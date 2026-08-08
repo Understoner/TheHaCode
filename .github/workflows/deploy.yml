@@ -1,0 +1,169 @@
+name: Deploy
+
+# Ausrollen in zwei Stufen.
+#
+#   Push auf develop  ->  Supabase Staging     ->  auf Hostinger warten
+#                     ->  Smoke-Tests          ->  Beförderung nach main
+#   Push auf main     ->  Supabase Production  ->  auf Hostinger warten
+#                     ->  Smoke-Tests
+#
+# WICHTIG: Hostinger baut selbststaendig bei jedem Push auf den verbundenen
+# Branch. Diese Pipeline stoesst das Deployment also NICHT an, sondern wartet
+# darauf und prueft danach. Daraus folgt die Regel aus SAD §2.6: Migrationen
+# sind ausnahmslos additiv, weil die Reihenfolge nicht erzwingbar ist.
+
+on:
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------- STAGING
+  staging:
+    if: github.ref == 'refs/heads/develop'
+    name: Staging ausrollen und pruefen
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 25
+    outputs:
+      smoke: ${{ steps.smoke.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Startzeit merken
+        id: t0
+        run: echo "value=$(date -u +%s)" >> "$GITHUB_OUTPUT"
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Migrationen nach Staging
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+          supabase db push
+
+      - name: Edge Functions nach Staging
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+
+      - name: Auf Hostinger-Deployment warten
+        run: bash scripts/wait-for-deploy.sh "${{ vars.STAGING_URL }}" "${{ steps.t0.outputs.value }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Smoke-Tests gegen Staging
+        id: smoke
+        env:
+          BASE_URL: ${{ vars.STAGING_URL }}
+        run: npm run e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-staging
+          path: playwright-report/
+          retention-days: 7
+
+  # ------------------------------------------------------------- BEFOERDERUNG
+  promote:
+    if: github.ref == 'refs/heads/develop'
+    name: Nach main befoerdern
+    needs: staging
+    runs-on: ubuntu-latest
+    # Das GitHub-Environment "production" traegt die Freigaberegel.
+    # Mit hinterlegtem Reviewer ist die Beförderung ein Klick; ohne Reviewer
+    # laeuft sie vollautomatisch durch. Empfehlung siehe docs/DEPLOYMENT.md.
+    environment: production
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: develop nach main mergen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          git merge --ff-only origin/develop || {
+            echo "::error::main ist develop vorausgelaufen. Bitte develop rebasen."
+            exit 1
+          }
+          git push origin main
+
+  # ------------------------------------------------------------- PRODUCTION
+  production:
+    if: github.ref == 'refs/heads/main'
+    name: Production ausrollen und pruefen
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Startzeit merken
+        id: t0
+        run: echo "value=$(date -u +%s)" >> "$GITHUB_OUTPUT"
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Migrationen nach Production
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+          supabase db push
+
+      - name: Edge Functions nach Production
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+
+      - name: Auf Hostinger-Deployment warten
+        run: bash scripts/wait-for-deploy.sh "${{ vars.PRODUCTION_URL }}" "${{ steps.t0.outputs.value }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Smoke-Tests gegen Production
+        env:
+          BASE_URL: ${{ vars.PRODUCTION_URL }}
+        run: npm run e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-production
+          path: playwright-report/
+          retention-days: 30
+
+      # Schlaegt Production fehl, ist das kein automatischer Rollback —
+      # in hPanel liegt unter Deployments die vorherige Version zum
+      # Zurueckrollen bereit. Bewusst manuell (docs/DEPLOYMENT.md).
+      - name: Bei Fehlschlag Hinweis ausgeben
+        if: failure()
+        run: |
+          echo "::error::Production-Smoke fehlgeschlagen. In hPanel unter" \
+               "Deployments die letzte gruene Version erneut ausrollen."

@@ -1,0 +1,24 @@
+# Secrets — niemals committen (CLAUDE.md: service_role-Key nie im Client/Repo)
+.env
+.env.local
+.env.*.local
+
+# Abhängigkeiten
+node_modules/
+
+# Build-Ausgabe (statischer Export, SAD §2.5)
+dist/
+.expo/
+web-build/
+
+# Supabase lokale Laufzeit
+supabase/.branches/
+supabase/.temp/
+
+# Test- und Tool-Artefakte
+coverage/
+playwright-report/
+test-results/
+
+# Editor/OS
+.DS_Store

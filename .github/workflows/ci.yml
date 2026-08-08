@@ -1,0 +1,54 @@
+name: CI
+
+# Läuft auf jedem PR nach develop (DEPLOYMENT.md §4, Schritt 3) und ist der
+# Status-Check "verify", den die Branch Protection auf develop/main verlangt
+# (DEPLOYMENT.md §3). Deploy.yml (push-getriggert) wiederholt diese Prüfungen
+# bewusst nicht — sie sind hier bereits Merge-Voraussetzung.
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # typecheck + lint + vitest (CLAUDE.md: "npm run verify" vor jedem PR)
+      - name: Typecheck, Lint, Vitest
+        run: npm run verify
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Lokale Supabase-Instanz starten
+        run: supabase start
+
+      # Meldet zerstörerische Schemaänderungen — die technische Absicherung
+      # der additiven-Migrationen-Regel aus CLAUDE.md / SAD §2.6.
+      - name: Migrationen linten
+        run: npm run db:lint
+
+      - name: Migrationen einspielen
+        run: npm run db:reset
+
+      - name: pgTAP
+        run: npm run db:test
+
+      - name: Web-Build
+        run: npm run build:web
