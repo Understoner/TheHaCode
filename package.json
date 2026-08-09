@@ -10,7 +10,11 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "test": "vitest run",
-    "verify": "npm run typecheck && npm run lint && npm run test"
+    "verify": "npm run typecheck && npm run lint && npm run test",
+    "db:lint": "supabase db lint",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "db:types": "mkdir -p src/types && supabase gen types typescript --local --schema public > src/types/database.ts"
   },
   "dependencies": {
     "expo": "~57.0.11",
