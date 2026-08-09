@@ -6,6 +6,8 @@ export const colors = {
   surface: '#F5F5F5',
   text700: '#3D3D3D',
   brand700: '#0F5C4A',
+  // Flaeche fuer Hinweisbanner (z. B. Staging). text700 darauf: Kontrast ~9,9:1.
+  warningSurface: '#FDECC8',
 } as const;
 
 export const spacing = {
