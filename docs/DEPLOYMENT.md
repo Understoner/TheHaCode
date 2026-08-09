@@ -106,6 +106,15 @@ EXPO_PUBLIC_APP_ENV            staging  |  production
 
 Der **Database Connect Wizard** im Node.js-Dashboard trägt die beiden Supabase-Werte auf Wunsch selbst ein. `EXPO_PUBLIC_APP_ENV` müsst ihr von Hand setzen — davon hängt ab, ob der Staging-Hinweisbalken erscheint.
 
+> **Wichtig, hat schon einmal zu falschen Werten auf Production geführt:** Diese
+> Variablen werden zur **Build-Zeit** in den statischen Export eingebacken
+> (SAD §2.5) — ein bloßes Ändern in hPanel bewirkt nichts, solange nicht neu
+> gebaut wird. „Deployments → vorherige Version erneut ausrollen" ist dafür
+> **nicht** geeignet, das rollt nur einen bereits gebauten Stand erneut aus
+> (siehe „Wenn Production rot wird" unten). Um geänderte Umgebungsvariablen
+> wirksam werden zu lassen, braucht es einen echten neuen Push auf den
+> verbundenen Branch — Hostinger baut nur dann neu.
+
 > Diese Werte landen im Client-Bundle, und das ist so vorgesehen: Der anon key ist ohne RLS wertlos, und RLS steht (SAD §3.8).
 
 ### Nach dem ersten Deployment
