@@ -179,12 +179,12 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 
 ## 5. Checkliste vor dem allerersten Livegang
 
-- [ ] Beide Supabase-Projekte angelegt, Migrationen und Seeds eingespielt
+- [x] Beide Supabase-Projekte angelegt (Migrationen/Seeds laufen ab jetzt über die Pipeline)
 - [ ] Auth-Provider konfiguriert, E-Mail-Vorlagen auf Deutsch
-- [ ] Beide Hostinger-Websites laufen, Branch-Trennung geprüft
-- [ ] Staging gegen Indexierung geschützt
-- [ ] GitHub Environments mit Secrets und Variables befüllt
-- [ ] Branch Protection aktiv, Bot-Ausnahme für `promote` gesetzt
+- [x] Staging-Website auf Hostinger läuft, Branch `develop` bestätigt — Production-Website steht noch aus
+- [x] Staging gegen Indexierung geschützt (automatisches `robots.txt`, kein Passwortschutz — der steht bei Node.js Web Apps in hPanel nicht zur Auswahl)
+- [x] GitHub Environments `staging`/`production` mit Secrets und Variables befüllt, `production` hat einen Required Reviewer
+- [ ] Branch Protection — bewusst zurückgestellt: GitHub Free auf privatem Repo unterstützt sie nicht. Reviewer-Pflicht auf `production` übernimmt einen Teil der Absicherung bis dahin.
 - [ ] Ein vollständiger Durchlauf feature → develop → main erfolgreich
 - [ ] Supabase Production auf Pro (spätestens am Tag der ersten Zahlung)
 - [ ] Auftragsverarbeitungsverträge: Supabase, Hostinger, Stripe (SAD §5.5)
