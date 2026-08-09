@@ -37,7 +37,7 @@ select is(current_user::text, 'authenticated', 'SET ROLE hat gewirkt');
 select throws_ok(
   $$ update public.profiles set has_active_subscription = true
      where id = '11111111-1111-1111-1111-111111111111' $$,
-  'Ein Nutzer kann has_active_subscription nicht selbst setzen'
+  'has_active_subscription und plus_until sind nur per service_role aenderbar'
 );
 
 reset role;
