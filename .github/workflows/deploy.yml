@@ -15,6 +15,10 @@ name: Deploy
 on:
   push:
     branches: [develop, main]
+  # GITHUB_TOKEN-Pushes loesen keine anderen on:push-Workflows aus (GitHubs
+  # eigener Schutz gegen Endlosschleifen). Der promote-Job pusht genau damit
+  # nach main, deshalb stoesst er diesen Workflow hier manuell noch mal an.
+  workflow_dispatch:
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -90,6 +94,7 @@ jobs:
     environment: production
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -106,6 +111,11 @@ jobs:
             exit 1
           }
           git push origin main
+
+      - name: Production-Job anstossen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
 
   # ------------------------------------------------------------- PRODUCTION
   production:
