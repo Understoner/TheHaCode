@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "TheHaCode",
+    "slug": "thehacode",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "thehacode",
+    "userInterfaceStyle": "automatic",
+    "web": {
+      "output": "static"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

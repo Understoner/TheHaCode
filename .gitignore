@@ -10,6 +10,12 @@ node_modules/
 dist/
 .expo/
 web-build/
+expo-env.d.ts
+*.tsbuildinfo
+
+# Native Projekte (V1 ist Web-only, siehe CLAUDE.md)
+/ios/
+/android/
 
 # Supabase lokale Laufzeit
 supabase/.branches/
@@ -23,3 +29,5 @@ test-results/
 # Editor/OS
 .DS_Store
 *:Zone.Identifier
+.vscode/
+.idea/
