@@ -48,11 +48,18 @@ create policy profiles_select_own on public.profiles
 create policy profiles_update_own on public.profiles
   for update using (id = auth.uid()) with check (id = auth.uid());
 
+-- Ohne "auto_expose_new_tables" erteilt Supabase keine Grants mehr automatisch
+-- (aktueller Cloud-Default, config.toml) — deshalb explizit statt pauschal.
+-- anon bekommt bewusst nichts: Profile sind nur fuer angemeldete Nutzer.
+grant select, update on public.profiles to authenticated;
+grant select, insert, update, delete on public.profiles to service_role;
+
 -- Entitlement-Felder sind nie vom Client schreibbar, auch nicht auf die eigene
 -- Zeile — has_active_subscription setzt ausschliesslich der Stripe-Trigger
--- ueber service_role (SAD §3.8).
+-- (SAD §3.8). service_role bleibt bewusst ausgenommen, da spaeter dessen
+-- Trigger genau darueber schreibt.
 revoke update (has_active_subscription, plus_until)
-  on public.profiles from authenticated, anon;
+  on public.profiles from authenticated;
 
 create trigger trg_profiles_updated
   before update on public.profiles
