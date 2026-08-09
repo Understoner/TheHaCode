@@ -14,7 +14,8 @@
     "db:lint": "supabase db lint",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
-    "db:types": "mkdir -p src/types && supabase gen types typescript --local --schema public > src/types/database.ts"
+    "db:types": "mkdir -p src/types && supabase gen types typescript --local --schema public > src/types/database.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "expo": "~57.0.11",
@@ -33,6 +34,7 @@
     "react-native-web": "~0.21.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
     "eslint-config-expo": "^57.0.1",
