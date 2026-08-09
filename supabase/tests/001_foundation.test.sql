@@ -2,7 +2,7 @@
 -- UNION-Liste aller Nutzertabellen (CLAUDE.md) — kuenftige Nutzertabellen
 -- tragen sich unten beim Loeschkaskade-Test per UNION ALL nach.
 begin;
-select plan(7);
+select plan(6);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 't@example.at');
@@ -30,14 +30,9 @@ select is(
 select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 
--- Diagnose: bevor wir throws_ok pruefen, sicherstellen, dass Rollenwechsel
--- und Revoke tatsaechlich angekommen sind (statt bei "no exception" zu raten).
+-- Sanity-Check fuer den Testaufbau selbst: ohne echten Rollenwechsel waere
+-- der folgende throws_ok ohnehin bedeutungslos.
 select is(current_user::text, 'authenticated', 'SET ROLE hat gewirkt');
-select is(
-  has_column_privilege('public.profiles', 'has_active_subscription', 'UPDATE'),
-  false,
-  'authenticated hat kein UPDATE-Recht auf has_active_subscription'
-);
 
 select throws_ok(
   $$ update public.profiles set has_active_subscription = true

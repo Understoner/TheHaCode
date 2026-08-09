@@ -56,10 +56,24 @@ grant select, insert, update, delete on public.profiles to service_role;
 
 -- Entitlement-Felder sind nie vom Client schreibbar, auch nicht auf die eigene
 -- Zeile — has_active_subscription setzt ausschliesslich der Stripe-Trigger
--- (SAD §3.8). service_role bleibt bewusst ausgenommen, da spaeter dessen
--- Trigger genau darueber schreibt.
-revoke update (has_active_subscription, plus_until)
-  on public.profiles from authenticated;
+-- (SAD §3.8). Als Trigger statt als Column-Revoke: Supabases lokale Umgebung
+-- erteilt nach den Migrationen offenbar erneut Tabellen-Grants (per pgTAP
+-- bestaetigt — has_column_privilege blieb trotz revoke true), ein Revoke
+-- waere also nur Scheinsicherheit. Der Trigger prueft unabhaengig davon.
+create or replace function public.protect_entitlement_columns()
+returns trigger language plpgsql as $$
+begin
+  if (new.has_active_subscription is distinct from old.has_active_subscription
+      or new.plus_until is distinct from old.plus_until)
+     and current_user <> 'service_role' then
+    raise exception 'has_active_subscription und plus_until sind nur per service_role aenderbar';
+  end if;
+  return new;
+end $$;
+
+create trigger trg_profiles_protect_entitlement
+  before update on public.profiles
+  for each row execute function public.protect_entitlement_columns();
 
 create trigger trg_profiles_updated
   before update on public.profiles
