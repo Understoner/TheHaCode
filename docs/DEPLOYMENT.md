@@ -75,13 +75,24 @@ Beim ersten Mal autorisiert ihr die Hostinger-GitHub-App. **Ein Hosting-Tarif ka
 | **Branch** | `develop` | `main` |
 | Framework | Other | Other |
 | Node-Version | 22.x | 22.x |
-| Build-Befehl | `npm ci && npm run build:web` | `npm ci && npm run build:web` |
+| Build-Befehl | `npm run build:web` | `npm run build:web` |
 | Output-Verzeichnis | `dist` | `dist` |
 | Entry-File | *leer lassen* | *leer lassen* |
 | Domain | `staging.deine-domain.at` | `app.deine-domain.at` |
 
+> Build-Befehl ist ein Dropdown mit den Scripts aus `package.json`, kein
+> freier Shell-Befehl — `npm ci`/`npm install` läuft davor automatisch als
+> eigener Schritt.
+
 > **Der wichtigste Punkt der ganzen Einrichtung: die Branch-Auswahl.**
-> Prüft direkt beim Anlegen, ob sich der Branch wählen lässt. Falls nicht, deployen beide Websites denselben Stand und die Trennung Test/Live existiert nicht.
+> Die Branch-Auswahl steht **nicht** im Import-Assistenten selbst, sondern
+> erst danach in den Website-Einstellungen der neu angelegten Seite. Bis
+> dahin klont der Import den GitHub-Default-Branch — steht dort `main` und
+> fehlt dort `package.json` (weil `develop` noch nicht befördert wurde),
+> bricht der Import mit genau dieser Fehlermeldung ab. Abhilfe: den
+> GitHub-Default-Branch kurzzeitig auf `develop` stellen, importieren, dann
+> in den Website-Einstellungen auf den richtigen Branch fixieren und den
+> GitHub-Default-Branch wieder auf `main` zurückstellen.
 >
 > **Wenn keine Branch-Auswahl vorhanden ist**, gibt es zwei Auswege: bei Hostinger-Support nachfragen, ob die Einstellung in den Settings der Website liegt — oder Production über Hostingers öffentliche API (`developers.hostinger.com`) aus dem `production`-Job in `deploy.yml` heraus auslösen statt über die Git-Automatik. Der Rest der Pipeline bleibt unverändert.
 
@@ -101,7 +112,7 @@ Der **Database Connect Wizard** im Node.js-Dashboard trägt die beiden Supabase-
 
 - [ ] SSL-Zertifikat für beide Domains ausgestellt
 - [ ] `https://staging.deine-domain.at/build-info.json` liefert einen Zeitstempel
-- [ ] **Staging vor Suchmaschinen schützen** — Passwortschutz in hPanel oder `X-Robots-Tag: noindex`. Ein indexiertes Testsystem konkurriert mit dem Livesystem um Rankings.
+- [x] **Staging vor Suchmaschinen schützen** — `scripts/write-build-info.mjs` schreibt bei `EXPO_PUBLIC_APP_ENV=staging` automatisch ein sperrendes `dist/robots.txt`. Hostingers Passwortschutz für Verzeichnisse (hPanel → Advanced) steht bei Node.js Web Apps nicht zur Auswahl, deshalb dieser Weg statt manueller hPanel-Konfiguration.
 - [ ] Unter **Security → Vulnerabilities** den Schwachstellen-Scan ansehen; Korrektur-Pull-Requests kommen automatisch
 
 ---
