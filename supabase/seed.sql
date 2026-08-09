@@ -1,0 +1,3 @@
+-- Wird bei jedem `npm run db:reset` nach den Migrationen eingespielt.
+-- Noch leer — Beispieldaten (z. B. Box Breathing 4-4-4-4, SAD §3.4) kommen
+-- mit den Migrationen, die exercises/exercise_steps/exercise_phases anlegen.
