@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+<rect width="1200" height="820" fill="#EFF3F4"/>
+<rect x="20" y="20" width="1160" height="780" rx="14" fill="#FFFFFF" stroke="#D3DCE3" stroke-width="1"/>
+
+<!-- Topbar -->
+<rect x="20" y="20" width="1160" height="56" rx="0" fill="#FFFFFF"/>
+<rect x="20" y="20" width="1160" height="14" rx="14" fill="#FFFFFF"/>
+<line x1="20" y1="76" x2="1180" y2="76" stroke="#E8EDF1" stroke-width="1"/>
+<text x="48" y="54" font-size="14" font-weight="600" fill="#16242B" letter-spacing="0.4">thehacode</text>
+
+<!-- Nav -->
+<rect x="380" y="38" width="62" height="30" rx="15" fill="#5B93AC"/>
+<text x="411" y="58" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">News</text>
+<text x="474" y="58" font-size="13" fill="#5A6B75">  Kurse</text>
+<text x="554" y="58" font-size="13" fill="#5A6B75">  Übungen</text>
+<text x="652" y="58" font-size="13" fill="#5A6B75">  Team</text>
+
+<!-- Right -->
+<rect x="1060" y="38" width="100" height="30" rx="15" fill="#5B93AC"/>
+<text x="1110" y="58" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">Anmelden</text>
+
+<!-- Section header -->
+<text x="48" y="112" font-size="18" font-weight="600" fill="#16242B">Neuigkeiten</text>
+<text x="1132" y="112" text-anchor="end" font-size="13" fill="#3B6C82">Alle anzeigen →</text>
+
+<!-- CARD GROSS 1 -->
+<rect x="48" y="128" width="360" height="290" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="48" y="128" width="360" height="158" rx="0" fill="#DCE8F0"/>
+<path d="M62 128 L48 128 Q48 128 48 142 L48 286 L408 286 L408 142 Q408 128 394 128 Z" fill="#DCE8F0"/>
+<circle cx="228" cy="200" r="30" fill="none" stroke="#5B93AC" stroke-width="1.5" opacity="0.3"/>
+<line x1="228" y1="170" x2="228" y2="230" stroke="#5B93AC" stroke-width="1.5" opacity="0.25"/>
+<line x1="198" y1="200" x2="258" y2="200" stroke="#5B93AC" stroke-width="1.5" opacity="0.25"/>
+<rect x="62" y="140" width="108" height="20" rx="10" fill="rgba(255,255,255,0.9)"/>
+<text x="116" y="154" text-anchor="middle" font-size="11" font-weight="600" fill="#3B6C82" letter-spacing="0.5">ATEMTECHNIK</text>
+<text x="64" y="302" font-size="11" fill="#8C9AA3">12. August 2026 · 4 Min</text>
+<text x="64" y="322" font-size="14" font-weight="600" fill="#16242B">Box Breathing: wie vier Sekunden</text>
+<text x="64" y="340" font-size="14" font-weight="600" fill="#16242B">dein Nervensystem regulieren</text>
+<text x="64" y="360" font-size="12" fill="#5A6B75">Ein Rhythmus, vier Phasen, messbare Wirkung</text>
+<text x="64" y="376" font-size="12" fill="#5A6B75">auf den Vagustonus — Traumaforschung …</text>
+<text x="64" y="404" font-size="12" font-weight="500" fill="#3B6C82">Weiterlesen →</text>
+
+<!-- CARD GROSS 2 -->
+<rect x="426" y="128" width="360" height="290" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="426" y="128" width="360" height="158" rx="0" fill="#F2F6F1"/>
+<path d="M440 128 L426 128 Q426 128 426 142 L426 286 L786 286 L786 142 Q786 128 772 128 Z" fill="#F2F6F1"/>
+<circle cx="606" cy="200" r="28" fill="none" stroke="#87A582" stroke-width="1.5" opacity="0.35"/>
+<line x1="606" y1="172" x2="606" y2="228" stroke="#87A582" stroke-width="1.5" opacity="0.3"/>
+<rect x="440" y="140" width="102" height="20" rx="10" fill="rgba(255,255,255,0.9)"/>
+<text x="491" y="154" text-anchor="middle" font-size="11" font-weight="600" fill="#3B6C82" letter-spacing="0.5">WISSENSCHAFT</text>
+<text x="442" y="302" font-size="11" fill="#8C9AA3">28. Juli 2026 · 6 Min</text>
+<text x="442" y="322" font-size="14" font-weight="600" fill="#16242B">BOLT-Score verstehen: was dein</text>
+<text x="442" y="340" font-size="14" font-weight="600" fill="#16242B">Atemhaltetest über dich verrät</text>
+<text x="442" y="360" font-size="12" fill="#5A6B75">CO₂-Toleranz messen und einen</text>
+<text x="442" y="376" font-size="12" fill="#5A6B75">Ausgangspunkt für das Training gewinnen …</text>
+<text x="442" y="404" font-size="12" font-weight="500" fill="#3B6C82">Weiterlesen →</text>
+
+<!-- CARD GROSS 3 -->
+<rect x="804" y="128" width="356" height="290" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="804" y="128" width="356" height="158" rx="0" fill="#F0F6F9"/>
+<path d="M818 128 L804 128 Q804 128 804 142 L804 286 L1160 286 L1160 142 Q1160 128 1146 128 Z" fill="#F0F6F9"/>
+<circle cx="982" cy="200" r="26" fill="none" stroke="#5B93AC" stroke-width="1.5" opacity="0.3"/>
+<text x="982" y="205" text-anchor="middle" font-size="22" fill="#3B6C82" opacity="0.3">✦</text>
+<rect x="818" y="140" width="56" height="20" rx="10" fill="rgba(255,255,255,0.9)"/>
+<text x="846" y="154" text-anchor="middle" font-size="11" font-weight="600" fill="#5F7F5B" letter-spacing="0.5">KURS</text>
+<text x="820" y="302" font-size="11" fill="#8C9AA3">5. August 2026</text>
+<text x="820" y="322" font-size="14" font-weight="600" fill="#16242B">21 Tage funktionale Atmung —</text>
+<text x="820" y="340" font-size="14" font-weight="600" fill="#16242B">die neue Kursreihe ist da</text>
+<text x="820" y="360" font-size="12" fill="#5A6B75">Sechs Module, tägliche Praxis,</text>
+<text x="820" y="376" font-size="12" fill="#5A6B75">messbare Fortschritte ab Woche zwei …</text>
+<text x="820" y="404" font-size="12" font-weight="500" fill="#3B6C82">Zum Kurs →</text>
+
+<!-- Trennlinie -->
+<line x1="48" y1="442" x2="1152" y2="442" stroke="#E8EDF1" stroke-width="1"/>
+
+<!-- Section header 2 -->
+<text x="48" y="472" font-size="15" fill="#5A6B75">Weitere Beiträge</text>
+
+<!-- LIST 1 -->
+<rect x="48" y="490" width="352" height="80" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="48" y="490" width="72" height="80" rx="12" fill="#F2F6F1"/>
+<rect x="88" y="490" width="32" height="80" fill="#F2F6F1"/>
+<text x="84" y="534" text-anchor="middle" font-size="20" fill="#5F7F5B" opacity="0.4">👥</text>
+<rect x="120" y="503" width="1" height="54" fill="#E8EDF1"/>
+<text x="132" y="516" font-size="10" font-weight="600" fill="#5F7F5B" letter-spacing="0.5">TEAM</text>
+<text x="132" y="534" font-size="13" font-weight="500" fill="#16242B">Michael über seine Ausbildung zum Atemcoach</text>
+<text x="132" y="551" font-size="11" fill="#8C9AA3">15. Juli 2026</text>
+<text x="390" y="534" text-anchor="end" font-size="16" fill="#8C9AA3">›</text>
+
+<!-- LIST 2 -->
+<rect x="420" y="490" width="352" height="80" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="420" y="490" width="72" height="80" rx="12" fill="#DCE8F0"/>
+<rect x="460" y="490" width="32" height="80" fill="#DCE8F0"/>
+<text x="456" y="534" text-anchor="middle" font-size="20" fill="#3B6C82" opacity="0.4">💡</text>
+<rect x="492" y="503" width="1" height="54" fill="#E8EDF1"/>
+<text x="504" y="516" font-size="10" font-weight="600" fill="#3B6C82" letter-spacing="0.5">PRAXIS</text>
+<text x="504" y="534" font-size="13" font-weight="500" fill="#16242B">Morgenroutine in 8 Minuten: drei Übungen</text>
+<text x="504" y="551" font-size="11" fill="#8C9AA3">2. Juli 2026</text>
+<text x="762" y="534" text-anchor="end" font-size="16" fill="#8C9AA3">›</text>
+
+<!-- LIST 3 -->
+<rect x="792" y="490" width="360" height="80" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="792" y="490" width="72" height="80" rx="12" fill="#F0F6F9"/>
+<rect x="832" y="490" width="32" height="80" fill="#F0F6F9"/>
+<text x="828" y="534" text-anchor="middle" font-size="20" fill="#3B6C82" opacity="0.4">🔬</text>
+<rect x="864" y="503" width="1" height="54" fill="#E8EDF1"/>
+<text x="876" y="516" font-size="10" font-weight="600" fill="#3B6C82" letter-spacing="0.5">WISSENSCHAFT</text>
+<text x="876" y="534" font-size="13" font-weight="500" fill="#16242B">Atemfrequenz und HRV: der Zusammenhang</text>
+<text x="876" y="551" font-size="11" fill="#8C9AA3">18. Juni 2026</text>
+<text x="1142" y="534" text-anchor="end" font-size="16" fill="#8C9AA3">›</text>
+
+<!-- LIST 4 -->
+<rect x="48" y="590" width="352" height="80" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="48" y="590" width="72" height="80" rx="12" fill="#F2F6F1"/>
+<rect x="88" y="590" width="32" height="80" fill="#F2F6F1"/>
+<text x="84" y="634" text-anchor="middle" font-size="20" fill="#87A582" opacity="0.5">🌿</text>
+<rect x="120" y="603" width="1" height="54" fill="#E8EDF1"/>
+<text x="132" y="616" font-size="10" font-weight="600" fill="#5F7F5B" letter-spacing="0.5">PRAXIS</text>
+<text x="132" y="634" font-size="13" font-weight="500" fill="#16242B">Kohärenzatmung: der 5-5-Rhythmus erklärt</text>
+<text x="132" y="651" font-size="11" fill="#8C9AA3">10. Juni 2026</text>
+<text x="390" y="634" text-anchor="end" font-size="16" fill="#8C9AA3">›</text>
+
+<!-- LIST 5 -->
+<rect x="420" y="590" width="352" height="80" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="420" y="590" width="72" height="80" rx="12" fill="#DCE8F0"/>
+<rect x="460" y="590" width="32" height="80" fill="#DCE8F0"/>
+<text x="456" y="634" text-anchor="middle" font-size="20" fill="#3B6C82" opacity="0.4">📖</text>
+<rect x="492" y="603" width="1" height="54" fill="#E8EDF1"/>
+<text x="504" y="616" font-size="10" font-weight="600" fill="#5F7F5B" letter-spacing="0.5">KURS</text>
+<text x="504" y="634" font-size="13" font-weight="500" fill="#16242B">Kursstart: Slow-Pace Breathing für Anfänger</text>
+<text x="504" y="651" font-size="11" fill="#8C9AA3">1. Juni 2026</text>
+<text x="762" y="634" text-anchor="end" font-size="16" fill="#8C9AA3">›</text>
+
+<!-- Mehr laden -->
+<rect x="520" y="700" width="160" height="36" rx="18" fill="#FFFFFF" stroke="#B9D4E0" stroke-width="1"/>
+<text x="600" y="723" text-anchor="middle" font-size="13" font-weight="500" fill="#3B6C82">Mehr laden</text>
+</svg>

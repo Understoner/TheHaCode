@@ -36,16 +36,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '600',
-    color: colors.text700,
+    color: colors.ink900,
   },
   subtitle: {
     fontSize: 16,
-    color: colors.text700,
+    color: colors.ink700,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '600',
-    color: colors.text700,
+    color: colors.ink900,
     paddingHorizontal: spacing.md,
   },
 });

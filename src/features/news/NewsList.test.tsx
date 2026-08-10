@@ -29,9 +29,19 @@ describe('NewsList', () => {
     fromMock.mockReset();
   });
 
-  it('zeigt veroeffentlichte Beitraege mit Titel und Anriss', async () => {
+  it('zeigt gepinnte Beitraege als Hero-Karte mit Titel und Anriss', async () => {
     mockNewsQuery({
-      data: [{ id: '1', title: 'Neu im Studio', excerpt: 'Kurzfassung' }],
+      data: [
+        {
+          id: '1',
+          title: 'Neu im Studio',
+          excerpt: 'Kurzfassung',
+          body_md: 'Ein kurzer Beitrag.',
+          cover_image_path: null,
+          is_pinned: true,
+          published_at: '2026-08-10T00:00:00Z',
+        },
+      ],
       error: null,
     });
 
@@ -39,6 +49,28 @@ describe('NewsList', () => {
 
     await waitFor(() => expect(screen.getByText('Neu im Studio')).toBeTruthy());
     expect(screen.getByText('Kurzfassung')).toBeTruthy();
+  });
+
+  it('zeigt nicht gepinnte Beitraege als schlanke Liste ohne Anriss', async () => {
+    mockNewsQuery({
+      data: [
+        {
+          id: '2',
+          title: 'Kursreihe startet',
+          excerpt: 'Kurzfassung',
+          body_md: 'Ein kurzer Beitrag.',
+          cover_image_path: null,
+          is_pinned: false,
+          published_at: '2026-08-05T00:00:00Z',
+        },
+      ],
+      error: null,
+    });
+
+    renderWithClient(<NewsList />);
+
+    await waitFor(() => expect(screen.getByText('Kursreihe startet')).toBeTruthy());
+    expect(screen.queryByText('Kurzfassung')).toBeNull();
   });
 
   it('zeigt den Leer-Zustand ohne veroeffentlichte Beitraege', async () => {

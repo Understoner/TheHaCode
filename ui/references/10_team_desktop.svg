@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+<rect width="1200" height="820" fill="#EFF3F4"/>
+<rect x="20" y="20" width="1160" height="780" rx="14" fill="#FFFFFF" stroke="#D3DCE3" stroke-width="1"/>
+
+<!-- Topbar -->
+<rect x="20" y="20" width="1160" height="14" rx="14" fill="#FFFFFF"/>
+<line x1="20" y1="76" x2="1180" y2="76" stroke="#E8EDF1" stroke-width="1"/>
+<text x="48" y="54" font-size="14" font-weight="600" fill="#16242B" letter-spacing="0.4">thehacode</text>
+<text x="384" y="58" font-size="13" fill="#5A6B75">News</text>
+<text x="430" y="58" font-size="13" fill="#5A6B75">  Kurse</text>
+<text x="498" y="58" font-size="13" fill="#5A6B75">  Übungen</text>
+<rect x="582" y="38" width="56" height="30" rx="15" fill="#5B93AC"/>
+<text x="610" y="58" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">Team</text>
+<rect x="1060" y="38" width="100" height="30" rx="15" fill="#5B93AC"/>
+<text x="1110" y="58" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">Anmelden</text>
+
+<!-- Linke Spalte: Profil -->
+<rect x="48" y="100" width="380" height="660" rx="14" fill="#FAFBFC"/>
+
+<!-- Avatar -->
+<circle cx="238" cy="190" r="72" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1.5"/>
+<circle cx="238" cy="175" r="34" fill="#B9D4E0"/>
+<path d="M175 245 a63 63 0 0 1 126 0" fill="#DCE8F0"/>
+
+<text x="238" y="288" text-anchor="middle" font-size="20" font-weight="600" fill="#16242B">Michael Huber</text>
+<text x="238" y="310" text-anchor="middle" font-size="14" fill="#5A6B75">Zertifizierter Atemcoach · Gründer</text>
+
+<!-- Zertifikate -->
+<rect x="76" y="326" width="98" height="24" rx="12" fill="#F0F6F9"/>
+<text x="125" y="342" text-anchor="middle" font-size="11" font-weight="500" fill="#3B6C82">Oxygen Advantage</text>
+<rect x="182" y="326" width="98" height="24" rx="12" fill="#F2F6F1"/>
+<text x="231" y="342" text-anchor="middle" font-size="11" font-weight="500" fill="#5F7F5B">Buteyko-Methode</text>
+<rect x="76" y="358" width="90" height="24" rx="12" fill="#F0F6F9"/>
+<text x="121" y="374" text-anchor="middle" font-size="11" font-weight="500" fill="#3B6C82">HRV-Coaching</text>
+
+<!-- Stats Reihe -->
+<line x1="68" y1="398" x2="408" y2="398" stroke="#E8EDF1" stroke-width="1"/>
+<text x="150" y="424" text-anchor="middle" font-size="22" font-weight="600" fill="#16242B">247</text>
+<text x="150" y="440" text-anchor="middle" font-size="11" fill="#5A6B75">Klienten</text>
+<line x1="238" y1="402" x2="238" y2="445" stroke="#E8EDF1" stroke-width="1"/>
+<text x="238" y="424" text-anchor="middle" font-size="22" font-weight="600" fill="#16242B">6</text>
+<text x="238" y="440" text-anchor="middle" font-size="11" fill="#5A6B75">Jahre</text>
+<line x1="326" y1="402" x2="326" y2="445" stroke="#E8EDF1" stroke-width="1"/>
+<text x="326" y="424" text-anchor="middle" font-size="22" font-weight="600" fill="#16242B">12</text>
+<text x="326" y="440" text-anchor="middle" font-size="11" fill="#5A6B75">Kurse</text>
+<line x1="68" y1="448" x2="408" y2="448" stroke="#E8EDF1" stroke-width="1"/>
+
+<!-- Kontakt -->
+<text x="68" y="480" font-size="12" font-weight="600" fill="#8C9AA3" letter-spacing="0.6">KONTAKT</text>
+<text x="68" y="502" font-size="13" fill="#5A6B75">📧  michael@thehacode.com</text>
+<text x="68" y="522" font-size="13" fill="#5A6B75">🌐  thehacode.com</text>
+
+<line x1="68" y1="538" x2="408" y2="538" stroke="#E8EDF1" stroke-width="1"/>
+
+<!-- Sozial -->
+<text x="68" y="566" font-size="12" font-weight="600" fill="#8C9AA3" letter-spacing="0.6">FOLGE UNS</text>
+<rect x="68" y="578" width="100" height="30" rx="15" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="118" y="598" text-anchor="middle" font-size="12" fill="#5A6B75">Instagram</text>
+<rect x="178" y="578" width="100" height="30" rx="15" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="228" y="598" text-anchor="middle" font-size="12" fill="#5A6B75">LinkedIn</text>
+
+<!-- CTA Button -->
+<rect x="68" y="636" width="310" height="44" rx="22" fill="#5B93AC"/>
+<text x="223" y="663" text-anchor="middle" font-size="14" font-weight="500" fill="#FFFFFF">Erstgespräch buchen →</text>
+
+<!-- Rechte Spalte -->
+<!-- Über mich -->
+<rect x="452" y="100" width="690" height="170" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="472" y="130" font-size="16" font-weight="600" fill="#16242B">Über mich</text>
+<text x="472" y="156" font-size="13" fill="#16242B">Als Director of Digitalisation in der IT-Industrie habe ich hautnah erlebt, wie stark</text>
+<text x="472" y="174" font-size="13" fill="#16242B">Atemgewohnheiten die kognitive Leistungsfähigkeit beeinflussen — und wie schnell</text>
+<text x="472" y="192" font-size="13" fill="#5A6B75">sich das mit gezieltem Training verändert. TheHaCode ist meine Antwort auf die Frage,</text>
+<text x="472" y="210" font-size="13" fill="#5A6B75">wie man Atemcoaching zugänglich und messbar macht.</text>
+<text x="472" y="252" font-size="13" font-weight="500" fill="#3B6C82">Vollständige Geschichte lesen →</text>
+
+<!-- 3 Prinzipien -->
+<text x="452" y="306" font-size="16" font-weight="600" fill="#16242B">Der Ansatz</text>
+
+<rect x="452" y="322" width="212" height="120" rx="12" fill="#F0F6F9"/>
+<circle cx="482" cy="352" r="18" fill="#FFFFFF"/>
+<text x="482" y="357" text-anchor="middle" font-size="16" fill="#3B6C82" opacity="0.7">⬡</text>
+<text x="472" y="388" font-size="13" font-weight="600" fill="#16242B">Wissenschaftlich</text>
+<text x="472" y="406" font-size="12" fill="#5A6B75">Oxygen Advantage &amp;</text>
+<text x="472" y="422" font-size="12" fill="#5A6B75">Buteyko-Methode</text>
+
+<rect x="676" y="322" width="212" height="120" rx="12" fill="#F2F6F1"/>
+<circle cx="706" cy="352" r="18" fill="#FFFFFF"/>
+<text x="706" y="357" text-anchor="middle" font-size="16" fill="#5F7F5B" opacity="0.7">◎</text>
+<text x="696" y="388" font-size="13" font-weight="600" fill="#16242B">Messbar</text>
+<text x="696" y="406" font-size="12" fill="#5A6B75">BOLT-Score und HRV</text>
+<text x="696" y="422" font-size="12" fill="#5A6B75">als objektive Marker</text>
+
+<rect x="900" y="322" width="242" height="120" rx="12" fill="#F0F6F9"/>
+<circle cx="930" cy="352" r="18" fill="#FFFFFF"/>
+<text x="930" y="357" text-anchor="middle" font-size="16" fill="#3B6C82" opacity="0.7">⊕</text>
+<text x="920" y="388" font-size="13" font-weight="600" fill="#16242B">Alltägstauglich</text>
+<text x="920" y="406" font-size="12" fill="#5A6B75">Kurze Sequenzen die</text>
+<text x="920" y="422" font-size="12" fill="#5A6B75">in jeden Tag passen</text>
+
+<!-- Ausbildung Timeline -->
+<text x="452" y="478" font-size="16" font-weight="600" fill="#16242B">Ausbildung &amp; Zertifizierungen</text>
+
+<line x1="472" y1="500" x2="472" y2="660" stroke="#E8EDF1" stroke-width="2"/>
+
+<circle cx="472" cy="515" r="6" fill="#5B93AC"/>
+<text x="492" y="510" font-size="12" fill="#8C9AA3">2024</text>
+<text x="492" y="528" font-size="13" font-weight="600" fill="#16242B">Oxygen Advantage Practitioner</text>
+<text x="492" y="544" font-size="12" fill="#5A6B75">Patrick McKeown Institute, Irland</text>
+
+<circle cx="472" cy="574" r="6" fill="#5B93AC"/>
+<text x="492" y="569" font-size="12" fill="#8C9AA3">2022</text>
+<text x="492" y="587" font-size="13" font-weight="600" fill="#16242B">Buteyko-Methode Certified</text>
+<text x="492" y="603" font-size="12" fill="#5A6B75">Buteyko Clinic International</text>
+
+<circle cx="472" cy="633" r="6" fill="#5B93AC"/>
+<text x="492" y="628" font-size="12" fill="#8C9AA3">2021</text>
+<text x="492" y="646" font-size="13" font-weight="600" fill="#16242B">HRV-Biofeedback Coach</text>
+<text x="492" y="662" font-size="12" fill="#5A6B75">HeartMath Institute</text>
+
+<!-- Testimonials -->
+<text x="452" y="712" font-size="16" font-weight="600" fill="#16242B">Was Klienten sagen</text>
+<rect x="452" y="726" width="330" height="54" rx="10" fill="#FAFBFC"/>
+<text x="468" y="748" font-size="12" fill="#16242B">„Nach 3 Wochen habe ich meinen BOLT-Score</text>
+<text x="468" y="764" font-size="12" fill="#16242B">von 14 auf 26 Sekunden gebracht."</text>
+<text x="468" y="776" font-size="11" fill="#8C9AA3">— Anna K., Salzburg</text>
+<rect x="804" y="726" width="330" height="54" rx="10" fill="#FAFBFC"/>
+<text x="820" y="748" font-size="12" fill="#16242B">„Endlich schlafe ich wieder durch —</text>
+<text x="820" y="764" font-size="12" fill="#16242B">die 4-7-8-Übung hat mein Leben verändert."</text>
+<text x="820" y="776" font-size="11" fill="#8C9AA3">— Thomas R., Wien</text>
+</svg>

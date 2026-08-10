@@ -33,10 +33,10 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 13,
-    color: colors.text700,
+    color: colors.ink700,
   },
   separator: {
     fontSize: 13,
-    color: colors.text700,
+    color: colors.ink700,
   },
 });

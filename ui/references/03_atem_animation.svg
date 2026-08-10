@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1230" width="1600" height="1230" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+  <style>
+    .sheet-title { font-size: 26px; font-weight: 600; fill: #16242B; letter-spacing: -0.4px; }
+    .sheet-sub   { font-size: 14px; fill: #5A6B75; }
+    .frame-label { font-size: 12px; font-weight: 600; fill: #5A6B75; letter-spacing: 0.6px; }
+    .note        { font-size: 11px; fill: #8C9AA3; }
+    .note-b      { font-size: 11px; font-weight: 600; fill: #5A6B75; }
+    .cap         { font-size: 12px; font-weight: 600; fill: #16242B; }
+    .phase       { font-size: 22px; font-weight: 500; fill: #16242B; letter-spacing: -0.2px; }
+    .count       { font-size: 46px; font-weight: 300; fill: #16242B; letter-spacing: -1.5px; }
+    .line        { stroke: #E8EDF1; stroke-width: 1; }
+    .t           { fill: none; stroke: #E8EDF1; stroke-width: 2.5; stroke-linecap: round; }
+    .o           { fill: none; stroke: #5B93AC; stroke-width: 2.5; stroke-linecap: round; }
+    .s           { fill: none; stroke: #87A582; stroke-width: 2.5; stroke-linecap: round; }
+    .measure     { stroke: #B9D4E0; stroke-width: 1; stroke-dasharray: 3 3; }
+  </style>
+
+  <rect width="1600" height="1230" fill="#EFF3F4"/>
+
+  <text x="64" y="56" class="sheet-title">Atem-Animation — ein Umlauf je Runde</text>
+  <text x="64" y="80" class="sheet-sub">Einatmen beginnt immer bei 6 Uhr, Ausatmen immer bei 12 Uhr. Die linke Hälfte gehört dem Einatmen und dem Halten-voll, die rechte dem Ausatmen und dem Halten-leer.</text>
+
+  <!-- ================= PHASE STATES ================= -->
+  <text x="64" y="132" class="frame-label">DIE VIER ZUSTÄNDE — BOX 4-4-4-4</text>
+
+  <!-- 1 Einatmen -->
+  <g transform="translate(64,152)">
+    <rect x="0" y="0" width="330" height="380" rx="16" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <text x="24" y="32" class="cap">1 · Einatmen — ab 6 Uhr</text>
+    <text x="24" y="50" class="note">Radius 0.55 → 1.00 · Marke läuft aufwärts</text>
+    <g transform="translate(165,200)">
+      <circle cx="0" cy="0" r="66" fill="#5B93AC" opacity="0.13"/>
+      <path class="t" d="M -3.07 87.95 A 88 88 0 0 1 -87.95 3.07"/>
+      <path class="t" d="M -87.95 -3.07 A 88 88 0 0 1 -3.07 -87.95"/>
+      <path class="t" d="M 3.07 -87.95 A 88 88 0 0 1 87.95 -3.07"/>
+      <path class="t" d="M 87.95 3.07 A 88 88 0 0 1 3.07 87.95"/>
+      <path class="o" d="M -3.07 87.95 A 88 88 0 0 1 -62.23 62.23"/>
+      <circle cx="-62.23" cy="62.23" r="5" fill="#5B93AC"/>
+      <text x="0" y="8" text-anchor="middle" class="count">2</text>
+    </g>
+    <text x="165" y="322" text-anchor="middle" class="phase">Einatmen</text>
+    <text x="165" y="346" text-anchor="middle" style="font-size:13px;fill:#5A6B75">Ruhig durch die Nase</text>
+    <text x="165" y="366" text-anchor="middle" class="note">Runde 3 von 8 · noch 2 s</text>
+  </g>
+
+  <!-- 2 Halten voll -->
+  <g transform="translate(424,152)">
+    <rect x="0" y="0" width="330" height="380" rx="16" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <text x="24" y="32" class="cap">2 · Halten (voll) — endet bei 12 Uhr</text>
+    <text x="24" y="50" class="note">Radius bleibt 1.00 — nur die Marke läuft weiter</text>
+    <g transform="translate(165,200)">
+      <circle cx="0" cy="0" r="80" fill="#5B93AC" opacity="0.13"/>
+      <path class="t" d="M -3.07 87.95 A 88 88 0 0 1 -87.95 3.07"/>
+      <path class="t" d="M -87.95 -3.07 A 88 88 0 0 1 -3.07 -87.95"/>
+      <path class="t" d="M 3.07 -87.95 A 88 88 0 0 1 87.95 -3.07"/>
+      <path class="t" d="M 87.95 3.07 A 88 88 0 0 1 3.07 87.95"/>
+      <path class="o" d="M -3.07 87.95 A 88 88 0 0 1 -87.95 3.07"/>
+      <path class="o" d="M -87.95 -3.07 A 88 88 0 0 1 -0.00 -88.00"/>
+      <circle cx="0" cy="-88" r="5" fill="#5B93AC"/>
+      <text x="0" y="8" text-anchor="middle" class="count">1</text>
+    </g>
+    <text x="165" y="322" text-anchor="middle" class="phase">Halten</text>
+    <text x="165" y="346" text-anchor="middle" style="font-size:13px;fill:#5A6B75">Schultern locker</text>
+    <text x="165" y="366" text-anchor="middle" class="note">Runde 3 von 8 · noch 1 s</text>
+  </g>
+
+  <!-- 3 Ausatmen -->
+  <g transform="translate(784,152)">
+    <rect x="0" y="0" width="330" height="380" rx="16" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <text x="24" y="32" class="cap">3 · Ausatmen — ab 12 Uhr</text>
+    <text x="24" y="50" class="note">Radius 1.00 → 0.55 · Marke läuft abwärts · sage</text>
+    <g transform="translate(165,200)">
+      <circle cx="0" cy="0" r="62" fill="#87A582" opacity="0.15"/>
+      <path class="t" d="M -3.07 87.95 A 88 88 0 0 1 -87.95 3.07"/>
+      <path class="t" d="M -87.95 -3.07 A 88 88 0 0 1 -3.07 -87.95"/>
+      <path class="t" d="M 3.07 -87.95 A 88 88 0 0 1 87.95 -3.07"/>
+      <path class="t" d="M 87.95 3.07 A 88 88 0 0 1 3.07 87.95"/>
+      <path class="o" d="M -3.07 87.95 A 88 88 0 0 1 -87.95 3.07"/>
+      <path class="o" d="M -87.95 -3.07 A 88 88 0 0 1 -3.07 -87.95"/>
+      <path class="s" d="M 3.07 -87.95 A 88 88 0 0 1 81.30 -33.68"/>
+      <circle cx="81.30" cy="-33.68" r="5" fill="#87A582"/>
+      <text x="0" y="8" text-anchor="middle" class="count">1</text>
+    </g>
+    <text x="165" y="322" text-anchor="middle" class="phase">Ausatmen</text>
+    <text x="165" y="346" text-anchor="middle" style="font-size:13px;fill:#5A6B75">Langsam und vollständig</text>
+    <text x="165" y="366" text-anchor="middle" class="note">Runde 3 von 8 · noch 1 s</text>
+  </g>
+
+  <!-- 4 Leer halten -->
+  <g transform="translate(1144,152)">
+    <rect x="0" y="0" width="330" height="380" rx="16" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <text x="24" y="32" class="cap">4 · Leer halten — endet bei 6 Uhr</text>
+    <text x="24" y="50" class="note">Radius bleibt 0.55 · Marke schließt den Umlauf</text>
+    <g transform="translate(165,200)">
+      <circle cx="0" cy="0" r="48" fill="#87A582" opacity="0.15"/>
+      <path class="t" d="M -3.07 87.95 A 88 88 0 0 1 -87.95 3.07"/>
+      <path class="t" d="M -87.95 -3.07 A 88 88 0 0 1 -3.07 -87.95"/>
+      <path class="t" d="M 3.07 -87.95 A 88 88 0 0 1 87.95 -3.07"/>
+      <path class="t" d="M 87.95 3.07 A 88 88 0 0 1 3.07 87.95"/>
+      <path class="o" d="M -3.07 87.95 A 88 88 0 0 1 -87.95 3.07"/>
+      <path class="o" d="M -87.95 -3.07 A 88 88 0 0 1 -3.07 -87.95"/>
+      <path class="s" d="M 3.07 -87.95 A 88 88 0 0 1 87.95 -3.07"/>
+      <path class="s" d="M 87.95 3.07 A 88 88 0 0 1 81.30 33.68"/>
+      <circle cx="81.30" cy="33.68" r="5" fill="#87A582"/>
+      <text x="0" y="8" text-anchor="middle" class="count">3</text>
+    </g>
+    <text x="165" y="322" text-anchor="middle" class="phase">Leer halten</text>
+    <text x="165" y="346" text-anchor="middle" style="font-size:13px;fill:#5A6B75">Ohne Anspannung</text>
+    <text x="165" y="366" text-anchor="middle" class="note">Runde 3 von 8 · noch 3 s</text>
+  </g>
+
+  <!-- ================= PLAYER ================= -->
+  <text x="64" y="590" class="frame-label">VOLLBILD-PLAYER — MOBILE 390 × 844 · Einatmen bei 70 %</text>
+  <g transform="translate(64,610)">
+    <rect x="0" y="0" width="390" height="540" rx="26" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <text x="24" y="40" style="font-size:14px;fill:#5A6B75">‹ Beenden</text>
+    <text x="366" y="40" text-anchor="end" style="font-size:13px;fill:#8C9AA3">1:12 / 2:08</text>
+    <line x1="24" y1="58" x2="366" y2="58" stroke="#E8EDF1" stroke-width="2" stroke-linecap="round"/>
+    <line x1="24" y1="58" x2="216" y2="58" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+    <line x1="115" y1="52" x2="115" y2="64" stroke="#FFFFFF" stroke-width="2"/>
+    <line x1="262" y1="52" x2="262" y2="64" stroke="#FFFFFF" stroke-width="2"/>
+
+    <g transform="translate(195,236)">
+      <circle cx="0" cy="0" r="78" fill="#5B93AC" opacity="0.13"/>
+      <path class="t" d="M -3.32 94.94 A 95 95 0 0 1 -94.94 3.32"/>
+      <path class="t" d="M -94.94 -3.32 A 95 95 0 0 1 -3.32 -94.94"/>
+      <path class="t" d="M 3.32 -94.94 A 95 95 0 0 1 94.94 -3.32"/>
+      <path class="t" d="M 94.94 3.32 A 95 95 0 0 1 3.32 94.94"/>
+      <path class="o" d="M -3.32 94.94 A 95 95 0 0 1 -84.65 43.13"/>
+      <circle cx="-84.65" cy="43.13" r="5.5" fill="#5B93AC"/>
+      <text x="0" y="10" text-anchor="middle" style="font-size:52px;font-weight:300;fill:#16242B;letter-spacing:-1.6px">2</text>
+    </g>
+
+    <text x="195" y="384" text-anchor="middle" class="phase">Einatmen</text>
+    <text x="195" y="408" text-anchor="middle" style="font-size:13px;fill:#5A6B75">Ruhig durch die Nase</text>
+    <text x="195" y="432" text-anchor="middle" class="note">Block 2 von 3 · Runde 3 von 8</text>
+
+    <g transform="translate(0,470)">
+      <circle cx="112" cy="20" r="21" fill="none" stroke="#D3DCE3" stroke-width="1"/>
+      <path d="M107 13 v14 M117 13 v14" stroke="#3B6C82" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="195" cy="20" r="27" fill="#5B93AC"/>
+      <rect x="188" y="12" width="4.5" height="16" rx="2" fill="#FFFFFF"/>
+      <rect x="197" y="12" width="4.5" height="16" rx="2" fill="#FFFFFF"/>
+      <circle cx="278" cy="20" r="21" fill="none" stroke="#D3DCE3" stroke-width="1"/>
+      <path d="M272 15 h5 l5 -4 v18 l-5 -4 h-5 z" fill="none" stroke="#3B6C82" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M285 15 a5 5 0 0 1 0 10" fill="none" stroke="#3B6C82" stroke-width="1.6"/>
+    </g>
+    <text x="112" y="522" text-anchor="middle" class="note">Pause</text>
+    <text x="195" y="522" text-anchor="middle" class="note">Anhalten</text>
+    <text x="278" y="522" text-anchor="middle" class="note">Ton</text>
+  </g>
+
+  <!-- ================= ANATOMY ================= -->
+  <g transform="translate(500,610)">
+    <text x="0" y="-20" class="frame-label">AUFBAU UND WERTE</text>
+    <rect x="0" y="0" width="490" height="540" rx="16" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <g transform="translate(170,166)">
+      <path class="t" d="M -3.84 109.93 A 110 110 0 0 1 -109.93 3.84"/>
+      <path class="t" d="M -109.93 -3.84 A 110 110 0 0 1 -3.84 -109.93"/>
+      <path class="t" d="M 3.84 -109.93 A 110 110 0 0 1 109.93 -3.84"/>
+      <path class="t" d="M 109.93 3.84 A 110 110 0 0 1 3.84 109.93"/>
+      <path class="o" d="M -3.84 109.93 A 110 110 0 0 1 -109.93 3.84"/>
+      <path class="o" d="M -109.93 -3.84 A 110 110 0 0 1 -71.44 -83.64"/>
+      <circle cx="-71.44" cy="-83.64" r="5" fill="#5B93AC"/>
+      <circle cx="0" cy="0" r="98" fill="#5B93AC" opacity="0.10"/>
+      <circle cx="0" cy="0" r="54" fill="none" stroke="#B9D4E0" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="0" y1="0" x2="0" y2="-54" class="measure"/>
+      <line x1="0" y1="0" x2="98" y2="0" class="measure"/>
+      <text x="6" y="-30" class="note">0.55</text>
+      <text x="40" y="-8" class="note">1.00</text>
+      <circle cx="0" cy="110" r="4" fill="#16242B"/>
+      <text x="0" y="134" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#16242B">6 Uhr — Einatmen beginnt</text>
+      <circle cx="0" cy="-110" r="4" fill="#16242B"/>
+      <text x="0" y="-122" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#16242B">12 Uhr — Ausatmen beginnt</text>
+      <path d="M -128 40 a 130 130 0 0 1 0 -80" fill="none" stroke="#B9D4E0" stroke-width="1"/>
+      <path d="M -128 -34 l -4 6 l 8 0 z" fill="#B9D4E0"/>
+      <text x="-136" y="4" text-anchor="end" style="font-size:11px;fill:#8C9AA3">linke Hälfte</text>
+      <text x="-136" y="18" text-anchor="end" style="font-size:11px;fill:#8C9AA3">Ein + Halten voll</text>
+      <text x="136" y="4" style="font-size:11px;fill:#8C9AA3">rechte Hälfte</text>
+      <text x="136" y="18" style="font-size:11px;fill:#8C9AA3">Aus + Halten leer</text>
+    </g>
+
+    <text x="20" y="330" class="note-b">Die zwei festen Ankerpunkte</text>
+    <text x="20" y="346" class="note">Einatmen startet bei 6 Uhr (θ = 90°), Ausatmen bei 12 Uhr (θ = 270°).</text>
+    <text x="20" y="362" class="note">Daraus folgt: jede Hälfte umfasst 180° und wird intern nach Dauer geteilt.</text>
+
+    <text x="20" y="392" class="note-b">Winkel je Phase</text>
+    <text x="20" y="408" class="note">α(einatmen)   = 180° × t_ein / (t_ein + t_haltenVoll)</text>
+    <text x="20" y="424" class="note">α(haltenVoll) = 180° − α(einatmen)</text>
+    <text x="20" y="440" class="note">α(ausatmen)   = 180° × t_aus / (t_aus + t_haltenLeer)</text>
+    <text x="20" y="456" class="note">α(haltenLeer) = 180° − α(ausatmen)</text>
+
+    <text x="20" y="486" class="note-b">Umlaufdauer</text>
+    <text x="20" y="502" class="note">Ein voller Umlauf entspricht genau einer Runde. Die Winkelgeschwindigkeit ist</text>
+    <text x="20" y="518" class="note">je Hälfte konstant, kann sich zwischen den Hälften aber unterscheiden —</text>
+    <text x="20" y="534" class="note">bei 4-7-8 braucht die linke Hälfte 11 s, die rechte 8 s.</text>
+  </g>
+
+  <!-- ================= SEGMENTS ================= -->
+  <g transform="translate(1030,610)">
+    <text x="0" y="-20" class="frame-label">SEGMENTZAHL FOLGT DEN HALTEPHASEN</text>
+    <rect x="0" y="0" width="506" height="590" rx="16" fill="#FFFFFF" stroke="#D3DCE3"/>
+
+    <g transform="translate(96,116)">
+      <circle cx="0" cy="0" r="30" fill="#5B93AC" opacity="0.10"/>
+      <path d="M -1.47 41.97 A 42 42 0 0 1 -41.97 1.47" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M -41.97 -1.47 A 42 42 0 0 1 -1.47 -41.97" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 1.47 -41.97 A 42 42 0 0 1 41.97 -1.47" fill="none" stroke="#87A582" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 41.97 1.47 A 42 42 0 0 1 1.47 41.97" fill="none" stroke="#87A582" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="0" y="66" text-anchor="middle" style="font-size:12px;font-weight:600;fill:#16242B">4-4-4-4</text>
+      <text x="0" y="82" text-anchor="middle" class="note">4 Segmente</text>
+    </g>
+
+    <g transform="translate(252,116)">
+      <circle cx="0" cy="0" r="30" fill="#5B93AC" opacity="0.10"/>
+      <path d="M -1.47 41.97 A 42 42 0 0 1 -37.57 18.77" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M -38.79 16.10 A 42 42 0 0 1 -1.47 -41.97" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 1.47 -41.97 A 42 42 0 0 1 1.47 41.97" fill="none" stroke="#87A582" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="0" y="66" text-anchor="middle" style="font-size:12px;font-weight:600;fill:#16242B">4-7-8</text>
+      <text x="0" y="82" text-anchor="middle" class="note">3 Segmente</text>
+    </g>
+
+    <g transform="translate(408,116)">
+      <circle cx="0" cy="0" r="30" fill="#5B93AC" opacity="0.10"/>
+      <path d="M -1.47 41.97 A 42 42 0 0 1 -1.47 -41.97" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 1.47 -41.97 A 42 42 0 0 1 1.47 41.97" fill="none" stroke="#87A582" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="0" y="66" text-anchor="middle" style="font-size:12px;font-weight:600;fill:#16242B">5-5</text>
+      <text x="0" y="82" text-anchor="middle" class="note">2 Segmente</text>
+    </g>
+
+    <line x1="24" y1="222" x2="482" y2="222" class="line"/>
+    <text x="24" y="244" class="note">Ohne Haltephasen halbiert sich der Kreis, mit einer Haltephase entstehen drei Abschnitte.</text>
+    <text x="24" y="260" class="note">Die Unterbrechung liegt immer dort, wo die Phase wechselt — 4° Lücke, gerundete Enden.</text>
+    <text x="24" y="276" class="note">Der Kreis bleibt in jedem Fall ein Kreis; nur seine Unterteilung ändert sich.</text>
+
+    <text x="24" y="316" class="cap">Farbzuordnung</text>
+    <text x="24" y="338" class="note">Linke Hälfte ocean500, rechte Hälfte sage500 — die Farbe sagt schon vor dem Lesen,</text>
+    <text x="24" y="354" class="note">ob eingeatmet oder ausgeatmet wird. Die graue Spur darunter bleibt immer sichtbar.</text>
+
+    <text x="24" y="394" class="cap">Was während der Haltephasen passiert</text>
+    <text x="24" y="416" class="note">Die Fläche steht still, die Marke läuft weiter. Genau dafür ist der Umlauf da: Er zeigt</text>
+    <text x="24" y="432" class="note">an, dass etwas passiert, ohne dass die Fläche fälschlich weiteratmet.</text>
+
+    <text x="24" y="452" class="cap">Blockwechsel</text>
+    <text x="24" y="474" class="note">Bei mehreren Blöcken teilt sich der Ring beim Wechsel neu auf — aus vier Segmenten können</text>
+    <text x="24" y="490" class="note">drei werden. Der Übergang läuft über 400 ms während der Pause zwischen den Blöcken, nie</text>
+    <text x="24" y="506" class="note">mitten in einer Phase. Die Balkenmarken oben zeigen die Blockgrenzen.</text>
+
+    <text x="24" y="546" class="cap">Reduzierte Bewegung</text>
+    <text x="24" y="568" class="note">`prefers-reduced-motion` schaltet nichts ab — die Animation ist Funktion, nicht Dekoration.</text>
+  </g>
+</svg>

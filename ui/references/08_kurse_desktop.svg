@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+<rect width="1200" height="820" fill="#EFF3F4"/>
+<rect x="20" y="20" width="1160" height="780" rx="14" fill="#FFFFFF" stroke="#D3DCE3" stroke-width="1"/>
+
+<!-- Topbar -->
+<rect x="20" y="20" width="1160" height="14" rx="14" fill="#FFFFFF"/>
+<line x1="20" y1="76" x2="1180" y2="76" stroke="#E8EDF1" stroke-width="1"/>
+<text x="48" y="54" font-size="14" font-weight="600" fill="#16242B" letter-spacing="0.4">thehacode</text>
+<text x="384" y="58" font-size="13" fill="#5A6B75">News</text>
+<rect x="430" y="38" width="60" height="30" rx="15" fill="#5B93AC"/>
+<text x="460" y="58" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">Kurse</text>
+<text x="512" y="58" font-size="13" fill="#5A6B75">  Übungen</text>
+<text x="610" y="58" font-size="13" fill="#5A6B75">  Team</text>
+<rect x="1060" y="38" width="100" height="30" rx="15" fill="#5B93AC"/>
+<text x="1110" y="58" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">Anmelden</text>
+
+<!-- Hero Featured Kurs -->
+<rect x="48" y="100" width="750" height="220" rx="14" fill="#DCE8F0"/>
+<!-- Wellen-Deko -->
+<path d="M100 185 Q160 150 220 185 Q280 220 340 185 Q400 150 460 185 Q520 220 580 185 Q640 150 700 185 Q760 220 800 195" fill="none" stroke="#5B93AC" stroke-width="2.5" opacity="0.2"/>
+<path d="M100 205 Q160 170 220 205 Q280 240 340 205 Q400 170 460 205 Q520 240 580 205 Q640 170 700 205 Q760 240 800 215" fill="none" stroke="#5B93AC" stroke-width="2" opacity="0.12"/>
+<rect x="64" y="116" width="46" height="22" rx="11" fill="#5B93AC"/>
+<text x="87" y="131" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">NEU</text>
+<rect x="118" y="116" width="78" height="22" rx="11" fill="rgba(255,255,255,0.85)"/>
+<text x="157" y="131" text-anchor="middle" font-size="11" font-weight="600" fill="#3B6C82">EINSTEIGER</text>
+<text x="64" y="188" font-size="22" font-weight="600" fill="#16242B">21 Tage funktionale Atmung</text>
+<text x="64" y="212" font-size="14" fill="#5A6B75">Täglich 10 Minuten · 6 Module · Selbststudium · Lebenslanger Zugang</text>
+<text x="64" y="238" font-size="13" fill="#5B93AC">★★★★★</text>
+<text x="138" y="238" font-size="13" fill="#5A6B75">24 Teilnehmer · ab sofort verfügbar</text>
+<rect x="64" y="258" width="160" height="38" rx="19" fill="#5B93AC"/>
+<text x="144" y="282" text-anchor="middle" font-size="14" font-weight="500" fill="#FFFFFF">Jetzt starten →</text>
+<rect x="236" y="258" width="130" height="38" rx="19" fill="none" stroke="#5B93AC" stroke-width="1.5"/>
+<text x="301" y="282" text-anchor="middle" font-size="14" font-weight="500" fill="#3B6C82">Mehr erfahren</text>
+
+<!-- Filter-Leiste rechts oben -->
+<text x="828" y="116" font-size="12" font-weight="600" fill="#8C9AA3" letter-spacing="0.6">FILTERN</text>
+<rect x="828" y="126" width="42" height="26" rx="13" fill="#5B93AC"/>
+<text x="849" y="143" text-anchor="middle" font-size="12" font-weight="500" fill="#FFFFFF">Alle</text>
+<rect x="878" y="126" width="68" height="26" rx="13" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="912" y="143" text-anchor="middle" font-size="12" fill="#5A6B75">Einsteiger</text>
+<rect x="954" y="126" width="76" height="26" rx="13" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="992" y="143" text-anchor="middle" font-size="12" fill="#5A6B75">Fortgeschr.</text>
+<rect x="1038" y="126" width="66" height="26" rx="13" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="1071" y="143" text-anchor="middle" font-size="12" fill="#5A6B75">Workshop</text>
+
+<!-- Kurs-Karte 2 -->
+<rect x="828" y="164" width="152" height="156" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="828" y="164" width="152" height="80" rx="0" fill="#F2F6F1"/>
+<path d="M840 164 L828 164 Q828 164 828 176 L828 244 L980 244 L980 176 Q980 164 968 164 Z" fill="#F2F6F1"/>
+<path d="M858 200 L888 182 L888 218 Z" fill="#87A582" opacity="0.35"/>
+<path d="M892 200 L922 182 L922 218 Z" fill="#87A582" opacity="0.2"/>
+<rect x="840" y="174" width="88" height="18" rx="9" fill="rgba(255,255,255,0.88)"/>
+<text x="884" y="187" text-anchor="middle" font-size="9" font-weight="600" fill="#5F7F5B">FORTGESCHRITTEN</text>
+<text x="840" y="260" font-size="12" font-weight="600" fill="#16242B">Slow-Pace Intensiv</text>
+<text x="840" y="276" font-size="11" fill="#5A6B75">8 Wochen · Live</text>
+<text x="840" y="292" font-size="11" fill="#5B93AC">★★★★☆  11</text>
+<rect x="840" y="302" width="124" height="26" rx="13" fill="none" stroke="#5B93AC" stroke-width="1"/>
+<text x="902" y="319" text-anchor="middle" font-size="11" font-weight="500" fill="#3B6C82">Details</text>
+
+<!-- Kurs-Karte 3 -->
+<rect x="996" y="164" width="152" height="156" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="996" y="164" width="152" height="80" rx="0" fill="#F0F6F9"/>
+<path d="M1008 164 L996 164 Q996 164 996 176 L996 244 L1148 244 L1148 176 Q1148 164 1136 164 Z" fill="#F0F6F9"/>
+<circle cx="1072" cy="202" r="18" fill="none" stroke="#5B93AC" stroke-width="1.5" opacity="0.35"/>
+<line x1="1072" y1="184" x2="1072" y2="220" stroke="#5B93AC" stroke-width="1.5" opacity="0.3"/>
+<line x1="1054" y1="202" x2="1090" y2="202" stroke="#5B93AC" stroke-width="1.5" opacity="0.3"/>
+<rect x="1008" y="174" width="70" height="18" rx="9" fill="rgba(255,255,255,0.88)"/>
+<text x="1043" y="187" text-anchor="middle" font-size="9" font-weight="600" fill="#3B6C82">WORKSHOP</text>
+<text x="1008" y="260" font-size="12" font-weight="600" fill="#16242B">Box Masterclass</text>
+<text x="1008" y="276" font-size="11" fill="#5A6B75">1 Tag · Online · 12 Pers.</text>
+<text x="1008" y="292" font-size="11" fill="#8C9AA3">Sa 23. August</text>
+<rect x="1008" y="302" width="124" height="26" rx="13" fill="none" stroke="#5B93AC" stroke-width="1"/>
+<text x="1070" y="319" text-anchor="middle" font-size="11" font-weight="500" fill="#3B6C82">Anmelden</text>
+
+<!-- Alle Kurse Titel -->
+<text x="48" y="356" font-size="16" font-weight="600" fill="#16242B">Alle Kurse</text>
+
+<!-- 3-Spalten-Raster -->
+<!-- Karte A -->
+<rect x="48" y="372" width="350" height="190" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="48" y="372" width="350" height="96" rx="0" fill="#DCE8F0"/>
+<path d="M60 372 L48 372 Q48 372 48 384 L48 468 L398 468 L398 384 Q398 372 386 372 Z" fill="#DCE8F0"/>
+<path d="M120 416 Q150 395 180 416 Q210 437 240 416 Q270 395 300 416 Q330 437 360 416" fill="none" stroke="#5B93AC" stroke-width="2" opacity="0.22"/>
+<rect x="62" y="384" width="46" height="18" rx="9" fill="rgba(255,255,255,0.88)"/>
+<text x="85" y="396" text-anchor="middle" font-size="9" font-weight="600" fill="#3B6C82">EINSTEIGER</text>
+<text x="64" y="484" font-size="13" font-weight="600" fill="#16242B">4-7-8 Atmung für besseren Schlaf</text>
+<text x="64" y="500" font-size="11" fill="#5A6B75">4 Wochen · täglich 8 Min · Audio-Guides</text>
+<text x="64" y="518" font-size="11" fill="#5B93AC">★★★★★</text>
+<text x="110" y="518" font-size="11" fill="#8C9AA3">18 Teilnehmer</text>
+<rect x="64" y="530" width="110" height="26" rx="13" fill="#5B93AC"/>
+<text x="119" y="547" text-anchor="middle" font-size="11" font-weight="500" fill="#FFFFFF">Zum Kurs</text>
+
+<!-- Karte B -->
+<rect x="422" y="372" width="350" height="190" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="422" y="372" width="350" height="96" rx="0" fill="#F2F6F1"/>
+<path d="M434 372 L422 372 Q422 372 422 384 L422 468 L772 468 L772 384 Q772 372 760 372 Z" fill="#F2F6F1"/>
+<circle cx="597" cy="416" r="22" fill="none" stroke="#87A582" stroke-width="1.5" opacity="0.35"/>
+<text x="597" y="421" text-anchor="middle" font-size="18" fill="#5F7F5B" opacity="0.3">∿</text>
+<rect x="436" y="384" width="88" height="18" rx="9" fill="rgba(255,255,255,0.88)"/>
+<text x="480" y="396" text-anchor="middle" font-size="9" font-weight="600" fill="#5F7F5B">FORTGESCHRITTEN</text>
+<text x="438" y="484" font-size="13" font-weight="600" fill="#16242B">HRV-Training mit Atemübungen</text>
+<text x="438" y="500" font-size="11" fill="#5A6B75">6 Wochen · Messung &amp; Protokoll</text>
+<text x="438" y="518" font-size="11" fill="#5B93AC">★★★★☆</text>
+<text x="484" y="518" font-size="11" fill="#8C9AA3">9 Teilnehmer</text>
+<rect x="438" y="530" width="110" height="26" rx="13" fill="none" stroke="#5B93AC" stroke-width="1"/>
+<text x="493" y="547" text-anchor="middle" font-size="11" font-weight="500" fill="#3B6C82">Details</text>
+
+<!-- Karte C -->
+<rect x="796" y="372" width="356" height="190" rx="12" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="796" y="372" width="356" height="96" rx="0" fill="#F0F6F9"/>
+<path d="M808 372 L796 372 Q796 372 796 384 L796 468 L1152 468 L1152 384 Q1152 372 1140 372 Z" fill="#F0F6F9"/>
+<path d="M850 430 L900 400 L950 430 L900 460 Z" fill="#5B93AC" opacity="0.15"/>
+<rect x="810" y="384" width="80" height="18" rx="9" fill="rgba(255,255,255,0.88)"/>
+<text x="850" y="396" text-anchor="middle" font-size="9" font-weight="600" fill="#3B6C82">MASTERCLASS</text>
+<text x="812" y="484" font-size="13" font-weight="600" fill="#16242B">Wim-Hof-Methode: Grundlagen</text>
+<text x="812" y="500" font-size="11" fill="#5A6B75">1-Tages-Workshop · Sa 6. Sept.</text>
+<text x="812" y="518" font-size="11" fill="#5B93AC">★★★★★</text>
+<text x="858" y="518" font-size="11" fill="#8C9AA3">Ausgebucht — Warteliste</text>
+<rect x="812" y="530" width="130" height="26" rx="13" fill="none" stroke="#8C9AA3" stroke-width="1"/>
+<text x="877" y="547" text-anchor="middle" font-size="11" font-weight="500" fill="#8C9AA3">Warteliste</text>
+
+<!-- Mehr-Button -->
+<rect x="516" y="582" width="168" height="36" rx="18" fill="#FFFFFF" stroke="#B9D4E0" stroke-width="1"/>
+<text x="600" y="605" text-anchor="middle" font-size="13" font-weight="500" fill="#3B6C82">Mehr anzeigen</text>
+</svg>

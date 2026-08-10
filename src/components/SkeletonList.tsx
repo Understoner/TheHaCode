@@ -24,6 +24,6 @@ const styles = StyleSheet.create({
   bar: {
     height: 64,
     borderRadius: radius.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.oceanTint,
   },
 });

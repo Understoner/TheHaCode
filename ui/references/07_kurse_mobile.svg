@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 920" width="430" height="920" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+<rect width="430" height="920" fill="#EFF3F4"/>
+<rect x="20" y="10" width="390" height="900" rx="28" fill="#FFFFFF" stroke="#D3DCE3" stroke-width="1"/>
+
+<!-- Status -->
+<text x="44" y="44" font-size="13" fill="#5A6B75">9:41</text>
+<text x="366" y="44" text-anchor="end" font-size="13" fill="#5A6B75">●●●</text>
+
+<!-- Header -->
+<text x="44" y="80" font-size="15" font-weight="600" fill="#16242B" letter-spacing="0.4">thehacode</text>
+<circle cx="366" cy="74" r="15" fill="none" stroke="#D3DCE3" stroke-width="1"/>
+<text x="366" y="79" text-anchor="middle" font-size="13" fill="#5A6B75">M</text>
+
+<!-- Nav pills -->
+<rect x="44" y="94" width="62" height="30" rx="15" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="75" y="114" text-anchor="middle" font-size="13" fill="#5A6B75">News</text>
+<rect x="114" y="94" width="60" height="30" rx="15" fill="#5B93AC"/>
+<text x="144" y="114" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">Kurse</text>
+<rect x="182" y="94" width="76" height="30" rx="15" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="220" y="114" text-anchor="middle" font-size="13" fill="#5A6B75">Übungen</text>
+<rect x="266" y="94" width="56" height="30" rx="15" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="294" y="114" text-anchor="middle" font-size="13" fill="#5A6B75">Team</text>
+
+<!-- Filter Chips -->
+<text x="44" y="154" font-size="11" font-weight="600" fill="#8C9AA3" letter-spacing="0.6">KATEGORIE</text>
+<rect x="44" y="162" width="46" height="26" rx="13" fill="#5B93AC"/>
+<text x="67" y="179" text-anchor="middle" font-size="12" font-weight="500" fill="#FFFFFF">Alle</text>
+<rect x="98" y="162" width="68" height="26" rx="13" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="132" y="179" text-anchor="middle" font-size="12" fill="#5A6B75">Einsteiger</text>
+<rect x="174" y="162" width="72" height="26" rx="13" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="210" y="179" text-anchor="middle" font-size="12" fill="#5A6B75">Fortgeschr.</text>
+<rect x="254" y="162" width="62" height="26" rx="13" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="285" y="179" text-anchor="middle" font-size="12" fill="#5A6B75">Intensiv</text>
+
+<!-- Kurs 1: Featured groß -->
+<rect x="36" y="204" width="358" height="240" rx="16" fill="#FFFFFF" stroke="#B9D4E0" stroke-width="1.5"/>
+<rect x="36" y="204" width="358" height="140" rx="0" fill="#DCE8F0"/>
+<path d="M52 204 L36 204 Q36 204 36 220 L36 344 L394 344 L394 220 Q394 204 378 204 Z" fill="#DCE8F0"/>
+<!-- Wellenform-Dekoration -->
+<path d="M80 270 Q110 245 140 270 Q170 295 200 270 Q230 245 260 270 Q290 295 320 270 Q350 245 380 270" fill="none" stroke="#5B93AC" stroke-width="2" opacity="0.25"/>
+<path d="M80 285 Q110 260 140 285 Q170 310 200 285 Q230 260 260 285 Q290 310 320 285 Q350 260 380 285" fill="none" stroke="#5B93AC" stroke-width="2" opacity="0.15"/>
+<rect x="50" y="216" width="46" height="20" rx="10" fill="#5B93AC"/>
+<text x="73" y="230" text-anchor="middle" font-size="10" font-weight="600" fill="#FFFFFF">NEU</text>
+<rect x="104" y="216" width="76" height="20" rx="10" fill="rgba(255,255,255,0.9)"/>
+<text x="142" y="230" text-anchor="middle" font-size="10" font-weight="600" fill="#3B6C82">EINSTEIGER</text>
+<!-- Inhalt -->
+<text x="52" y="364" font-size="15" font-weight="600" fill="#16242B">21 Tage funktionale Atmung</text>
+<text x="52" y="383" font-size="13" fill="#5A6B75">Täglich 10 Min · 6 Module · Selbststudium</text>
+<!-- Sterne / Info -->
+<text x="52" y="404" font-size="12" fill="#5B93AC">★★★★★</text>
+<text x="128" y="404" font-size="12" fill="#8C9AA3">24 Teilnehmer</text>
+<!-- CTA -->
+<rect x="246" y="392" width="134" height="32" rx="16" fill="#5B93AC"/>
+<text x="313" y="413" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">Zum Kurs →</text>
+
+<!-- Kurs 2 -->
+<rect x="36" y="460" width="358" height="180" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="36" y="460" width="358" height="98" rx="0" fill="#F2F6F1"/>
+<path d="M52 460 L36 460 Q36 460 36 474 L36 558 L394 558 L394 474 Q394 460 378 460 Z" fill="#F2F6F1"/>
+<path d="M100 505 L150 480 L150 530 Z" fill="#87A582" opacity="0.3"/>
+<path d="M160 505 L210 480 L210 530 Z" fill="#87A582" opacity="0.2"/>
+<rect x="50" y="472" width="86" height="20" rx="10" fill="rgba(255,255,255,0.9)"/>
+<text x="93" y="486" text-anchor="middle" font-size="10" font-weight="600" fill="#5F7F5B">FORTGESCHRITTEN</text>
+<text x="52" y="580" font-size="14" font-weight="600" fill="#16242B">Slow-Pace Breathing Intensiv</text>
+<text x="52" y="598" font-size="12" fill="#5A6B75">8 Wochen · Live-Sessions + Aufzeichnungen</text>
+<text x="52" y="618" font-size="12" fill="#5B93AC">★★★★☆</text>
+<text x="116" y="618" font-size="12" fill="#8C9AA3">11 Teilnehmer</text>
+<rect x="254" y="606" width="126" height="30" rx="15" fill="none" stroke="#5B93AC" stroke-width="1.5"/>
+<text x="317" y="626" text-anchor="middle" font-size="13" font-weight="500" fill="#3B6C82">Details</text>
+
+<!-- Kurs 3 -->
+<rect x="36" y="656" width="358" height="150" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="36" y="656" width="358" height="74" rx="0" fill="#F0F6F9"/>
+<path d="M52 656 L36 656 Q36 656 36 670 L36 730 L394 730 L394 670 Q394 656 378 656 Z" fill="#F0F6F9"/>
+<circle cx="215" cy="693" r="18" fill="none" stroke="#5B93AC" stroke-width="1.5" opacity="0.35"/>
+<line x1="215" y1="675" x2="215" y2="711" stroke="#5B93AC" stroke-width="1.5" opacity="0.3"/>
+<line x1="197" y1="693" x2="233" y2="693" stroke="#5B93AC" stroke-width="1.5" opacity="0.3"/>
+<rect x="50" y="666" width="68" height="20" rx="10" fill="rgba(255,255,255,0.9)"/>
+<text x="84" y="680" text-anchor="middle" font-size="10" font-weight="600" fill="#3B6C82">WORKSHOP</text>
+<text x="52" y="752" font-size="14" font-weight="600" fill="#16242B">Box Breathing Masterclass — 1 Tag</text>
+<text x="52" y="770" font-size="12" fill="#5A6B75">Sa 23. Aug · Online · max. 12 Pers.</text>
+<rect x="254" y="758" width="126" height="30" rx="15" fill="none" stroke="#5B93AC" stroke-width="1.5"/>
+<text x="317" y="778" text-anchor="middle" font-size="13" font-weight="500" fill="#3B6C82">Anmelden</text>
+
+<!-- Tab bar -->
+<line x1="20" y1="826" x2="410" y2="826" stroke="#E8EDF1" stroke-width="1"/>
+<text x="76" y="851" text-anchor="middle" font-size="20" fill="#8C9AA3">◉</text>
+<text x="76" y="870" text-anchor="middle" font-size="10" fill="#8C9AA3">News</text>
+<text x="165" y="851" text-anchor="middle" font-size="20" fill="#3B6C82">📖</text>
+<text x="165" y="870" text-anchor="middle" font-size="10" font-weight="600" fill="#3B6C82">Kurse</text>
+<text x="254" y="851" text-anchor="middle" font-size="20" fill="#8C9AA3">◯</text>
+<text x="254" y="870" text-anchor="middle" font-size="10" fill="#8C9AA3">Übungen</text>
+<text x="343" y="851" text-anchor="middle" font-size="20" fill="#8C9AA3">👤</text>
+<text x="343" y="870" text-anchor="middle" font-size="10" fill="#8C9AA3">Team</text>
+<rect x="170" y="892" width="90" height="4" rx="2" fill="#D3DCE3"/>
+</svg>

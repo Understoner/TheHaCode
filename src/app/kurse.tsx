@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '600',
-    color: colors.text700,
+    color: colors.ink900,
     paddingHorizontal: spacing.md,
   },
 });

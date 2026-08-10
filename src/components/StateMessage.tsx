@@ -33,12 +33,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text700,
+    color: colors.ink900,
     textAlign: 'center',
   },
   body: {
     fontSize: 14,
-    color: colors.text700,
+    color: colors.ink700,
     textAlign: 'center',
   },
   action: {
@@ -49,6 +49,6 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.brand700,
+    color: colors.ocean700,
   },
 });

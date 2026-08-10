@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 920" width="430" height="920" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+<rect width="430" height="920" fill="#EFF3F4"/>
+<rect x="20" y="10" width="390" height="900" rx="28" fill="#FFFFFF" stroke="#D3DCE3" stroke-width="1"/>
+
+<!-- Status bar -->
+<text x="44" y="44" font-size="13" fill="#5A6B75">9:41</text>
+<text x="366" y="44" text-anchor="end" font-size="13" fill="#5A6B75">●●●</text>
+
+<!-- Header -->
+<text x="44" y="80" font-size="15" font-weight="600" fill="#16242B" letter-spacing="0.4">thehacode</text>
+<circle cx="366" cy="74" r="15" fill="none" stroke="#D3DCE3" stroke-width="1"/>
+<text x="366" y="79" text-anchor="middle" font-size="13" fill="#5A6B75">M</text>
+
+<!-- Nav pills -->
+<rect x="44" y="94" width="62" height="30" rx="15" fill="#5B93AC"/>
+<text x="75" y="114" text-anchor="middle" font-size="13" font-weight="500" fill="#FFFFFF">News</text>
+<rect x="114" y="94" width="60" height="30" rx="15" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="144" y="114" text-anchor="middle" font-size="13" fill="#5A6B75">Kurse</text>
+<rect x="182" y="94" width="76" height="30" rx="15" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="220" y="114" text-anchor="middle" font-size="13" fill="#5A6B75">Übungen</text>
+<rect x="266" y="94" width="56" height="30" rx="15" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<text x="294" y="114" text-anchor="middle" font-size="13" fill="#5A6B75">Team</text>
+
+<!-- Card 1: groß -->
+<rect x="36" y="140" width="358" height="218" rx="16" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="36" y="140" width="358" height="130" rx="0" fill="#DCE8F0"/>
+<rect x="36" y="140" width="358" height="16" rx="0" fill="#DCE8F0"/>
+<rect x="36" y="255" width="358" height="15" rx="0" fill="#FFFFFF"/>
+<!-- Bild oben: abgerundete Ecken nur oben -->
+<path d="M52 140 Q36 140 36 156 L36 265 L394 265 L394 156 Q394 140 378 140 Z" fill="#DCE8F0"/>
+<!-- Icon im Bild -->
+<text x="215" y="198" text-anchor="middle" font-size="42" fill="#3B6C82" opacity="0.28">❧</text>
+<circle cx="215" cy="195" r="28" fill="none" stroke="#5B93AC" stroke-width="1.5" opacity="0.3"/>
+<line x1="215" y1="167" x2="215" y2="223" stroke="#5B93AC" stroke-width="1.5" opacity="0.25"/>
+<line x1="187" y1="195" x2="243" y2="195" stroke="#5B93AC" stroke-width="1.5" opacity="0.25"/>
+<!-- Tag -->
+<rect x="50" y="152" width="102" height="20" rx="10" fill="rgba(255,255,255,0.92)"/>
+<text x="101" y="166" text-anchor="middle" font-size="11" font-weight="600" fill="#3B6C82" letter-spacing="0.5">ATEMTECHNIK</text>
+<!-- Body -->
+<text x="52" y="283" font-size="11" fill="#8C9AA3">12. August 2026 · 4 Min Lesezeit</text>
+<text x="52" y="303" font-size="15" font-weight="600" fill="#16242B">Box Breathing: wie vier Sekunden</text>
+<text x="52" y="321" font-size="15" font-weight="600" fill="#16242B">dein Nervensystem regulieren</text>
+<text x="52" y="341" font-size="13" fill="#5A6B75">Ein Rhythmus, vier Phasen, messbare Wirkung</text>
+<text x="52" y="357" font-size="13" fill="#5A6B75">auf den Vagustonus — warum diese Technik …</text>
+
+<!-- Card 2: horizontal -->
+<rect x="36" y="372" width="358" height="86" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="36" y="372" width="86" height="86" rx="0" fill="#F0F6F9"/>
+<path d="M36 372 Q36 372 50 372 L36 386 Z" fill="#F0F6F9"/>
+<!-- Eckradien links -->
+<path d="M50 372 L36 372 Q36 372 36 386 L36 444 Q36 458 50 458 L122 458 L122 372 Z" fill="#F0F6F9"/>
+<rect x="36" y="372" width="86" height="86" rx="0" fill="#F0F6F9"/>
+<!-- Korrigierter Bereich -->
+<rect x="36" y="372" width="358" height="86" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="36" y="372" width="86" height="86" rx="14" fill="#F0F6F9"/>
+<rect x="80" y="372" width="42" height="86" fill="#F0F6F9"/>
+<text x="79" y="420" text-anchor="middle" font-size="24" fill="#3B6C82" opacity="0.3">📅</text>
+<rect x="122" y="385" width="1" height="60" fill="#E8EDF1"/>
+<text x="136" y="397" font-size="10" font-weight="600" fill="#5F7F5B" letter-spacing="0.5">KURS</text>
+<text x="136" y="414" font-size="13" font-weight="600" fill="#16242B">Neue Kursreihe: 21 Tage</text>
+<text x="136" y="430" font-size="13" font-weight="600" fill="#16242B">funktionale Atmung</text>
+<text x="136" y="447" font-size="11" fill="#8C9AA3">5. August 2026</text>
+
+<!-- Card 3: groß -->
+<rect x="36" y="472" width="358" height="218" rx="16" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<path d="M52 472 L36 472 Q36 472 36 488 L36 598 L394 598 L394 488 Q394 472 378 472 Z" fill="#F2F6F1"/>
+<circle cx="215" cy="527" r="26" fill="none" stroke="#87A582" stroke-width="1.5" opacity="0.35"/>
+<line x1="215" y1="508" x2="215" y2="546" stroke="#87A582" stroke-width="1.5" opacity="0.3"/>
+<line x1="197" y1="519" x2="233" y2="535" stroke="#87A582" stroke-width="1.5" opacity="0.3"/>
+<rect x="50" y="484" width="96" height="20" rx="10" fill="rgba(255,255,255,0.92)"/>
+<text x="98" y="498" text-anchor="middle" font-size="11" font-weight="600" fill="#3B6C82" letter-spacing="0.5">WISSENSCHAFT</text>
+<text x="52" y="616" font-size="11" fill="#8C9AA3">28. Juli 2026 · 6 Min Lesezeit</text>
+<text x="52" y="636" font-size="15" font-weight="600" fill="#16242B">BOLT-Score verstehen: was dein</text>
+<text x="52" y="654" font-size="15" font-weight="600" fill="#16242B">Atemhaltetest über dich verrät</text>
+<text x="52" y="674" font-size="13" fill="#5A6B75">CO₂-Toleranz messen und einen Ausgangspunkt</text>
+<text x="52" y="690" font-size="13" fill="#5A6B75">für dein Training gewinnen …</text>
+
+<!-- Card 4: horizontal -->
+<rect x="36" y="706" width="358" height="86" rx="14" fill="#FFFFFF" stroke="#E8EDF1" stroke-width="1"/>
+<rect x="36" y="706" width="86" height="86" rx="14" fill="#F2F6F1"/>
+<rect x="80" y="706" width="42" height="86" fill="#F2F6F1"/>
+<text x="79" y="754" text-anchor="middle" font-size="22" fill="#5F7F5B" opacity="0.4">👥</text>
+<rect x="122" y="719" width="1" height="60" fill="#E8EDF1"/>
+<text x="136" y="731" font-size="10" font-weight="600" fill="#5F7F5B" letter-spacing="0.5">TEAM</text>
+<text x="136" y="748" font-size="13" font-weight="600" fill="#16242B">Michael über seine Ausbildung</text>
+<text x="136" y="764" font-size="13" font-weight="600" fill="#16242B">zum Atemcoach</text>
+<text x="136" y="781" font-size="11" fill="#8C9AA3">15. Juli 2026</text>
+
+<!-- Mehr-Hinweis -->
+<text x="215" y="814" text-anchor="middle" font-size="12" fill="#8C9AA3">↓ mehr laden</text>
+
+<!-- Tab bar -->
+<line x1="20" y1="826" x2="410" y2="826" stroke="#E8EDF1" stroke-width="1"/>
+<!-- News aktiv -->
+<text x="76" y="851" text-anchor="middle" font-size="20" fill="#3B6C82">◉</text>
+<text x="76" y="870" text-anchor="middle" font-size="10" font-weight="600" fill="#3B6C82">News</text>
+<!-- Kurse -->
+<text x="165" y="851" text-anchor="middle" font-size="20" fill="#8C9AA3">📖</text>
+<text x="165" y="870" text-anchor="middle" font-size="10" fill="#8C9AA3">Kurse</text>
+<!-- Übungen -->
+<text x="254" y="851" text-anchor="middle" font-size="20" fill="#8C9AA3">◯</text>
+<text x="254" y="870" text-anchor="middle" font-size="10" fill="#8C9AA3">Übungen</text>
+<!-- Team -->
+<text x="343" y="851" text-anchor="middle" font-size="20" fill="#8C9AA3">👤</text>
+<text x="343" y="870" text-anchor="middle" font-size="10" fill="#8C9AA3">Team</text>
+
+<rect x="170" y="892" width="90" height="4" rx="2" fill="#D3DCE3"/>
+</svg>
