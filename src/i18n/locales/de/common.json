@@ -1,5 +1,8 @@
 {
   "home.title": "TheHaCode",
   "home.subtitle": "In Entwicklung",
-  "common.stagingBanner": "Testsystem — nicht die Live-Version"
+  "common.stagingBanner": "Testsystem — nicht die Live-Version",
+  "news.title": "Neuigkeiten",
+  "news.empty.title": "Noch keine Neuigkeiten",
+  "news.empty.hint": "Schau bald wieder vorbei."
 }
