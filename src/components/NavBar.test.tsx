@@ -31,5 +31,8 @@ describe('NavBar', () => {
 
     const uebungen = screen.getByText('Übungen');
     expect(uebungen.closest('a')).toBeNull();
+
+    const konto = screen.getByText('Konto');
+    expect(konto.closest('a')).toBeNull();
   });
 });

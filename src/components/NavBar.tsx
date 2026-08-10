@@ -38,6 +38,15 @@ function NavGlyph({ icon, color }: { icon: NavIcon; color: string }) {
           <View style={[styles.teamBody, { backgroundColor: color }]} />
         </View>
       );
+    case 'konto':
+      return (
+        <View style={styles.glyphBox}>
+          <View style={[styles.kontoRing, { borderColor: color }]}>
+            <View style={[styles.kontoHead, { backgroundColor: color }]} />
+            <View style={[styles.kontoBody, { backgroundColor: color }]} />
+          </View>
+        </View>
+      );
   }
 }
 
@@ -82,7 +91,12 @@ export function NavBar() {
             const content = (
               <>
                 <NavGlyph icon={item.icon} color={color} />
-                <Text style={[styles.tabLabel, { color }, active && styles.tabLabelActive]}>{t(item.labelKey)}</Text>
+                <Text
+                  style={[styles.tabLabel, { color }, active && styles.tabLabelActive]}
+                  numberOfLines={1}
+                >
+                  {t(item.labelKey)}
+                </Text>
               </>
             );
             if (item.kind === 'comingSoon') {
@@ -166,14 +180,19 @@ const styles = StyleSheet.create({
     borderTopColor: colors.line,
     zIndex: 10,
   },
+  // flex: 1 verteilt beliebig viele Eintraege gleichmaessig - aktuell 5
+  // (News, Kurse, Uebungen, Team, Konto), minWidth 0 verhindert, dass ein
+  // langes Label ("Uebungen") den Nachbarn Platz wegnimmt.
   tabItem: {
     flex: 1,
+    minWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
   },
   tabLabel: {
     fontSize: 10,
+    textAlign: 'center',
   },
   tabLabelActive: {
     fontWeight: '600',
@@ -225,5 +244,29 @@ const styles = StyleSheet.create({
     height: 9,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
+  },
+  // Konto: Kopf+Schultern wie teamHead/-Body, aber innerhalb eines Rings
+  // (overflow: hidden) freigestellt - das klassische Profil-in-Kreis-Symbol,
+  // optisch von "Team" (frei stehende Figur) unterscheidbar.
+  kontoRing: {
+    width: 18,
+    height: 18,
+    borderRadius: radius.full,
+    borderWidth: 1.6,
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  kontoHead: {
+    width: 6,
+    height: 6,
+    borderRadius: radius.full,
+    marginTop: 3,
+  },
+  kontoBody: {
+    width: 13,
+    height: 8,
+    borderTopLeftRadius: 7,
+    borderTopRightRadius: 7,
+    marginTop: 1,
   },
 });

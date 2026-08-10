@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -20,8 +20,10 @@ function renderWithClient(ui: ReactElement) {
 function mockNewsQuery(result: { data: unknown; error: unknown }) {
   const orderPublished = vi.fn().mockResolvedValue(result);
   const orderPinned = vi.fn(() => ({ order: orderPublished }));
-  const select = vi.fn(() => ({ order: orderPinned }));
+  const eq = vi.fn(() => ({ order: orderPinned }));
+  const select = vi.fn(() => ({ order: orderPinned, eq }));
   fromMock.mockReturnValue({ select });
+  return { select, eq, orderPinned, orderPublished };
 }
 
 function post(overrides: Record<string, unknown>) {
@@ -33,6 +35,7 @@ function post(overrides: Record<string, unknown>) {
     cover_image_path: null,
     is_pinned: false,
     published_at: '2026-08-01T00:00:00Z',
+    category: 'allgemein',
     ...overrides,
   };
 }
@@ -77,5 +80,28 @@ describe('NewsList', () => {
     renderWithClient(<NewsList />);
 
     await waitFor(() => expect(screen.getByText('Noch keine Neuigkeiten')).toBeTruthy());
+  });
+
+  it('zeigt die Kategorie als Badge auf der Karte', async () => {
+    mockNewsQuery({
+      data: [post({ id: '1', title: 'Atemtechnik Grundlagen', category: 'praxis' })],
+      error: null,
+    });
+
+    renderWithClient(<NewsList />);
+
+    await waitFor(() => expect(screen.getByText('Atemtechnik Grundlagen')).toBeTruthy());
+    expect(screen.getAllByText('Praxis').length).toBeGreaterThan(0);
+  });
+
+  it('filtert die Abfrage nach der gewaehlten Kategorie', async () => {
+    const { eq } = mockNewsQuery({ data: [], error: null });
+
+    renderWithClient(<NewsList />);
+
+    await waitFor(() => expect(screen.getByText('Alle')).toBeTruthy());
+    fireEvent.click(screen.getByText('Kurs'));
+
+    await waitFor(() => expect(eq).toHaveBeenCalledWith('category', 'kurs'));
   });
 });
