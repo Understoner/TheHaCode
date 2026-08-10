@@ -11,13 +11,19 @@ optimale Einzellösungen.
 
 ## Was V1 ist
 
-1. Landing Page mit News — öffentlich, ersetzt die alte Website
+1. Landing Page mit News, Kurse, Team und Navigation — öffentlich, ersetzt
+   die alte Website. Inkl. Impressum/Datenschutzerklärung als Voraussetzung
+   für den sofortigen Umzug auf die Hauptdomain (Kostenersparnis, ein
+   Hosting-Vertrag statt zwei — vorgezogen aus SAD §11.3, siehe §2.4).
+   Redaktion von News/Kurse/Team läuft vorerst über Supabase Studio, keine
+   eigene Admin-Oberfläche in dieser Phase.
 2. Vorkonfigurierte Box-Sequenzen und Videos — kostenlos, dauerhaft
 3. Der Sequenz-Konfigurator — die bezahlte Funktion
 
 **Nicht in V1:** Atem-Tagebuch, Micro Habits, Session-Protokoll, geführte
 Aufnahmen, Hintergrundmusik, Sprachansagen, Testzeitraum, Lifetime-Tarif,
-native Apps, Offline-Betrieb. Wenn eine Aufgabe eines
+native Apps, Offline-Betrieb, In-App-Redaktionsoberfläche (Studio reicht).
+Wenn eine Aufgabe eines
 dieser Themen berührt: nicht anfangen, sondern melden.
 
 ---

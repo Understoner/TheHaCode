@@ -4,5 +4,20 @@
   "common.stagingBanner": "Testsystem — nicht die Live-Version",
   "news.title": "Neuigkeiten",
   "news.empty.title": "Noch keine Neuigkeiten",
-  "news.empty.hint": "Schau bald wieder vorbei."
+  "news.empty.hint": "Schau bald wieder vorbei.",
+  "nav.start": "Start",
+  "nav.kurse": "Kurse",
+  "nav.team": "Team",
+  "nav.uebungen": "Übungen",
+  "nav.konfigurator": "Konfigurator",
+  "nav.comingSoon": "bald verfügbar",
+  "footer.impressum": "Impressum",
+  "footer.datenschutz": "Datenschutzerklärung",
+  "kurse.title": "Kurse",
+  "kurse.empty.title": "Aktuell keine Kurse",
+  "kurse.empty.hint": "Schau bald wieder vorbei.",
+  "kurse.signup": "Anmelden",
+  "team.title": "Team",
+  "team.empty.title": "Team wird gerade vorgestellt",
+  "team.empty.hint": "Schau bald wieder vorbei."
 }

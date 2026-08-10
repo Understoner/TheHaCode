@@ -1,0 +1,25 @@
+{
+  "impressum.title": "Impressum",
+  "impressum.sectionAngaben": "Angaben gemäß § 5 ECG, § 25 MedienG",
+  "impressum.name": "[[TODO: Vor- und Nachname]]",
+  "impressum.address": "[[TODO: Anschrift]]",
+  "impressum.email": "[[TODO: E-Mail-Adresse]]",
+  "impressum.phone": "[[TODO: Telefonnummer, optional]]",
+  "impressum.uid": "[[TODO: UID-Nummer, falls vorhanden]]",
+  "impressum.kleinunternehmer": "Kleinunternehmer gemäß § 6 Abs. 1 Z 27 UStG — keine Umsatzsteuer ausgewiesen.",
+  "impressum.sectionStreit": "Streitschlichtung",
+  "impressum.streitschlichtung": "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: https://ec.europa.eu/consumers/odr. Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+
+  "datenschutz.title": "Datenschutzerklärung",
+  "datenschutz.intro": "Diese Website informiert über Kurse und stellt öffentliche Inhalte (News, Kurse, Team) bereit. Es gibt derzeit keine Registrierung und keine Nutzerkonten — entsprechend werden keine personenbezogenen Daten von Besucher:innen aktiv erhoben.",
+  "datenschutz.sectionVerantwortlicher": "Verantwortlicher",
+  "datenschutz.verantwortlicherName": "[[TODO: Vor- und Nachname]]",
+  "datenschutz.verantwortlicherAddress": "[[TODO: Anschrift]]",
+  "datenschutz.verantwortlicherEmail": "[[TODO: E-Mail-Adresse]]",
+  "datenschutz.sectionHosting": "Hosting und Auftragsverarbeitung",
+  "datenschutz.hosting": "Diese Website wird bei Hostinger gehostet; beim Aufruf verarbeitet Hostinger technisch notwendige Zugriffsdaten (u. a. IP-Adresse, Zeitpunkt) zur Auslieferung der Seite. Inhalte (News, Kurse, Team) werden zur Laufzeit von Supabase geladen, das dafür als Auftragsverarbeiter fungiert.",
+  "datenschutz.sectionTracking": "Tracking und Cookies",
+  "datenschutz.tracking": "Es werden keine Analyse- oder Marketing-Cookies eingesetzt und keine Tracking-Dienste eingebunden.",
+  "datenschutz.sectionRechte": "Ihre Rechte",
+  "datenschutz.rechte": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer Daten sowie ein Beschwerderecht bei der österreichischen Datenschutzbehörde."
+}

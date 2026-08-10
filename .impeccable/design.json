@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-10T00:00:00.000Z",
+  "title": "Design System: TheHaCode",
+  "extensions": {
+    "colorMeta": {
+      "forest": {
+        "role": "primary",
+        "displayName": "Waldgrün",
+        "canonical": "#0F5C4A",
+        "tonalRamp": ["#041A14", "#0A2E24", "#0F5C4A", "#16785F", "#1F9E7D", "#4CBE9C", "#82D4BB", "#BAE9D9"]
+      },
+      "sage": {
+        "role": "secondary",
+        "displayName": "Salbei",
+        "canonical": "#3E8B72",
+        "tonalRamp": ["#0B2A21", "#1D5A48", "#2F7A63", "#3E8B72", "#6BAA96", "#98C7B7", "#C6E3D8", "#EDF7F3"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#0A0A0A", "#2E2E2E", "#5C5C5C", "#8A8A8A", "#B8B8B8", "#DADADA", "#F0F0F0", "#FFFFFF"]
+      },
+      "mist": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "canonical": "#F5F5F5",
+        "tonalRamp": ["#141414", "#2A2A2A", "#545454", "#7A7A7A", "#A3A3A3", "#CCCCCC", "#E8E8E8", "#F5F5F5"]
+      },
+      "clinic-tint": {
+        "role": "neutral",
+        "displayName": "Clinic Tint",
+        "canonical": "#F2F7F5",
+        "tonalRamp": ["#0C1E19", "#1C3A32", "#3A6156", "#5D8A7E", "#8DB5AB", "#BEDAD3", "#DFEEEA", "#F2F7F5"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#3D3D3D",
+        "tonalRamp": ["#141414", "#2A2A2A", "#3D3D3D", "#545454", "#7A7A7A", "#A3A3A3", "#CCCCCC", "#F0F0F0"]
+      },
+      "caution-wash": {
+        "role": "semantic",
+        "displayName": "Caution Wash",
+        "canonical": "#FDECC8",
+        "tonalRamp": ["#4A3A0F", "#7A611D", "#A88A2E", "#D0B357", "#E7CE8C", "#F3E1AF", "#FBE8BE", "#FDECC8"]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#E8EDF1",
+        "tonalRamp": ["#2A3238", "#4A555C", "#6E7B82", "#95A2A8", "#BDC6CB", "#D8DFE3", "#E8EDF1", "#F6F8F9"]
+      },
+      "hairline-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "canonical": "#D3DCE3",
+        "tonalRamp": ["#232C33", "#3F4A52", "#606C74", "#87939B", "#AEBAC0", "#C4CFD5", "#D3DCE3", "#EBF0F3"]
+      }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Title", "purpose": "Größte Schrift im System; Hero-Überschrift und jeder Seitentitel gleichermaßen." },
+      "headline": { "displayName": "Headline", "purpose": "Abschnittsüberschrift innerhalb einer Seite." },
+      "subtitle": { "displayName": "Subtitle", "purpose": "Karten-/Listen-Titel und Sub-Überschriften." },
+      "body": { "displayName": "Body", "purpose": "Fließtext: Beschreibungen, Bios, Excerpts." },
+      "label": { "displayName": "Label", "purpose": "Navigation, Footer-Links, Meta-Angaben." }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button (geplant)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Gefüllter Primär-Button, Waldgrün-Fläche, weißer Text. Noch nicht implementiert — bestätigte Richtung für kommende CTAs (Kurs-Anmeldung, Konfigurator-Speichern).",
+      "html": "<button class=\"ds-btn-primary\">Anmelden</button>",
+      "css": ".ds-btn-primary { background: #0F5C4A; color: #FFFFFF; padding: 12px 24px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600; transition: background 0.15s ease; } .ds-btn-primary:hover, .ds-btn-primary:focus-visible { background: #0C4A3C; } .ds-btn-primary:focus-visible { outline: 2px solid #0F5C4A; outline-offset: 2px; }"
+    },
+    {
+      "name": "CTA Text Link (aktuell)",
+      "kind": "button",
+      "refersTo": "nav-link",
+      "description": "Aktueller CTA-Stil: fetter Textlink ohne Button-Fläche, z. B. „Anmelden“ bei Kursen oder „Erneut versuchen“ bei Fehlerzuständen.",
+      "html": "<a class=\"ds-cta-link\" href=\"#\">Anmelden</a>",
+      "css": ".ds-cta-link { color: #0F5C4A; font-size: 14px; font-weight: 600; text-decoration: none; } .ds-cta-link:hover, .ds-cta-link:focus-visible { text-decoration: underline; }"
+    },
+    {
+      "name": "Card - Kurs (tinted)",
+      "kind": "card",
+      "refersTo": "card-tinted",
+      "description": "Kurs-Karte mit leicht grün getöntem Hintergrund, Titel, Beschreibung, Meta-Zeilen und CTA-Link.",
+      "html": "<div class=\"ds-card-tinted\"><h3 class=\"ds-card-title\">Box-Atmung Grundkurs</h3><p class=\"ds-card-desc\">Einführung in die Box-Atmung, für Einsteiger:innen.</p><p class=\"ds-card-meta\">Wien · 89 €</p><a class=\"ds-cta-link\" href=\"#\">Anmelden</a></div>",
+      "css": ".ds-card-tinted { background: #F2F7F5; border: 1px solid #E8EDF1; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; } .ds-card-title { font-size: 18px; font-weight: 600; color: #3D3D3D; margin: 0; } .ds-card-desc { font-size: 14px; color: #3D3D3D; margin: 0; } .ds-card-meta { font-size: 13px; color: #3D3D3D; margin: 0; } .ds-cta-link { color: #0F5C4A; font-size: 14px; font-weight: 600; text-decoration: none; align-self: flex-start; }"
+    },
+    {
+      "name": "Card - Team (outlined)",
+      "kind": "card",
+      "refersTo": "card-outlined",
+      "description": "Team-Mitglied-Karte mit Foto, Name, Rolle und Bio, plain white background, hairline border.",
+      "html": "<div class=\"ds-card-outlined\"><img class=\"ds-card-photo\" src=\"\" alt=\"\" width=\"96\" height=\"96\" /><h3 class=\"ds-card-name\">Vorname Nachname</h3><p class=\"ds-card-role\">Atemtrainer:in</p></div>",
+      "css": ".ds-card-outlined { background: #FFFFFF; border: 1px solid #E8EDF1; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; } .ds-card-photo { border-radius: 12px; object-fit: cover; } .ds-card-name { font-size: 18px; font-weight: 600; color: #3D3D3D; margin: 0; } .ds-card-role { font-size: 14px; color: #3D3D3D; margin: 0; }"
+    },
+    {
+      "name": "List Row - News",
+      "kind": "custom",
+      "refersTo": "card-outlined",
+      "description": "Editorial-schlichte Listenzeile ohne Rahmen, nur Hairline-Trennlinie darunter.",
+      "html": "<div class=\"ds-list-row\"><h3 class=\"ds-row-title\">Neuer Kurstermin im Herbst</h3><p class=\"ds-row-excerpt\">Ab September starten neue Gruppen.</p></div>",
+      "css": ".ds-list-row { border-bottom: 1px solid #E8EDF1; padding: 8px 0; display: flex; flex-direction: column; gap: 8px; } .ds-row-title { font-size: 18px; font-weight: 600; color: #3D3D3D; margin: 0; } .ds-row-excerpt { font-size: 14px; color: #3D3D3D; margin: 0; }"
+    },
+    {
+      "name": "Navigation Bar",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Horizontale, umbrechende Navigationsleiste mit verstärkter Unterkante (Kantengewicht-Regel).",
+      "html": "<nav class=\"ds-navbar\"><a class=\"ds-nav-link\" href=\"#\">Start</a><a class=\"ds-nav-link\" href=\"#\">Kurse</a><a class=\"ds-nav-link\" href=\"#\">Team</a><span class=\"ds-nav-soon\">Übungen · bald verfügbar</span></nav>",
+      "css": ".ds-navbar { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; padding: 8px 16px; border-bottom: 1px solid #D3DCE3; } .ds-nav-link { color: #0F5C4A; font-size: 15px; font-weight: 600; text-decoration: none; } .ds-nav-link:hover, .ds-nav-link:focus-visible { text-decoration: underline; } .ds-nav-soon { color: #3D3D3D; opacity: 0.5; font-size: 15px; }"
+    },
+    {
+      "name": "Warning Banner",
+      "kind": "custom",
+      "refersTo": "card-outlined",
+      "description": "Zentrierter Hinweisbanner für Staging-Umgebung oder Platzhalter-Rechtstext, einziger Nicht-Grün-Akzent im System.",
+      "html": "<div class=\"ds-banner-warning\">Testsystem — nicht die Live-Version</div>",
+      "css": ".ds-banner-warning { background: #FDECC8; color: #3D3D3D; font-size: 14px; font-weight: 600; text-align: center; padding: 8px 16px; }"
+    },
+    {
+      "name": "State Message (Empty/Error)",
+      "kind": "custom",
+      "refersTo": "card-outlined",
+      "description": "Zentrierter Block für Leer- und Fehlerzustände mit optionaler Textlink-Aktion.",
+      "html": "<div class=\"ds-state-message\"><h4 class=\"ds-state-title\">Noch keine Neuigkeiten</h4><p class=\"ds-state-body\">Schau bald wieder vorbei.</p></div>",
+      "css": ".ds-state-message { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 16px; text-align: center; } .ds-state-title { font-size: 16px; font-weight: 600; color: #3D3D3D; margin: 0; } .ds-state-body { font-size: 14px; color: #3D3D3D; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Vorraum und Tiefenraum",
+    "overview": "Zwei Räume, ein Haus. Der Vorraum ist alles, was ein Besucher vor dem eigentlichen Atem-Erlebnis sieht: Startseite, Kurse, Team, Navigation, rechtliche Seiten. Er folgt konsequent dem in SAD §6 festgelegten Prinzip „minimalistisch-medizinisch“ — reines Weiß, viel Weißraum, dünne Linien statt Schatten, zwei ruhige Grüntöne, keine Illustrationen, keine Verläufe. Seine Aufgabe ist Vertrauen: sowohl für bestehende Kursteilnehmer:innen als auch für kalte Besucher:innen, die zum ersten Mal über Social Media hereinkommen und noch nichts über die Marke wissen. Der Tiefenraum ist der noch nicht gebaute zweite Teil des Systems: die eigentlichen Atem-Sessions, inklusive Formaten, die dem holotropen Atmen nahekommen und bewusst tief in emotionale/psychische Erfahrung gehen. Das Team hat bestätigt, dass diese zweite Stimmung im ganzen System sichtbar werden soll, nicht nur in der Atem-Ring-Animation selbst.",
+    "keyCharacteristics": [
+      "Vorraum: ein Grün-auf-Weiß-System mit zwei Grüntönen, keine dritte Akzentfarbe",
+      "Trennung ausschließlich über 1-px-Linien in zwei Gewichtsstufen, nie über Schatten",
+      "Keine Illustrationen, keine Fotografie außer echten Team-Porträts",
+      "Aktuell keine gefüllten Buttons — CTAs sind fette Textlinks, gefüllte Buttons sind die bestätigte nächste Ausbaustufe",
+      "Tiefenraum: Prinzip bestätigt, Umsetzung offen — wird bei Bau der Breathing Engine aufgelöst"
+    ],
+    "rules": [
+      { "name": "Die 700er-für-Text-Regel", "body": "Waldgrün (700er-Ton) darf Text tragen, Salbei (500er-Ton) nie — Kontrast unter 4,5:1.", "section": "colors" },
+      { "name": "Die Kantengewicht-Regel", "body": "Zwei Trennlinien-Gewichte: hairline-strong markiert die primäre Chrome-Kante (Navigation), hairline trennt alles andere.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do jede Farbe ausschließlich aus tokens.ts beziehen — kein Hex-Literal in Komponenten.",
+      "Do Fließtext ausschließlich in ink/Waldgrün (den 700er-Werten) setzen — Kontrast ≥4,5:1.",
+      "Do Trennung über Linien und Weißraum lösen, nie über Schatten.",
+      "Do für neue Primär-Aktionen den kommenden gefüllten button-primary verwenden, sobald er gebaut ist.",
+      "Do die hairline-strong/hairline-Unterscheidung respektieren.",
+      "Do den Vorraum konsequent ruhig halten, auch wenn der Tiefenraum später wärmer wird."
+    ],
+    "donts": [
+      "Don't Salbei (#3E8B72) für Text verwenden.",
+      "Don't Pastellverläufe oder organische Blob-Illustrationen einsetzen.",
+      "Don't verspielte oder laute Gamification einbauen.",
+      "Don't Radius- oder Spacing-Werte als Literal schreiben, wenn ein Token existiert.",
+      "Don't Illustrationen oder Stock-Fotografie einsetzen."
+    ]
+  }
+}

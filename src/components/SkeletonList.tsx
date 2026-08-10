@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { colors, spacing } from '@/design/tokens';
+import { colors, radius, spacing } from '@/design/tokens';
 
 type Props = {
   count?: number;
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   bar: {
     height: 64,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     backgroundColor: colors.surface,
   },
 });

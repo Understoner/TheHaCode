@@ -6,10 +6,17 @@ export const colors = {
   surface: '#F5F5F5',
   text700: '#3D3D3D',
   brand700: '#0F5C4A',
+  // Flaechenton (Badges, Icons) - NICHT fuer Text, Kontrast <4,5:1.
+  brand500: '#3E8B72',
+  // Hover-/Active-Flaeche fuer gefuellte Primaer-Buttons (dunkleres Waldgruen, DESIGN.md).
+  brand800: '#0C4A3C',
+  // Sehr helle, brand-getoente Flaeche fuer Hero-/Teaser-Sektionen.
+  heroSurface: '#F2F7F5',
   // Flaeche fuer Hinweisbanner (z. B. Staging). text700 darauf: Kontrast ~9,9:1.
   warningSurface: '#FDECC8',
   // Abgrenzung ueber 1-px-Linien statt Schatten (CLAUDE.md).
   line: '#E8EDF1',
+  lineStrong: '#D3DCE3',
 } as const;
 
 export const spacing = {
@@ -17,4 +24,10 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
+  '2xl': 48,
+} as const;
+
+export const radius = {
+  sm: 8,
+  md: 12,
 } as const;
