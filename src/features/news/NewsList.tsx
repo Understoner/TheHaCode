@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { CoverImage } from '@/components/CoverImage';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
+import { MOBILE_NAV_BREAKPOINT, RECENT_ITEMS_COUNT } from '@/design/navigation';
 import { useNewsList } from '@/features/news/useNewsList';
 import { estimateReadingMinutes } from '@/features/news/readingTime';
 
@@ -12,44 +13,49 @@ const dateFormatter = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 
 export function NewsList() {
   const { t } = useTranslation();
   const query = useNewsList();
+  const { width } = useWindowDimensions();
+  const isMobile = width < MOBILE_NAV_BREAKPOINT;
 
   return (
     <QueryBoundary query={query} empty={{ title: t('news.empty.title'), hint: t('news.empty.hint') }}>
       {(posts) => {
-        const pinned = posts.filter((p) => p.is_pinned);
-        const rest = posts.filter((p) => !p.is_pinned);
+        const recent = posts.slice(0, RECENT_ITEMS_COUNT);
+        const older = posts.slice(RECENT_ITEMS_COUNT);
 
         return (
           <View style={styles.container}>
-            {pinned.length > 0 ? (
-              <View style={styles.heroRow}>
-                {pinned.map((post, i) => (
-                  <View key={post.id} style={styles.heroCard}>
-                    <CoverImage
-                      path={post.cover_image_path}
-                      label={post.title}
-                      tone={i % 2 === 0 ? 'ocean' : 'sage'}
-                      style={styles.heroCover}
-                    />
-                    <View style={styles.heroBody}>
-                      <Text style={styles.meta}>
-                        {post.published_at ? dateFormatter.format(new Date(post.published_at)) : ''}
-                        {post.published_at ? ' · ' : ''}
-                        {t('news.readingTime', { minutes: estimateReadingMinutes(post.body_md) })}
-                      </Text>
-                      <Text style={styles.heroTitle}>{post.title}</Text>
-                      {post.excerpt ? <Text style={styles.excerpt}>{post.excerpt}</Text> : null}
+            {recent.length > 0 ? (
+              <View style={styles.section}>
+                <Text style={styles.sectionHeading}>{t('news.recentTitle')}</Text>
+                <View style={styles.heroRow}>
+                  {recent.map((post, i) => (
+                    <View key={post.id} style={[styles.heroCard, !isMobile && styles.heroCardFixed]}>
+                      <CoverImage
+                        path={post.cover_image_path}
+                        label={post.title}
+                        tone={i % 2 === 0 ? 'ocean' : 'sage'}
+                        style={styles.heroCover}
+                      />
+                      <View style={styles.heroBody}>
+                        <Text style={styles.meta}>
+                          {post.published_at ? dateFormatter.format(new Date(post.published_at)) : ''}
+                          {post.published_at ? ' · ' : ''}
+                          {t('news.readingTime', { minutes: estimateReadingMinutes(post.body_md) })}
+                        </Text>
+                        <Text style={styles.heroTitle}>{post.title}</Text>
+                        {post.excerpt ? <Text style={styles.excerpt}>{post.excerpt}</Text> : null}
+                      </View>
                     </View>
-                  </View>
-                ))}
+                  ))}
+                </View>
               </View>
             ) : null}
 
-            {rest.length > 0 ? (
-              <View style={styles.listSection}>
-                {pinned.length > 0 ? <Text style={styles.listHeading}>{t('news.moreTitle')}</Text> : null}
+            {older.length > 0 ? (
+              <View style={styles.section}>
+                <Text style={styles.sectionHeading}>{t('news.moreTitle')}</Text>
                 <View style={styles.list}>
-                  {rest.map((post) => (
+                  {older.map((post) => (
                     <View key={post.id} style={styles.listRow}>
                       <CoverImage
                         path={post.cover_image_path}
@@ -80,19 +86,34 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
     paddingHorizontal: spacing.md,
   },
+  section: {
+    gap: spacing.md,
+  },
+  sectionHeading: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.ink900,
+  },
   heroRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.md,
   },
   heroCard: {
-    flexGrow: 1,
-    flexBasis: 320,
+    flexGrow: 0,
+    flexBasis: '100%',
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
     overflow: 'hidden',
+  },
+  // Desktop: feste Breite statt flexGrow, damit eine einzelne Karte nicht auf
+  // volle Breite gezogen wird, wenn (noch) weniger als RECENT_ITEMS_COUNT
+  // Eintraege existieren.
+  heroCardFixed: {
+    flexBasis: '31%',
+    minWidth: 280,
   },
   heroCover: {
     width: '100%',
@@ -109,13 +130,6 @@ const styles = StyleSheet.create({
   },
   excerpt: {
     fontSize: 13,
-    color: colors.ink700,
-  },
-  listSection: {
-    gap: spacing.md,
-  },
-  listHeading: {
-    fontSize: 14,
     color: colors.ink700,
   },
   list: {

@@ -1,68 +1,81 @@
 import { useTranslation } from 'react-i18next';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { CoverImage } from '@/components/CoverImage';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
+import { MOBILE_NAV_BREAKPOINT, RECENT_ITEMS_COUNT } from '@/design/navigation';
 import { useCoursesList } from '@/features/courses/useCoursesList';
 
 export function CoursesList() {
   const { t } = useTranslation();
   const query = useCoursesList();
+  const { width } = useWindowDimensions();
+  const isMobile = width < MOBILE_NAV_BREAKPOINT;
 
   return (
     <QueryBoundary query={query} empty={{ title: t('kurse.empty.title'), hint: t('kurse.empty.hint') }}>
       {(courses) => {
-        const [featured, ...rest] = courses;
+        const recent = courses.slice(0, RECENT_ITEMS_COUNT);
+        const older = courses.slice(RECENT_ITEMS_COUNT);
 
         return (
           <View style={styles.container}>
-            {featured ? (
-              <View style={styles.featuredCard}>
-                <CoverImage
-                  path={featured.cover_image_path}
-                  label={featured.title}
-                  tone="ocean"
-                  style={styles.featuredCover}
-                />
-                <View style={styles.featuredBody}>
-                  <Text style={styles.featuredTitle}>{featured.title}</Text>
-                  <Text style={styles.description}>{featured.description}</Text>
-                  <View style={styles.metaRow}>
-                    {featured.location ? <Text style={styles.meta}>{featured.location}</Text> : null}
-                    {featured.price_info ? <Text style={styles.meta}>{featured.price_info}</Text> : null}
-                  </View>
-                  {featured.signup_url ? (
-                    <Button label={t('kurse.signup')} onPress={() => Linking.openURL(featured.signup_url!)} />
-                  ) : null}
+            {recent.length > 0 ? (
+              <View style={styles.section}>
+                <Text style={styles.sectionHeading}>{t('kurse.recentTitle')}</Text>
+                <View style={styles.grid}>
+                  {recent.map((course, i) => (
+                    <View key={course.id} style={[styles.card, !isMobile && styles.cardFixed]}>
+                      <CoverImage
+                        path={course.cover_image_path}
+                        label={course.title}
+                        tone={i % 2 === 0 ? 'ocean' : 'sage'}
+                        style={styles.cover}
+                      />
+                      <View style={styles.cardBody}>
+                        <Text style={styles.title}>{course.title}</Text>
+                        <Text style={styles.description}>{course.description}</Text>
+                        <View style={styles.metaRow}>
+                          {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
+                          {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
+                        </View>
+                        {course.signup_url ? (
+                          <Button label={t('kurse.signup')} onPress={() => Linking.openURL(course.signup_url!)} />
+                        ) : null}
+                      </View>
+                    </View>
+                  ))}
                 </View>
               </View>
             ) : null}
 
-            {rest.length > 0 ? (
-              <View style={styles.grid}>
-                {rest.map((course, i) => (
-                  <View key={course.id} style={styles.card}>
-                    <CoverImage
-                      path={course.cover_image_path}
-                      label={course.title}
-                      tone={i % 2 === 0 ? 'sage' : 'ocean'}
-                      style={styles.cover}
-                    />
-                    <View style={styles.cardBody}>
-                      <Text style={styles.title}>{course.title}</Text>
-                      <Text style={styles.description}>{course.description}</Text>
-                      <View style={styles.metaRow}>
-                        {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
-                        {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
+            {older.length > 0 ? (
+              <View style={styles.section}>
+                <Text style={styles.sectionHeading}>{t('kurse.moreTitle')}</Text>
+                <View style={styles.list}>
+                  {older.map((course) => (
+                    <View key={course.id} style={styles.listRow}>
+                      <CoverImage
+                        path={course.cover_image_path}
+                        label={course.title}
+                        tone="sage"
+                        style={styles.listCover}
+                      />
+                      <View style={styles.listText}>
+                        <Text style={styles.listTitle}>{course.title}</Text>
+                        <View style={styles.metaRow}>
+                          {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
+                          {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
+                        </View>
                       </View>
                       {course.signup_url ? (
                         <Button label={t('kurse.signup')} onPress={() => Linking.openURL(course.signup_url!)} />
                       ) : null}
                     </View>
-                  </View>
-                ))}
+                  ))}
+                </View>
               </View>
             ) : null}
           </View>
@@ -74,26 +87,14 @@ export function CoursesList() {
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.lg,
+    gap: spacing.xl,
     paddingHorizontal: spacing.md,
   },
-  featuredCard: {
-    borderRadius: radius.lg,
-    borderWidth: 1.5,
-    borderColor: colors.focusRing,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
+  section: {
+    gap: spacing.md,
   },
-  featuredCover: {
-    width: '100%',
-    aspectRatio: 16 / 7,
-  },
-  featuredBody: {
-    gap: spacing.sm,
-    padding: spacing.md,
-  },
-  featuredTitle: {
-    fontSize: 20,
+  sectionHeading: {
+    fontSize: 18,
     fontWeight: '600',
     color: colors.ink900,
   },
@@ -103,13 +104,20 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   card: {
-    flexGrow: 1,
-    flexBasis: 300,
+    flexGrow: 0,
+    flexBasis: '100%',
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
     overflow: 'hidden',
+  },
+  // Desktop: feste Breite statt flexGrow - eine einzelne Karte soll nicht auf
+  // volle Breite gezogen werden, solange (noch) weniger als
+  // RECENT_ITEMS_COUNT Kurse existieren.
+  cardFixed: {
+    flexBasis: '31%',
+    minWidth: 280,
   },
   cover: {
     width: '100%',
@@ -136,5 +144,32 @@ const styles = StyleSheet.create({
   meta: {
     fontSize: 12,
     color: colors.ink700,
+  },
+  list: {
+    gap: spacing.sm,
+  },
+  listRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+    padding: spacing.sm,
+  },
+  listCover: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.md,
+  },
+  listText: {
+    flex: 1,
+    gap: 4,
+  },
+  listTitle: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.ink900,
   },
 });
