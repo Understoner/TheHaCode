@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      courses: {
+        Row: {
+          cover_image_path: string | null
+          created_at: string
+          description: string
+          id: string
+          location: string | null
+          price_info: string | null
+          published_at: string | null
+          signup_url: string | null
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_path?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          location?: string | null
+          price_info?: string | null
+          published_at?: string | null
+          signup_url?: string | null
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_path?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string | null
+          price_info?: string | null
+          published_at?: string | null
+          signup_url?: string | null
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news_posts: {
         Row: {
           body_md: string
@@ -124,6 +169,45 @@ export type Database = {
           registered_at?: string
           sound_enabled?: boolean
           timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          full_name: string
+          id: string
+          photo_path: string | null
+          published_at: string | null
+          role_title: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          photo_path?: string | null
+          published_at?: string | null
+          role_title?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          photo_path?: string | null
+          published_at?: string | null
+          role_title?: string | null
+          slug?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []

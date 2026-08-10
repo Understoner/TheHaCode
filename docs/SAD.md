@@ -1,8 +1,8 @@
 # System Architecture Document (SAD) — Atem-App MVP
 
 **Projekt:** TheHaCode Breathwork App
-**Version:** 0.6 (vereinfacht: statisch, kein Trial, kein Lifetime, nur Töne)
-**Datum:** 26.07.2026
+**Version:** 0.7 (Homepage-Ablösung vorgezogen: Kurse, Team, Navigation, Rechtliches sofort statt in Block 6)
+**Datum:** 10.08.2026
 **Team:** 2 Personen, Teilzeit, **20 Std./Woche gemeinsam**, KI-gestützte Entwicklung
 **Leitprinzip:** *Boring Technology.* Jede Komponente, die kein Kundenproblem löst, ist Wartungslast.
 
@@ -10,11 +10,13 @@
 
 **V1 besteht aus drei Dingen — und ersetzt die bestehende Website:**
 
-1. **Landing Page mit News** — öffentlich, ohne Anmeldung; übernimmt „Über mich", Angebot und Kontakt von der alten Homepage
+1. **Landing Page mit News, Kurse, Team und Navigation** — öffentlich, ohne Anmeldung; übernimmt „Über mich", Angebot und Kontakt von der alten Homepage. Inkl. Impressum/Datenschutzerklärung als Voraussetzung für den sofortigen Domain-Umzug (§2.4). Redaktion vorerst über Supabase Studio, keine eigene Admin-Oberfläche.
 2. **Vorkonfigurierte Box-Sequenzen und Videos** — kostenlos, dauerhaft
 3. **Der Sequenz-Konfigurator** — die bezahlte Funktion: eigene Box-Atemsequenzen bauen, mit Musik und gesprochener Anleitung
 
 **Alles andere ist verschoben** (§11): Atem-Tagebuch und Micro Habits nach V1.1 · geführte Aufnahmen mit Marker-Synchronisation nach V1.2 · Session-Protokoll nach V1.1 · Programme, Coach-Sicht, native Apps, Offline nach V2.
+
+**Neu in 0.7 gegenüber 0.6:** Homepage-Ablösung vorgezogen — Kostenersparnis (ein Hosting-Vertrag statt zwei) wiegt schwerer als das ursprünglich in §2.4/§11.3/§12.2 zurückgestellte SEO-Risiko. Kurse- und Team-Seite kommen als eigene Inhaltstypen dazu (§3.13), dazu ein projektweites Navigationsmenü und ein rechtliches Minimum (Impressum/Datenschutzerklärung), alles noch vor der Breathing Engine (§12.2). Redaktion läuft bewusst über Supabase Studio statt einer eigenen Admin-Oberfläche — Letztere bleibt vorgemerkt (§11.6).
 
 **Neu in 0.6 gegenüber 0.5:** Homepage wird ersetzt, SEO nachrangig → statischer Export statt Serverrendern (§2.5) · kein Testzeitraum, Zugriff heißt bezahlt (§4.6) · kein Lifetime-Tarif · nur synthetische Töne, keine Musik und keine Sprachaufnahmen (§7.5) · Aufwand rund 130–165 Stunden statt 150–190 (§12.1).
 
@@ -201,9 +203,11 @@ Entschieden: Die App übernimmt die Hauptdomain, die alte Website wird abgelöst
 
 **Das SEO-Risiko ist bewusst in Kauf genommen** — die bestehende Seite hat noch wenig Reichweite, der mögliche Verlust ist entsprechend klein. Genau diese Entscheidung erlaubt den statischen Export und damit den Wegfall des gesamten Serverteils (§2.5).
 
-**Was von der alten Seite übernommen wird:** „Über mich", Angebot und Kontakt. Sie liegen als gepinnte Beiträge in `news_posts` statt in einer eigenen Seitenstruktur — vier Inhalte rechtfertigen kein zweites Modell.
+**Was von der alten Seite übernommen wird:** „Über mich" und Kontakt liegen als gepinnte Beiträge in `news_posts` — zwei Inhalte rechtfertigen kein eigenes Modell. Angebot bekommt mit `courses` (§3.13) jetzt eine eigene, strukturierte Seite, weil „aktuell angebotene Kurse" mehr Feldbedarf hat als ein Blogbeitrag (Ort, Preis, Anmeldelink) und sich unabhängig von News pflegen lassen soll. Dazu neu: eine Team-Seite (`team_members`, §3.13) mit Foto und Kurzvorstellung je Person, und ein projektweites Navigationsmenü, das auch schon auf noch nicht gebaute Funktionen verweist (als „bald verfügbar", ohne den Typecheck zu brechen — `app.json` hat `typedRoutes: true`).
 
-**Reihenfolge:** Die App startet in Block 1 auf `app.deine-domain.at`, die alte Seite bleibt unangetastet. Erst in Block 6, wenn die App trägt, wandert sie auf die Hauptdomain — mit 301-Weiterleitungen für jede bestehende URL. Vorher bleibt die alte Seite als Sicherheitsnetz stehen.
+**Reihenfolge — geändert gegenüber 0.6:** Ursprünglich sollte die Domain erst in Block 6 umgehängt werden, wenn die App durch zahlende Kunden trägt, um das SEO-Risiko zu minimieren. Diese Abwägung ist überholt: Die Kostenersparnis aus einem einzigen Hosting-Vertrag statt zweier wiegt für das Team schwerer als das SEO-Risiko einer ohnehin reichweitenschwachen alten Seite. Die Domain wird deshalb **sofort umgehängt, sobald** News, Kurse, Team, Navigation und ein rechtliches Minimum (Impressum, Datenschutzerklärung — zwingend, sobald die App die einzige öffentliche Seite ist) live und getestet sind — nicht erst nach Stripe. §11.3 und §12.2 sind entsprechend angepasst.
+
+**Redaktion:** News, Kurse und Team werden vorerst direkt in Supabase Studio gepflegt (RLS über `is_admin()` erlaubt das schon), nicht über eine eigene In-App-Oberfläche — die bleibt bewusst vorgemerkt (§11.6) und ist kein Blocker für den Domain-Umzug. Impressum und Datenschutzerklärung sind davon ausgenommen: Sie liegen als git-versionierter i18n-Inhalt (`src/i18n/locales/de/legal.json`) statt als frei im Studio editierbare Zeile, weil rechtsverbindlicher Text einen Review-Pfad (PR, Diff) braucht, den eine Studio-Bearbeitung nicht bietet.
 
 ### 2.5 Hostinger — statische Auslieferung
 
@@ -1108,6 +1112,89 @@ create policy news_read on public.news_posts
     )
   );
 ```
+
+### 3.13 Kurse und Team — Homepage-Ablösung (neu in 0.7)
+
+Reine öffentliche Marketinginhalte, bewusst ohne `visibility_level`: anders
+als News gibt es hier keine Bezahlstufen, nur „veröffentlicht oder nicht".
+Struktur und RLS-Stil sind identisch zu `news_posts` (§3.12) — gleiche
+`published_at`-Gate-Logik, gleiche `is_admin()`-Schreibpolicy, keine neue
+Hilfsfunktion.
+
+```sql
+create table public.courses (
+  id                uuid primary key default gen_random_uuid(),
+  slug              text not null unique,
+  title             text not null,
+  description       text not null,    -- Klartext, kein Markdown-Renderer im Projekt
+  location          text,
+  price_info        text,             -- Klartext statt Zahl, keine Zahlungslogik
+  signup_url        text,             -- externer Anmeldelink
+  cover_image_path  text,             -- Storage: public-assets/courses/...
+  sort_order        int not null default 0,
+  published_at      timestamptz,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+
+create table public.team_members (
+  id            uuid primary key default gen_random_uuid(),
+  slug          text not null unique,
+  full_name     text not null,
+  role_title    text,
+  bio           text,
+  photo_path    text,                 -- Storage: public-assets/team/...
+  sort_order    int not null default 0,
+  published_at  timestamptz,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+alter table public.courses      enable row level security;
+alter table public.team_members enable row level security;
+
+create policy courses_read on public.courses
+  for select using (published_at is not null and published_at <= now());
+create policy team_members_read on public.team_members
+  for select using (published_at is not null and published_at <= now());
+
+create policy courses_admin_write on public.courses
+  for all using (public.is_admin()) with check (public.is_admin());
+create policy team_members_admin_write on public.team_members
+  for all using (public.is_admin()) with check (public.is_admin());
+```
+
+Weder `courses` noch `team_members` sind Nutzertabellen (kein `user_id`,
+admin-verfasst wie `news_posts`) — kein Eintrag in der UNION-Kaskadenliste
+aus `supabase/tests/001_foundation.test.sql`.
+
+**Storage — Bucket `public-assets`.** Der Name stand schon vorher in der
+Architekturübersicht (Komponentendiagramm, §1.1) für genau diesen Zweck,
+wird hier erstmals tatsächlich angelegt statt neu erfunden. Ein Bucket,
+Ordnerkonvention nach Inhaltstyp, damit `news_posts.cover_image_path`
+(bislang ungenutzt), `courses.cover_image_path` und
+`team_members.photo_path` denselben Speicherort teilen:
+
+```sql
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('public-assets', 'public-assets', true, 5242880,
+        array['image/png','image/jpeg','image/webp'])
+on conflict (id) do nothing;
+
+create policy public_assets_read on storage.objects
+  for select using (bucket_id = 'public-assets');
+
+create policy public_assets_admin_insert on storage.objects
+  for insert to authenticated
+  with check (
+    bucket_id = 'public-assets' and public.is_admin()
+    and (storage.foldername(name))[1] in ('news', 'courses', 'team')
+  );
+```
+
+Der Ordner-Check in der Insert-Policy ist keine bloße Namenskonvention,
+sondern erzwungen: Ein Admin kann nur in die drei vorgesehenen virtuellen
+Ordner hochladen, `update`/`delete` folgen demselben `is_admin()`-Muster.
 
 ---
 
@@ -2181,9 +2268,13 @@ Weil die Schemastruktur schon steht, ist V1.1 überwiegend UI-Arbeit — der Tei
 
 Vollständige Sessions mit deiner Stimme, phasengenau synchronisiert. Dafür kommen zurück: `playback_mode = 'audio_guided'`, die Audio-Zeitquelle aus §7.2, das Marker-Werkzeug und der iOS-Spike aus §7.8 — denn *hier* wird das Hören mit gesperrtem Bildschirm plötzlich zum Kernszenario.
 
-### 11.3 V1.3 — Umzug auf die Hauptdomain
+### 11.3 Umzug auf die Hauptdomain — vorgezogen in V1 (war V1.3)
 
-Sofern die Messung aus §2.4 dafür spricht: Landing Page und News wandern auf die Hauptdomain, die alte Seite wird mit 301-Weiterleitungen abgelöst.
+**Überholt seit 0.7.** Dieser Punkt stand ursprünglich hier als Post-V1-Schritt,
+abhängig von einer Reichweiten-Messung. Diese Abwägung ist entfallen: Die
+Kostenersparnis eines einzigen Hosting-Vertrags wiegt schwerer als das
+SEO-Risiko, die Domain wandert deshalb bereits in V1 — siehe §2.4 für die
+aktuelle Begründung und Reihenfolge, §12.2 für den Platz im Wochenplan.
 
 ### 11.4 Offline-Sync
 
@@ -2237,16 +2328,16 @@ Ein Block entspricht zwei Kalenderwochen, also etwa 30–34 produktiven Stunden.
 | Wochen | Inhalt | Ergebnis |
 |---|---|---|
 | **1–2** | Repo, Supabase-Projekte, CI mit Vitest + pgTAP, Design-Tokens und Komponenteninventar, statischer Web-Export auf Hostinger, **iOS-Audio-Spike (§7.7)** | Ein Deployment steht, die visuelle Sprache ist entschieden, die einzige Frage mit Roadmap-Einfluss ist beantwortet |
-| **3–4** | Auth, Profil, Consent (nur AGB/Datenschutz), `delete-account`, `export-my-data`, **Landing Page + News + Inhalte der alten Homepage** | Die neue Website ist live, Nutzer können sich anmelden |
+| **3–4** | Auth, Profil, Consent (nur AGB/Datenschutz), `delete-account`, `export-my-data`, **Landing Page + News + Kurse + Team + Navigation + Impressum/Datenschutzerklärung (Redaktion über Supabase Studio, §2.4/§3.13)** | Die neue Website ist live, alte Domain umgehängt, Nutzer können sich anmelden |
 | **5–6** | **Breathing Engine**: Timeline, Ankeruhr, Animation, synthetische Töne + Unit-Tests | Das Kernerlebnis funktioniert — kostenlose Sequenzen sind spielbar |
 | **7–8** | **Sequenz-Konfigurator**, `owner_id`-Policies, Quota, eigene Sequenzen speichern und abspielen | Die bezahlte Funktion existiert |
 | **9** | **Beta mit 10–15 Bestandskunden**, ohne Bezahlschranke | Die Antwort auf die einzige wirklich offene Frage |
-| **10–11** | Stripe Checkout, Webhook, Entitlement, Paywall, alte Domain umleiten | Monetarisierung live, Homepage abgelöst |
-| **12** | DSGVO-Dokumente, Feinschliff, Launch | Release |
+| **10–11** | Stripe Checkout, Webhook, Entitlement, Paywall | Monetarisierung live |
+| **12** | DSGVO-Dokumente (AGB, Verarbeitungsverzeichnis, AVVs), Feinschliff, Launch | Release |
 
 **Woche 9 ist bewusst kein Puffer.** Der Konfigurator ist eine Wette: Ihr nehmt an, dass Menschen für die Möglichkeit zahlen, sich eigene Sequenzen zu bauen. Diese Annahme lässt sich in einer Woche mit fünfzehn echten Nutzern prüfen — vor dem Aufwand für Stripe, nicht danach. Fällt sie negativ aus, ist es billiger, in Woche 9 umzudenken als in Woche 12.
 
-**Die Ablösung der alten Homepage gehört in Block 6, nicht früher.** Erst wenn die App trägt und zahlende Kunden möglich sind, wird die Domain umgehängt. Vorher bleibt die alte Seite als Sicherheitsnetz stehen.
+**Die Ablösung der alten Homepage gehört in Block 2, nicht später (geändert in 0.7).** Ursprünglich sollte die Domain erst umgehängt werden, wenn die App durch zahlende Kunden trägt. Die Kostenersparnis eines einzigen Hosting-Vertrags wiegt inzwischen schwerer als das SEO-Risiko einer reichweitenschwachen alten Seite — siehe §2.4.
 
 **Die Wochen 5–8 sind der Kern.** Alles davor ist Infrastruktur, alles danach ist Kaufabwicklung. Wenn etwas rutscht, dann rutscht es hier — plant keine anderen Verpflichtungen in diesen Zeitraum.
 

@@ -95,13 +95,56 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 
 ### T07 · Landing Page und News ⏱16
 **Ziel:** Die öffentliche Seite — sie ersetzt die alte Website.
-**Dateien:** `src/app/(public)/index.tsx`, `src/app/(public)/neu/[slug].tsx`, `src/features/news/*`
-**Vorlage:** `ui/01_startscreen.svg`
+**Dateien:** `src/app/index.tsx`, `src/features/news/*`, `supabase/migrations/0002_news.sql`
 **Abnahme:**
-- [ ] Ohne Anmeldung erreichbar, freie Sequenzen sichtbar
-- [ ] Neuer News-Beitrag im Studio erscheint **ohne Neubau** (Daten kommen zur Laufzeit)
-- [ ] „Über mich", Angebot und Kontakt als gepinnte Beiträge
+- [x] Ohne Anmeldung erreichbar
+- [x] Neuer News-Beitrag im Studio erscheint **ohne Neubau** (Daten kommen zur Laufzeit)
+- [ ] „Über mich" und Kontakt als gepinnte Beiträge (Angebot zieht nach T07a auf die eigene Kurse-Seite)
+- [x] Vier Zustände über `QueryBoundary` behandelt
+
+> Erledigt bis auf die redaktionelle Befüllung. Freie Sequenzen (T09–T11) folgen erst in Block 3.
+
+### T07a · Kurse-Seite ⏱10
+**Ziel:** Aktuell angebotene Kurse öffentlich darstellen, redaktionell über Supabase Studio pflegbar.
+**Dateien:** `supabase/migrations/0003_courses_team.sql` (Tabelle `courses`), `src/features/courses/*`, `src/app/kurse.tsx`
+**Vorlage:** `src/features/news/*` (identisches Muster: Migration → Typen → Query-Hook → `QueryBoundary`-Komponente → Test)
+**Abnahme:**
+- [ ] Nur veröffentlichte Kurse sichtbar (`published_at`-Gate wie bei News)
+- [ ] Kein Buchungs-/Zahlungsablauf — Anmeldung über externen Link (`signup_url`)
 - [ ] Vier Zustände über `QueryBoundary` behandelt
+- [ ] pgTAP: Normal- und Missbrauchsfall (`supabase/tests/003_courses_team.test.sql`)
+
+### T07b · Team-Seite ⏱8
+**Ziel:** Teammitglieder mit Foto und Kurzvorstellung öffentlich darstellen.
+**Dateien:** `supabase/migrations/0003_courses_team.sql` (Tabelle `team_members`), `src/features/team/*`, `src/app/team.tsx`
+**Abnahme:**
+- [ ] Sortierung über `sort_order`, nur veröffentlichte Zeilen sichtbar
+- [ ] Foto über Storage-Bucket `public-assets` (T07e)
+- [ ] Vier Zustände über `QueryBoundary` behandelt
+
+### T07c · Navigation ⏱6
+**Ziel:** Ein Menü, das schon auf noch nicht gebaute Funktionen verweist, ohne den Build zu brechen.
+**Dateien:** `src/design/navigation.ts`, `src/components/NavBar.tsx`, `src/app/_layout.tsx`
+**Abnahme:**
+- [ ] Start/News/Kurse/Team als echte Links
+- [ ] Übungen/Sequenz-Konfigurator als „bald verfügbar" — kein `href` auf eine nicht existierende Route (bricht sonst `typedRoutes: true` aus `app.json`)
+
+### T07d · Impressum & Datenschutz (Minimal) 🔒 ⏱6
+**Ziel:** Rechtliches Minimum für den Domain-Umzug — ohne erfundene Geschäftsdaten.
+**Dateien:** `src/i18n/locales/de/legal.json`, `src/app/impressum.tsx`, `src/app/datenschutz.tsx`
+**Warum 🔒:** Rechtsverbindlicher Text braucht Review durch einen Menschen, nicht nur einen grünen Test.
+**Abnahme:**
+- [ ] Keine erfundenen Fakten — fehlende Angaben (Nachname, Anschrift, E-Mail, UID) als `[[TODO: ...]]`-Platzhalter
+- [ ] Sichtbarer Warnbanner auf beiden Seiten, solange ein Platzhalter steht — **auch in Production**, nicht nur Staging
+- [ ] Inhaltlich schmal: kein Tracking, keine Nutzerkonten in dieser Phase — Hosting/Supabase als einzige Auftragsverarbeiter genannt
+
+### T07e · Storage-Bucket `public-assets` ⏱4
+**Ziel:** Ein öffentlicher Bucket für Kurs-, Team- und (künftig) News-Bilder, Schreibzugriff nur für Admins.
+**Dateien:** `supabase/migrations/0004_storage_public_assets.sql`, `supabase/tests/004_storage_public_assets.test.sql`
+**Abnahme:**
+- [ ] Öffentliches Lesen, Schreiben nur mit `is_admin()`
+- [ ] Ordner-Allowlist (`news`/`courses`/`team`) technisch erzwungen, nicht nur Konvention
+- [ ] pgTAP deckt den Missbrauchsfall ab (falscher Ordner, fehlende Admin-Rolle)
 
 ---
 
@@ -220,14 +263,15 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 
 ## Block 7 — Launch (Woche 12)
 
-### T18 · Inhalte einpflegen ⏱10
+### T18 · Inhalte einpflegen ⏱6
 - [ ] Vier freie Sequenzen geprüft und veröffentlicht
 - [ ] Erster News-Beitrag steht
-- [ ] „Über mich", Angebot und Kontakt als gepinnte Beiträge übernommen
-- [ ] 301-Weiterleitungen für alle bisherigen URLs der alten Website
 
-### T19 · Rechtliches und Launch 🔒 ⏱10
-- [ ] Impressum, Datenschutzerklärung, AGB online
+> Impressum/Datenschutzerklärung und der Domain-Umzug sind mit T07d/T07e in
+> Block 2 vorgezogen, nicht mehr Teil von Launch (geändert in SAD 0.7).
+
+### T19 · Rechtliches und Launch 🔒 ⏱6
+- [ ] AGB online (erst jetzt nötig — ab hier existieren Nutzerkonten/Zahlungen)
 - [ ] Verzeichnis von Verarbeitungstätigkeiten angelegt
 - [ ] AVV mit Supabase, Hostinger, Stripe geschlossen
 - [ ] Checkliste aus `docs/DEPLOYMENT.md` Abschnitt 5 abgehakt
@@ -236,6 +280,6 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 
 ## Nicht in V1
 
-Atem-Tagebuch und Micro Habits (V1.1) · Session-Protokoll (V1.1) · geführte Aufnahmen mit Markern (V1.2) · Umzug auf die Hauptdomain (V1.3) · native Apps, Programme, Coach-Sicht, Offline (V2).
+Atem-Tagebuch und Micro Habits (V1.1) · Session-Protokoll (V1.1) · geführte Aufnahmen mit Markern (V1.2) · native Apps, Programme, Coach-Sicht, Offline (V2) · In-App-Redaktionsoberfläche für News/Kurse/Team (vorgemerkt, SAD §11.6 — Supabase Studio reicht vorerst).
 
 Wenn eine Aufgabe eines dieser Themen berührt: nicht anfangen, sondern im SAD §11 nachsehen und die Aufgabe zurückstellen.
