@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 
 test('Startseite laedt und zeigt den Titel', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('TheHaCode')).toBeVisible();
+  // exact: true, sonst matcht es case-insensitiv auch das "thehacode"-
+  // Wortzeichen in der NavBar (zwei Treffer, strict-mode violation).
+  await expect(page.getByText('TheHaCode', { exact: true })).toBeVisible();
 });
 
 test('build-info.json ist erreichbar', async ({ request }) => {
