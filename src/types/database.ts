@@ -57,6 +57,7 @@ export type Database = {
       news_posts: {
         Row: {
           body_md: string
+          category: Database["public"]["Enums"]["news_category"]
           cover_image_path: string | null
           created_at: string
           excerpt: string | null
@@ -70,6 +71,7 @@ export type Database = {
         }
         Insert: {
           body_md: string
+          category?: Database["public"]["Enums"]["news_category"]
           cover_image_path?: string | null
           created_at?: string
           excerpt?: string | null
@@ -83,6 +85,7 @@ export type Database = {
         }
         Update: {
           body_md?: string
+          category?: Database["public"]["Enums"]["news_category"]
           cover_image_path?: string | null
           created_at?: string
           excerpt?: string | null
@@ -223,6 +226,7 @@ export type Database = {
     Enums: {
       exercise_type: "paced" | "general"
       habit_tracking_type: "number" | "smiley_5" | "slider_100" | "text"
+      news_category: "praxis" | "blog" | "kurs" | "allgemein"
       phase_kind:
         | "inhale"
         | "hold_in"
@@ -368,6 +372,7 @@ export const Constants = {
     Enums: {
       exercise_type: ["paced", "general"],
       habit_tracking_type: ["number", "smiley_5", "slider_100", "text"],
+      news_category: ["praxis", "blog", "kurs", "allgemein"],
       phase_kind: ["inhale", "hold_in", "exhale", "hold_out", "free_breathing"],
       playback_mode: ["timer", "audio_guided", "audio_only"],
       subscription_plan: ["monthly", "yearly"],

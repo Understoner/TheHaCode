@@ -43,6 +43,9 @@ export const colors = {
   // Hinweisbanner (Staging, Rechtstext-Platzhalter) - unveraendert, da die
   // Referenzvorlagen dafuer keine eigene Farbe vorgeben.
   warningSurface: '#FDECC8',
+  // Halbtransparente Flaeche fuer Kategorie-Pills ueber Cover-Bildern
+  // (ui/references/05_news_mobile.svg, 06_news_desktop.svg).
+  overlaySurface: 'rgba(255,255,255,0.9)',
   // Destruktive Aktionen (z. B. "Block loeschen" im Konfigurator, spaeter).
   danger: '#B45A5A',
 } as const;
