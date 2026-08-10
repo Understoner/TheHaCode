@@ -8,6 +8,8 @@ export const colors = {
   brand700: '#0F5C4A',
   // Flaeche fuer Hinweisbanner (z. B. Staging). text700 darauf: Kontrast ~9,9:1.
   warningSurface: '#FDECC8',
+  // Abgrenzung ueber 1-px-Linien statt Schatten (CLAUDE.md).
+  line: '#E8EDF1',
 } as const;
 
 export const spacing = {
