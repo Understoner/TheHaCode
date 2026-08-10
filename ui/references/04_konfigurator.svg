@@ -1,0 +1,314 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1240" width="1600" height="1240" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+  <style>
+    .sheet-title { font-size: 26px; font-weight: 600; fill: #16242B; letter-spacing: -0.4px; }
+    .sheet-sub   { font-size: 14px; fill: #5A6B75; }
+    .frame-label { font-size: 12px; font-weight: 600; fill: #5A6B75; letter-spacing: 0.6px; }
+    .note        { font-size: 11px; fill: #8C9AA3; }
+    .note-b      { font-size: 11px; font-weight: 600; fill: #5A6B75; }
+    .cap         { font-size: 12px; font-weight: 600; fill: #16242B; }
+    .label       { font-size: 14px; font-weight: 500; fill: #16242B; }
+    .val         { font-size: 18px; font-weight: 500; fill: #16242B; letter-spacing: -0.3px; }
+    .unit        { font-size: 11px; fill: #8C9AA3; }
+    .line        { stroke: #E8EDF1; stroke-width: 1; }
+  </style>
+
+  <rect width="1600" height="1240" fill="#EFF3F4"/>
+
+  <text x="64" y="56" class="sheet-title">Konfigurator — mehrere Blöcke je Sequenz</text>
+  <text x="64" y="80" class="sheet-sub">Ein Block ist eine Phasenkombination plus die Runden, über die sie sich wiederholt. Bis zu 10 Blöcke laufen nacheinander — etwa Aufwärmen, Hauptteil, Ausklang.</text>
+
+  <!-- ===================== MOBILE ===================== -->
+  <text x="64" y="132" class="frame-label">MOBILE — 390 × 844 · Block 2 aufgeklappt</text>
+  <g transform="translate(64,152)">
+    <rect x="0" y="0" width="390" height="844" rx="26" fill="#FFFFFF" stroke="#D3DCE3"/>
+
+    <text x="24" y="42" style="font-size:14px;fill:#5A6B75">‹ Abbrechen</text>
+    <text x="366" y="42" text-anchor="end" style="font-size:14px;font-weight:600;fill:#3B6C82">Speichern</text>
+
+    <!-- Name -->
+    <rect x="24" y="62" width="342" height="46" rx="10" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <text x="40" y="91" style="font-size:15px;fill:#16242B">Abendrunde</text>
+
+    <!-- Zeitleiste über alle Blöcke -->
+    <text x="24" y="142" class="label">Ablauf</text>
+    <text x="366" y="142" text-anchor="end" style="font-size:13px;fill:#5A6B75">3 Blöcke · 5:48 Min</text>
+    <g transform="translate(24,154)">
+      <rect x="0" y="0" width="92.7" height="10" rx="5" fill="#5B93AC" opacity="0.45"/>
+      <rect x="95.7" y="0" width="146.8" height="10" rx="5" fill="#5B93AC"/>
+      <rect x="245.5" y="0" width="96.6" height="10" rx="5" fill="#5B93AC" opacity="0.45"/>
+      <text x="0" y="26" class="note">1:36</text>
+      <text x="169" y="26" text-anchor="middle" class="note">2:32</text>
+      <text x="342" y="26" text-anchor="end" class="note">1:40</text>
+    </g>
+
+    <!-- Block 1, zugeklappt -->
+    <g transform="translate(24,204)">
+      <rect x="0" y="0" width="342" height="62" rx="12" fill="#FFFFFF" stroke="#E8EDF1"/>
+      <g transform="translate(36,31)">
+        <path d="M -1.31 14.94 A 15 15 0 0 1 -14.94 1.31" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M -14.94 -1.31 A 15 15 0 0 1 -1.31 -14.94" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 1.31 -14.94 A 15 15 0 0 1 14.94 -1.31" fill="none" stroke="#87A582" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 14.94 1.31 A 15 15 0 0 1 1.31 14.94" fill="none" stroke="#87A582" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="70" y="27" style="font-size:14px;font-weight:500;fill:#16242B">Block 1 · 4-4-4-4</text>
+      <text x="70" y="45" class="note">6 Runden · 1:36 Min</text>
+      <path d="M 306 25 h14 M 306 31 h14 M 306 37 h14" stroke="#D3DCE3" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="292" y="36" text-anchor="end" style="font-size:14px;fill:#8C9AA3">⌄</text>
+    </g>
+
+    <!-- Block 2, aufgeklappt -->
+    <g transform="translate(24,276)">
+      <rect x="0" y="0" width="342" height="360" rx="12" fill="#FAFBFC" stroke="#B9D4E0"/>
+      <g transform="translate(36,31)">
+        <path d="M -1.31 14.94 A 15 15 0 0 1 -13.05 7.40" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M -14.14 5.02 A 15 15 0 0 1 -1.31 -14.94" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 1.31 -14.94 A 15 15 0 0 1 1.31 14.94" fill="none" stroke="#87A582" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="70" y="27" style="font-size:14px;font-weight:600;fill:#16242B">Block 2 · 4-7-8</text>
+      <text x="70" y="45" class="note">8 Runden · 2:32 Min</text>
+      <path d="M 306 25 h14 M 306 31 h14 M 306 37 h14" stroke="#D3DCE3" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="292" y="36" text-anchor="end" style="font-size:14px;fill:#8C9AA3">⌃</text>
+      <line x1="16" y1="62" x2="326" y2="62" class="line"/>
+
+      <!-- Phasen -->
+      <g transform="translate(16,62)">
+        <rect x="0" y="14" width="3" height="24" rx="1.5" fill="#5B93AC"/>
+        <text x="14" y="31" style="font-size:13px;fill:#16242B">Einatmen</text>
+        <circle cx="214" cy="26" r="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+        <path d="M208 26 h12" stroke="#3B6C82" stroke-width="1.7" stroke-linecap="round"/>
+        <text x="258" y="33" text-anchor="middle" class="val">4</text>
+        <text x="274" y="33" class="unit">s</text>
+        <circle cx="302" cy="26" r="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+        <path d="M296 26 h12 M302 20 v12" stroke="#3B6C82" stroke-width="1.7" stroke-linecap="round"/>
+
+        <rect x="0" y="54" width="3" height="24" rx="1.5" fill="#5B93AC"/>
+        <text x="14" y="71" style="font-size:13px;fill:#16242B">Halten</text>
+        <circle cx="214" cy="66" r="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+        <path d="M208 66 h12" stroke="#3B6C82" stroke-width="1.7" stroke-linecap="round"/>
+        <text x="258" y="73" text-anchor="middle" class="val">7</text>
+        <text x="274" y="73" class="unit">s</text>
+        <circle cx="302" cy="66" r="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+        <path d="M296 66 h12 M302 60 v12" stroke="#3B6C82" stroke-width="1.7" stroke-linecap="round"/>
+
+        <rect x="0" y="94" width="3" height="24" rx="1.5" fill="#87A582"/>
+        <text x="14" y="111" style="font-size:13px;fill:#16242B">Ausatmen</text>
+        <circle cx="214" cy="106" r="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+        <path d="M208 106 h12" stroke="#3B6C82" stroke-width="1.7" stroke-linecap="round"/>
+        <text x="258" y="113" text-anchor="middle" class="val">8</text>
+        <text x="274" y="113" class="unit">s</text>
+        <circle cx="302" cy="106" r="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+        <path d="M296 106 h12 M302 100 v12" stroke="#3B6C82" stroke-width="1.7" stroke-linecap="round"/>
+
+        <rect x="0" y="134" width="3" height="24" rx="1.5" fill="#D3DCE3"/>
+        <text x="14" y="151" style="font-size:13px;fill:#8C9AA3">Leer halten</text>
+        <circle cx="214" cy="146" r="14" fill="#FFFFFF" stroke="#E8EDF1"/>
+        <path d="M208 146 h12" stroke="#D3DCE3" stroke-width="1.7" stroke-linecap="round"/>
+        <text x="258" y="153" text-anchor="middle" style="font-size:18px;font-weight:500;fill:#8C9AA3">0</text>
+        <text x="274" y="153" class="unit">s</text>
+        <circle cx="302" cy="146" r="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+        <path d="M296 146 h12 M302 140 v12" stroke="#3B6C82" stroke-width="1.7" stroke-linecap="round"/>
+      </g>
+
+      <line x1="16" y1="230" x2="326" y2="230" class="line"/>
+
+      <!-- Runden -->
+      <text x="16" y="256" style="font-size:13px;fill:#16242B">Runden</text>
+      <text x="326" y="256" text-anchor="end" style="font-size:13px;font-weight:600;fill:#3B6C82">8</text>
+      <line x1="16" y1="276" x2="326" y2="276" stroke="#E8EDF1" stroke-width="3" stroke-linecap="round"/>
+      <line x1="16" y1="276" x2="120" y2="276" stroke="#5B93AC" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="120" cy="276" r="11" fill="#FFFFFF" stroke="#5B93AC" stroke-width="2"/>
+
+      <!-- Pause danach -->
+      <line x1="16" y1="296" x2="326" y2="296" class="line"/>
+      <text x="16" y="320" style="font-size:13px;fill:#16242B">Pause danach</text>
+      <text x="326" y="320" text-anchor="end" style="font-size:13px;fill:#5A6B75">5 s ›</text>
+
+      <!-- Aktionen -->
+      <line x1="16" y1="334" x2="326" y2="334" class="line"/>
+      <text x="16" y="352" style="font-size:12px;fill:#5A6B75">Duplizieren</text>
+      <text x="326" y="352" text-anchor="end" style="font-size:12px;fill:#B45A5A">Block löschen</text>
+    </g>
+
+    <!-- Block 3, zugeklappt -->
+    <g transform="translate(24,646)">
+      <rect x="0" y="0" width="342" height="62" rx="12" fill="#FFFFFF" stroke="#E8EDF1"/>
+      <g transform="translate(36,31)">
+        <path d="M -1.31 14.94 A 15 15 0 0 1 -1.31 -14.94" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 1.31 -14.94 A 15 15 0 0 1 1.31 14.94" fill="none" stroke="#87A582" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="70" y="27" style="font-size:14px;font-weight:500;fill:#16242B">Block 3 · 5-5</text>
+      <text x="70" y="45" class="note">10 Runden · 1:40 Min</text>
+      <path d="M 306 25 h14 M 306 31 h14 M 306 37 h14" stroke="#D3DCE3" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="292" y="36" text-anchor="end" style="font-size:14px;fill:#8C9AA3">⌄</text>
+    </g>
+
+    <!-- Block hinzufügen -->
+    <rect x="24" y="720" width="342" height="46" rx="12" fill="#FFFFFF" stroke="#B9D4E0" stroke-dasharray="4 4"/>
+    <text x="195" y="749" text-anchor="middle" style="font-size:14px;font-weight:500;fill:#3B6C82">+ Block hinzufügen</text>
+    <text x="195" y="786" text-anchor="middle" class="note">3 von 10 Blöcken</text>
+  </g>
+
+  <!-- ===================== CALLOUTS ===================== -->
+  <g>
+    <text x="490" y="188" class="note-b">Ein Block = Phasen + Runden</text>
+    <text x="490" y="206" class="note">Genau die Struktur aus dem Datenmodell: `exercise_steps`</text>
+    <text x="490" y="222" class="note">mit `repeat_count`, darunter `exercise_phases`. Am Schema</text>
+    <text x="490" y="238" class="note">ändert sich für dieses Feature nichts.</text>
+
+    <text x="490" y="278" class="note-b">Zugeklappt ist der Normalfall</text>
+    <text x="490" y="296" class="note">Immer nur ein Block offen. Sonst passen drei Blöcke nicht</text>
+    <text x="490" y="312" class="note">auf ein Handydisplay und man verliert den Überblick über</text>
+    <text x="490" y="328" class="note">das, was man eigentlich baut: den Ablauf.</text>
+
+    <text x="490" y="368" class="note-b">Die Zeitleiste oben ist der Überblick</text>
+    <text x="490" y="386" class="note">Blockbreite proportional zur Gesamtdauer inklusive Runden.</text>
+    <text x="490" y="402" class="note">Der offene Block ist kräftig, die übrigen blass. Damit sieht</text>
+    <text x="490" y="418" class="note">man sofort, ob der Hauptteil wirklich der Hauptteil ist.</text>
+
+    <text x="490" y="458" class="note-b">Der Ring zeigt einen Block, nicht die Sequenz</text>
+    <text x="490" y="476" class="note">Ein Umlauf entspricht einer Runde — und Runden gehören</text>
+    <text x="490" y="492" class="note">zum Block. Für die Sequenz als Ganzes ist die Zeitleiste da.</text>
+    <text x="490" y="508" class="note">Zwei Ebenen, zwei Darstellungen, keine Vermischung.</text>
+
+    <text x="490" y="548" class="note-b">Weglassen statt Schalter</text>
+    <text x="490" y="566" class="note">„Leer halten" auf 0 heißt: Phase entfällt. Der Regler wird</text>
+    <text x="490" y="582" class="note">grau, das Ringsegment verschwindet, aus vier Segmenten</text>
+    <text x="490" y="598" class="note">werden drei. Keine Checkbox, kein zweiter Bedienweg.</text>
+
+    <text x="490" y="598" class="note-b">Kein Musikwähler, keine Sprachauswahl</text>
+    <text x="490" y="616" class="note">Der Ton kommt aus einem Oszillator, drei Tonhöhen je Phasenart. Keine</text>
+    <text x="490" y="632" class="note">Audiodateien, keine Lizenzen. Musik bringt der Nutzer selbst mit —</text>
+    <text x="490" y="648" class="note">auf dem iPhone unterbricht der Ton sie allerdings meist (SAD §7.5).</text>
+
+    <text x="490" y="688" class="note-b">Umsortieren</text>
+    <text x="490" y="706" class="note">Griff rechts, Drag &amp; Drop. Auf dem Desktop zusätzlich per</text>
+    <text x="490" y="722" class="note">Tastatur: Fokus auf den Griff, dann Pfeil hoch/runter.</text>
+
+    <text x="490" y="762" class="note-b">Grenzen aus der Datenbank</text>
+    <text x="490" y="780" class="note">10 Blöcke je Sequenz · 12 Phasen je Block · 1–120 s je Phase</text>
+    <text x="490" y="796" class="note">1–200 Runden · 50 eigene Sequenzen je Konto.</text>
+    <text x="490" y="812" class="note">Trigger `check_step_quota` und CHECK-Constraints in 0005.</text>
+
+    <text x="490" y="852" class="note-b">Warum überhaupt mehrere Blöcke</text>
+    <text x="490" y="870" class="note">Aufwärmen mit ruhigem Verhältnis, Hauptteil mit längerem</text>
+    <text x="490" y="886" class="note">Ausatmen, Ausklang ohne Haltephasen. Genau das lässt sich</text>
+    <text x="490" y="902" class="note">mit einer einzigen Phasenkombination nicht abbilden.</text>
+  </g>
+
+  <!-- ===================== DESKTOP ===================== -->
+  <text x="1000" y="132" class="frame-label">DESKTOP ≥ 1024 px — Blockliste links, Vorschau rechts fixiert</text>
+  <g transform="translate(1000,152)">
+    <rect x="0" y="0" width="536" height="470" rx="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+
+    <text x="24" y="38" style="font-size:18px;font-weight:600;fill:#16242B;letter-spacing:-0.3px">Abendrunde</text>
+    <text x="512" y="38" text-anchor="end" style="font-size:13px;font-weight:600;fill:#3B6C82">Speichern</text>
+    <line x1="0" y1="58" x2="536" y2="58" class="line"/>
+
+    <!-- Zeitleiste -->
+    <g transform="translate(24,76)">
+      <rect x="0" y="0" width="130.5" height="8" rx="4" fill="#5B93AC" opacity="0.45"/>
+      <rect x="133.5" y="0" width="206.6" height="8" rx="4" fill="#5B93AC"/>
+      <rect x="343.1" y="0" width="136.0" height="8" rx="4" fill="#5B93AC" opacity="0.45"/>
+      <text x="0" y="24" class="note">3 Blöcke · 5:48 Min gesamt</text>
+    </g>
+
+    <line x1="304" y1="112" x2="304" y2="470" class="line"/>
+
+    <!-- Blockliste -->
+    <g transform="translate(24,124)">
+      <rect x="0" y="0" width="256" height="52" rx="10" fill="#FFFFFF" stroke="#E8EDF1"/>
+      <g transform="translate(30,26)">
+        <path d="M -1.13 12.95 A 13 13 0 0 1 -12.95 1.13" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M -12.95 -1.13 A 13 13 0 0 1 -1.13 -12.95" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 1.13 -12.95 A 13 13 0 0 1 12.95 -1.13" fill="none" stroke="#87A582" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 12.95 1.13 A 13 13 0 0 1 1.13 12.95" fill="none" stroke="#87A582" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="58" y="24" style="font-size:13px;font-weight:500;fill:#16242B">Block 1 · 4-4-4-4</text>
+      <text x="58" y="40" class="note">6 Runden · 1:36</text>
+
+      <rect x="0" y="62" width="256" height="52" rx="10" fill="#F0F6F9" stroke="#B9D4E0"/>
+      <g transform="translate(30,88)">
+        <path d="M -1.13 12.95 A 13 13 0 0 1 -11.31 6.41" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M -12.25 4.35 A 13 13 0 0 1 -1.13 -12.95" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 1.13 -12.95 A 13 13 0 0 1 1.13 12.95" fill="none" stroke="#87A582" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="58" y="86" style="font-size:13px;font-weight:600;fill:#3B6C82">Block 2 · 4-7-8</text>
+      <text x="58" y="102" style="font-size:11px;fill:#5A6B75">8 Runden · 2:32</text>
+
+      <rect x="0" y="124" width="256" height="52" rx="10" fill="#FFFFFF" stroke="#E8EDF1"/>
+      <g transform="translate(30,150)">
+        <path d="M -1.13 12.95 A 13 13 0 0 1 -1.13 -12.95" fill="none" stroke="#5B93AC" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 1.13 -12.95 A 13 13 0 0 1 1.13 12.95" fill="none" stroke="#87A582" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="58" y="148" style="font-size:13px;font-weight:500;fill:#16242B">Block 3 · 5-5</text>
+      <text x="58" y="164" class="note">10 Runden · 1:40</text>
+
+      <rect x="0" y="186" width="256" height="42" rx="10" fill="#FFFFFF" stroke="#B9D4E0" stroke-dasharray="4 4"/>
+      <text x="128" y="212" text-anchor="middle" style="font-size:13px;font-weight:500;fill:#3B6C82">+ Block hinzufügen</text>
+      <text x="128" y="248" text-anchor="middle" class="note">3 von 10</text>
+    </g>
+
+    <!-- Vorschau des offenen Blocks -->
+    <g transform="translate(420,238)">
+      <circle cx="0" cy="0" r="38" fill="#5B93AC" opacity="0.13"/>
+      <path d="M -5.58 63.76 A 64 64 0 0 1 -55.68 31.56" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M -60.31 21.41 A 64 64 0 0 1 -5.58 -63.76" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 5.58 -63.76 A 64 64 0 0 1 5.58 63.76" fill="none" stroke="#87A582" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="0" y="92" text-anchor="middle" style="font-size:13px;fill:#5A6B75">Block 2 · 4 · 7 · 8</text>
+      <text x="0" y="112" text-anchor="middle" style="font-size:13px;fill:#8C9AA3">8 Runden · 2:32 Min</text>
+      <rect x="-56" y="132" width="112" height="34" rx="17" fill="none" stroke="#5B93AC" stroke-width="1.5"/>
+      <text x="0" y="154" text-anchor="middle" style="font-size:13px;font-weight:500;fill:#3B6C82">Vorhören</text>
+    </g>
+  </g>
+
+  <!-- LOCKED -->
+  <text x="1000" y="662" class="frame-label">OHNE PLUS — GESPERRTER ZUSTAND</text>
+  <g transform="translate(1000,682)">
+    <rect x="0" y="0" width="536" height="206" rx="14" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <g transform="translate(268,66)" opacity="0.4">
+      <circle cx="0" cy="0" r="26" fill="#5B93AC" opacity="0.13"/>
+      <path d="M -3.72 42.51 A 44 44 0 0 1 -42.51 3.72" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M -42.51 -3.72 A 44 44 0 0 1 -3.72 -42.51" fill="none" stroke="#5B93AC" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 3.72 -42.51 A 44 44 0 0 1 42.51 -3.72" fill="none" stroke="#87A582" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 42.51 3.72 A 44 44 0 0 1 3.72 42.51" fill="none" stroke="#87A582" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+    <text x="268" y="140" text-anchor="middle" style="font-size:16px;font-weight:600;fill:#16242B">Eigene Sequenzen gehören zu Plus</text>
+    <text x="268" y="162" text-anchor="middle" style="font-size:13px;fill:#5A6B75">Sieben Tage testen, ohne Zahlungsdaten.</text>
+    <rect x="188" y="172" width="160" height="30" rx="15" fill="#5B93AC"/>
+    <text x="268" y="192" text-anchor="middle" style="font-size:13px;font-weight:500;fill:#FFFFFF">Plus ansehen</text>
+  </g>
+  <text x="1000" y="916" class="note">Konfigurator bleibt sichtbar und bedienbar, nur Speichern ist gesperrt. Wer ihn nie sieht, kauft ihn auch nicht.</text>
+  <text x="1000" y="932" class="note">Nach Trial-Ende gilt dasselbe für bestehende Sequenzen: abspielbar und löschbar, nicht änderbar (§3.4).</text>
+
+  <!-- ===================== VALIDATION ===================== -->
+  <g transform="translate(64,1064)">
+    <text x="0" y="0" class="note-b">FEHLERTEXTE — WORTLAUT VERBINDLICH</text>
+    <rect x="0" y="14" width="1472" height="146" rx="12" fill="#FFFFFF" stroke="#D3DCE3"/>
+    <g style="font-size:12px">
+      <text x="24" y="42" style="fill:#5A6B75;font-weight:600">Auslöser</text>
+      <text x="440" y="42" style="fill:#5A6B75;font-weight:600">Text im UI</text>
+      <text x="1080" y="42" style="fill:#5A6B75;font-weight:600">Quelle</text>
+      <line x1="24" y1="52" x2="1448" y2="52" class="line"/>
+
+      <text x="24" y="72" style="fill:#16242B">Name leer</text>
+      <text x="440" y="72" style="fill:#16242B">Gib deiner Sequenz einen Namen.</text>
+      <text x="1080" y="72" style="fill:#8C9AA3">Client, vor dem Speichern</text>
+
+      <text x="24" y="92" style="fill:#16242B">Alle Phasen eines Blocks auf 0</text>
+      <text x="440" y="92" style="fill:#16242B">Jeder Block braucht mindestens eine Phase mit Dauer.</text>
+      <text x="1080" y="92" style="fill:#8C9AA3">Client, Speichern bleibt inaktiv</text>
+
+      <text x="24" y="112" style="fill:#16242B">11. Block</text>
+      <text x="440" y="112" style="fill:#16242B">Mehr als 10 Blöcke sind nicht möglich.</text>
+      <text x="1080" y="112" style="fill:#8C9AA3">Trigger check_step_quota</text>
+
+      <text x="24" y="132" style="fill:#16242B">51. Sequenz</text>
+      <text x="440" y="132" style="fill:#16242B">Du hast 50 Sequenzen — lösch eine, um Platz zu machen.</text>
+      <text x="1080" y="132" style="fill:#8C9AA3">Trigger check_exercise_quota</text>
+
+      <text x="24" y="152" style="fill:#16242B">Sequenz länger als 60 Min</text>
+      <text x="440" y="152" style="fill:#16242B">Das sind über 60 Minuten. Sicher so gewollt?</text>
+      <text x="1080" y="152" style="fill:#8C9AA3">Client, Hinweis statt Sperre</text>
+    </g>
+  </g>
+</svg>

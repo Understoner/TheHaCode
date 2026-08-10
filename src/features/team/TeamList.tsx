@@ -23,7 +23,12 @@ export function TeamList() {
               <View key={member.id} style={styles.card}>
                 {photoUrl ? (
                   <Image source={{ uri: photoUrl }} style={styles.photo} accessibilityLabel={member.full_name} />
-                ) : null}
+                ) : (
+                  <View style={styles.photoFallback} accessibilityLabel={member.full_name}>
+                    <View style={styles.avatarHead} />
+                    <View style={styles.avatarBody} />
+                  </View>
+                )}
                 <Text style={styles.name}>{member.full_name}</Text>
                 {member.role_title ? <Text style={styles.role}>{member.role_title}</Text> : null}
                 {member.bio ? <Text style={styles.bio}>{member.bio}</Text> : null}
@@ -38,32 +43,60 @@ export function TeamList() {
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.md,
     paddingHorizontal: spacing.md,
   },
   card: {
+    flexGrow: 1,
+    flexBasis: 300,
     gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radius.md,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
+    backgroundColor: colors.surface,
   },
   photo: {
     width: 96,
     height: 96,
-    borderRadius: radius.md,
+    borderRadius: radius.full,
+  },
+  photoFallback: {
+    width: 96,
+    height: 96,
+    borderRadius: radius.full,
+    backgroundColor: colors.oceanImageBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarHead: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.full,
+    backgroundColor: colors.ocean500,
+    marginBottom: 4,
+  },
+  avatarBody: {
+    width: 60,
+    height: 34,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    backgroundColor: colors.ocean500,
   },
   name: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
-    color: colors.text700,
+    color: colors.ink900,
   },
   role: {
-    fontSize: 14,
-    color: colors.text700,
+    fontSize: 13,
+    color: colors.ocean700,
   },
   bio: {
-    fontSize: 14,
-    color: colors.text700,
+    fontSize: 13,
+    color: colors.ink700,
   },
 });

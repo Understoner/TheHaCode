@@ -14,21 +14,22 @@ vi.mock('expo-router', () => ({
       {children}
     </a>
   ),
+  usePathname: () => '/',
 }));
 
 describe('NavBar', () => {
-  it('zeigt Start, Kurse und Team als Links', () => {
+  it('zeigt News, Kurse und Team als Links', () => {
     render(<NavBar />);
 
-    expect(screen.getByText('Start')).toBeTruthy();
+    expect(screen.getByText('News')).toBeTruthy();
     expect(screen.getByText('Kurse')).toBeTruthy();
     expect(screen.getByText('Team')).toBeTruthy();
   });
 
-  it('zeigt noch nicht gebaute Funktionen als "bald verfügbar", nicht als Link', () => {
+  it('zeigt noch nicht gebaute Funktionen nicht als Link', () => {
     render(<NavBar />);
 
-    expect(screen.getByText(/Übungen.*bald verfügbar/)).toBeTruthy();
-    expect(screen.getByText(/Konfigurator.*bald verfügbar/)).toBeTruthy();
+    const uebungen = screen.getByText('Übungen');
+    expect(uebungen.closest('a')).toBeNull();
   });
 });

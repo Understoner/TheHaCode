@@ -8,9 +8,8 @@ type Props = {
   onPress: (event: GestureResponderEvent) => void;
 };
 
-// Gefuellter Primaer-Button (DESIGN.md: button-primary). Fuer wichtige
-// Aktionen wie Kurs-Anmeldung oder spaeter Konfigurator-Speichern - keine
-// neuen Textlink-CTAs mehr fuer diese Faelle (DESIGN.md, Do's and Don'ts).
+// Gefuellter Pillen-Button (ui/references/*.svg). Fuer wichtige Aktionen wie
+// Kurs-Anmeldung oder spaeter Konfigurator-Speichern.
 export function Button({ label, onPress }: Props) {
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -33,23 +32,23 @@ const styles = StyleSheet.create({
   base: {
     alignSelf: 'flex-start',
     alignItems: 'center',
-    backgroundColor: colors.brand700,
-    borderRadius: radius.sm,
+    backgroundColor: colors.ocean700,
+    borderRadius: radius.full,
     paddingVertical: 12,
     paddingHorizontal: 24,
   },
   active: {
-    backgroundColor: colors.brand800,
+    backgroundColor: colors.ocean800,
   },
   focusRing: {
-    outlineColor: colors.brand700,
+    outlineColor: colors.ocean700,
     outlineOffset: 2,
     outlineStyle: 'solid',
     outlineWidth: 2,
   },
   label: {
-    color: colors.background,
-    fontSize: 15,
-    fontWeight: '600',
+    color: colors.surface,
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

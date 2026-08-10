@@ -43,17 +43,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '600',
-    color: colors.text700,
+    color: colors.ink900,
     marginBottom: spacing.sm,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text700,
+    color: colors.ink900,
     marginTop: spacing.md,
   },
   text: {
     fontSize: 15,
-    color: colors.text700,
+    color: colors.ink700,
   },
 });
