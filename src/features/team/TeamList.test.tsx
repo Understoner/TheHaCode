@@ -43,6 +43,20 @@ describe('TeamList', () => {
     expect(screen.getByText('Gründer')).toBeTruthy();
   });
 
+  it('zeigt Teammitglieder ab Position vier in der Weiteres-Team-Liste', async () => {
+    const member = (id: string, full_name: string) => ({ id, full_name, role_title: null, bio: null, photo_path: null });
+
+    mockTeamQuery({
+      data: [member('1', 'Person eins'), member('2', 'Person zwei'), member('3', 'Person drei'), member('4', 'Person vier')],
+      error: null,
+    });
+
+    renderWithClient(<TeamList />);
+
+    await waitFor(() => expect(screen.getByText('Person vier')).toBeTruthy());
+    expect(screen.getByText('Person eins')).toBeTruthy();
+  });
+
   it('zeigt den Leer-Zustand ohne veroeffentlichte Teammitglieder', async () => {
     mockTeamQuery({ data: [], error: null });
 

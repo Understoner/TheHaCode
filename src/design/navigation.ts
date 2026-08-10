@@ -18,6 +18,10 @@ export type NavItem =
 export const MOBILE_NAV_BREAKPOINT = 768;
 export const MOBILE_TAB_BAR_HEIGHT = 64;
 
+// Listen (News/Kurse/Team): so viele Eintraege stehen nebeneinander in der
+// "aktuell"-Reihe, bevor der Rest in eine schlanke Liste darunter faellt.
+export const RECENT_ITEMS_COUNT = 3;
+
 export const navItems: NavItem[] = [
   { key: 'news', labelKey: 'nav.news', icon: 'news', kind: 'link', href: '/' },
   { key: 'kurse', labelKey: 'nav.kurse', icon: 'kurse', kind: 'link', href: '/kurse' },

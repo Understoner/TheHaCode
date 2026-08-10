@@ -40,6 +40,27 @@ describe('CoursesList', () => {
     expect(screen.getByText('Vier Wochen, wöchentlich')).toBeTruthy();
   });
 
+  it('zeigt Kurse ab Position vier als schlanke Liste', async () => {
+    const course = (id: string, title: string) => ({
+      id,
+      title,
+      description: 'Beschreibung',
+      location: null,
+      price_info: null,
+      signup_url: null,
+    });
+
+    mockCoursesQuery({
+      data: [course('1', 'Kurs eins'), course('2', 'Kurs zwei'), course('3', 'Kurs drei'), course('4', 'Kurs vier')],
+      error: null,
+    });
+
+    renderWithClient(<CoursesList />);
+
+    await waitFor(() => expect(screen.getByText('Kurs vier')).toBeTruthy());
+    expect(screen.getAllByText('Beschreibung')).toHaveLength(3);
+  });
+
   it('zeigt den Leer-Zustand ohne veroeffentlichte Kurse', async () => {
     mockCoursesQuery({ data: [], error: null });
 

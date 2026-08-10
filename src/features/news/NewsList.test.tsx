@@ -24,24 +24,27 @@ function mockNewsQuery(result: { data: unknown; error: unknown }) {
   fromMock.mockReturnValue({ select });
 }
 
+function post(overrides: Record<string, unknown>) {
+  return {
+    id: overrides.id,
+    title: overrides.title,
+    excerpt: 'Kurzfassung',
+    body_md: 'Ein kurzer Beitrag.',
+    cover_image_path: null,
+    is_pinned: false,
+    published_at: '2026-08-01T00:00:00Z',
+    ...overrides,
+  };
+}
+
 describe('NewsList', () => {
   beforeEach(() => {
     fromMock.mockReset();
   });
 
-  it('zeigt gepinnte Beitraege als Hero-Karte mit Titel und Anriss', async () => {
+  it('zeigt die ersten drei Beitraege als Hero-Karten mit Titel und Anriss', async () => {
     mockNewsQuery({
-      data: [
-        {
-          id: '1',
-          title: 'Neu im Studio',
-          excerpt: 'Kurzfassung',
-          body_md: 'Ein kurzer Beitrag.',
-          cover_image_path: null,
-          is_pinned: true,
-          published_at: '2026-08-10T00:00:00Z',
-        },
-      ],
+      data: [post({ id: '1', title: 'Neu im Studio' })],
       error: null,
     });
 
@@ -51,26 +54,21 @@ describe('NewsList', () => {
     expect(screen.getByText('Kurzfassung')).toBeTruthy();
   });
 
-  it('zeigt nicht gepinnte Beitraege als schlanke Liste ohne Anriss', async () => {
+  it('zeigt Beitraege ab Position vier als schlanke Liste ohne Anriss', async () => {
     mockNewsQuery({
       data: [
-        {
-          id: '2',
-          title: 'Kursreihe startet',
-          excerpt: 'Kurzfassung',
-          body_md: 'Ein kurzer Beitrag.',
-          cover_image_path: null,
-          is_pinned: false,
-          published_at: '2026-08-05T00:00:00Z',
-        },
+        post({ id: '1', title: 'Beitrag eins' }),
+        post({ id: '2', title: 'Beitrag zwei' }),
+        post({ id: '3', title: 'Beitrag drei' }),
+        post({ id: '4', title: 'Beitrag vier' }),
       ],
       error: null,
     });
 
     renderWithClient(<NewsList />);
 
-    await waitFor(() => expect(screen.getByText('Kursreihe startet')).toBeTruthy());
-    expect(screen.queryByText('Kurzfassung')).toBeNull();
+    await waitFor(() => expect(screen.getByText('Beitrag vier')).toBeTruthy());
+    expect(screen.getAllByText('Kurzfassung')).toHaveLength(3);
   });
 
   it('zeigt den Leer-Zustand ohne veroeffentlichte Beitraege', async () => {
