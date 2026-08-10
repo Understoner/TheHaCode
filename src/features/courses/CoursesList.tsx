@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
 
+import { Button } from '@/components/Button';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
 import { useCoursesList } from '@/features/courses/useCoursesList';
@@ -20,9 +21,7 @@ export function CoursesList() {
               {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
               {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
               {course.signup_url ? (
-                <Pressable onPress={() => Linking.openURL(course.signup_url!)}>
-                  <Text style={styles.signup}>{t('kurse.signup')}</Text>
-                </Pressable>
+                <Button label={t('kurse.signup')} onPress={() => Linking.openURL(course.signup_url!)} />
               ) : null}
             </View>
           ))}
@@ -57,10 +56,5 @@ const styles = StyleSheet.create({
   meta: {
     fontSize: 13,
     color: colors.text700,
-  },
-  signup: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.brand700,
   },
 });

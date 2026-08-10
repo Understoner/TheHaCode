@@ -8,6 +8,8 @@ export const colors = {
   brand700: '#0F5C4A',
   // Flaechenton (Badges, Icons) - NICHT fuer Text, Kontrast <4,5:1.
   brand500: '#3E8B72',
+  // Hover-/Active-Flaeche fuer gefuellte Primaer-Buttons (dunkleres Waldgruen, DESIGN.md).
+  brand800: '#0C4A3C',
   // Sehr helle, brand-getoente Flaeche fuer Hero-/Teaser-Sektionen.
   heroSurface: '#F2F7F5',
   // Flaeche fuer Hinweisbanner (z. B. Staging). text700 darauf: Kontrast ~9,9:1.
