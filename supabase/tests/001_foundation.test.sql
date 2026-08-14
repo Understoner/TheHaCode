@@ -44,10 +44,19 @@ reset role;
 
 -- Loeschkaskade: nach dem Loeschen darf in keiner Nutzertabelle eine Zeile
 -- uebrig bleiben.
+-- exercises traegt owner_id -> auth.users on delete cascade: eigene Sequenzen
+-- muessen mit dem Konto verschwinden. Die Kindtabellen exercise_steps und
+-- exercise_phases haengen ihrerseits per cascade an exercises und sind damit
+-- mit abgedeckt.
+insert into public.exercises (owner_id, type, playback_mode, visibility, title, default_round_count)
+values ('11111111-1111-1111-1111-111111111111', 'paced', 'timer', 'plus', 'Eigene Sequenz', 4);
+
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
   select count(*) from (
     select id as user_id from public.profiles where id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select owner_id from public.exercises where owner_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select * from finish();

@@ -54,6 +54,217 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_categories: {
+        Row: {
+          description: string | null
+          icon: string | null
+          id: string
+          slug: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          description?: string | null
+          icon?: string | null
+          id?: string
+          slug: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          description?: string | null
+          icon?: string | null
+          id?: string
+          slug?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      exercise_phases: {
+        Row: {
+          cue_text: string | null
+          duration_delta_per_round: number
+          duration_seconds: number
+          id: string
+          is_open_ended: boolean
+          kind: Database["public"]["Enums"]["phase_kind"]
+          max_duration_seconds: number | null
+          position: number
+          step_id: string
+        }
+        Insert: {
+          cue_text?: string | null
+          duration_delta_per_round?: number
+          duration_seconds?: number
+          id?: string
+          is_open_ended?: boolean
+          kind: Database["public"]["Enums"]["phase_kind"]
+          max_duration_seconds?: number | null
+          position: number
+          step_id: string
+        }
+        Update: {
+          cue_text?: string | null
+          duration_delta_per_round?: number
+          duration_seconds?: number
+          id?: string
+          is_open_ended?: boolean
+          kind?: Database["public"]["Enums"]["phase_kind"]
+          max_duration_seconds?: number | null
+          position?: number
+          step_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_phases_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercise_steps: {
+        Row: {
+          exercise_id: string
+          id: string
+          label: string | null
+          position: number
+          repeat_count: number
+          rest_seconds: number
+        }
+        Insert: {
+          exercise_id: string
+          id?: string
+          label?: string | null
+          position: number
+          repeat_count?: number
+          rest_seconds?: number
+        }
+        Update: {
+          exercise_id?: string
+          id?: string
+          label?: string | null
+          position?: number
+          repeat_count?: number
+          rest_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_steps_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercise_steps_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "v_exercise_duration"
+            referencedColumns: ["exercise_id"]
+          },
+        ]
+      }
+      exercises: {
+        Row: {
+          audio_path: string | null
+          benefits_md: string | null
+          category_id: string | null
+          client_id: string | null
+          contraindications_md: string | null
+          cover_image_path: string | null
+          created_at: string
+          default_round_count: number | null
+          deleted_at: string | null
+          description_md: string | null
+          difficulty: number | null
+          estimated_seconds: number | null
+          has_metronome: boolean
+          id: string
+          is_published: boolean
+          owner_id: string | null
+          playback_mode: Database["public"]["Enums"]["playback_mode"]
+          slug: string | null
+          sort_order: number
+          subtitle: string | null
+          title: string
+          type: Database["public"]["Enums"]["exercise_type"]
+          updated_at: string
+          video_external_id: string | null
+          video_hash: string | null
+          video_provider: string | null
+          visibility: Database["public"]["Enums"]["visibility_level"]
+        }
+        Insert: {
+          audio_path?: string | null
+          benefits_md?: string | null
+          category_id?: string | null
+          client_id?: string | null
+          contraindications_md?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          default_round_count?: number | null
+          deleted_at?: string | null
+          description_md?: string | null
+          difficulty?: number | null
+          estimated_seconds?: number | null
+          has_metronome?: boolean
+          id?: string
+          is_published?: boolean
+          owner_id?: string | null
+          playback_mode?: Database["public"]["Enums"]["playback_mode"]
+          slug?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+          type: Database["public"]["Enums"]["exercise_type"]
+          updated_at?: string
+          video_external_id?: string | null
+          video_hash?: string | null
+          video_provider?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_level"]
+        }
+        Update: {
+          audio_path?: string | null
+          benefits_md?: string | null
+          category_id?: string | null
+          client_id?: string | null
+          contraindications_md?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          default_round_count?: number | null
+          deleted_at?: string | null
+          description_md?: string | null
+          difficulty?: number | null
+          estimated_seconds?: number | null
+          has_metronome?: boolean
+          id?: string
+          is_published?: boolean
+          owner_id?: string | null
+          playback_mode?: Database["public"]["Enums"]["playback_mode"]
+          slug?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["exercise_type"]
+          updated_at?: string
+          video_external_id?: string | null
+          video_hash?: string | null
+          video_provider?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_level"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       news_posts: {
         Row: {
           body_md: string
@@ -217,7 +428,13 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_exercise_duration: {
+        Row: {
+          exercise_id: string | null
+          total_seconds: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_plus_access: { Args: never; Returns: boolean }
