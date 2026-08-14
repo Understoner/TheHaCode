@@ -50,5 +50,19 @@ jobs:
       - name: pgTAP
         run: npm run db:test
 
+      # Platzhalterwerte, absichtlich offensichtlich falsch: dieser Schritt
+      # prueft nur, ob sich der Export bauen laesst - ausgeliefert wird hier
+      # nichts. Die echten Werte setzt Hostinger je Website (DEPLOYMENT.md §2)
+      # und backt sie zur Bauzeit ein.
+      #
+      # Noetig seit dem Sessions-Player: src/lib/supabase.ts wirft beim Laden,
+      # wenn die Variablen fehlen, und das statische Rendern der Route
+      # /sessions/[id] fuehrt dieses Modul aus. Die Liste allein tat das nicht,
+      # deshalb lief die CI bis dahin ohne Konfiguration durch. Der laute
+      # Fehlschlag bei fehlender Konfiguration ist erwuenscht und bleibt - er
+      # trifft jetzt nur nicht mehr die CI, die keine echten Werte haben darf.
       - name: Web-Build
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://ci-platzhalter.invalid
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ci-platzhalter-kein-echter-schluessel
         run: npm run build:web
