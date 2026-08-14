@@ -47,6 +47,8 @@
   "player.soundOff": "Ton aus",
   "player.musicOff": "Musik aus",
   "player.musicLabel": "Musik",
+  "player.volumeTone": "Ton",
+  "player.volumeMusic": "Musik",
   "player.music.afternoon-highway": "Afternoon Highway",
   "player.music.doku-marimba": "Doku Marimba",
   "phase.inhale": "Einatmen",

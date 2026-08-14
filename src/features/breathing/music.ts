@@ -31,6 +31,7 @@ export type MusicPlayer = {
   stop: () => void;
   pause: () => void;
   resume: () => void;
+  setVolume: (value: number) => void;
   dispose: () => void;
 };
 
@@ -42,11 +43,12 @@ export type MusicPlayer = {
 export function createMusicPlayer(): MusicPlayer {
   if (typeof window === 'undefined' || typeof Audio === 'undefined') {
     const noop = () => undefined;
-    return { play: noop, stop: noop, pause: noop, resume: noop, dispose: noop };
+    return { play: noop, stop: noop, pause: noop, resume: noop, setVolume: noop, dispose: noop };
   }
 
   let element: HTMLAudioElement | null = null;
   let current: TrackId | null = null;
+  let volume = DEFAULT_VOLUME;
 
   const play = (id: TrackId) => {
     const track = TRACKS.find((t) => t.id === id);
@@ -60,7 +62,7 @@ export function createMusicPlayer(): MusicPlayer {
     element?.pause();
     element = new Audio(track.src);
     element.loop = true;
-    element.volume = DEFAULT_VOLUME;
+    element.volume = volume;
     element.preload = 'none';
     current = id;
     // Schlaegt die Wiedergabe fehl (Autoplay-Sperre, Datei fehlt), bleibt es
@@ -79,6 +81,10 @@ export function createMusicPlayer(): MusicPlayer {
   return {
     play,
     stop,
+    setVolume: (value: number) => {
+      volume = Math.min(1, Math.max(0, value));
+      if (element) element.volume = volume;
+    },
     pause: () => element?.pause(),
     resume: () => {
       if (element) void element.play().catch(() => undefined);
