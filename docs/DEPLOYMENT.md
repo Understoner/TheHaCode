@@ -186,21 +186,37 @@ Hostinger baut unabhängig von GitHub Actions. Ohne Wartepunkt würden die Smoke
 
 ### Wenn der Wartepunkt rot wird
 
-Der Schritt „Auf Hostinger-Deployment warten" kann aus zwei grundverschiedenen
+Der Schritt „Auf Hostinger-Deployment warten" kann aus mehreren grundverschiedenen
 Gründen scheitern. Der Log unterscheidet sie seit dem 14.08.2026 ausdrücklich —
 entscheidend ist der **curl-Exitcode** in den Wartezeilen:
 
 | Meldung | Bedeutung | Was zu tun ist |
 |---|---|---|
-| `curl-Exitcode 28: Connection timed out` bei **jedem** Abruf | Die Seite ist vom GitHub-Runner aus nicht erreichbar. Der Build kann längst fertig sein. | hPanel → CDN/Bot-Schutz für die Subdomain. Nicht im Build-Protokoll suchen. |
+| `curl-Exitcode 22: … 403` bei **jedem** Abruf | Der Server antwortet, weist den Runner aber ab. Bot-Schutz. Der Build kann längst fertig sein. | hPanel → CDN/Bot-Schutz für die Subdomain. Nicht im Build-Protokoll suchen. |
+| `curl-Exitcode 28: Connection timed out` bei jedem Abruf | Vom Runner aus gar nicht erreichbar — Firewall oder DNS. | Wie oben, plus DNS der Subdomain prüfen. |
 | `noch die vorherige Version (builtAt=…)` | Die Seite antwortet, Hostinger hat aber nicht neu gebaut. | hPanel → Deployments, Build-Protokoll ansehen. |
 | `curl-Exitcode 22: … 404` | Erreichbar, aber `build-info.json` fehlt — Build unvollständig oder falsches Output-Verzeichnis. | Build-Einstellungen prüfen (Output `dist`). |
 
-**Erlebt am 14.08.2026:** erster Fall. `dev.deratemcode.at` lieferte den neuen
-Commit bereits 44 Sekunden nach Workflow-Start korrekt aus, inklusive aller
-Schutz-Header — der Runner kam nur nicht daran, jeder Abruf lief in den
-Timeout. Die Antwort trägt `server: hcdn`, es steht ein Hostinger-CDN davor.
-Am 10.08. hatte derselbe Schritt noch 11 Sekunden gebraucht.
+**Erlebt am 14.08.2026:** der erste Fall, zweimal hintereinander.
+`dev.deratemcode.at` lieferte den neuen Commit jeweils binnen 20 bis 45 Sekunden
+nach Workflow-Start korrekt aus, inklusive aller Schutz-Header — der Runner
+bekam 59-mal in Folge ein **403**. Von einer gewöhnlichen Adresse aus antwortete
+dieselbe URL mit 200, und zwar mit jeder Client-Kennung (curl-Standard,
+Chrome-Kennung, eigene Kennung). Es lag also **an der IP-Adresse, nicht am
+Client**: Hostingers Bot-Schutz blockte die GitHub-Runner. Die Antwort trägt
+`server: hcdn`. Am 10.08. hatte derselbe Schritt noch 11 Sekunden gebraucht.
+
+> **Der Wartepunkt ist dabei nur das erste Opfer.** Die Smoke-Tests laufen von
+> denselben Adressen. Blockt der Bot-Schutz die Runner, ist die gesamte
+> Prüfung von GitHub aus betroffen, nicht bloß dieser eine Schritt — auch wenn
+> ein echter Browser andere Signale sendet als curl und deshalb unter Umständen
+> durchkommt, wo curl scheitert.
+
+Die GitHub-Adressen freizugeben ist **kein** gangbarer Weg: das sind über 7.000
+CIDR-Bereiche, die sich laufend ändern. Entweder der Bot-Schutz für die
+Subdomain fällt weg, oder `/build-info.json` bekommt eine Ausnahme — oder die
+Pipeline stößt den Build über Hostingers API an und fragt den Status dort ab,
+statt die Seite abzufragen (siehe §2, „Wenn keine Branch-Auswahl vorhanden ist").
 
 Wichtig für die Einordnung: Ein roter Wartepunkt heißt **nicht**, dass die
 ausgerollte Seite kaputt ist. Er heißt, dass die Pipeline sie nicht prüfen
