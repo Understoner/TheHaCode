@@ -6,6 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
 import { BreathCircle } from '@/features/breathing/BreathCircle';
+import { createMusicPlayer, TRACKS, type TrackId } from '@/features/breathing/music';
 import { createAudioContext, playCue } from '@/features/breathing/tones';
 import {
   buildTimeline,
@@ -41,8 +42,11 @@ function Player({ session }: { session: PlayableExercise }) {
   const [finished, setFinished] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
 
+  const [musicTrack, setMusicTrack] = useState<TrackId | null>(null);
+
   const audioRef = useRef<AudioContext | null>(null);
   const lastCuedRef = useRef(-1);
+  const musicRef = useRef<ReturnType<typeof createMusicPlayer> | null>(null);
 
   const segment: TimelineSegment | null = segIndex >= 0 ? timeline[segIndex] : null;
 
@@ -91,6 +95,25 @@ function Player({ session }: { session: PlayableExercise }) {
     if (segment.kind === 'rest') return;
     playCue(audioRef.current, segment.kind, segment.durationMs);
   }, [segIndex, segment, soundOn]);
+
+  // Musik folgt zwei Dingen: der Auswahl und dem Laufzustand. Pausiert die
+  // Uebung, pausiert auch die Musik - sonst laeuft sie weiter, waehrend
+  // niemand mehr atmet.
+  useEffect(() => {
+    if (!musicRef.current) musicRef.current = createMusicPlayer();
+    const music = musicRef.current;
+
+    if (!musicTrack) {
+      music.stop();
+      return;
+    }
+    if (clock.isRunning) music.play(musicTrack);
+    else music.pause();
+  }, [musicTrack, clock.isRunning]);
+
+  // Beim Verlassen des Players verstummt die Musik - ein Stueck, das nach dem
+  // Zurueckgehen weiterlaeuft, waere das Aergerlichste an der Funktion.
+  useEffect(() => () => musicRef.current?.dispose(), []);
 
   const start = useCallback(() => {
     // Der AudioContext darf erst auf eine Nutzergeste entstehen - ein Aufruf
@@ -187,11 +210,40 @@ function Player({ session }: { session: PlayableExercise }) {
           </Pressable>
         )}
 
-        <Pressable onPress={() => setSoundOn((s) => !s)} style={styles.secondary}>
-          <Text style={styles.secondaryText}>
+        <Pressable
+          onPress={() => setSoundOn((s) => !s)}
+          style={[styles.secondary, soundOn && styles.secondaryActive]}
+        >
+          <Text style={[styles.secondaryText, soundOn && styles.secondaryTextActive]}>
             {soundOn ? t('player.soundOn') : t('player.soundOff')}
           </Text>
         </Pressable>
+      </View>
+
+      {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
+      <View style={styles.musicRow}>
+        <Text style={styles.musicLabel}>{t('player.musicLabel')}</Text>
+        <View style={styles.musicChoices}>
+          <Pressable
+            onPress={() => setMusicTrack(null)}
+            style={[styles.chip, musicTrack === null && styles.chipActive]}
+          >
+            <Text style={[styles.chipText, musicTrack === null && styles.chipTextActive]}>
+              {t('player.musicOff')}
+            </Text>
+          </Pressable>
+          {TRACKS.map((track) => (
+            <Pressable
+              key={track.id}
+              onPress={() => setMusicTrack(track.id)}
+              style={[styles.chip, musicTrack === track.id && styles.chipActive]}
+            >
+              <Text style={[styles.chipText, musicTrack === track.id && styles.chipTextActive]}>
+                {t(`player.music.${track.id}`)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       {session.effects.length > 0 ? (
@@ -306,6 +358,52 @@ const styles = StyleSheet.create({
   secondaryText: {
     color: colors.ink700,
     fontSize: 14,
+  },
+  secondaryActive: {
+    borderColor: colors.ocean700,
+    backgroundColor: colors.oceanTint,
+  },
+  secondaryTextActive: {
+    color: colors.ocean700,
+    fontWeight: '600',
+  },
+  musicRow: {
+    alignItems: 'center',
+    gap: spacing.sm,
+    maxWidth: 620,
+  },
+  musicLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.ink900,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  musicChoices: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  chip: {
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  },
+  chipActive: {
+    borderColor: colors.ocean700,
+    backgroundColor: colors.oceanTint,
+  },
+  chipText: {
+    fontSize: 13,
+    color: colors.ink700,
+  },
+  chipTextActive: {
+    color: colors.ocean700,
+    fontWeight: '600',
   },
   effectRow: {
     flexDirection: 'row',

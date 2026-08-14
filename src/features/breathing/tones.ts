@@ -133,7 +133,10 @@ export function playCue(
   ctx: BaseAudioContext | null,
   kind: PhaseKind,
   phaseDurationMs: number,
-  volume = 0.22
+  // Deutlich lauter als der erste Entwurf (0,22): der Ton markiert den
+  // Phasenwechsel und muss sich ueber der Hintergrundmusik durchsetzen, ohne
+  // dass man beim Ueben zum Lautstaerkeregler greifen muss.
+  volume = 0.5
 ): void {
   if (!ctx) return;
   if (phaseDurationMs < MIN_PHASE_MS) return;

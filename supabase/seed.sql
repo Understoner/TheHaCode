@@ -180,8 +180,12 @@ from s, (values
 -- Das ist die Vorlage fuer alles, was den Rhythmus wechselt. Der Unterschied
 -- zu den vier Sequenzen oben: hier gibt es DREI Zeilen in exercise_steps
 -- statt einer, jede mit eigener Rundenzahl, eigenen Phasen und einer Pause
--- danach (rest_seconds). Der Player zaehlt dann "Block 2 von 3" und legt
--- zwischen den Bloecken eine sichtbare Pause ein.
+-- danach (rest_seconds). Der Player zaehlt dann "Block 2 von 3".
+--
+-- rest_seconds steht hier ueberall auf 0: die Bloecke sollen ohne
+-- Unterbrechung ineinander uebergehen. Die Spalte bleibt trotzdem nutzbar -
+-- wer eine Pause will, traegt dort Sekunden ein, und der Player zeigt sie als
+-- eigenen Abschnitt an.
 --
 -- Zum Erweitern: eine weitere Zeile in exercise_steps mit position 4 und die
 -- zugehoerigen Phasen. Die Reihenfolge steuert position, nicht die
@@ -197,7 +201,7 @@ with e as (
     (select id from public.exercise_categories where slug = 'box'),
     'paced', 'timer', 'free',
     'Aufbau-Session', 'Drei Blöcke, ruhiger werdend',
-    'Drei Abschnitte, die ineinander übergehen: erst ankommen im Viererrhythmus, dann längere Phasen, zum Schluss betont langes Ausatmen. Zwischen den Blöcken jeweils eine kurze Pause.',
+    'Drei Abschnitte, die ohne Unterbrechung ineinander übergehen: erst ankommen im Viererrhythmus, dann längere Phasen, zum Schluss betont langes Ausatmen.',
     'Der Aufbau nimmt den Körper mit, statt ihn zu überfordern: die CO₂-Toleranz wird über die längeren Haltephasen im zweiten Block trainiert, der dritte Block führt gezielt herunter. Als Ganzes wirkt die Session eher beruhigend.',
     '{co2_toleranz,entspannend,stressreduktion}',
     'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
@@ -206,10 +210,10 @@ with e as (
   on conflict (slug) do nothing
   returning id
 ),
--- Block 1: ankommen, 4-4-4-4, danach 12 s Pause
+-- Block 1: ankommen, 4-4-4-4, ohne Pause danach
 s1 as (
   insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
-  select id, 1, 'Ankommen', 4, 12 from e
+  select id, 1, 'Ankommen', 4, 0 from e
   returning id
 ),
 p1 as (
@@ -223,10 +227,10 @@ p1 as (
   ) as v(pos, kind, dur, cue)
   returning step_id
 ),
--- Block 2: vertiefen, 6-6-6-6, danach 12 s Pause
+-- Block 2: vertiefen, 6-6-6-6, ohne Pause danach
 s2 as (
   insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
-  select id, 2, 'Vertiefen', 4, 12 from e
+  select id, 2, 'Vertiefen', 4, 0 from e
   returning id
 ),
 p2 as (
@@ -240,7 +244,7 @@ p2 as (
   ) as v(pos, kind, dur, cue)
   returning step_id
 ),
--- Block 3: herunterfahren, 4-7-8, keine Pause danach
+-- Block 3: herunterfahren, 4-7-8
 s3 as (
   insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
   select id, 3, 'Herunterfahren', 4, 0 from e

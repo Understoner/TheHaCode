@@ -1,0 +1,10 @@
+Hintergrundmusik fuer die Sessions.
+
+Dateien in diesem Verzeichnis werden vom statischen Export unveraendert nach
+dist/ kopiert (public/ ist Expos Verzeichnis fuer genau das). Sie landen also
+NICHT im JavaScript-Bundle - der Browser laedt sie erst, wenn jemand ein Stueck
+auswaehlt, und streamt sie dann per Range-Request.
+
+Neue Stuecke: Datei hier ablegen und in src/features/breathing/music.ts in die
+Liste TRACKS eintragen. Der Anzeigename steht in
+src/i18n/locales/de/common.json unter "player.music.<id>".
