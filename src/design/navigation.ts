@@ -6,10 +6,10 @@ import type { DimensionValue } from 'react-native';
 // href und sind nicht anklickbar, statt auf eine erfundene Route zu zeigen.
 //
 // Reihenfolge und Icon-Zuordnung folgen ui/references/05-10 (News, Kurse,
-// Uebungen, Team) - dort kein eigener "Konfigurator"-Eintrag, der wird
-// spaeter ueber Uebungen erreichbar sein. "Konto" kommt dazu, sobald Supabase
-// Auth angebunden ist - bis dahin comingSoon wie Uebungen.
-export type NavIcon = 'news' | 'kurse' | 'uebungen' | 'team' | 'konto';
+// Sessions, Team) - dort kein eigener "Konfigurator"-Eintrag, der wird
+// spaeter ueber die Sessions erreichbar sein. "Konto" kommt dazu, sobald Supabase
+// Auth angebunden ist - bis dahin comingSoon wie die Sessions.
+export type NavIcon = 'news' | 'kurse' | 'sessions' | 'team' | 'konto';
 
 export type NavItem =
   | { key: string; labelKey: string; icon: NavIcon; kind: 'link'; href: Href }
@@ -41,7 +41,7 @@ export const RECENT_ITEMS_COUNT = 3;
 export const navItems: NavItem[] = [
   { key: 'news', labelKey: 'nav.news', icon: 'news', kind: 'link', href: '/' },
   { key: 'kurse', labelKey: 'nav.kurse', icon: 'kurse', kind: 'link', href: '/kurse' },
-  { key: 'uebungen', labelKey: 'nav.uebungen', icon: 'uebungen', kind: 'comingSoon' },
+  { key: 'sessions', labelKey: 'nav.sessions', icon: 'sessions', kind: 'comingSoon' },
   { key: 'team', labelKey: 'nav.team', icon: 'team', kind: 'link', href: '/team' },
   { key: 'konto', labelKey: 'nav.konto', icon: 'konto', kind: 'comingSoon' },
 ];

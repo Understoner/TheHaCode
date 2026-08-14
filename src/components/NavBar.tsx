@@ -26,10 +26,10 @@ function NavGlyph({ icon, color }: { icon: NavIcon; color: string }) {
           <View style={[styles.kurseBar, { backgroundColor: color, width: 11 }]} />
         </View>
       );
-    case 'uebungen':
+    case 'sessions':
       return (
         <View style={styles.glyphBox}>
-          <View style={[styles.uebungenRing, { borderColor: color }]} />
+          <View style={[styles.sessionsRing, { borderColor: color }]} />
         </View>
       );
     case 'team':
@@ -62,9 +62,12 @@ export function NavBar() {
 
   return (
     <>
-      <View style={styles.topBar}>
-        <Text style={styles.wordmark}>thehacode</Text>
-        <View {...responsive('nav-desktop')} style={styles.pillRow}>
+      {/* Ohne Wortzeichen traegt die Kopfzeile nur noch die Pillen - auf dem
+          Handy waere sie damit ein leerer Streifen mit Trennlinie. Deshalb
+          faellt jetzt die ganze Leiste weg statt nur ihr Inhalt: Desktop
+          navigiert oben, das Handy unten. */}
+      <View {...responsive('nav-desktop')} style={styles.topBar}>
+        <View style={styles.pillRow}>
           {navItems.map((item) => {
             if (item.kind === 'comingSoon') {
               return (
@@ -137,18 +140,11 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.line,
     backgroundColor: colors.surface,
-  },
-  wordmark: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.ink900,
-    letterSpacing: 0.2,
   },
   pillRow: {
     flexDirection: 'row',
@@ -201,8 +197,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   // flex: 1 verteilt beliebig viele Eintraege gleichmaessig - aktuell 5
-  // (News, Kurse, Uebungen, Team, Konto), minWidth 0 verhindert, dass ein
-  // langes Label ("Uebungen") den Nachbarn Platz wegnimmt.
+  // (News, Kurse, Sessions, Team, Konto), minWidth 0 verhindert, dass ein
+  // langes Label den Nachbarn Platz wegnimmt.
   //
   // display/flexDirection stehen hier ausdruecklich, obwohl das fuer eine View
   // ohnehin der Standard ist: die Haelfte der Eintraege ist ein expo-router
@@ -223,9 +219,10 @@ const styles = StyleSheet.create({
   },
   // lineHeight muss ausdruecklich gesetzt sein: numberOfLines={1} bringt in
   // react-native-web ein overflow: hidden mit, und mit dem Standard
-  // line-height: normal ist die Zeilenbox bei 10px nur 11px hoch - gerade so
-  // niedrig, dass die Punkte auf dem "Ü" von "Übungen" abgeschnitten werden.
-  // Auf einer deutschsprachigen Seite ist das kein Schoenheitsfehler.
+  // line-height: normal ist die Zeilenbox bei 10px nur 11px hoch - zu niedrig
+  // fuer Umlautpunkte, die damit abgeschnitten werden. Aufgefallen ist es an
+  // "Übungen" (heute "Sessions"); die Beschriftungen sind deutsch, der
+  // naechste Umlaut kommt bestimmt.
   tabLabel: {
     fontSize: 10,
     lineHeight: 14,
@@ -260,7 +257,7 @@ const styles = StyleSheet.create({
     height: 2,
     borderRadius: 1,
   },
-  uebungenRing: {
+  sessionsRing: {
     width: 18,
     height: 18,
     borderRadius: radius.full,

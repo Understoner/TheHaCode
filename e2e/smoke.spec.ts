@@ -2,9 +2,10 @@ import { expect, test } from '@playwright/test';
 
 test('Startseite laedt und zeigt den Titel', async ({ page }) => {
   await page.goto('/');
-  // exact: true, sonst matcht es case-insensitiv auch das "thehacode"-
-  // Wortzeichen in der NavBar (zwei Treffer, strict-mode violation).
-  await expect(page.getByText('TheHaCode', { exact: true })).toBeVisible();
+  // exact: true pinnt die Ueberschrift selbst. Das Wortzeichen in der NavBar,
+  // gegen dessen Doppeltreffer das urspruenglich noetig war, gibt es nicht
+  // mehr - die Genauigkeit bleibt trotzdem richtig.
+  await expect(page.getByText('DER ATEM CODE', { exact: true })).toBeVisible();
 });
 
 // Regressionsschutz fuer die untere Tab-Leiste. Der Fehler, der das noetig

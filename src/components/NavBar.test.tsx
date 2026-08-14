@@ -37,7 +37,7 @@ describe('NavBar', () => {
     render(<NavBar />);
 
     const { desktop, mobile } = variants();
-    for (const label of ['News', 'Kurse', 'Team', 'Übungen', 'Konto']) {
+    for (const label of ['News', 'Kurse', 'Team', 'Sessions', 'Konto']) {
       expect(within(desktop).getByText(label, { exact: false })).toBeTruthy();
       expect(within(mobile).getByText(label)).toBeTruthy();
     }
@@ -60,7 +60,7 @@ describe('NavBar', () => {
   it('zeigt noch nicht gebaute Funktionen in keiner Fassung als Link', () => {
     render(<NavBar />);
 
-    for (const label of ['Übungen', 'Konto']) {
+    for (const label of ['Sessions', 'Konto']) {
       for (const found of screen.getAllByText(label, { exact: false })) {
         expect(found.closest('a')).toBeNull();
       }
