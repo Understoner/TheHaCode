@@ -68,12 +68,44 @@ console.log(`[thehacode] dist/robots.txt geschrieben (env: ${buildInfo.env})`);
 // am ausgerollten System feststellen — genau das prueft der Smoke-Test
 // "Schutz-Header" in e2e/smoke.spec.ts. Schlaegt er fehl, greift dieser Weg
 // nicht und die Header muessen in hPanel gesetzt werden (docs/DEPLOYMENT.md §2).
+// Der zweite Teil der Datei loest ein Problem, das erst am 14.08.2026 auffiel:
+// der statische Export legt jede Route als eigene Datei ab (kurse.html,
+// impressum.html), Hostinger liefert aber nur den exakten Pfad aus. Innerhalb
+// der Seite faellt das nie auf, weil expo-router clientseitig navigiert — aber
+// jeder DIREKTE Aufruf von /impressum lief in einen 404: Lesezeichen,
+// geteilter Link, Neuladen auf einer Unterseite, Treffer aus einer
+// Suchmaschine. Beim Impressum ist das keine Kosmetik, es muss unmittelbar
+// erreichbar sein.
+//
+// Reihenfolge der Regeln ist wesentlich: Vorhandenes bleibt unangetastet,
+// dann faellt ein abschliessender Schraegstrich weg, dann erst wird .html
+// angehaengt — und nur, wenn die Datei wirklich existiert. Was danach noch
+// uebrig ist, bekommt die 404-Seite des Exports MIT 404-Status (ErrorDocument
+// statt Rewrite, sonst meldet der Server faelschlich 200).
 const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand aendern.
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "DENY"
   Header always set Content-Security-Policy "frame-ancestors 'none'"
 </IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Vorhandene Dateien und Verzeichnisse unveraendert ausliefern
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # /kurse/ -> /kurse
+  RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+  # /kurse -> /kurse.html, sofern die Datei existiert
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+</IfModule>
+
+ErrorDocument 404 /+not-found.html
 `;
 
 writeFileSync(join(distDir, '.htaccess'), htaccess);
