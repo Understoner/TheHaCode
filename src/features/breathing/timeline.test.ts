@@ -86,7 +86,7 @@ describe('buildTimeline', () => {
     expect(buildTimeline(verdreht).map((s) => s.kind)).toEqual(['inhale', 'hold_in', 'exhale']);
   });
 
-  it('zaehlt Runden je Block und haengt die Pause nach dem Block an', () => {
+  it('zaehlt Runden je Block und legt die Pause als eigenes Segment dazwischen', () => {
     const t = buildTimeline(
       uebung([
         { repeat_count: 2, rest_seconds: 10, phases: [{ position: 1, kind: 'inhale', duration_seconds: 5 }] },
@@ -94,13 +94,84 @@ describe('buildTimeline', () => {
       ])
     );
 
-    expect(t.map((s) => [s.stepIndex, s.round])).toEqual([
-      [0, 1],
-      [0, 2],
-      [1, 1],
-    ]);
-    // 2x5s + 10s Pause = 20s, dann beginnt der zweite Block
-    expect(t[2].startMs).toBe(20_000);
+    expect(t.map((s) => s.kind)).toEqual(['inhale', 'inhale', 'rest', 'exhale']);
+    expect(t.map((s) => s.stepIndex)).toEqual([0, 0, 0, 1]);
+    // 2x5s, dann 10s Pause, dann beginnt der zweite Block bei 20s
+    expect(t[2].startMs).toBe(10_000);
+    expect(t[3].startMs).toBe(20_000);
+  });
+
+  // Die Pause war frueher ein Loch in der Zeitachse: phaseAt lieferte dort
+  // null, der Player zeigte wieder den Titel und der Ring stand still,
+  // obwohl die Uebung laeuft. Bei einer Sequenz aus mehreren Bloecken faellt
+  // das sofort auf.
+  it('laesst zwischen zwei Bloecken keine Luecke offen', () => {
+    const t = buildTimeline(
+      uebung([
+        { repeat_count: 2, rest_seconds: 10, phases: [{ position: 1, kind: 'inhale', duration_seconds: 5 }] },
+        { repeat_count: 1, phases: [{ position: 1, kind: 'exhale', duration_seconds: 5 }] },
+      ])
+    );
+
+    for (let ms = 0; ms < 25_000; ms += 250) {
+      expect(phaseAt(t, ms), `bei ${ms} ms laeuft ein Segment`).not.toBeNull();
+    }
+    expect(phaseAt(t, 14_000)?.kind, 'mitten in der Pause').toBe('rest');
+  });
+
+  it('laesst Bloecke ohne Pause direkt ineinander uebergehen', () => {
+    const t = buildTimeline(
+      uebung([
+        { repeat_count: 1, phases: [{ position: 1, kind: 'inhale', duration_seconds: 5 }] },
+        { repeat_count: 1, phases: [{ position: 1, kind: 'exhale', duration_seconds: 5 }] },
+      ])
+    );
+
+    expect(t.map((s) => s.kind)).toEqual(['inhale', 'exhale']);
+    expect(t[1].startMs).toBe(5_000);
+  });
+
+  it('rechnet eine dreiteilige Session korrekt durch', () => {
+    // Entspricht der Beispielsequenz "Aufbau-Session" aus seed.sql:
+    // 4x16s + 12s + 4x24s + 12s + 4x19s = 260s
+    const t = buildTimeline(
+      uebung([
+        {
+          repeat_count: 4,
+          rest_seconds: 12,
+          phases: [
+            { position: 1, kind: 'inhale', duration_seconds: 4 },
+            { position: 2, kind: 'hold_in', duration_seconds: 4 },
+            { position: 3, kind: 'exhale', duration_seconds: 4 },
+            { position: 4, kind: 'hold_out', duration_seconds: 4 },
+          ],
+        },
+        {
+          repeat_count: 4,
+          rest_seconds: 12,
+          phases: [
+            { position: 1, kind: 'inhale', duration_seconds: 6 },
+            { position: 2, kind: 'hold_in', duration_seconds: 6 },
+            { position: 3, kind: 'exhale', duration_seconds: 6 },
+            { position: 4, kind: 'hold_out', duration_seconds: 6 },
+          ],
+        },
+        {
+          repeat_count: 4,
+          phases: [
+            { position: 1, kind: 'inhale', duration_seconds: 4 },
+            { position: 2, kind: 'hold_in', duration_seconds: 7 },
+            { position: 3, kind: 'exhale', duration_seconds: 8 },
+          ],
+        },
+      ])
+    );
+
+    expect(totalDurationMs(t)).toBe(260_000);
+    expect(new Set(t.map((s) => s.stepIndex)).size, 'drei Bloecke').toBe(3);
+    expect(t.filter((s) => s.kind === 'rest')).toHaveLength(2);
+    // Der zweite Block beginnt nach Block 1 plus Pause
+    expect(phaseAt(t, 76_000)?.stepIndex).toBe(1);
   });
 
   it('laesst Phasen ohne Dauer weg statt sie als Nullsegment zu fuehren', () => {

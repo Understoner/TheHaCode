@@ -19,6 +19,9 @@ type Filter = ExerciseEffect | 'all';
 
 /** "4-4-4-4" aus den Phasen der ersten Runde - die Kurzform, die jeder kennt. */
 function rhythmOf(exercise: PlayableExercise): string | null {
+  // Bei mehreren Bloecken gibt es keinen EINEN Rhythmus - die Kurzform waere
+  // dort schlicht falsch, deshalb steht an der Stelle dann die Blockanzahl.
+  if (exercise.exercise_steps.length > 1) return null;
   const step = [...exercise.exercise_steps].sort((a, b) => a.position - b.position)[0];
   if (!step) return null;
   const phases = [...step.exercise_phases].sort((a, b) => a.position - b.position);
@@ -90,6 +93,11 @@ export function SessionsList() {
                       {session.default_round_count ? (
                         <Text style={styles.meta}>
                           {t('sessions.rounds', { count: session.default_round_count })}
+                        </Text>
+                      ) : null}
+                      {session.exercise_steps.length > 1 ? (
+                        <Text style={styles.meta}>
+                          {t('sessions.blocks', { count: session.exercise_steps.length })}
                         </Text>
                       ) : null}
                       {session.difficulty ? (

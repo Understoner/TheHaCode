@@ -43,6 +43,10 @@ function contentSecurityPolicy(): string {
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' data:",
+    // Hintergrundmusik liegt unter public/musik/ und damit auf der eigenen
+    // Domain. Ausdruecklich genannt, damit die Regel beim Lesen sichtbar ist -
+    // ueber default-src waere sie ohnehin erlaubt.
+    "media-src 'self'",
     `img-src 'self' data: blob: ${supabase}`.trim(),
     `connect-src 'self' ${supabase}`.trim(),
     'upgrade-insecure-requests',

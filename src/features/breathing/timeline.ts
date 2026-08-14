@@ -13,8 +13,15 @@ import type { Phase, PhaseKind, PlayableExercise } from '@/types/breathing';
 // hoechstens eine Bilddauer (CLAUDE.md verbietet setInterval fuer
 // Zeitkritisches, SAD §7.1).
 
+// Die Pause zwischen zwei Bloecken ist kein Atemzustand und hat deshalb
+// keinen phase_kind in der Datenbank - fuer die Zeitachse braucht sie aber
+// ein eigenes Segment. Sonst klafft dort ein Loch: phaseAt lieferte null, der
+// Player zeigte wieder den Titel und der Ring stand still, obwohl die Uebung
+// laeuft.
+export type SegmentKind = PhaseKind | 'rest';
+
 export interface TimelineSegment {
-  kind: PhaseKind;
+  kind: SegmentKind;
   startMs: number; // absolut, ab Uebungsbeginn
   endMs: number; // exklusiv; bei openEnded nur ein Planwert
   durationMs: number;
@@ -72,7 +79,23 @@ export function buildTimeline(exercise: PlayableExercise): TimelineSegment[] {
         cursor += durationMs;
       }
     }
-    cursor += Number(step.rest_seconds ?? 0) * SEC;
+    const restMs = Number(step.rest_seconds ?? 0) * SEC;
+    if (restMs > 0) {
+      segments.push({
+        kind: 'rest',
+        startMs: cursor,
+        endMs: cursor + restMs,
+        durationMs: restMs,
+        openEnded: false,
+        // Die Pause gehoert zum Block, der gerade geendet hat. Welcher als
+        // naechstes kommt, leitet der Player daraus ab.
+        stepIndex,
+        round: step.repeat_count,
+        roundsInStep: step.repeat_count,
+        cue: null,
+      });
+      cursor += restMs;
+    }
   });
 
   return segments;
