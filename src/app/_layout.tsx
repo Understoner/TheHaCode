@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import Head from 'expo-router/head';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,14 @@ import '@/i18n';
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient());
   const { t } = useTranslation();
+  const pathname = usePathname();
+
+  // Der Player laeuft im Vollbild: waehrend einer Uebung soll nichts
+  // ablenken und nichts versehentlich wegfuehren, der Ausstieg geht nur ueber
+  // "Beenden" (BACKLOG T11). Betroffen ist nur /sessions/<id>, nicht die
+  // Liste darueber. Ohne Navigation entfaellt auch der reservierte Platz fuer
+  // die Tab-Leiste, sonst bliebe unten ein leerer Streifen stehen.
+  const immersive = /^\/sessions\/.+/.test(pathname);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -33,11 +41,15 @@ export default function RootLayout() {
           Seiteninhalt ist unsichtbar. minHeight (keine feste height) laesst
           die Seite trotzdem ueber eine Bildschirmhoehe hinaus wachsen, der
           Footer bleibt am natuerlichen Seitenende erreichbar. */}
-      <View {...responsive('page-root')} style={styles.root}>
-        <StagingBanner />
-        <NavBar />
+      <View {...(immersive ? {} : responsive('page-root'))} style={styles.root}>
+        {immersive ? null : (
+          <>
+            <StagingBanner />
+            <NavBar />
+          </>
+        )}
         <Stack screenOptions={{ headerShown: false, contentStyle: styles.screen }} />
-        <Footer />
+        {immersive ? null : <Footer />}
       </View>
     </QueryClientProvider>
   );

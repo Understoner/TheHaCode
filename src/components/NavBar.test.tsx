@@ -60,7 +60,9 @@ describe('NavBar', () => {
   it('zeigt noch nicht gebaute Funktionen in keiner Fassung als Link', () => {
     render(<NavBar />);
 
-    for (const label of ['Sessions', 'Konto']) {
+    // Sessions ist seit Migration 0007 eine echte Route; uebrig bleibt Konto,
+    // das an Supabase Auth haengt.
+    for (const label of ['Konto']) {
       for (const found of screen.getAllByText(label, { exact: false })) {
         expect(found.closest('a')).toBeNull();
       }

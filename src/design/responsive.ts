@@ -35,14 +35,16 @@ export type ResponsiveTarget =
   // wird (solange weniger als RECENT_ITEMS_COUNT Eintraege existieren).
   | 'news-grid'
   | 'courses-grid'
-  | 'team-grid';
+  | 'team-grid'
+  | 'sessions-grid';
 
 // Nur die Mindestbreiten unterscheiden sich - Teamkarten sind schmaler, weil
 // sie neben dem 96px-Portrait weniger Fliesstext tragen.
-const GRID_MIN_WIDTH: Record<'news-grid' | 'courses-grid' | 'team-grid', number> = {
+const GRID_MIN_WIDTH: Record<'news-grid' | 'courses-grid' | 'team-grid' | 'sessions-grid', number> = {
   'news-grid': 280,
   'courses-grid': 280,
   'team-grid': 260,
+  'sessions-grid': 260,
 };
 
 // RNs Style-Typen sind nur fuer Nativ gedacht und fuehren dataSet nicht,
