@@ -36,10 +36,7 @@ export type ResponsiveTarget =
   | 'news-grid'
   | 'courses-grid'
   | 'team-grid'
-  | 'sessions-grid'
-  // Player: ab dem Breakpoint stehen Beschreibung und Wirkung rechts neben
-  // der Animation statt darunter.
-  | 'player-layout';
+  | 'sessions-grid';
 
 // Nur die Mindestbreiten unterscheiden sich - Teamkarten sind schmaler, weil
 // sie neben dem 96px-Portrait weniger Fliesstext tragen.
@@ -76,8 +73,6 @@ export function responsiveCss(): string {
 }
 @media (min-width: ${MOBILE_NAV_BREAKPOINT}px) {
   [data-thc="nav-mobile"] { display: none !important; }
-  [data-thc="player-layout"] { flex-direction: row !important; align-items: flex-start !important; gap: 48px !important; }
-  [data-thc="player-layout"] > * { flex: 1 1 0 !important; min-width: 0 !important; }
 ${gridRules}
 }
 `.trim();

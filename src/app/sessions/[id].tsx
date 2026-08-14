@@ -1,44 +1,35 @@
-import { Link, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Link, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { QueryBoundary } from "@/components/QueryBoundary";
-import { VolumeSlider } from "@/components/VolumeSlider";
-import { colors, radius, spacing } from "@/design/tokens";
-import { responsive } from "@/design/responsive";
-import { BreathCircle } from "@/features/breathing/BreathCircle";
-import {
-  createMusicPlayer,
-  TRACKS,
-  type TrackId,
-} from "@/features/breathing/music";
-import { createAudioContext, playCue } from "@/features/breathing/tones";
+import { QueryBoundary } from '@/components/QueryBoundary';
+import { VolumeSlider } from '@/components/VolumeSlider';
+import { colors, radius, spacing } from '@/design/tokens';
+import { BreathCircle } from '@/features/breathing/BreathCircle';
+import { createMusicPlayer, TRACKS, type TrackId } from '@/features/breathing/music';
+import { createAudioContext, playCue } from '@/features/breathing/tones';
 import {
   buildTimeline,
   segmentIndexAt,
   totalDurationMs,
   type TimelineSegment,
-} from "@/features/breathing/timeline";
-import { useBreathClock } from "@/features/breathing/useBreathClock";
-import { effectColors } from "@/features/sessions/effects";
-import { useSession } from "@/features/sessions/useSessions";
-import type { PlayableExercise } from "@/types/breathing";
+} from '@/features/breathing/timeline';
+import { useBreathClock } from '@/features/breathing/useBreathClock';
+import { effectColors } from '@/features/sessions/effects';
+import { useSession } from '@/features/sessions/useSessions';
+import type { PlayableExercise } from '@/types/breathing';
 
 function mmss(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
-  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }
 
 export default function SessionPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const query = useSession(id);
 
-  return (
-    <QueryBoundary query={query}>
-      {(session) => <Player session={session} />}
-    </QueryBoundary>
-  );
+  return <QueryBoundary query={query}>{(session) => <Player session={session} />}</QueryBoundary>;
 }
 
 function Player({ session }: { session: PlayableExercise }) {
@@ -62,16 +53,13 @@ function Player({ session }: { session: PlayableExercise }) {
   const lastCuedRef = useRef(-1);
   const musicRef = useRef<ReturnType<typeof createMusicPlayer> | null>(null);
 
-  const segment: TimelineSegment | null =
-    segIndex >= 0 ? timeline[segIndex] : null;
+  const segment: TimelineSegment | null = segIndex >= 0 ? timeline[segIndex] : null;
 
   // Alle Segmente der laufenden Runde - der Ring teilt seine 180-Grad-Haelften
   // nach deren Dauern auf (ui/references/03_atem_animation.svg).
   const roundSegments = useMemo(() => {
     if (!segment) return [];
-    return timeline.filter(
-      (s) => s.stepIndex === segment.stepIndex && s.round === segment.round,
-    );
+    return timeline.filter((s) => s.stepIndex === segment.stepIndex && s.round === segment.round);
   }, [timeline, segment]);
 
   // Anzeige-Schleife ueber requestAnimationFrame statt setInterval, und es wird
@@ -87,9 +75,7 @@ function Player({ session }: { session: PlayableExercise }) {
       const idx = segmentIndexAt(timeline, now);
 
       setSegIndex((prev) => (prev === idx ? prev : idx));
-      setElapsedMs((prev) =>
-        Math.floor(prev / 250) === Math.floor(now / 250) ? prev : now,
-      );
+      setElapsedMs((prev) => (Math.floor(prev / 250) === Math.floor(now / 250) ? prev : now));
 
       if (idx === -1 && now >= totalMs) {
         clock.pause();
@@ -109,7 +95,7 @@ function Player({ session }: { session: PlayableExercise }) {
     lastCuedRef.current = segIndex;
     // In der Pause zwischen zwei Bloecken schlaegt nichts an - sie ist
     // Ruhe, kein Phasenwechsel.
-    if (segment.kind === "rest") return;
+    if (segment.kind === 'rest') return;
     playCue(audioRef.current, segment.kind, segment.durationMs, toneVolume);
   }, [segIndex, segment, soundOn, toneVolume]);
 
@@ -157,216 +143,173 @@ function Player({ session }: { session: PlayableExercise }) {
     <ScrollView contentContainerStyle={styles.screen}>
       <View style={styles.topRow}>
         <Link href="/sessions" style={styles.back}>
-          {`‹ ${t("player.end")}`}
+          {`‹ ${t('player.end')}`}
         </Link>
         <Text style={styles.clock}>
           {mmss(elapsedMs)} / {mmss(totalMs)}
         </Text>
       </View>
 
-      <View {...responsive("player-layout")} style={styles.layout}>
-        <View style={styles.stageColumn}>
-          {/* Die Effekte stehen ueber dem Kreis: sie sagen, worauf die Uebung
-              wirkt, und gehoeren damit vor die Uebung, nicht hinter sie. */}
-          {session.effects.length > 0 ? (
-            <View style={styles.effectRow}>
-              {session.effects.map((effect) => {
-                const tone = effectColors(effect);
-                return (
-                  <View
-                    key={effect}
-                    style={[styles.effectPill, { backgroundColor: tone.tint }]}
-                  >
-                    <Text style={[styles.effectText, { color: tone.text }]}>
-                      {t(`sessions.effects.${effect}`)}
-                    </Text>
-                  </View>
-                );
+      {/* Die Effekte stehen ueber dem Kreis: sie sagen, worauf die Uebung
+          wirkt, und gehoeren damit vor die Uebung, nicht hinter sie. */}
+      {session.effects.length > 0 ? (
+        <View style={styles.effectRow}>
+          {session.effects.map((effect) => {
+            const tone = effectColors(effect);
+            return (
+              <View key={effect} style={[styles.effectPill, { backgroundColor: tone.tint }]}>
+                <Text style={[styles.effectText, { color: tone.text }]}>
+                  {t(`sessions.effects.${effect}`)}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      ) : null}
+
+      <View style={styles.stage}>
+        <BreathCircle segment={segment} round={roundSegments} running={clock.isRunning} />
+      </View>
+
+      <View style={styles.readout}>
+        {finished ? (
+          <>
+            <Text style={styles.phase}>{t('player.done.title')}</Text>
+            <Text style={styles.cue}>
+              {t('player.done.hint', {
+                minutes: Math.max(1, Math.round(totalMs / 60000)),
               })}
-            </View>
-          ) : null}
+            </Text>
+          </>
+        ) : segment?.kind === 'rest' ? (
+          <>
+            <Text style={styles.phase}>{t('phase.rest')}</Text>
+            <Text style={styles.cue}>{t('player.restCue')}</Text>
+            <Text style={styles.counter}>
+              {segment.stepIndex + 1 < stepCount
+                ? `${t('player.nextBlock', { block: segment.stepIndex + 2, total: stepCount })} · `
+                : ''}
+              {t('player.remaining', {
+                seconds: Math.max(0, Math.ceil((segment.endMs - elapsedMs) / 1000)),
+              })}
+            </Text>
+          </>
+        ) : segment ? (
+          <>
+            <Text style={styles.phase}>{t(`phase.${segment.kind}`)}</Text>
+            {segment.cue ? <Text style={styles.cue}>{segment.cue}</Text> : null}
+            <Text style={styles.counter}>
+              {stepCount > 1
+                ? `${t('player.block', { block: segment.stepIndex + 1, total: stepCount })} · `
+                : ''}
+              {t('player.round', {
+                round: segment.round,
+                total: segment.roundsInStep,
+              })}{' '}
+              ·{' '}
+              {t('player.remaining', {
+                seconds: Math.max(0, Math.ceil((segment.endMs - elapsedMs) / 1000)),
+              })}
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.phase}>{session.title}</Text>
+            {session.subtitle ? <Text style={styles.cue}>{session.subtitle}</Text> : null}
+          </>
+        )}
+      </View>
 
-          <View style={styles.stage}>
-            <BreathCircle
-              segment={segment}
-              round={roundSegments}
-              running={clock.isRunning}
-            />
-          </View>
+      <View style={styles.controls}>
+        {finished ? (
+          <Pressable onPress={restart} style={styles.primary}>
+            <Text style={styles.primaryText}>{t('player.restart')}</Text>
+          </Pressable>
+        ) : clock.isRunning ? (
+          <Pressable onPress={clock.pause} style={styles.secondary}>
+            <Text style={styles.secondaryText}>{t('player.pause')}</Text>
+          </Pressable>
+        ) : (
+          <Pressable onPress={start} style={styles.primary}>
+            <Text style={styles.primaryText}>
+              {elapsedMs > 0 ? t('player.resume') : t('sessions.start')}
+            </Text>
+          </Pressable>
+        )}
 
-          <View style={styles.readout}>
-            {finished ? (
-              <>
-                <Text style={styles.phase}>{t("player.done.title")}</Text>
-                <Text style={styles.cue}>
-                  {t("player.done.hint", {
-                    minutes: Math.max(1, Math.round(totalMs / 60000)),
-                  })}
-                </Text>
-              </>
-            ) : segment?.kind === "rest" ? (
-              <>
-                <Text style={styles.phase}>{t("phase.rest")}</Text>
-                <Text style={styles.cue}>{t("player.restCue")}</Text>
-                <Text style={styles.counter}>
-                  {segment.stepIndex + 1 < stepCount
-                    ? `${t("player.nextBlock", { block: segment.stepIndex + 2, total: stepCount })} · `
-                    : ""}
-                  {t("player.remaining", {
-                    seconds: Math.max(
-                      0,
-                      Math.ceil((segment.endMs - elapsedMs) / 1000),
-                    ),
-                  })}
-                </Text>
-              </>
-            ) : segment ? (
-              <>
-                <Text style={styles.phase}>{t(`phase.${segment.kind}`)}</Text>
-                {segment.cue ? (
-                  <Text style={styles.cue}>{segment.cue}</Text>
-                ) : null}
-                <Text style={styles.counter}>
-                  {stepCount > 1
-                    ? `${t("player.block", { block: segment.stepIndex + 1, total: stepCount })} · `
-                    : ""}
-                  {t("player.round", {
-                    round: segment.round,
-                    total: segment.roundsInStep,
-                  })}{" "}
-                  ·{" "}
-                  {t("player.remaining", {
-                    seconds: Math.max(
-                      0,
-                      Math.ceil((segment.endMs - elapsedMs) / 1000),
-                    ),
-                  })}
-                </Text>
-              </>
-            ) : (
-              <>
-                <Text style={styles.phase}>{session.title}</Text>
-                {session.subtitle ? (
-                  <Text style={styles.cue}>{session.subtitle}</Text>
-                ) : null}
-              </>
-            )}
-          </View>
+        <Pressable
+          onPress={() => setSoundOn((s) => !s)}
+          style={[styles.secondary, soundOn && styles.secondaryActive]}
+        >
+          <Text style={[styles.secondaryText, soundOn && styles.secondaryTextActive]}>
+            {soundOn ? t('player.soundOn') : t('player.soundOff')}
+          </Text>
+        </Pressable>
+      </View>
 
-          <View style={styles.controls}>
-            {finished ? (
-              <Pressable onPress={restart} style={styles.primary}>
-                <Text style={styles.primaryText}>{t("player.restart")}</Text>
-              </Pressable>
-            ) : clock.isRunning ? (
-              <Pressable onPress={clock.pause} style={styles.secondary}>
-                <Text style={styles.secondaryText}>{t("player.pause")}</Text>
-              </Pressable>
-            ) : (
-              <Pressable onPress={start} style={styles.primary}>
-                <Text style={styles.primaryText}>
-                  {elapsedMs > 0 ? t("player.resume") : t("sessions.start")}
-                </Text>
-              </Pressable>
-            )}
-
+      {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
+      <View style={styles.musicRow}>
+        <Text style={styles.musicLabel}>{t('player.musicLabel')}</Text>
+        <View style={styles.musicChoices}>
+          <Pressable
+            onPress={() => setMusicTrack(null)}
+            style={[styles.chip, musicTrack === null && styles.chipActive]}
+          >
+            <Text style={[styles.chipText, musicTrack === null && styles.chipTextActive]}>
+              {t('player.musicOff')}
+            </Text>
+          </Pressable>
+          {TRACKS.map((track) => (
             <Pressable
-              onPress={() => setSoundOn((s) => !s)}
-              style={[styles.secondary, soundOn && styles.secondaryActive]}
+              key={track.id}
+              onPress={() => setMusicTrack(track.id)}
+              style={[styles.chip, musicTrack === track.id && styles.chipActive]}
             >
-              <Text
-                style={[
-                  styles.secondaryText,
-                  soundOn && styles.secondaryTextActive,
-                ]}
-              >
-                {soundOn ? t("player.soundOn") : t("player.soundOff")}
+              <Text style={[styles.chipText, musicTrack === track.id && styles.chipTextActive]}>
+                {t(`player.music.${track.id}`)}
               </Text>
             </Pressable>
-          </View>
-
-          {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
-          <View style={styles.musicRow}>
-            <Text style={styles.musicLabel}>{t("player.musicLabel")}</Text>
-            <View style={styles.musicChoices}>
-              <Pressable
-                onPress={() => setMusicTrack(null)}
-                style={[styles.chip, musicTrack === null && styles.chipActive]}
-              >
-                <Text
-                  style={[
-                    styles.chipText,
-                    musicTrack === null && styles.chipTextActive,
-                  ]}
-                >
-                  {t("player.musicOff")}
-                </Text>
-              </Pressable>
-              {TRACKS.map((track) => (
-                <Pressable
-                  key={track.id}
-                  onPress={() => setMusicTrack(track.id)}
-                  style={[
-                    styles.chip,
-                    musicTrack === track.id && styles.chipActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      musicTrack === track.id && styles.chipTextActive,
-                    ]}
-                  >
-                    {t(`player.music.${track.id}`)}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
-            {/* Zwei Regler, weil Ton und Musik unterschiedliche Aufgaben haben:
-            der Ton markiert den Wechsel und muss sich durchsetzen, die Musik
-            traegt den Hintergrund. Ein gemeinsamer Regler wuerde beide
-            verschieben. */}
-            <View style={styles.sliders}>
-              <VolumeSlider
-                label={t("player.volumeTone")}
-                value={toneVolume}
-                onChange={setToneVolume}
-              />
-              <VolumeSlider
-                label={t("player.volumeMusic")}
-                value={musicVolume}
-                onChange={setMusicVolume}
-              />
-            </View>
-          </View>
+          ))}
         </View>
 
-        <View style={styles.textColumn}>
-          {session.description_md ? (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t("sessions.about")}</Text>
-              <Text style={styles.sectionText}>{session.description_md}</Text>
-            </View>
-          ) : null}
-
-          {session.benefits_md ? (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t("sessions.benefits")}</Text>
-              <Text style={styles.sectionText}>{session.benefits_md}</Text>
-            </View>
-          ) : null}
-
-          {session.contraindications_md ? (
-            <View style={styles.notice}>
-              <Text style={styles.noticeTitle}>{t("sessions.notice")}</Text>
-              <Text style={styles.noticeText}>
-                {session.contraindications_md}
-              </Text>
-            </View>
-          ) : null}
+        {/* Zwei Regler, weil Ton und Musik unterschiedliche Aufgaben haben:
+        der Ton markiert den Wechsel und muss sich durchsetzen, die Musik
+        traegt den Hintergrund. Ein gemeinsamer Regler wuerde beide
+        verschieben. */}
+        <View style={styles.sliders}>
+          <VolumeSlider
+            label={t('player.volumeTone')}
+            value={toneVolume}
+            onChange={setToneVolume}
+          />
+          <VolumeSlider
+            label={t('player.volumeMusic')}
+            value={musicVolume}
+            onChange={setMusicVolume}
+          />
         </View>
       </View>
+
+      {session.description_md ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('sessions.about')}</Text>
+          <Text style={styles.sectionText}>{session.description_md}</Text>
+        </View>
+      ) : null}
+
+      {session.benefits_md ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('sessions.benefits')}</Text>
+          <Text style={styles.sectionText}>{session.benefits_md}</Text>
+        </View>
+      ) : null}
+
+      {session.contraindications_md ? (
+        <View style={styles.notice}>
+          <Text style={styles.noticeTitle}>{t('sessions.notice')}</Text>
+          <Text style={styles.noticeText}>{session.contraindications_md}</Text>
+        </View>
+      ) : null}
     </ScrollView>
   );
 }
@@ -376,16 +319,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
     gap: spacing.lg,
-    alignItems: "center",
+    alignItems: 'center',
     backgroundColor: colors.background,
   },
   topRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    alignSelf: "stretch",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignSelf: 'stretch',
     maxWidth: 620,
-    width: "100%",
+    width: '100%',
   },
   back: {
     fontSize: 14,
@@ -395,31 +338,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.ink700,
   },
-  // Unter dem Breakpoint eine Spalte, darueber zwei nebeneinander - gesteuert
-  // per Media Query ueber 'player-layout' (src/design/responsive.ts), nicht
-  // ueber eine in JavaScript gemessene Fensterbreite.
-  layout: {
-    flexDirection: "column",
-    alignItems: "center",
-    alignSelf: "stretch",
-    gap: spacing.lg,
-    maxWidth: 1100,
-    width: "100%",
-  },
-  stageColumn: {
-    alignItems: "center",
-    gap: spacing.lg,
-    alignSelf: "stretch",
-  },
-  textColumn: {
-    alignItems: "center",
-    gap: spacing.lg,
-    alignSelf: "stretch",
-  },
   sliders: {
-    alignSelf: "stretch",
+    alignSelf: 'stretch',
     maxWidth: 320,
-    width: "100%",
+    width: '100%',
     gap: spacing.sm,
     marginTop: spacing.sm,
   },
@@ -427,28 +349,28 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   readout: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: spacing.sm,
     minHeight: 96,
   },
   phase: {
     fontSize: 24,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.ink900,
   },
   cue: {
     fontSize: 15,
     color: colors.ink700,
-    textAlign: "center",
+    textAlign: 'center',
   },
   counter: {
     fontSize: 13,
     color: colors.ink700,
   },
   controls: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: spacing.sm,
-    alignItems: "center",
+    alignItems: 'center',
   },
   primary: {
     backgroundColor: colors.ocean700,
@@ -459,7 +381,7 @@ const styles = StyleSheet.create({
   primaryText: {
     color: colors.surface,
     fontSize: 15,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   secondary: {
     borderRadius: radius.full,
@@ -479,24 +401,24 @@ const styles = StyleSheet.create({
   },
   secondaryTextActive: {
     color: colors.ocean700,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   musicRow: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: spacing.sm,
     maxWidth: 620,
   },
   musicLabel: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.ink900,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   musicChoices: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: spacing.sm,
   },
   chip: {
@@ -517,12 +439,12 @@ const styles = StyleSheet.create({
   },
   chipTextActive: {
     color: colors.ocean700,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   effectRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: spacing.sm,
     maxWidth: 620,
   },
@@ -533,7 +455,7 @@ const styles = StyleSheet.create({
   },
   effectText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: '600',
     letterSpacing: 0.3,
   },
   // Beschreibung und Wirkung stehen unter den Bedienelementen, nicht darueber:
@@ -541,22 +463,22 @@ const styles = StyleSheet.create({
   section: {
     maxWidth: 620,
     gap: 6,
-    alignSelf: "center",
-    alignItems: "center",
+    alignSelf: 'center',
+    alignItems: 'center',
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.ink900,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
-    textAlign: "center",
+    textAlign: 'center',
   },
   sectionText: {
     fontSize: 15,
     lineHeight: 24,
     color: colors.ink700,
-    textAlign: "center",
+    textAlign: 'center',
   },
   notice: {
     maxWidth: 620,
@@ -569,9 +491,9 @@ const styles = StyleSheet.create({
   },
   noticeTitle: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.ink900,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   noticeText: {
