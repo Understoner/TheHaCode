@@ -5,7 +5,7 @@ test('Startseite laedt und zeigt den Titel', async ({ page }) => {
   // exact: true pinnt die Ueberschrift selbst. Das Wortzeichen in der NavBar,
   // gegen dessen Doppeltreffer das urspruenglich noetig war, gibt es nicht
   // mehr - die Genauigkeit bleibt trotzdem richtig.
-  await expect(page.getByText('DER ATEM CODE', { exact: true })).toBeVisible();
+  await expect(page.getByText('DER ATEMCODE', { exact: true })).toBeVisible();
 });
 
 // Regressionsschutz fuer die untere Tab-Leiste. Der Fehler, der das noetig
@@ -41,6 +41,25 @@ test('Mobile: alle Eintraege der Tab-Leiste stehen gleich aufgebaut da', async (
     expect(Math.abs(text.x + text.width / 2 - itemCenter), `Beschriftung von "${label}" mittig`).toBeLessThan(1.5);
     // ... und untereinander, nicht nebeneinander
     expect(text.y, `Beschriftung von "${label}" unter dem Symbol`).toBeGreaterThanOrEqual(glyph.y + glyph.height);
+  }
+});
+
+// Am 14.08.2026 lieferte jede Route ausser "/" bei DIREKTEM Aufruf einen 404 —
+// auf Staging wie auf Production, und zwar unbemerkt: innerhalb der Seite
+// navigiert expo-router clientseitig, da funktioniert jeder Link. Betroffen war
+// nur, was von aussen kommt: Lesezeichen, geteilter Link, Neuladen auf einer
+// Unterseite, Treffer aus einer Suchmaschine. Beim Impressum ist das keine
+// Kosmetik. Aufgefallen ist es beim Nachsehen von Hand, nicht durch einen Test —
+// deshalb dieser hier.
+//
+// Der Test ruft bewusst per request statt per page auf: page.goto() wuerde bei
+// einer 404-Seite, die trotzdem rendert, gruen bleiben.
+const ROUTEN = ['/', '/kurse', '/team', '/impressum', '/datenschutz'];
+
+test('jede Route ist auch direkt aufrufbar, nicht nur ueber einen Klick', async ({ request }) => {
+  for (const route of ROUTEN) {
+    const response = await request.get(route);
+    expect(response.status(), `${route} direkt aufgerufen`).toBe(200);
   }
 });
 
