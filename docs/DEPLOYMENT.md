@@ -126,9 +126,7 @@ Der **Database Connect Wizard** im Node.js-Dashboard trägt die beiden Supabase-
 - [x] **Content Security Policy** — steht als `<meta http-equiv>` in `src/app/+html.tsx` und wird beim Build mitgeliefert. Sie erlaubt Verbindungen und Bilder nur zur eigenen Domain und zum Supabase-Projekt; selbst eingeschleuster Code hätte damit kein Ziel, an das er etwas ausleiten könnte.
 - [x] **Zwei Header, die per `<meta>` nicht gehen** — `X-Content-Type-Options: nosniff` und `frame-ancestors 'none'` (gegen Clickjacking) wertet ein Browser nur als echten Antwort-Header aus. V1 hat keinen eigenen Serverprozess, der sie setzen könnte, deshalb schreibt `scripts/write-build-info.mjs` bei jedem Build ein `dist/.htaccess` — derselbe Weg wie beim Staging-`robots.txt`.
 
-  **Das ist die einzige Maßnahme im Projekt, die wir nicht selbst beweisen können:** ob Hostinger bei einer Node.js Web App eine `.htaccess` überhaupt auswertet, zeigt sich erst am ausgerollten System. Genau dafür gibt es den Smoke-Test *„Schutz-Header, die per `<meta>` nicht gehen, sind gesetzt"*.
-
-  Ist dieser Test nach dem ersten Deployment rot, greift der Weg nicht. Dann entweder die Header in hPanel setzen oder — falls hPanel das bei Node.js Web Apps nicht anbietet — den Test entfernen und den Punkt hier wieder auf offen setzen. **Nicht** einfach rot stehen lassen: ein dauerhaft roter Smoke-Test blockiert die Beförderung nach `main`.
+  **Am 14.08.2026 auf Staging bestätigt:** Hostinger wertet die Datei aus, alle drei Header liegen an. Der Smoke-Test *„Schutz-Header, die per `<meta>` nicht gehen, sind gesetzt"* hält das fest. Sollte er später rot werden, ist die Ursache eine Änderung an der Hosting-Konfiguration, nicht am Repo.
 
 ---
 
@@ -185,6 +183,34 @@ Von Merge nach `develop` bis Livegang: etwa 12 bis 18 Minuten, davon die Hälfte
 Hostinger baut unabhängig von GitHub Actions. Ohne Wartepunkt würden die Smoke-Tests die **alte** Version prüfen und fälschlich grün melden — der gefährlichste denkbare Fehlerfall, weil er Vertrauen erzeugt, wo keines hingehört.
 
 `scripts/wait-for-deploy.sh` fragt die Datei ab, bis ihr Zeitstempel nach dem Start des Workflows liegt. Sie entsteht in `scripts/write-build-info.mjs` am Ende des Builds und wird als gewöhnliche statische Datei ausgeliefert.
+
+### Wenn der Wartepunkt rot wird
+
+Der Schritt „Auf Hostinger-Deployment warten" kann aus zwei grundverschiedenen
+Gründen scheitern. Der Log unterscheidet sie seit dem 14.08.2026 ausdrücklich —
+entscheidend ist der **curl-Exitcode** in den Wartezeilen:
+
+| Meldung | Bedeutung | Was zu tun ist |
+|---|---|---|
+| `curl-Exitcode 28: Connection timed out` bei **jedem** Abruf | Die Seite ist vom GitHub-Runner aus nicht erreichbar. Der Build kann längst fertig sein. | hPanel → CDN/Bot-Schutz für die Subdomain. Nicht im Build-Protokoll suchen. |
+| `noch die vorherige Version (builtAt=…)` | Die Seite antwortet, Hostinger hat aber nicht neu gebaut. | hPanel → Deployments, Build-Protokoll ansehen. |
+| `curl-Exitcode 22: … 404` | Erreichbar, aber `build-info.json` fehlt — Build unvollständig oder falsches Output-Verzeichnis. | Build-Einstellungen prüfen (Output `dist`). |
+
+**Erlebt am 14.08.2026:** erster Fall. `dev.deratemcode.at` lieferte den neuen
+Commit bereits 44 Sekunden nach Workflow-Start korrekt aus, inklusive aller
+Schutz-Header — der Runner kam nur nicht daran, jeder Abruf lief in den
+Timeout. Die Antwort trägt `server: hcdn`, es steht ein Hostinger-CDN davor.
+Am 10.08. hatte derselbe Schritt noch 11 Sekunden gebraucht.
+
+Wichtig für die Einordnung: Ein roter Wartepunkt heißt **nicht**, dass die
+ausgerollte Seite kaputt ist. Er heißt, dass die Pipeline sie nicht prüfen
+konnte — und sich deshalb weigert, grün zu melden. Genau dafür ist er da.
+Ein schneller Gegencheck von außen:
+
+```bash
+curl -sI https://dev.deratemcode.at/ | head -1
+curl -s  https://dev.deratemcode.at/build-info.json
+```
 
 ### Wenn Production rot wird
 
