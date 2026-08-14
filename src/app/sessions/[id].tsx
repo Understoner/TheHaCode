@@ -86,6 +86,9 @@ function Player({ session }: { session: PlayableExercise }) {
   useEffect(() => {
     if (!soundOn || !segment || segIndex === lastCuedRef.current) return;
     lastCuedRef.current = segIndex;
+    // In der Pause zwischen zwei Bloecken schlaegt nichts an - sie ist
+    // Ruhe, kein Phasenwechsel.
+    if (segment.kind === 'rest') return;
     playCue(audioRef.current, segment.kind, segment.durationMs);
   }, [segIndex, segment, soundOn]);
 
@@ -130,6 +133,19 @@ function Player({ session }: { session: PlayableExercise }) {
             <Text style={styles.phase}>{t('player.done.title')}</Text>
             <Text style={styles.cue}>
               {t('player.done.hint', { minutes: Math.max(1, Math.round(totalMs / 60000)) })}
+            </Text>
+          </>
+        ) : segment?.kind === 'rest' ? (
+          <>
+            <Text style={styles.phase}>{t('phase.rest')}</Text>
+            <Text style={styles.cue}>{t('player.restCue')}</Text>
+            <Text style={styles.counter}>
+              {segment.stepIndex + 1 < stepCount
+                ? `${t('player.nextBlock', { block: segment.stepIndex + 2, total: stepCount })} · `
+                : ''}
+              {t('player.remaining', {
+                seconds: Math.max(0, Math.ceil((segment.endMs - elapsedMs) / 1000)),
+              })}
             </Text>
           </>
         ) : segment ? (

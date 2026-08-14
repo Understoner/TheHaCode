@@ -107,6 +107,14 @@ export function BreathCircle({ segment, round, running }: Props) {
   useEffect(() => {
     if (!segment) return;
 
+    // Pause zwischen zwei Bloecken: der Ring ruht am kleinsten Radius und die
+    // Marke parkt bei 6 Uhr - genau dort, wo das naechste Einatmen beginnt.
+    if (segment.kind === 'rest') {
+      scale.setValue(RADIUS_MIN);
+      angle.setValue(0);
+      return;
+    }
+
     // prefers-reduced-motion: fester Radius, die Marke springt statt zu
     // laufen. Zaehler und Beschriftung laufen normal weiter (BACKLOG T09).
     if (reduceMotion) {
@@ -163,7 +171,11 @@ export function BreathCircle({ segment, round, running }: Props) {
   const markerCounterScale = Animated.divide(1, scale);
 
   const toneOfPhase =
-    segment?.kind === 'exhale' || segment?.kind === 'hold_out' ? colors.sage500 : colors.ocean500;
+    segment?.kind === 'rest'
+      ? colors.ink500
+      : segment?.kind === 'exhale' || segment?.kind === 'hold_out'
+        ? colors.sage500
+        : colors.ocean500;
 
   return (
     <View style={styles.box}>
