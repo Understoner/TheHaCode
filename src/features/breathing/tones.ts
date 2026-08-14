@@ -43,11 +43,14 @@ import type { PhaseKind } from '@/types/breathing';
 // haeufigste bei Handpans, und benachbarte Toene daraus klingen in jeder
 // Reihenfolge zusammen. Tiefer als der erste Entwurf: eine Handpan liegt in
 // dieser Lage, und fuer eine Atemuebung ist es angenehmer.
+// Die Tonhoehe faellt ueber den Atemzug hinweg ab und kommt beim leeren
+// Halten zur Ruhe - dem tiefsten Punkt. D3 ist dabei der Grundton der
+// Stimmung, der Kreis schliesst sich also hoerbar.
 const PITCH: Record<PhaseKind, number> = {
-  inhale: 220.0, // A3 - traegt aufwaerts
-  hold_in: 261.63, // C4 - hellster Ton
-  exhale: 146.83, // D3 - Grundton der Stimmung, tief und ruhend
-  hold_out: 174.61, // F3
+  inhale: 220.0, // A3
+  hold_in: 261.63, // C4 - hellster Ton, oben angekommen
+  exhale: 174.61, // F3
+  hold_out: 146.83, // D3 - Grundton, tiefster Punkt
   free_breathing: 0,
 };
 

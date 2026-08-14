@@ -157,7 +157,8 @@ describe('playCue', () => {
     });
 
     expect(new Set(grundtoene).size, 'vier verschiedene Grundtoene').toBe(4);
-    // Ausatmen liegt am tiefsten - der Ton soll herunterfuehren.
-    expect(Math.min(...grundtoene)).toBe(grundtoene[2]);
+    // Das leere Halten liegt am tiefsten: der Klang kommt am Ende des
+    // Atemzugs zur Ruhe, nicht schon beim Ausatmen.
+    expect(Math.min(...grundtoene)).toBe(grundtoene[3]);
   });
 });
