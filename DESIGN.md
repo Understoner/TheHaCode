@@ -148,7 +148,9 @@ Ein zweifarbiges System auf getöntem Grund: Ocean für die primäre Handlung (E
 
 Einspaltig auf Mobile, responsives `flexWrap`-Raster ab genug Breite (Kurse-Grid, News-Hero-Karten, Team-Karten: `flexBasis` 300–320px, wächst frei). Kein festes Spaltenraster, keine Breakpoint-Sprünge in der Kartenbreite — die Karten verteilen sich, wie viel Platz sie bekommen.
 
-**Navigation ist der einzige echte Breakpoint-Wechsel:** unter 768px eine fixe Tab-Bar unten (Icon + Label, vier Ziele), ab 768px eine Pillen-Leiste oben neben dem Wortzeichen „thehacode". Der Breakpoint-Wert und die Tab-Bar-Höhe stehen als Konstanten in `src/design/navigation.ts` (`MOBILE_NAV_BREAKPOINT`, `MOBILE_TAB_BAR_HEIGHT`), der Root-Container reserviert auf Mobile entsprechend `paddingBottom`, damit der Footer nicht unter der Tab-Bar verschwindet.
+**Navigation ist der einzige echte Breakpoint-Wechsel:** unter 768px eine fixe Tab-Bar unten (Icon + Label, fünf Ziele) und gar keine Kopfzeile, ab 768px eine Pillen-Leiste oben. Ein Wortzeichen gibt es nicht mehr — die Kopfzeile trüge nur noch die Pillen und entfällt deshalb auf Mobile ganz, statt als leerer Streifen mit Trennlinie stehen zu bleiben.
+
+Der Breakpoint ist **CSS und nicht JavaScript**: beide Fassungen stehen im HTML, ausgeblendet wird per Media Query über `data-thc`-Attribute (`src/design/responsive.ts`). Grund ist der statische Export — `useWindowDimensions()` kennt zur Bauzeit keine Fensterbreite und lieferte deshalb immer die Mobilfassung, die React auf Desktop verwarf und komplett neu baute. Der Breakpoint-Wert und die Tab-Bar-Höhe stehen als Konstanten in `src/design/navigation.ts` (`MOBILE_NAV_BREAKPOINT`, `MOBILE_TAB_BAR_HEIGHT`), der Root-Container reserviert auf Mobile entsprechend `paddingBottom` inklusive `env(safe-area-inset-bottom)`, damit der Footer weder unter der Tab-Bar noch unter dem Home-Indikator verschwindet.
 
 ## Elevation & Depth
 
@@ -164,8 +166,10 @@ Drei Rundungsstufen plus Pillenform: `sm` (8px, kleine Elemente wie Skeleton-Bal
 Gefüllter Pillen-Button (`radius.full`), Ocean-700-Fläche, weißer Text, dunkler (Ocean 800) im Hover-/Aktiv-Zustand. Ersetzt vollständig die Textlink-CTAs der Vorgängerfassung.
 
 ### Navigation
-**Desktop (≥768px):** Wortzeichen „thehacode" links, daneben eine Reihe Pillen — aktives Ziel gefüllt (Ocean 700, weißer Text), inaktive Ziele als schlichter Text in einer umrandeten Pille. Noch nicht gebaute Ziele (aktuell: Übungen) erscheinen gedämpft mit „bald verfügbar"-Zusatz, ohne Link.
-**Mobile (<768px):** Wortzeichen oben als schlanke Kopfzeile, Navigation wandert in eine fixe Tab-Bar unten (Icon über Label, vier Ziele). Aktives Ziel: Icon und Label in Ocean 700. Noch nicht gebaute Ziele zeigen sich durch die reduzierte Ink-700-Farbe als inaktiv, ohne zusätzlichen Text — in der Tab-Bar ist dafür kein Platz.
+**Desktop (≥768px):** eine Reihe Pillen in der Kopfzeile — aktives Ziel gefüllt (Ocean 700, weißer Text), inaktive Ziele als schlichter Text in einer umrandeten Pille. Noch nicht gebaute Ziele (aktuell: Sessions, Konto) tragen den Zusatz „bald verfügbar" und keinen Link. Bewusst **ohne** reduzierte Deckkraft: die drückte Ink 700 auf etwa 2:1 und damit unter die 4,5:1-Regel.
+**Mobile (<768px):** keine Kopfzeile, die Navigation sitzt vollständig in der fixen Tab-Bar unten (Icon über Label, fünf Ziele). Aktives Ziel: Icon und Label in Ocean 700, dazu `aria-current="page"`. Noch nicht gebaute Ziele erkennt man am Symbol in Ink 500 — für den Zusatz „bald verfügbar" ist in der Tab-Bar kein Platz, und die Beschriftung bleibt in Ink 700, damit der Kontrast hält.
+
+Alle Tab-Einträge setzen `display: flex` ausdrücklich: die Hälfte ist ein expo-router-`<Link>`, der im Web ein `<Text>` mit `display: inline` rendert — als Flex-Kind wird daraus `block`, und Zentrierung wie Abstand greifen dann nicht.
 **Icons:** handgebaute Liniensymbole aus `View`-Formen (Ring, Balken, Kreis+Silhouette) — kein Emoji, keine neue SVG-Bibliothek.
 
 ### Cover-Bild (News, Kurse)

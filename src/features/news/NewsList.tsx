@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CoverImage } from '@/components/CoverImage';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
-import { MOBILE_NAV_BREAKPOINT, RECENT_ITEMS_COUNT } from '@/design/navigation';
+import { RECENT_ITEMS_COUNT } from '@/design/navigation';
+import { responsive } from '@/design/responsive';
 import { NEWS_CATEGORIES, newsCategoryColors, type NewsCategory } from '@/features/news/categories';
 import { useNewsList } from '@/features/news/useNewsList';
 import { estimateReadingMinutes } from '@/features/news/readingTime';
@@ -18,8 +19,6 @@ export function NewsList() {
   const { t } = useTranslation();
   const [category, setCategory] = useState<CategoryFilter>('all');
   const query = useNewsList(category === 'all' ? undefined : category);
-  const { width } = useWindowDimensions();
-  const isMobile = width < MOBILE_NAV_BREAKPOINT;
 
   const filters: CategoryFilter[] = ['all', ...NEWS_CATEGORIES];
 
@@ -61,9 +60,9 @@ export function NewsList() {
               {recent.length > 0 ? (
                 <View style={styles.section}>
                   <Text style={styles.sectionHeading}>{t('news.recentTitle')}</Text>
-                  <View style={styles.heroRow}>
+                  <View {...responsive('news-grid')} style={styles.heroRow}>
                     {recent.map((post, i) => (
-                      <View key={post.id} style={[styles.heroCard, !isMobile && styles.heroCardFixed]}>
+                      <View key={post.id} style={styles.heroCard}>
                         <View style={styles.heroCoverWrap}>
                           <CoverImage
                             path={post.cover_image_path}
@@ -182,13 +181,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     overflow: 'hidden',
   },
-  // Desktop: feste Breite statt flexGrow, damit eine einzelne Karte nicht auf
-  // volle Breite gezogen wird, wenn (noch) weniger als RECENT_ITEMS_COUNT
-  // Eintraege existieren.
-  heroCardFixed: {
-    flexBasis: '31%',
-    minWidth: 280,
-  },
+  // Die Desktop-Breite ('news-grid') steht als Media Query in
+  // src/design/responsive.ts - siehe dort, warum nicht mehr in JavaScript.
   heroCoverWrap: {
     position: 'relative',
   },

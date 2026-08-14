@@ -123,6 +123,12 @@ Der **Database Connect Wizard** im Node.js-Dashboard trägt die beiden Supabase-
 - [ ] `https://staging.deine-domain.at/build-info.json` liefert einen Zeitstempel
 - [x] **Staging vor Suchmaschinen schützen** — `scripts/write-build-info.mjs` schreibt bei `EXPO_PUBLIC_APP_ENV=staging` automatisch ein sperrendes `dist/robots.txt`. Hostingers Passwortschutz für Verzeichnisse (hPanel → Advanced) steht bei Node.js Web Apps nicht zur Auswahl, deshalb dieser Weg statt manueller hPanel-Konfiguration.
 - [ ] Unter **Security → Vulnerabilities** den Schwachstellen-Scan ansehen; Korrektur-Pull-Requests kommen automatisch
+- [x] **Content Security Policy** — steht als `<meta http-equiv>` in `src/app/+html.tsx` und wird beim Build mitgeliefert. Sie erlaubt Verbindungen und Bilder nur zur eigenen Domain und zum Supabase-Projekt; selbst eingeschleuster Code hätte damit kein Ziel, an das er etwas ausleiten könnte.
+- [x] **Zwei Header, die per `<meta>` nicht gehen** — `X-Content-Type-Options: nosniff` und `frame-ancestors 'none'` (gegen Clickjacking) wertet ein Browser nur als echten Antwort-Header aus. V1 hat keinen eigenen Serverprozess, der sie setzen könnte, deshalb schreibt `scripts/write-build-info.mjs` bei jedem Build ein `dist/.htaccess` — derselbe Weg wie beim Staging-`robots.txt`.
+
+  **Das ist die einzige Maßnahme im Projekt, die wir nicht selbst beweisen können:** ob Hostinger bei einer Node.js Web App eine `.htaccess` überhaupt auswertet, zeigt sich erst am ausgerollten System. Genau dafür gibt es den Smoke-Test *„Schutz-Header, die per `<meta>` nicht gehen, sind gesetzt"*.
+
+  Ist dieser Test nach dem ersten Deployment rot, greift der Weg nicht. Dann entweder die Header in hPanel setzen oder — falls hPanel das bei Node.js Web Apps nicht anbietet — den Test entfernen und den Punkt hier wieder auf offen setzen. **Nicht** einfach rot stehen lassen: ein dauerhaft roter Smoke-Test blockiert die Beförderung nach `main`.
 
 ---
 

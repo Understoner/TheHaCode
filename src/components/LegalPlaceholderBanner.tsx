@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, spacing } from '@/design/tokens';
@@ -10,13 +11,15 @@ type Props = {
 // Domain wird sofort nach Fertigstellung umgehaengt (SAD §2.4), das
 // Sicherheitsnetz muss deshalb auch in Production wirken.
 export function LegalPlaceholderBanner({ active }: Props) {
+  const { t } = useTranslation('legal');
+
   if (!active) {
     return null;
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Platzhalterdaten — vor Livegang ausfüllen.</Text>
+      <Text style={styles.text}>{t('placeholderBanner')}</Text>
     </View>
   );
 }

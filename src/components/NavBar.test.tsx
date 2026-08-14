@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -17,22 +17,53 @@ vi.mock('expo-router', () => ({
   usePathname: () => '/',
 }));
 
+// Seit dem Umstieg auf CSS-Breakpoints stehen BEIDE Navigationsfassungen im
+// HTML; sichtbar ist je nach Fensterbreite genau eine, ausgeblendet per Media
+// Query (src/design/responsive.ts). jsdom wertet keine Media Queries aus, hier
+// sind also immer beide zu sehen - genau das pruefen die Tests unten. Dass die
+// sichtbare Fassung dann auch richtig aussieht, prueft der Playwright-Test in
+// e2e/smoke.spec.ts an echtem Layout.
+function variants() {
+  const desktop = document.querySelector('[data-thc="nav-desktop"]');
+  const mobile = document.querySelector('[data-thc="nav-mobile"]');
+  if (!(desktop instanceof HTMLElement) || !(mobile instanceof HTMLElement)) {
+    throw new Error('Beide Navigationsfassungen muessen im HTML stehen');
+  }
+  return { desktop, mobile };
+}
+
 describe('NavBar', () => {
-  it('zeigt News, Kurse und Team als Links', () => {
+  it('rendert beide Fassungen, damit CSS und nicht JavaScript entscheidet', () => {
     render(<NavBar />);
 
-    expect(screen.getByText('News')).toBeTruthy();
-    expect(screen.getByText('Kurse')).toBeTruthy();
-    expect(screen.getByText('Team')).toBeTruthy();
+    const { desktop, mobile } = variants();
+    for (const label of ['News', 'Kurse', 'Team', 'Sessions', 'Konto']) {
+      expect(within(desktop).getByText(label, { exact: false })).toBeTruthy();
+      expect(within(mobile).getByText(label)).toBeTruthy();
+    }
   });
 
-  it('zeigt noch nicht gebaute Funktionen nicht als Link', () => {
+  it('kennzeichnet die mobile Fassung als Navigationsbereich', () => {
     render(<NavBar />);
 
-    const uebungen = screen.getByText('Übungen');
-    expect(uebungen.closest('a')).toBeNull();
+    expect(variants().mobile.tagName).toBe('NAV');
+  });
 
-    const konto = screen.getByText('Konto');
-    expect(konto.closest('a')).toBeNull();
+  it('markiert die aktuelle Seite in beiden Fassungen', () => {
+    render(<NavBar />);
+
+    const { desktop, mobile } = variants();
+    expect(desktop.querySelector('a[aria-current="page"]')?.getAttribute('href')).toBe('/');
+    expect(mobile.querySelector('a[aria-current="page"]')?.getAttribute('href')).toBe('/');
+  });
+
+  it('zeigt noch nicht gebaute Funktionen in keiner Fassung als Link', () => {
+    render(<NavBar />);
+
+    for (const label of ['Sessions', 'Konto']) {
+      for (const found of screen.getAllByText(label, { exact: false })) {
+        expect(found.closest('a')).toBeNull();
+      }
+    }
   });
 });

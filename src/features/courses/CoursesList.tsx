@@ -1,18 +1,18 @@
 import { useTranslation } from 'react-i18next';
-import { Linking, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { CoverImage } from '@/components/CoverImage';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
-import { MOBILE_NAV_BREAKPOINT, RECENT_ITEMS_COUNT } from '@/design/navigation';
+import { RECENT_ITEMS_COUNT } from '@/design/navigation';
+import { responsive } from '@/design/responsive';
 import { useCoursesList } from '@/features/courses/useCoursesList';
+import { openExternalUrl, safeExternalUrl } from '@/lib/externalLink';
 
 export function CoursesList() {
   const { t } = useTranslation();
   const query = useCoursesList();
-  const { width } = useWindowDimensions();
-  const isMobile = width < MOBILE_NAV_BREAKPOINT;
 
   return (
     <QueryBoundary query={query} empty={{ title: t('kurse.empty.title'), hint: t('kurse.empty.hint') }}>
@@ -25,28 +25,31 @@ export function CoursesList() {
             {recent.length > 0 ? (
               <View style={styles.section}>
                 <Text style={styles.sectionHeading}>{t('kurse.recentTitle')}</Text>
-                <View style={styles.grid}>
-                  {recent.map((course, i) => (
-                    <View key={course.id} style={[styles.card, !isMobile && styles.cardFixed]}>
-                      <CoverImage
-                        path={course.cover_image_path}
-                        label={course.title}
-                        tone={i % 2 === 0 ? 'ocean' : 'sage'}
-                        style={styles.cover}
-                      />
-                      <View style={styles.cardBody}>
-                        <Text style={styles.title}>{course.title}</Text>
-                        <Text style={styles.description}>{course.description}</Text>
-                        <View style={styles.metaRow}>
-                          {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
-                          {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
+                <View {...responsive('courses-grid')} style={styles.grid}>
+                  {recent.map((course, i) => {
+                    const signupUrl = safeExternalUrl(course.signup_url);
+                    return (
+                      <View key={course.id} style={styles.card}>
+                        <CoverImage
+                          path={course.cover_image_path}
+                          label={course.title}
+                          tone={i % 2 === 0 ? 'ocean' : 'sage'}
+                          style={styles.cover}
+                        />
+                        <View style={styles.cardBody}>
+                          <Text style={styles.title}>{course.title}</Text>
+                          <Text style={styles.description}>{course.description}</Text>
+                          <View style={styles.metaRow}>
+                            {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
+                            {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
+                          </View>
+                          {signupUrl ? (
+                            <Button label={t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
+                          ) : null}
                         </View>
-                        {course.signup_url ? (
-                          <Button label={t('kurse.signup')} onPress={() => Linking.openURL(course.signup_url!)} />
-                        ) : null}
                       </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               </View>
             ) : null}
@@ -55,26 +58,29 @@ export function CoursesList() {
               <View style={styles.section}>
                 <Text style={styles.sectionHeading}>{t('kurse.moreTitle')}</Text>
                 <View style={styles.list}>
-                  {older.map((course) => (
-                    <View key={course.id} style={styles.listRow}>
-                      <CoverImage
-                        path={course.cover_image_path}
-                        label={course.title}
-                        tone="sage"
-                        style={styles.listCover}
-                      />
-                      <View style={styles.listText}>
-                        <Text style={styles.listTitle}>{course.title}</Text>
-                        <View style={styles.metaRow}>
-                          {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
-                          {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
+                  {older.map((course) => {
+                    const signupUrl = safeExternalUrl(course.signup_url);
+                    return (
+                      <View key={course.id} style={styles.listRow}>
+                        <CoverImage
+                          path={course.cover_image_path}
+                          label={course.title}
+                          tone="sage"
+                          style={styles.listCover}
+                        />
+                        <View style={styles.listText}>
+                          <Text style={styles.listTitle}>{course.title}</Text>
+                          <View style={styles.metaRow}>
+                            {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
+                            {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
+                          </View>
                         </View>
+                        {signupUrl ? (
+                          <Button label={t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
+                        ) : null}
                       </View>
-                      {course.signup_url ? (
-                        <Button label={t('kurse.signup')} onPress={() => Linking.openURL(course.signup_url!)} />
-                      ) : null}
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               </View>
             ) : null}
@@ -112,13 +118,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     overflow: 'hidden',
   },
-  // Desktop: feste Breite statt flexGrow - eine einzelne Karte soll nicht auf
-  // volle Breite gezogen werden, solange (noch) weniger als
-  // RECENT_ITEMS_COUNT Kurse existieren.
-  cardFixed: {
-    flexBasis: '31%',
-    minWidth: 280,
-  },
+  // Die Desktop-Breite ('courses-grid') steht als Media Query in
+  // src/design/responsive.ts - siehe dort, warum nicht mehr in JavaScript.
   cover: {
     width: '100%',
     aspectRatio: 16 / 9,
