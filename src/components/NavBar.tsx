@@ -1,9 +1,10 @@
 import { Link, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing } from '@/design/tokens';
-import { MOBILE_NAV_BREAKPOINT, MOBILE_TAB_BAR_HEIGHT, navItems, type NavIcon } from '@/design/navigation';
+import { MOBILE_TAB_BAR_SAFE_HEIGHT, navItems, type NavIcon } from '@/design/navigation';
+import { responsive } from '@/design/responsive';
 
 // Handgebaute Liniensymbole statt Emoji (craft-floor: kein Unicode/Emoji als
 // Icon) und statt einer neuen SVG-Bibliothek (CLAUDE.md: keine neue
@@ -50,70 +51,84 @@ function NavGlyph({ icon, color }: { icon: NavIcon; color: string }) {
   }
 }
 
+// Beide Fassungen stehen immer im HTML, sichtbar ist je nach Fensterbreite
+// genau eine - ausgeblendet wird per Media Query, nicht per JavaScript
+// (Begruendung in src/design/responsive.ts). display: none nimmt die
+// ausgeblendete Fassung auch aus dem Accessibility-Baum, Screenreader sehen
+// die Navigation also nicht doppelt.
 export function NavBar() {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= MOBILE_NAV_BREAKPOINT;
 
   return (
     <>
       <View style={styles.topBar}>
         <Text style={styles.wordmark}>thehacode</Text>
-        {isDesktop ? (
-          <View style={styles.pillRow}>
-            {navItems.map((item) => {
-              if (item.kind === 'comingSoon') {
-                return (
-                  <Text key={item.key} style={styles.comingSoon}>
-                    {t(item.labelKey)} · {t('nav.comingSoon')}
-                  </Text>
-                );
-              }
-              const active = item.href === pathname;
-              return (
-                <Link key={item.key} href={item.href}>
-                  <View style={[styles.pill, active && styles.pillActive]}>
-                    <Text style={[styles.pillText, active && styles.pillTextActive]}>{t(item.labelKey)}</Text>
-                  </View>
-                </Link>
-              );
-            })}
-          </View>
-        ) : null}
-      </View>
-
-      {isDesktop ? null : (
-        <View style={styles.mobileTabBar}>
+        <View {...responsive('nav-desktop')} style={styles.pillRow}>
           {navItems.map((item) => {
-            const active = item.kind === 'link' && item.href === pathname;
-            const color = active ? colors.ocean700 : colors.ink700;
-            const content = (
-              <>
-                <NavGlyph icon={item.icon} color={color} />
-                <Text
-                  style={[styles.tabLabel, { color }, active && styles.tabLabelActive]}
-                  numberOfLines={1}
-                >
-                  {t(item.labelKey)}
-                </Text>
-              </>
-            );
             if (item.kind === 'comingSoon') {
               return (
-                <View key={item.key} style={styles.tabItem}>
-                  {content}
-                </View>
+                <Text key={item.key} style={styles.comingSoon}>
+                  {t(item.labelKey)} · {t('nav.comingSoon')}
+                </Text>
               );
             }
+            const active = item.href === pathname;
             return (
-              <Link key={item.key} href={item.href} style={styles.tabItem}>
-                {content}
+              <Link key={item.key} href={item.href} aria-current={active ? 'page' : undefined}>
+                <View style={[styles.pill, active && styles.pillActive]}>
+                  <Text style={[styles.pillText, active && styles.pillTextActive]}>{t(item.labelKey)}</Text>
+                </View>
               </Link>
             );
           })}
         </View>
-      )}
+      </View>
+
+      <View {...responsive('nav-mobile')} role="navigation" style={styles.mobileTabBar}>
+        {navItems.map((item) => {
+          const active = item.kind === 'link' && item.href === pathname;
+          const labelColor = active ? colors.ocean700 : colors.ink700;
+          // Noch nicht gebaute Eintraege sind auf dem Handy sonst von echten
+          // nicht zu unterscheiden - man tippt, und nichts passiert. Nur das
+          // Symbol wird zurueckgenommen: ink500 ist laut Token-Kommentar
+          // ausdruecklich fuer Icon-Striche gedacht, die Beschriftung bleibt
+          // in ink700 und damit ueber 4,5:1 (CLAUDE.md).
+          const glyphColor = item.kind === 'comingSoon' ? colors.ink500 : labelColor;
+          const content = (
+            <>
+              <NavGlyph icon={item.icon} color={glyphColor} />
+              <Text
+                style={[styles.tabLabel, { color: labelColor }, active && styles.tabLabelActive]}
+                numberOfLines={1}
+              >
+                {t(item.labelKey)}
+              </Text>
+            </>
+          );
+          if (item.kind === 'comingSoon') {
+            return (
+              <View
+                key={item.key}
+                style={styles.tabItem}
+                accessibilityLabel={`${t(item.labelKey)} — ${t('nav.comingSoon')}`}
+              >
+                {content}
+              </View>
+            );
+          }
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              style={styles.tabItem}
+              aria-current={active ? 'page' : undefined}
+            >
+              {content}
+            </Link>
+          );
+        })}
+      </View>
     </>
   );
 }
@@ -160,10 +175,12 @@ const styles = StyleSheet.create({
     color: colors.surface,
     fontWeight: '500',
   },
+  // Kein opacity: 0.5 - das druecke den Kontrast von ink700 auf etwa 2:1 und
+  // damit unter die 4,5:1-Regel (CLAUDE.md). Der Zusatz "· bald verfuegbar"
+  // traegt die Bedeutung ohnehin allein.
   comingSoon: {
     fontSize: 13,
     color: colors.ink700,
-    opacity: 0.5,
   },
 
   // Mobile Tab-Bar - fixed unten, react-native-web unterstuetzt das, RNs
@@ -174,7 +191,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: 'row',
-    height: MOBILE_TAB_BAR_HEIGHT,
+    // Inhaltshoehe bleibt MOBILE_TAB_BAR_HEIGHT, die Aussparung am unteren
+    // Rand kommt darueber hinaus dazu (siehe design/navigation.ts).
+    height: MOBILE_TAB_BAR_SAFE_HEIGHT,
+    paddingBottom: 'env(safe-area-inset-bottom, 0px)' as unknown as number,
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.line,
@@ -183,15 +203,32 @@ const styles = StyleSheet.create({
   // flex: 1 verteilt beliebig viele Eintraege gleichmaessig - aktuell 5
   // (News, Kurse, Uebungen, Team, Konto), minWidth 0 verhindert, dass ein
   // langes Label ("Uebungen") den Nachbarn Platz wegnimmt.
+  //
+  // display/flexDirection stehen hier ausdruecklich, obwohl das fuer eine View
+  // ohnehin der Standard ist: die Haelfte der Eintraege ist ein expo-router
+  // <Link>, und der rendert im Web ein <Text> - dessen Grundstil ist
+  // display: inline. Als Flex-Kind wird daraus block, nicht flex; alignItems,
+  // justifyContent und gap greifen dann nicht, und Symbol samt Beschriftung
+  // rutschen linksbuendig nebeneinander, waehrend die reinen View-Eintraege
+  // ("Uebungen", "Konto") sauber zentriert untereinander stehen. Genau das war
+  // die unsymmetrische Leiste. Beide Zweige brauchen denselben Boxtyp.
   tabItem: {
     flex: 1,
     minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
   },
+  // lineHeight muss ausdruecklich gesetzt sein: numberOfLines={1} bringt in
+  // react-native-web ein overflow: hidden mit, und mit dem Standard
+  // line-height: normal ist die Zeilenbox bei 10px nur 11px hoch - gerade so
+  // niedrig, dass die Punkte auf dem "Ü" von "Übungen" abgeschnitten werden.
+  // Auf einer deutschsprachigen Seite ist das kein Schoenheitsfehler.
   tabLabel: {
     fontSize: 10,
+    lineHeight: 14,
     textAlign: 'center',
   },
   tabLabelActive: {

@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
-import { MOBILE_NAV_BREAKPOINT, RECENT_ITEMS_COUNT } from '@/design/navigation';
+import { RECENT_ITEMS_COUNT } from '@/design/navigation';
+import { responsive } from '@/design/responsive';
 import { useTeamList } from '@/features/team/useTeamList';
 import { supabase } from '@/lib/supabase';
 
@@ -14,8 +15,6 @@ function photoUrlFor(path: string | null) {
 export function TeamList() {
   const { t } = useTranslation();
   const query = useTeamList();
-  const { width } = useWindowDimensions();
-  const isMobile = width < MOBILE_NAV_BREAKPOINT;
 
   return (
     <QueryBoundary query={query} empty={{ title: t('team.empty.title'), hint: t('team.empty.hint') }}>
@@ -28,11 +27,11 @@ export function TeamList() {
             {recent.length > 0 ? (
               <View style={styles.section}>
                 <Text style={styles.sectionHeading}>{t('team.recentTitle')}</Text>
-                <View style={styles.grid}>
+                <View {...responsive('team-grid')} style={styles.grid}>
                   {recent.map((member) => {
                     const photoUrl = photoUrlFor(member.photo_path);
                     return (
-                      <View key={member.id} style={[styles.card, !isMobile && styles.cardFixed]}>
+                      <View key={member.id} style={styles.card}>
                         {photoUrl ? (
                           <Image
                             source={{ uri: photoUrl }}
@@ -120,13 +119,8 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     backgroundColor: colors.surface,
   },
-  // Desktop: feste Breite statt flexGrow - eine einzelne Karte soll nicht auf
-  // volle Breite gezogen werden, solange (noch) weniger als
-  // RECENT_ITEMS_COUNT Personen im Team stehen.
-  cardFixed: {
-    flexBasis: '31%',
-    minWidth: 260,
-  },
+  // Die Desktop-Breite ('team-grid') steht als Media Query in
+  // src/design/responsive.ts - siehe dort, warum nicht mehr in JavaScript.
   photo: {
     width: 96,
     height: 96,
