@@ -313,7 +313,8 @@ const styles = StyleSheet.create({
   section: {
     maxWidth: 620,
     gap: 6,
-    alignSelf: 'stretch',
+    alignSelf: 'center',
+    alignItems: 'center',
   },
   sectionTitle: {
     fontSize: 12,
@@ -321,11 +322,13 @@ const styles = StyleSheet.create({
     color: colors.ink900,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   sectionText: {
     fontSize: 15,
     lineHeight: 24,
     color: colors.ink700,
+    textAlign: 'center',
   },
   notice: {
     maxWidth: 620,
