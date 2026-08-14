@@ -1,13 +1,21 @@
 import { Link } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
 import { responsive } from '@/design/responsive';
 import { buildTimeline, totalDurationMs } from '@/features/breathing/timeline';
+import {
+  EXERCISE_EFFECTS,
+  effectColors,
+  type ExerciseEffect,
+} from '@/features/sessions/effects';
 import { useSessionsList } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
+
+type Filter = ExerciseEffect | 'all';
 
 /** "4-4-4-4" aus den Phasen der ersten Runde - die Kurzform, die jeder kennt. */
 function rhythmOf(exercise: PlayableExercise): string | null {
@@ -25,55 +33,138 @@ function rhythmOf(exercise: PlayableExercise): string | null {
 
 export function SessionsList() {
   const { t } = useTranslation();
-  const query = useSessionsList();
+  const [filter, setFilter] = useState<Filter>('all');
+  const query = useSessionsList(filter === 'all' ? undefined : filter);
+
+  const filters: Filter[] = ['all', ...EXERCISE_EFFECTS];
 
   return (
-    <QueryBoundary
-      query={query}
-      empty={{ title: t('sessions.empty.title'), hint: t('sessions.empty.hint') }}
-    >
-      {(sessions) => (
-        <View {...responsive('sessions-grid')} style={styles.grid}>
-          {sessions.map((session) => {
-            const seconds = Math.round(totalDurationMs(buildTimeline(session)) / 1000);
-            const rhythm = rhythmOf(session);
+    <View style={styles.container}>
+      <View style={styles.filterRow}>
+        {filters.map((value) => {
+          const active = value === filter;
+          const tone = value === 'all' ? null : effectColors(value);
+          return (
+            <Pressable
+              key={value}
+              onPress={() => setFilter(value)}
+              style={[
+                styles.filterChip,
+                active &&
+                  (tone
+                    ? { backgroundColor: tone.tint, borderColor: tone.text }
+                    : styles.filterChipActiveAll),
+              ]}
+            >
+              <Text
+                style={[
+                  styles.filterChipText,
+                  active &&
+                    (tone ? { color: tone.text, fontWeight: '600' } : styles.filterChipTextActiveAll),
+                ]}
+              >
+                {value === 'all' ? t('sessions.filter.all') : t(`sessions.effects.${value}`)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
-            return (
-              <Link key={session.id} href={`/sessions/${session.id}`} style={styles.card}>
-                <View style={styles.cardInner}>
-                  <View style={styles.metaRow}>
-                    <Text style={styles.meta}>
-                      {t('sessions.duration', { minutes: Math.max(1, Math.round(seconds / 60)) })}
-                    </Text>
-                    {session.default_round_count ? (
+      <QueryBoundary
+        query={query}
+        empty={{ title: t('sessions.empty.title'), hint: t('sessions.empty.hint') }}
+      >
+        {(sessions) => (
+          <View {...responsive('sessions-grid')} style={styles.grid}>
+            {sessions.map((session) => {
+              const seconds = Math.round(totalDurationMs(buildTimeline(session)) / 1000);
+              const rhythm = rhythmOf(session);
+
+              return (
+                <Link key={session.id} href={`/sessions/${session.id}`} style={styles.card}>
+                  <View style={styles.cardInner}>
+                    <View style={styles.metaRow}>
                       <Text style={styles.meta}>
-                        {t('sessions.rounds', { count: session.default_round_count })}
+                        {t('sessions.duration', { minutes: Math.max(1, Math.round(seconds / 60)) })}
                       </Text>
-                    ) : null}
-                    {session.difficulty ? (
-                      <Text style={styles.meta}>{t(`sessions.difficulty.${session.difficulty}`)}</Text>
-                    ) : null}
-                  </View>
-
-                  <Text style={styles.title}>{session.title}</Text>
-                  {session.subtitle ? <Text style={styles.subtitle}>{session.subtitle}</Text> : null}
-
-                  {rhythm ? (
-                    <View style={styles.rhythmPill}>
-                      <Text style={styles.rhythmText}>{rhythm}</Text>
+                      {session.default_round_count ? (
+                        <Text style={styles.meta}>
+                          {t('sessions.rounds', { count: session.default_round_count })}
+                        </Text>
+                      ) : null}
+                      {session.difficulty ? (
+                        <Text style={styles.meta}>
+                          {t(`sessions.difficulty.${session.difficulty}`)}
+                        </Text>
+                      ) : null}
                     </View>
-                  ) : null}
-                </View>
-              </Link>
-            );
-          })}
-        </View>
-      )}
-    </QueryBoundary>
+
+                    <Text style={styles.title}>{session.title}</Text>
+                    {session.subtitle ? (
+                      <Text style={styles.subtitle}>{session.subtitle}</Text>
+                    ) : null}
+
+                    <View style={styles.tagRow}>
+                      {rhythm ? (
+                        <View style={styles.rhythmPill}>
+                          <Text style={styles.rhythmText}>{rhythm}</Text>
+                        </View>
+                      ) : null}
+                      {session.effects.map((effect) => {
+                        const tone = effectColors(effect);
+                        return (
+                          <View
+                            key={effect}
+                            style={[styles.effectPill, { backgroundColor: tone.tint }]}
+                          >
+                            <Text style={[styles.effectText, { color: tone.text }]}>
+                              {t(`sessions.effects.${effect}`)}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
+                </Link>
+              );
+            })}
+          </View>
+        )}
+      </QueryBoundary>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    gap: spacing.lg,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  filterChip: {
+    paddingVertical: 7,
+    paddingHorizontal: 16,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  },
+  filterChipActiveAll: {
+    backgroundColor: colors.ocean700,
+    borderColor: colors.ocean700,
+  },
+  filterChipText: {
+    fontSize: 13,
+    color: colors.ink700,
+  },
+  filterChipTextActiveAll: {
+    color: colors.surface,
+    fontWeight: '600',
+  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -116,17 +207,34 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.ink700,
   },
-  rhythmPill: {
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginTop: spacing.sm,
+  },
+  rhythmPill: {
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: radius.full,
-    backgroundColor: colors.oceanTint,
+    borderWidth: 1,
+    borderColor: colors.lineStrong,
   },
   rhythmText: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.ocean700,
+    color: colors.ink900,
     letterSpacing: 0.5,
+  },
+  effectPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  effectText: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
 });

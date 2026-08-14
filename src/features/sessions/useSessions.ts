@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { supabase } from '@/lib/supabase';
+import type { ExerciseEffect } from '@/features/sessions/effects';
 import type { PlayableExercise } from '@/types/breathing';
 
 // Eine einzige verschachtelte Abfrage liefert den ganzen Baum, den die Engine
@@ -9,15 +10,16 @@ import type { PlayableExercise } from '@/types/breathing';
 // (007_exercises.test.sql prueft die Datenbankseite).
 const TREE = '*, exercise_steps(*, exercise_phases(*))';
 
-export function useSessionsList() {
+export function useSessionsList(effect?: ExerciseEffect) {
   return useQuery({
-    queryKey: ['exercises'],
+    queryKey: ['exercises', effect ?? 'all'],
     queryFn: async (): Promise<PlayableExercise[]> => {
-      const { data, error } = await supabase
-        .from('exercises')
-        .select(TREE)
-        .eq('is_published', true)
-        .order('sort_order', { ascending: true });
+      let query = supabase.from('exercises').select(TREE).eq('is_published', true);
+      // "contains" statt "eq": effects ist ein Array, gesucht sind alle
+      // Uebungen, die den gewaehlten Effekt unter anderen enthalten.
+      if (effect) query = query.contains('effects', [effect]);
+
+      const { data, error } = await query.order('sort_order', { ascending: true });
 
       if (error) throw error;
       return (data ?? []) as unknown as PlayableExercise[];

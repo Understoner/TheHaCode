@@ -180,6 +180,7 @@ export type Database = {
           deleted_at: string | null
           description_md: string | null
           difficulty: number | null
+          effects: Database["public"]["Enums"]["exercise_effect"][]
           estimated_seconds: number | null
           has_metronome: boolean
           id: string
@@ -209,6 +210,7 @@ export type Database = {
           deleted_at?: string | null
           description_md?: string | null
           difficulty?: number | null
+          effects?: Database["public"]["Enums"]["exercise_effect"][]
           estimated_seconds?: number | null
           has_metronome?: boolean
           id?: string
@@ -238,6 +240,7 @@ export type Database = {
           deleted_at?: string | null
           description_md?: string | null
           difficulty?: number | null
+          effects?: Database["public"]["Enums"]["exercise_effect"][]
           estimated_seconds?: number | null
           has_metronome?: boolean
           id?: string
@@ -441,6 +444,11 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
+      exercise_effect:
+        | "co2_toleranz"
+        | "entspannend"
+        | "aktivierend"
+        | "stressreduktion"
       exercise_type: "paced" | "general"
       habit_tracking_type: "number" | "smiley_5" | "slider_100" | "text"
       news_category: "praxis" | "blog" | "kurs" | "allgemein"
@@ -587,6 +595,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      exercise_effect: [
+        "co2_toleranz",
+        "entspannend",
+        "aktivierend",
+        "stressreduktion",
+      ],
       exercise_type: ["paced", "general"],
       habit_tracking_type: ["number", "smiley_5", "slider_100", "text"],
       news_category: ["praxis", "blog", "kurs", "allgemein"],

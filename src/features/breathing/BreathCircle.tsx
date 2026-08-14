@@ -155,6 +155,13 @@ export function BreathCircle({ segment, round, running }: Props) {
     outputRange: ['0deg', '360deg'],
   });
 
+  // Die Marke laeuft AUF dem Ring, nicht auf einer festen Bahn daneben: der
+  // Wrapper wird mit demselben Wert skaliert wie der Ring, dadurch wandert der
+  // Punkt beim Ausatmen nach innen und beim Einatmen wieder nach aussen.
+  // Damit er dabei nicht selbst kleiner und groesser wird, bekommt er die
+  // Gegenskalierung - 1/scale hebt die Skalierung des Wrappers exakt auf.
+  const markerCounterScale = Animated.divide(1, scale);
+
   const toneOfPhase =
     segment?.kind === 'exhale' || segment?.kind === 'hold_out' ? colors.sage500 : colors.ocean500;
 
@@ -163,11 +170,21 @@ export function BreathCircle({ segment, round, running }: Props) {
       {/* Ruhige Bahn, auf der die Marke laeuft */}
       <View style={styles.track} />
 
-      <Animated.View style={[styles.ring, { borderColor: toneOfPhase, transform: [{ scale }] }]} />
+      <Animated.View
+        testID="breath-ring"
+        style={[styles.ring, { borderColor: toneOfPhase, transform: [{ scale }] }]}
+      />
 
-      {/* Die Marke sitzt bei 6 Uhr im Wrapper; gedreht wird der Wrapper. */}
-      <Animated.View style={[styles.markerWrap, { transform: [{ rotate }] }]}>
-        <View style={[styles.marker, { backgroundColor: toneOfPhase }]} />
+      {/* Die Marke sitzt bei 6 Uhr im Wrapper; gedreht UND skaliert wird der
+          Wrapper, damit sie dem Ring folgt. */}
+      <Animated.View style={[styles.markerWrap, { transform: [{ rotate }, { scale }] }]}>
+        <Animated.View
+          testID="breath-marker"
+          style={[
+            styles.marker,
+            { backgroundColor: toneOfPhase, transform: [{ scale: markerCounterScale }] },
+          ]}
+        />
       </Animated.View>
     </View>
   );

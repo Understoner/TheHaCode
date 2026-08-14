@@ -39,14 +39,16 @@ on conflict (slug) do nothing;
 with e as (
   insert into public.exercises (
     slug, category_id, type, playback_mode, visibility, title, subtitle,
-    description_md, contraindications_md, default_round_count, difficulty,
-    sort_order, is_published
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, sort_order, is_published
   ) values (
     'box-4-4-4-4',
     (select id from public.exercise_categories where slug = 'box'),
     'paced', 'timer', 'free',
     'Box-Atmung 4-4-4-4', 'Der Klassiker',
     'Vier gleich lange Phasen. Der einfachste Einstieg in die getaktete Atmung: einatmen, halten, ausatmen, halten - jeweils vier Sekunden.',
+    'Der gleichmäßige Takt verlängert das Ausatmen gegenüber dem Alltagsatem und beruhigt den Puls. Die gleich langen Haltephasen gewöhnen den Körper sanft an einen höheren CO2-Wert – das ist der Kern des Trainings.',
+    '{entspannend,co2_toleranz,stressreduktion}',
     'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
     8, 1, 1, true
   )
@@ -73,14 +75,16 @@ from s, (values
 with e as (
   insert into public.exercises (
     slug, category_id, type, playback_mode, visibility, title, subtitle,
-    description_md, contraindications_md, default_round_count, difficulty,
-    sort_order, is_published
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, sort_order, is_published
   ) values (
     'box-6-6-6-6',
     (select id from public.exercise_categories where slug = 'box'),
     'paced', 'timer', 'free',
     'Box-Atmung 6-6-6-6', 'Wenn 4-4-4-4 zu kurz wird',
     'Dieselbe Form wie 4-4-4-4, nur länger. Sinnvoll, sobald sich der Viererrhythmus mühelos anfühlt.',
+    'Die längeren Phasen senken die Atemfrequenz auf etwa 2,5 Atemzüge pro Minute. Der Reiz auf die CO2-Toleranz ist deutlich stärker als bei 4-4-4-4, die beruhigende Wirkung ebenso.',
+    '{co2_toleranz,entspannend,stressreduktion}',
     'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
     6, 2, 2, true
   )
@@ -107,14 +111,16 @@ from s, (values
 with e as (
   insert into public.exercises (
     slug, category_id, type, playback_mode, visibility, title, subtitle,
-    description_md, contraindications_md, default_round_count, difficulty,
-    sort_order, is_published
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, sort_order, is_published
   ) values (
     'atem-4-7-8',
     (select id from public.exercise_categories where slug = 'beruhigen'),
     'paced', 'timer', 'free',
     'Atmung 4-7-8', 'Zum Herunterkommen',
     'Das Ausatmen dauert doppelt so lang wie das Einatmen. Vier Runden genügen - diese Sequenz ist bewusst kurz.',
+    'Das doppelt so lange Ausatmen betont den Teil des Atems, der den Körper herunterfährt. Die lange Haltephase erhöht zusätzlich den CO2-Wert. Gut vor dem Einschlafen.',
+    '{entspannend,stressreduktion,co2_toleranz}',
     'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
     4, 2, 3, true
   )
@@ -140,14 +146,16 @@ from s, (values
 with e as (
   insert into public.exercises (
     slug, category_id, type, playback_mode, visibility, title, subtitle,
-    description_md, contraindications_md, default_round_count, difficulty,
-    sort_order, is_published
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, sort_order, is_published
   ) values (
     'kohaerenz-5-5',
     (select id from public.exercise_categories where slug = 'beruhigen'),
     'paced', 'timer', 'free',
     'Kohärenzatmung 5,5', 'Gleichmäßig, ohne Halten',
     'Ein- und Ausatmen gleich lang, ohne Pause dazwischen. Etwa fünfeinhalb Atemzüge pro Minute.',
+    'Ein- und Ausatmen gleich lang bei etwa fünfeinhalb Atemzügen pro Minute – der Bereich, in dem Herzschlag und Atmung in einen gemeinsamen Rhythmus finden. Ohne Halten, deshalb ohne CO2-Reiz: reine Beruhigung.',
+    '{entspannend,stressreduktion}',
     'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
     20, 1, 4, true
   )

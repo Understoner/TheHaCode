@@ -14,6 +14,7 @@ import {
   type TimelineSegment,
 } from '@/features/breathing/timeline';
 import { useBreathClock } from '@/features/breathing/useBreathClock';
+import { effectColors } from '@/features/sessions/effects';
 import { useSession } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
 
@@ -177,6 +178,35 @@ function Player({ session }: { session: PlayableExercise }) {
         </Pressable>
       </View>
 
+      {session.effects.length > 0 ? (
+        <View style={styles.effectRow}>
+          {session.effects.map((effect) => {
+            const tone = effectColors(effect);
+            return (
+              <View key={effect} style={[styles.effectPill, { backgroundColor: tone.tint }]}>
+                <Text style={[styles.effectText, { color: tone.text }]}>
+                  {t(`sessions.effects.${effect}`)}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      ) : null}
+
+      {session.description_md ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('sessions.about')}</Text>
+          <Text style={styles.sectionText}>{session.description_md}</Text>
+        </View>
+      ) : null}
+
+      {session.benefits_md ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('sessions.benefits')}</Text>
+          <Text style={styles.sectionText}>{session.benefits_md}</Text>
+        </View>
+      ) : null}
+
       {session.contraindications_md ? (
         <View style={styles.notice}>
           <Text style={styles.noticeTitle}>{t('sessions.notice')}</Text>
@@ -260,6 +290,42 @@ const styles = StyleSheet.create({
   secondaryText: {
     color: colors.ink700,
     fontSize: 14,
+  },
+  effectRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    maxWidth: 620,
+  },
+  effectPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: radius.full,
+  },
+  effectText: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  // Beschreibung und Wirkung stehen unter den Bedienelementen, nicht darueber:
+  // wer die Uebung startet, soll nicht erst scrollen muessen.
+  section: {
+    maxWidth: 620,
+    gap: 6,
+    alignSelf: 'stretch',
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.ink900,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sectionText: {
+    fontSize: 15,
+    lineHeight: 24,
+    color: colors.ink700,
   },
   notice: {
     maxWidth: 620,
