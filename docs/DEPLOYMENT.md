@@ -237,9 +237,9 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 ## 5. Checkliste vor dem allerersten Livegang
 
 - [x] Beide Supabase-Projekte angelegt (Migrationen/Seeds laufen ab jetzt über die Pipeline)
-- [ ] Google-Anmeldung konfiguriert — [AUTH-PROVIDER.md](AUTH-PROVIDER.md); die App schaltet die Schaltflaeche danach von selbst frei, ohne Deployment
-- [ ] *(spaeter)* Apple-Anmeldung konfiguriert — braucht einen Apple Developer Account, den es noch nicht gibt. Unabhaengig von Google, blockiert nichts: ohne Einrichtung erscheint der Knopf gar nicht erst. **Pflicht wird es erst mit einer nativen App** im App Store, sobald die eine andere Fremdanmeldung anbietet (App-Store-Richtlinie 4.8) — native Apps sind nicht in V1 (CLAUDE.md)
-- [ ] *(spaeter, mit Apple)* Apple-Secret laeuft nach hoechstens 6 Monaten ab — Erinnerung eingetragen
+- [x] Anmeldung mit E-Mail und Passwort steht — Registrierung, Anmeldung, Passwort zuruecksetzen, Kontoloeschung
+- [ ] *(zurueckgestellt)* Google- und Apple-Anmeldung konfiguriert — [AUTH-PROVIDER.md](AUTH-PROVIDER.md). **Kein offener Rest, sondern eine Entscheidung:** V1 meldet ueber E-Mail und Passwort an. Beide Anbieter sind unabhaengig voneinander und blockieren nichts; ohne Einrichtung erscheint ihr Knopf gar nicht erst. Einschalten geht spaeter allein ueber das Supabase-Dashboard, **ohne Deployment**
+- [ ] *(erst mit Apple)* Apple-Secret laeuft nach hoechstens 6 Monaten ab — Erinnerung eingetragen. Apple wird ausserdem erst Pflicht, wenn eine native App im Store eine andere Fremdanmeldung anbietet (Richtlinie 4.8) — native Apps sind nicht in V1 (CLAUDE.md)
 - [ ] E-Mail-Vorlagen auf Deutsch (Bestaetigung, Passwort zuruecksetzen)
 - [x] Staging-Website auf Hostinger läuft, Branch `develop` bestätigt — Production-Website steht noch aus
 - [x] Staging gegen Indexierung geschützt (automatisches `robots.txt`, kein Passwortschutz — der steht bei Node.js Web Apps in hPanel nicht zur Auswahl)

@@ -1,5 +1,11 @@
 # Anmeldung mit Google und Apple einrichten
 
+> **Stand: beide zurückgestellt.** Weder Google noch Apple sind eingerichtet,
+> und das ist eine Entscheidung, kein offener Rest. Die Anmeldung läuft in V1
+> über E-Mail und Passwort; die beiden Knöpfe erscheinen erst, wenn jemand die
+> Anbieter im Supabase-Dashboard einschaltet. Diese Datei ist die Anleitung für
+> genau diesen Tag — bis dahin ist hier nichts zu tun.
+
 Der Code ist fertig und braucht keine Änderung mehr. Was fehlt, sind
 Zugangsdaten bei Google und Apple — die kann nur bekommen, wer Zugriff auf die
 Konten hat.
@@ -18,13 +24,17 @@ Umgebungen synchron halten muss.
 > Technik. Aus der App ist das nicht abzufangen, der Browser hat die Seite
 > längst verlassen.
 
-## Die beiden sind unabhängig voneinander
+## Jeder Anbieter für sich, in beliebiger Reihenfolge
 
-Google allein einzurichten ist vollständig in Ordnung. Solange Apple aus ist,
-erscheint der Apple-Knopf nicht — es gibt keine halbe Anmeldeseite, keinen
-toten Knopf und nichts, was später „nachgezogen" werden müsste. Kommt Apple
-irgendwann dazu, reicht das Einschalten im Supabase-Dashboard; **ein neues
-Deployment braucht es dafür nicht.**
+Keiner der beiden hängt am anderen, und keiner muss überhaupt sein. Ist ein
+Anbieter aus, erscheint sein Knopf nicht — es gibt keine halbe Anmeldeseite,
+keinen toten Knopf und nichts, was später „nachgezogen" werden müsste. Auch
+beide aus ist ein vollständiger, richtiger Zustand: dann steht auf der
+Kontoseite das Formular mit E-Mail und Passwort, ohne Trennlinie und ohne
+„oder".
+
+Zum Einschalten reicht das Supabase-Dashboard. **Ein neues Deployment braucht
+es dafür nicht** — kein Rebuild, kein Merge, kein Release.
 
 Zwei Dinge, die den Zeitpunkt bestimmen dürfen:
 
@@ -34,8 +44,8 @@ Zwei Dinge, die den Zeitpunkt bestimmen dürfen:
   App-Store-Richtlinie 4.8 verlangt „Sign in with Apple" nur dann, wenn eine
   App im Store eine andere Fremdanmeldung (z. B. Google) anbietet. Für die
   Website gilt das nicht — und native Apps sind ausdrücklich nicht Teil von V1
-  (CLAUDE.md). Vor dem ersten App-Store-Release gehört Apple aber eingerichtet,
-  sonst wird die App abgelehnt.
+  (CLAUDE.md). Solange auch Google aus bleibt, entsteht die Pflicht gar nicht
+  erst.
 
 ---
 
