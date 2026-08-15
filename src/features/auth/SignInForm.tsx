@@ -7,7 +7,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { colors, radius, spacing } from '@/design/tokens';
 import { authErrorMessageKey } from '@/features/auth/authErrors';
-import { TextField } from '@/features/auth/TextField';
+import { TextField } from '@/components/TextField';
 import { signInSchema, type SignInValues } from '@/features/auth/schema';
 import { supabase } from '@/lib/supabase';
 

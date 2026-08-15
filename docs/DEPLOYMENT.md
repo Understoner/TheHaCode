@@ -53,6 +53,30 @@ Unter **Authentication → Emails** die Vorlagen auf Deutsch umstellen: Bestäti
 
 > Der Rest der Nutzerverwaltung — Sitzungen, Token-Erneuerung, Kontoverknüpfung, Passwort-Zurücksetzen, Löschung — kommt aus Supabase und wird nicht selbst gebaut. Fachliche Daten liegen in `public.profiles`, verknüpft über `auth.users.id` (SAD §3.3).
 
+### Plus vergeben, solange es keine Bezahlung gibt
+
+Der Sequenz-Konfigurator ist die bezahlte Funktion, und die Schranke steht
+bereits: die `INSERT`-Policy auf `exercises` verlangt `has_plus_access()`
+(Migration `0007`, Missbrauchsfall in `009_save_exercise.test.sql`). Ohne Plus
+zeigt die App den Hinweis statt des Editors — geprüft wird aber in der
+Datenbank, nicht im Browser.
+
+Bis Stripe steht, vergebt ihr Zugang von Hand:
+
+**Supabase Studio → Table Editor → `profiles` → `has_active_subscription` auf `true`.**
+
+Der Weg über den **SQL-Editor funktioniert nicht** — der läuft als `postgres`,
+und der Trigger `protect_entitlement_columns` lässt ausschließlich
+`service_role` an diese Spalte. Der Table Editor arbeitet mit `service_role`
+und darf es. Das ist Absicht: die Spalte gehört später allein dem
+Stripe-Trigger.
+
+> **Was sich beim Umstieg auf Stripe ändert: nichts an der App.** Der Webhook
+> schreibt dieselbe Spalte, die ihr heute von Hand setzt. Keine Policy, kein
+> Screen, kein Deployment — nur die Hand wird durch den Trigger ersetzt.
+> Käme statt dessen ein Gutschein oder eine Aktion dazu, ändert sich genau
+> `has_plus_access()` und keine einzige Policy (CLAUDE.md §Zugriff).
+
 ### Function Secrets
 
 ```bash
