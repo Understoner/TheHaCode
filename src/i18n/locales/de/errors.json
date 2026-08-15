@@ -17,8 +17,6 @@
   "auth.unknown": "Das hat leider nicht geklappt. Bitte versuch es noch einmal.",
   "auth.signOutFailed": "Das Abmelden hat nicht geklappt. Bitte lade die Seite neu und versuch es noch einmal.",
   "auth.samePassword": "Das ist dein bisheriges Passwort. Bitte wähle ein anderes.",
-  "auth.providerDisabled": "Diese Anmeldung ist gerade nicht eingerichtet. Melde dich stattdessen mit E-Mail und Passwort an.",
   "auth.linkExpired": "Dieser Link gilt nicht mehr – er läuft nach einer Stunde ab und lässt sich nur einmal benutzen. Fordere einfach einen neuen an.",
-  "auth.cancelled": "Die Anmeldung wurde abgebrochen. Du kannst es noch einmal versuchen oder E-Mail und Passwort nehmen.",
   "auth.deleteFailed": "Das Löschen hat nicht geklappt. Bitte versuch es noch einmal – oder schreib uns, dann erledigen wir es von Hand."
 }

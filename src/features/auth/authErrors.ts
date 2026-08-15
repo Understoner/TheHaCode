@@ -15,9 +15,7 @@ export type AuthErrorKey =
   | 'samePassword'
   | 'rateLimited'
   | 'signupDisabled'
-  | 'providerDisabled'
   | 'linkExpired'
-  | 'cancelled'
   | 'network'
   | 'unknown';
 
@@ -32,20 +30,12 @@ const BY_CODE: Record<string, AuthErrorKey> = {
   over_request_rate_limit: 'rateLimited',
   signup_disabled: 'signupDisabled',
   email_provider_disabled: 'signupDisabled',
-  // Google/Apple sind im Projekt nicht eingeschaltet oder ohne Zugangsdaten
-  // hinterlegt. Fuer den Nutzer ist das kein Fehler, den er beheben kann -
-  // er soll auf den Weg mit E-Mail und Passwort ausweichen koennen.
-  provider_disabled: 'providerDisabled',
-  oauth_provider_not_supported: 'providerDisabled',
   // Der Link aus der E-Mail ist einmalig und laeuft ab (config.toml:
   // otp_expiry). Beides endet hier.
   otp_expired: 'linkExpired',
   flow_state_expired: 'linkExpired',
   flow_state_not_found: 'linkExpired',
   bad_code_verifier: 'linkExpired',
-  // Der Nutzer hat bei Google oder Apple abgebrochen. Kein Fehler, nur ein
-  // Hinweis - sonst steht er ratlos wieder auf der Anmeldeseite.
-  access_denied: 'cancelled',
 };
 
 /** Der volle i18next-Schluessel zu einem Fehler aus supabase.auth.*. */
@@ -54,11 +44,11 @@ export function authErrorMessageKey(error: unknown): string {
 }
 
 /**
- * Fehler von Google, Apple oder aus einem abgelaufenen E-Mail-Link kommen
- * nicht als Antwort auf einen Aufruf zurueck, sondern stehen in der Adresse,
- * auf die zurueckgesprungen wird - je nach Ablauf als Query oder als
- * Fragment. Ohne diese Auswertung landet der Nutzer wortlos wieder auf der
- * Anmeldeseite und weiss nicht, warum nichts passiert ist.
+ * Ein abgelaufener oder schon benutzter E-Mail-Link meldet sich nicht als
+ * Antwort auf einen Aufruf, sondern steht in der Adresse, auf die
+ * zurueckgesprungen wird - je nach Ablauf als Query oder als Fragment. Ohne
+ * diese Auswertung landet der Nutzer wortlos auf /passwort-neu und weiss
+ * nicht, warum dort kein Formular steht.
  *
  * Liefert null, wenn in der Adresse gar kein Fehler steht.
  */

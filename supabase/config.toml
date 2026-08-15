@@ -330,12 +330,9 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
-# Google und Apple: Die Schaltflaechen dafuer stehen bereits im
-# Anmeldeformular (src/features/auth/OAuthButtons.tsx). Damit sie etwas tun,
-# muss hier enabled = true stehen UND client_id/secret gesetzt sein - die
-# Geheimnisse ausschliesslich per Umgebungsvariable, nie im Klartext hier.
-# Solange das fehlt, kommt der Nutzer mit einem Fehler zurueck, den die App in
-# "Diese Anmeldung ist gerade nicht eingerichtet" uebersetzt.
+# Fremdanmeldung (Google, Apple) ist nicht Teil von V1 - die App bietet sie
+# nicht an. Diese Bloecke bleiben auf enabled = false; sie einzuschalten allein
+# genuegt nicht, dazu braeuchte es auch wieder Code in der App.
 [auth.external.apple]
 enabled = false
 client_id = ""

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing } from '@/design/tokens';
-import { OAuthButtons } from '@/features/auth/OAuthButtons';
 import { ResetRequestForm } from '@/features/auth/ResetRequestForm';
 import { SignInForm } from '@/features/auth/SignInForm';
 import { SignUpForm } from '@/features/auth/SignUpForm';
@@ -50,10 +49,6 @@ export function AuthPanel() {
           );
         })}
       </View>
-
-      {/* Google und Apple stehen ueber dem Formular: wer ein Konto beim
-          Anbieter hat, soll nicht erst an zwei Feldern vorbei. */}
-      <OAuthButtons />
 
       {mode === 'signIn' ? <SignInForm /> : <SignUpForm />}
 

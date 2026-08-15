@@ -27,8 +27,7 @@ Je Projekt notieren: Project Ref, Datenbank-Passwort, Project URL, anon key.
 Unter **Authentication → Providers**:
 
 - **Email** aktivieren, „Confirm email" **an**
-- **Google** aktivieren — Client ID und Secret aus der Google Cloud Console
-- **Apple**: in V1 bewusst nicht. Es bräuchte eine kostenpflichtige Developer-Mitgliedschaft für eine dritte Anmeldeoption. Ab V2 mit der nativen App wird es ohnehin Pflicht.
+- **Google und Apple: in V1 bewusst nicht.** Die App bietet keine Fremdanmeldung an — sie einzuschalten allein bewirkt hier deshalb nichts, dazu bräuchte es auch wieder Code. Apple hätte zusätzlich eine kostenpflichtige Developer-Mitgliedschaft vorausgesetzt und wird ohnehin erst mit einer nativen App im Store zur Pflicht (Richtlinie 4.8) — native Apps sind nicht in V1 (CLAUDE.md).
 
 Unter **Authentication → URL Configuration**:
 
@@ -37,10 +36,18 @@ Site URL (Staging):     https://staging.deine-domain.at
 Site URL (Production):  https://app.deine-domain.at
 
 Redirect URLs (je Projekt):
-  https://<host>/auth/callback
-  http://localhost:3000/auth/callback     nur im Staging-Projekt
-  thehacode://auth/callback               für V2, schadet jetzt nicht
+  https://<host>/passwort-neu
+  http://localhost:8081/**                nur im Staging-Projekt
 ```
+
+> **`/passwort-neu` ist nicht optional.** Dorthin schickt
+> `resetPasswordForEmail` den Nutzer, und Supabase weist ein Rücksprungziel ab,
+> das nicht in dieser Liste steht. Fehlt der Eintrag, landet jeder, der sein
+> Passwort zurücksetzen will, ohne Sitzung auf der Seite und bekommt „Der Link
+> geht nicht mehr" zu sehen — obwohl der Link in Ordnung war.
+>
+> Frühere Fassungen dieser Datei nannten hier `/auth/callback`. Diese Route hat
+> es in der App nie gegeben; sie stammte aus einem Entwurf mit Fremdanmeldung.
 
 Unter **Authentication → Emails** die Vorlagen auf Deutsch umstellen: Bestätigung, Magic Link, Passwort zurücksetzen, E-Mail-Änderung. Der Standardtext ist Englisch und wirkt bei einem deutschsprachigen Coaching-Produkt wie ein Fremdkörper.
 
@@ -237,7 +244,9 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 ## 5. Checkliste vor dem allerersten Livegang
 
 - [x] Beide Supabase-Projekte angelegt (Migrationen/Seeds laufen ab jetzt über die Pipeline)
-- [ ] Auth-Provider konfiguriert, E-Mail-Vorlagen auf Deutsch
+- [x] Anmeldung steht: Registrierung, Anmeldung, Passwort zuruecksetzen, Kontoloeschung — ueber E-Mail und Passwort. Fremdanmeldung (Google/Apple) ist nicht Teil von V1
+- [ ] `https://<host>/passwort-neu` in den Redirect URLs beider Supabase-Projekte eingetragen — ohne den Eintrag scheitert das Zuruecksetzen (siehe §1)
+- [ ] E-Mail-Vorlagen auf Deutsch (Bestaetigung, Passwort zuruecksetzen)
 - [x] Staging-Website auf Hostinger läuft, Branch `develop` bestätigt — Production-Website steht noch aus
 - [x] Staging gegen Indexierung geschützt (automatisches `robots.txt`, kein Passwortschutz — der steht bei Node.js Web Apps in hPanel nicht zur Auswahl)
 - [x] GitHub Environments `staging`/`production` mit Secrets und Variables befüllt, `production` hat einen Required Reviewer
