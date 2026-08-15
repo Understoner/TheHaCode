@@ -10,6 +10,7 @@ import { NavBar } from '@/components/NavBar';
 import { StagingBanner } from '@/components/StagingBanner';
 import { colors } from '@/design/tokens';
 import { responsive } from '@/design/responsive';
+import { AuthProvider } from '@/features/auth/AuthProvider';
 import '@/i18n';
 
 export default function RootLayout() {
@@ -26,31 +27,36 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Der Titel gehoert hierher und nicht in +html.tsx: Expo rendert den
-          <title> ueber react-helmet, und nur ueber <Head> gesetzt aendert er
-          sich auch beim Wechsel der Seite ohne Neuladen. Einzelne Screens
-          koennen ihn spaeter mit demselben Bauteil ueberschreiben. */}
-      <Head>
-        <title>{t('meta.title')}</title>
-        <meta name="description" content={t('meta.description')} />
-      </Head>
-      {/* minHeight statt height/flex:1: react-native-web fixiert html/body auf
-          exakt eine Bildschirmhoehe (position: fixed, overflow: hidden) - der
-          Stack braucht flex:1 in seiner Elternkette, sonst hat sein intern
-          absolut positionierter Screen-Container hoehe 0 und der komplette
-          Seiteninhalt ist unsichtbar. minHeight (keine feste height) laesst
-          die Seite trotzdem ueber eine Bildschirmhoehe hinaus wachsen, der
-          Footer bleibt am natuerlichen Seitenende erreichbar. */}
-      <View {...(immersive ? {} : responsive('page-root'))} style={styles.root}>
-        {immersive ? null : (
-          <>
-            <StagingBanner />
-            <NavBar />
-          </>
-        )}
-        <Stack screenOptions={{ headerShown: false, contentStyle: styles.screen }} />
-        {immersive ? null : <Footer />}
-      </View>
+      {/* Die Sitzung steht ueber der ganzen App und nicht nur ueber /konto:
+          sobald es Inhalte gibt, die vom Anmeldezustand abhaengen, fragt jede
+          Stelle denselben Wert ab. */}
+      <AuthProvider>
+        {/* Der Titel gehoert hierher und nicht in +html.tsx: Expo rendert den
+            <title> ueber react-helmet, und nur ueber <Head> gesetzt aendert er
+            sich auch beim Wechsel der Seite ohne Neuladen. Einzelne Screens
+            koennen ihn spaeter mit demselben Bauteil ueberschreiben. */}
+        <Head>
+          <title>{t('meta.title')}</title>
+          <meta name="description" content={t('meta.description')} />
+        </Head>
+        {/* minHeight statt height/flex:1: react-native-web fixiert html/body auf
+            exakt eine Bildschirmhoehe (position: fixed, overflow: hidden) - der
+            Stack braucht flex:1 in seiner Elternkette, sonst hat sein intern
+            absolut positionierter Screen-Container hoehe 0 und der komplette
+            Seiteninhalt ist unsichtbar. minHeight (keine feste height) laesst
+            die Seite trotzdem ueber eine Bildschirmhoehe hinaus wachsen, der
+            Footer bleibt am natuerlichen Seitenende erreichbar. */}
+        <View {...(immersive ? {} : responsive('page-root'))} style={styles.root}>
+          {immersive ? null : (
+            <>
+              <StagingBanner />
+              <NavBar />
+            </>
+          )}
+          <Stack screenOptions={{ headerShown: false, contentStyle: styles.screen }} />
+          {immersive ? null : <Footer />}
+        </View>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

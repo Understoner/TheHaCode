@@ -7,8 +7,9 @@ import type { DimensionValue } from 'react-native';
 //
 // Reihenfolge und Icon-Zuordnung folgen ui/references/05-10 (News, Kurse,
 // Sessions, Team) - dort kein eigener "Konfigurator"-Eintrag, der wird
-// spaeter ueber die Sessions erreichbar sein. "Konto" kommt dazu, sobald Supabase
-// Auth angebunden ist - bis dahin bleibt es der einzige comingSoon-Eintrag.
+// spaeter ueber die Sessions erreichbar sein. "Konto" ist seit der Anbindung
+// von Supabase Auth eine echte Route; die comingSoon-Variante bleibt im Typ,
+// weil der Konfigurator sie wieder brauchen wird.
 export type NavIcon = 'news' | 'kurse' | 'sessions' | 'team' | 'konto';
 
 export type NavItem =
@@ -43,5 +44,5 @@ export const navItems: NavItem[] = [
   { key: 'kurse', labelKey: 'nav.kurse', icon: 'kurse', kind: 'link', href: '/kurse' },
   { key: 'sessions', labelKey: 'nav.sessions', icon: 'sessions', kind: 'link', href: '/sessions' },
   { key: 'team', labelKey: 'nav.team', icon: 'team', kind: 'link', href: '/team' },
-  { key: 'konto', labelKey: 'nav.konto', icon: 'konto', kind: 'comingSoon' },
+  { key: 'konto', labelKey: 'nav.konto', icon: 'konto', kind: 'link', href: '/konto' },
 ];

@@ -156,11 +156,22 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+# Die App laeuft lokal auf dem Expo-Devserver (npm run web), nicht auf 3000.
+# Von hier bauen sich die Links in den Bestaetigungs- und
+# "Passwort vergessen"-Mails.
+site_url = "http://localhost:8081"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# /passwort-neu ist das Ziel des Links aus der "Passwort vergessen"-Mail,
+# /konto das Ziel nach Google/Apple. Steht eine Adresse hier nicht drin, weist
+# Supabase den Ruecksprung ab und der Nutzer landet ohne Sitzung auf der Seite.
+# Testsystem und Livesystem werden nicht hier, sondern im Supabase-Dashboard
+# des jeweiligen Projekts eingetragen (docs/DEPLOYMENT.md).
+additional_redirect_urls = [
+  "http://localhost:8081/**",
+  "http://127.0.0.1:8081/**",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -319,6 +330,12 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
+# Google und Apple: Die Schaltflaechen dafuer stehen bereits im
+# Anmeldeformular (src/features/auth/OAuthButtons.tsx). Damit sie etwas tun,
+# muss hier enabled = true stehen UND client_id/secret gesetzt sein - die
+# Geheimnisse ausschliesslich per Umgebungsvariable, nie im Klartext hier.
+# Solange das fehlt, kommt der Nutzer mit einem Fehler zurueck, den die App in
+# "Diese Anmeldung ist gerade nicht eingerichtet" uebersetzt.
 [auth.external.apple]
 enabled = false
 client_id = ""
