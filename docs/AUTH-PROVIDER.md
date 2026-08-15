@@ -18,6 +18,25 @@ Umgebungen synchron halten muss.
 > Technik. Aus der App ist das nicht abzufangen, der Browser hat die Seite
 > längst verlassen.
 
+## Die beiden sind unabhängig voneinander
+
+Google allein einzurichten ist vollständig in Ordnung. Solange Apple aus ist,
+erscheint der Apple-Knopf nicht — es gibt keine halbe Anmeldeseite, keinen
+toten Knopf und nichts, was später „nachgezogen" werden müsste. Kommt Apple
+irgendwann dazu, reicht das Einschalten im Supabase-Dashboard; **ein neues
+Deployment braucht es dafür nicht.**
+
+Zwei Dinge, die den Zeitpunkt bestimmen dürfen:
+
+- Der **Apple Developer Account ist kostenpflichtig** (Jahresmitgliedschaft),
+  Google nicht. Für eine reine Web-App ist das die einzige Hürde.
+- **Zwingend wird Apple erst mit einer nativen App**: Apples
+  App-Store-Richtlinie 4.8 verlangt „Sign in with Apple" nur dann, wenn eine
+  App im Store eine andere Fremdanmeldung (z. B. Google) anbietet. Für die
+  Website gilt das nicht — und native Apps sind ausdrücklich nicht Teil von V1
+  (CLAUDE.md). Vor dem ersten App-Store-Release gehört Apple aber eingerichtet,
+  sonst wird die App abgelehnt.
+
 ---
 
 ## Was für beide gilt
