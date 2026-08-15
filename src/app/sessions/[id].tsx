@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -118,6 +118,44 @@ function Player({ session }: { session: PlayableExercise }) {
   // Beim Verlassen des Players verstummt die Musik - ein Stueck, das nach dem
   // Zurueckgehen weiterlaeuft, waere das Aergerlichste an der Funktion.
   useEffect(() => () => musicRef.current?.dispose(), []);
+
+  // ... und genau darauf war kein Verlass: der Stack von expo-router laesst
+  // einen Screen beim Weiternavigieren MONTIERT stehen. Das Aufraeumen oben
+  // haengt aber am Ausbauen der Komponente und lief deshalb beim Tippen auf
+  // "Beenden" nie. Die Anzeigeschleife lief weiter, die Uhr lief weiter, also
+  // schlugen auch die Phasentoene weiter an - hoerbar auf der Sessions-Liste
+  // und auf jeder anderen Seite.
+  //
+  // useFocusEffect haengt dagegen am Sichtbarsein und nicht am Montiertsein.
+  // Sein Aufraeumen laeuft bei jedem Verlassen: "Beenden", Zurueck-Taste,
+  // Tab-Leiste, und beim Ausbauen ohnehin auch.
+  //
+  // Die Abhaengigkeit ist bewusst clock.pause und nicht clock: useBreathClock
+  // gibt bei jedem Rendern ein frisches Objekt zurueck, das Aufraeumen liefe
+  // damit nach jedem Rendern - der Player koennte gar nicht mehr laufen.
+  // clock.pause selbst ist ueber useCallback stabil.
+  const pauseClock = clock.pause;
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        // Die Uhr zuerst: sie treibt die Anzeigeschleife und damit die Toene.
+        // Der Stand bleibt erhalten, wer zurueckkommt, macht mit "Weiter" da
+        // weiter, wo er aufgehoert hat.
+        pauseClock();
+        // Pausieren statt Stoppen: die Stelle im Stueck bleibt stehen.
+        musicRef.current?.pause();
+        // Ein bereits angeschlagener Ton klingt bis zu 4,2 Sekunden nach und
+        // wuerde einen sonst auf die naechste Seite begleiten. Schliessen
+        // beendet ihn sofort; der naechste Start legt ueber createAudioContext
+        // einen neuen an - deshalb muss die Referenz leer sein, ein
+        // geschlossener Kontext ist immer noch ein Objekt.
+        const audio = audioRef.current;
+        audioRef.current = null;
+        void audio?.close?.().catch(() => undefined);
+      },
+      [pauseClock]
+    )
+  );
 
   const start = useCallback(() => {
     // Der AudioContext darf erst auf eine Nutzergeste entstehen - ein Aufruf

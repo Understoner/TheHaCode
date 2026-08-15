@@ -20,23 +20,36 @@ export function Footer() {
   );
 }
 
+// Der Fussbereich traegt zwei Pflichtlinks und sonst nichts. Er darf deshalb
+// so niedrig sein, wie es die Bedienbarkeit gerade noch zulaesst - jeder Pixel
+// hier fehlt dem Inhalt darueber, und auf dem Handy sitzt unter dem Footer
+// ohnehin schon die Tab-Leiste.
+//
+// Die senkrechte Luft steht bewusst an den Links und nicht am Rahmen: so
+// bleibt die Trefferflaeche zum Antippen erhalten, waehrend der Streifen
+// selbst von rund 66 auf rund 40 Pixel schrumpft.
+const LINK_PADDING = 6;
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    paddingVertical: spacing.lg,
+    paddingVertical: LINK_PADDING,
     paddingHorizontal: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.line,
   },
   link: {
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 16,
     color: colors.ink700,
+    paddingVertical: LINK_PADDING,
   },
   separator: {
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 16,
     color: colors.ink700,
   },
 });

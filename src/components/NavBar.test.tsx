@@ -57,15 +57,16 @@ describe('NavBar', () => {
     expect(mobile.querySelector('a[aria-current="page"]')?.getAttribute('href')).toBe('/');
   });
 
-  it('zeigt noch nicht gebaute Funktionen in keiner Fassung als Link', () => {
+  it('fuehrt jeden Eintrag auf eine echte Route', () => {
     render(<NavBar />);
 
-    // Sessions ist seit Migration 0007 eine echte Route; uebrig bleibt Konto,
-    // das an Supabase Auth haengt.
-    for (const label of ['Konto']) {
-      for (const found of screen.getAllByText(label, { exact: false })) {
-        expect(found.closest('a')).toBeNull();
-      }
+    // Sessions ist seit Migration 0007 eine echte Route, Konto seit der
+    // Anbindung von Supabase Auth. Damit ist kein Eintrag mehr ein
+    // Platzhalter - wer tippt, landet auch irgendwo.
+    expect(screen.queryByText('bald verfügbar', { exact: false })).toBeNull();
+
+    for (const found of screen.getAllByText('Konto', { exact: false })) {
+      expect(found.closest('a')?.getAttribute('href')).toBe('/konto');
     }
   });
 });

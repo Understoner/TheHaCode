@@ -1,5 +1,24 @@
 {
   "loadFailed.title": "Daten konnten nicht geladen werden",
   "loadFailed.body": "Bitte prüfe deine Verbindung.",
-  "retry": "Erneut versuchen"
+  "retry": "Erneut versuchen",
+  "auth.emailInvalid": "Diese E-Mail-Adresse sieht nicht vollständig aus. Bitte prüfe sie noch einmal.",
+  "auth.passwordRequired": "Bitte gib dein Passwort ein.",
+  "auth.passwordTooShort": "Das Passwort braucht mindestens {{min}} Zeichen.",
+  "auth.passwordMismatch": "Die beiden Passwörter sind nicht gleich. Bitte gib das zweite noch einmal ein.",
+  "auth.nameTooShort": "Bitte gib mindestens zwei Zeichen ein oder lass das Feld leer.",
+  "auth.invalidCredentials": "E-Mail-Adresse oder Passwort stimmen nicht. Bitte prüfe beides und versuch es noch einmal.",
+  "auth.emailNotConfirmed": "Diese E-Mail-Adresse ist noch nicht bestätigt. Öffne den Link in der E-Mail, die wir dir geschickt haben.",
+  "auth.emailTaken": "Für diese E-Mail-Adresse gibt es schon ein Konto. Melde dich stattdessen an.",
+  "auth.weakPassword": "Dieses Passwort ist zu leicht zu erraten. Nimm ein längeres, am besten mit Zahlen oder Zeichen.",
+  "auth.rateLimited": "Das waren zu viele Versuche in kurzer Zeit. Bitte warte ein paar Minuten und versuch es dann noch einmal.",
+  "auth.signupDisabled": "Neue Konten sind gerade nicht möglich. Bitte versuch es später noch einmal.",
+  "auth.network": "Wir konnten den Server nicht erreichen. Bitte prüfe deine Verbindung und versuch es noch einmal.",
+  "auth.unknown": "Das hat leider nicht geklappt. Bitte versuch es noch einmal.",
+  "auth.signOutFailed": "Das Abmelden hat nicht geklappt. Bitte lade die Seite neu und versuch es noch einmal.",
+  "auth.samePassword": "Das ist dein bisheriges Passwort. Bitte wähle ein anderes.",
+  "auth.providerDisabled": "Diese Anmeldung ist gerade nicht eingerichtet. Melde dich stattdessen mit E-Mail und Passwort an.",
+  "auth.linkExpired": "Dieser Link gilt nicht mehr – er läuft nach einer Stunde ab und lässt sich nur einmal benutzen. Fordere einfach einen neuen an.",
+  "auth.cancelled": "Die Anmeldung wurde abgebrochen. Du kannst es noch einmal versuchen oder E-Mail und Passwort nehmen.",
+  "auth.deleteFailed": "Das Löschen hat nicht geklappt. Bitte versuch es noch einmal – oder schreib uns, dann erledigen wir es von Hand."
 }
