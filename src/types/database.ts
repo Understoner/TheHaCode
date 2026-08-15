@@ -442,6 +442,15 @@ export type Database = {
     Functions: {
       has_plus_access: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      save_exercise: {
+        Args: {
+          p_exercise_id: string
+          p_steps: Json
+          p_subtitle: string
+          p_title: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       exercise_effect:

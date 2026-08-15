@@ -46,9 +46,7 @@ describe('authErrorMessageKey', () => {
       { code: 'weak_password' },
       { code: 'over_request_rate_limit' },
       { code: 'signup_disabled' },
-      { code: 'provider_disabled' },
       { code: 'otp_expired' },
-      { code: 'access_denied' },
       { code: 'same_password' },
       { status: 0 },
       {},
@@ -62,30 +60,30 @@ describe('authErrorMessageKey', () => {
 });
 
 describe('urlErrorMessageKey', () => {
-  // Google und Apple melden nicht als Antwort auf einen Aufruf zurueck,
-  // sondern ueber die Adresse, auf die sie zurueckspringen - je nach Ablauf
+  // Ein abgelaufener Link meldet sich nicht als Antwort auf einen Aufruf,
+  // sondern ueber die Adresse, auf die zurueckgesprungen wird - je nach Ablauf
   // als Query oder als Fragment. Beides muss ankommen.
   it('liest den Fehler aus der Query', () => {
     expect(
-      urlErrorMessageKey('https://app.example.at/konto?error=access_denied&error_code=access_denied')
-    ).toBe('errors:auth.cancelled');
+      urlErrorMessageKey('https://app.example.at/passwort-neu?error=invalid_request&error_code=otp_expired')
+    ).toBe('errors:auth.linkExpired');
   });
 
   it('liest den Fehler auch aus dem Fragment', () => {
     expect(
-      urlErrorMessageKey('https://app.example.at/passwort-neu#error=invalid_request&error_code=otp_expired')
+      urlErrorMessageKey('https://app.example.at/passwort-neu#error=invalid_request&error_code=flow_state_expired')
     ).toBe('errors:auth.linkExpired');
   });
 
   it('faellt auf error zurueck, wenn es keinen error_code gibt', () => {
-    expect(urlErrorMessageKey('https://app.example.at/konto?error=access_denied')).toBe(
-      'errors:auth.cancelled'
+    expect(urlErrorMessageKey('https://app.example.at/passwort-neu?error=server_error')).toBe(
+      'errors:auth.unknown'
     );
   });
 
   it('meldet nichts, wenn in der Adresse gar kein Fehler steht', () => {
-    expect(urlErrorMessageKey('https://app.example.at/konto')).toBeNull();
-    expect(urlErrorMessageKey('https://app.example.at/konto?code=abc')).toBeNull();
+    expect(urlErrorMessageKey('https://app.example.at/passwort-neu')).toBeNull();
+    expect(urlErrorMessageKey('https://app.example.at/passwort-neu?code=abc')).toBeNull();
     expect(urlErrorMessageKey('kaputt')).toBeNull();
   });
 });

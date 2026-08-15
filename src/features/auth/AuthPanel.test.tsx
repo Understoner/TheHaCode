@@ -1,19 +1,18 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import '@/i18n';
 import { AuthPanel } from './AuthPanel';
 
-const { signInWithPassword, signUp, resetPasswordForEmail, signInWithOAuth } = vi.hoisted(() => ({
+const { signInWithPassword, signUp, resetPasswordForEmail } = vi.hoisted(() => ({
   signInWithPassword: vi.fn(),
   signUp: vi.fn(),
   resetPasswordForEmail: vi.fn(),
-  signInWithOAuth: vi.fn(),
 }));
 
 vi.mock('@/lib/supabase', () => ({
-  supabase: { auth: { signInWithPassword, signUp, resetPasswordForEmail, signInWithOAuth } },
+  supabase: { auth: { signInWithPassword, signUp, resetPasswordForEmail } },
 }));
 
 // Wie in NavBar.test.tsx: expo-routers Link zieht react-native-webs
@@ -31,14 +30,6 @@ describe('AuthPanel', () => {
     signInWithPassword.mockReset();
     signUp.mockReset();
     resetPasswordForEmail.mockReset();
-    signInWithOAuth.mockReset().mockResolvedValue({ data: {}, error: null });
-    // Google und Apple erscheinen nur, wenn sie in Supabase wirklich
-    // eingerichtet sind - die Variable sagt das (src/features/auth/oauth.ts).
-    vi.stubEnv('EXPO_PUBLIC_AUTH_PROVIDERS', 'google,apple');
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
   });
 
   it('startet beim Anmelden und laesst zum Registrieren wechseln', () => {
@@ -145,55 +136,6 @@ describe('AuthPanel', () => {
     await waitFor(() =>
       expect(
         screen.getByText('Für diese E-Mail-Adresse gibt es schon ein Konto.', { exact: false })
-      ).toBeTruthy()
-    );
-  });
-
-  // Der Standard ist "kein Anbieter": ein Knopf, der auf einer
-  // Supabase-Fehlerseite endet, waere schlimmer als gar keiner.
-  it('zeigt Google und Apple gar nicht erst, solange sie nicht eingerichtet sind', () => {
-    vi.stubEnv('EXPO_PUBLIC_AUTH_PROVIDERS', '');
-
-    render(<AuthPanel />);
-
-    expect(screen.queryByText('Mit Google anmelden')).toBeNull();
-    expect(screen.queryByText('Mit Apple anmelden')).toBeNull();
-    expect(screen.queryByText('oder')).toBeNull();
-    // Der Weg mit E-Mail und Passwort bleibt davon unberuehrt.
-    expect(screen.getByText('Jetzt anmelden')).toBeTruthy();
-  });
-
-  it('zeigt nur die Anbieter, die wirklich eingeschaltet sind', () => {
-    vi.stubEnv('EXPO_PUBLIC_AUTH_PROVIDERS', 'google');
-
-    render(<AuthPanel />);
-
-    expect(screen.getByText('Mit Google anmelden')).toBeTruthy();
-    expect(screen.queryByText('Mit Apple anmelden')).toBeNull();
-  });
-
-  it('schickt den Nutzer zum eingerichteten Anbieter', async () => {
-    render(<AuthPanel />);
-
-    fireEvent.click(screen.getByText('Mit Google anmelden'));
-
-    await waitFor(() => expect(signInWithOAuth).toHaveBeenCalledTimes(1));
-    expect(signInWithOAuth.mock.calls[0][0].provider).toBe('google');
-    expect(screen.getByText('Mit Apple anmelden')).toBeTruthy();
-  });
-
-  it('erklaert es, wenn der Anbieter gar nicht eingerichtet ist', async () => {
-    signInWithOAuth.mockResolvedValue({
-      data: {},
-      error: { code: 'provider_disabled', status: 400, message: 'Unsupported provider' },
-    });
-
-    render(<AuthPanel />);
-    fireEvent.click(screen.getByText('Mit Apple anmelden'));
-
-    await waitFor(() =>
-      expect(
-        screen.getByText('Diese Anmeldung ist gerade nicht eingerichtet.', { exact: false })
       ).toBeTruthy()
     );
   });
