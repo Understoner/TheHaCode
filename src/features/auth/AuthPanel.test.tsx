@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import '@/i18n';
 import { AuthPanel } from './AuthPanel';
@@ -14,6 +14,14 @@ const { signInWithPassword, signUp, resetPasswordForEmail, signInWithOAuth } = v
 
 vi.mock('@/lib/supabase', () => ({
   supabase: { auth: { signInWithPassword, signUp, resetPasswordForEmail, signInWithOAuth } },
+}));
+
+// Welche Anbieter angeboten werden, sagt Supabase ueber /auth/v1/settings
+// (src/features/auth/useAuthProviders.ts). Im Test steht dafuer diese Liste.
+const { anbieter } = vi.hoisted(() => ({ anbieter: { current: [] as string[] } }));
+
+vi.mock('@/features/auth/useAuthProviders', () => ({
+  useAuthProviders: () => ({ data: anbieter.current }),
 }));
 
 // Wie in NavBar.test.tsx: expo-routers Link zieht react-native-webs
@@ -32,13 +40,7 @@ describe('AuthPanel', () => {
     signUp.mockReset();
     resetPasswordForEmail.mockReset();
     signInWithOAuth.mockReset().mockResolvedValue({ data: {}, error: null });
-    // Google und Apple erscheinen nur, wenn sie in Supabase wirklich
-    // eingerichtet sind - die Variable sagt das (src/features/auth/oauth.ts).
-    vi.stubEnv('EXPO_PUBLIC_AUTH_PROVIDERS', 'google,apple');
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
+    anbieter.current = ['google', 'apple'];
   });
 
   it('startet beim Anmelden und laesst zum Registrieren wechseln', () => {
@@ -149,10 +151,10 @@ describe('AuthPanel', () => {
     );
   });
 
-  // Der Standard ist "kein Anbieter": ein Knopf, der auf einer
-  // Supabase-Fehlerseite endet, waere schlimmer als gar keiner.
+  // Ein Knopf, der auf einer Supabase-Fehlerseite endet, waere schlimmer als
+  // gar keiner - deshalb erscheint keiner, solange Supabase nichts meldet.
   it('zeigt Google und Apple gar nicht erst, solange sie nicht eingerichtet sind', () => {
-    vi.stubEnv('EXPO_PUBLIC_AUTH_PROVIDERS', '');
+    anbieter.current = [];
 
     render(<AuthPanel />);
 
@@ -164,7 +166,7 @@ describe('AuthPanel', () => {
   });
 
   it('zeigt nur die Anbieter, die wirklich eingeschaltet sind', () => {
-    vi.stubEnv('EXPO_PUBLIC_AUTH_PROVIDERS', 'google');
+    anbieter.current = ['google'];
 
     render(<AuthPanel />);
 

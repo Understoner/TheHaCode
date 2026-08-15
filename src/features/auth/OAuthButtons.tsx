@@ -4,7 +4,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing } from '@/design/tokens';
 import { authErrorMessageKey } from '@/features/auth/authErrors';
-import { enabledProviders, signInWithProvider, type OAuthProvider } from '@/features/auth/oauth';
+import { signInWithProvider, type OAuthProvider } from '@/features/auth/oauth';
+import { useAuthProviders } from '@/features/auth/useAuthProviders';
 
 // Bewusst ohne die Herstellerlogos: die gibt es nur als Bilddatei oder als
 // mehrfarbiges SVG, und beides hiesse entweder eine neue Abhaengigkeit oder
@@ -16,7 +17,14 @@ export function OAuthButtons() {
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<OAuthProvider | null>(null);
-  const providers = enabledProviders();
+
+  // ABWEICHUNG von der QueryBoundary-Regel (CLAUDE.md, SAD §6.2), und zwar
+  // absichtlich: Das hier ist kein Seiteninhalt, sondern eine Beigabe zum
+  // Anmeldeformular. Ein Skelett waehrend des Ladens wuerde das Formular
+  // beim Eintreffen nach unten schieben, und eine Fehlermeldung waere hier
+  // schlicht falsch - wer sich anmelden will, kann das ueber E-Mail und
+  // Passwort ohnehin. Beide Faelle enden deshalb in "nichts anzeigen".
+  const { data: providers = [] } = useAuthProviders();
 
   const start = async (provider: OAuthProvider) => {
     setError(null);
@@ -28,8 +36,8 @@ export function OAuthButtons() {
     if (startError) setError(t(authErrorMessageKey(startError)));
   };
 
-  // Kein eingerichteter Anbieter, kein Bereich - und auch keine Trennlinie mit
-  // "oder", die dann ins Nichts trennen wuerde.
+  // Kein eingeschalteter Anbieter, kein Bereich - und auch keine Trennlinie
+  // mit "oder", die dann ins Nichts trennen wuerde.
   if (providers.length === 0) return null;
 
   return (

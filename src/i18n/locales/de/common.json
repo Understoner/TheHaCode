@@ -127,5 +127,9 @@
   "passwortNeu.doneBody": "Du bist jetzt mit deinem neuen Passwort angemeldet.",
   "passwortNeu.toAccount": "Zum Konto",
   "passwortNeu.expiredTitle": "Der Link geht nicht mehr",
-  "passwortNeu.newLink": "Neuen Link anfordern"
+  "passwortNeu.newLink": "Neuen Link anfordern",
+  "auth.signedIn.providers": "Angemeldet über",
+  "auth.provider.email": "E-Mail und Passwort",
+  "auth.provider.google": "Google",
+  "auth.provider.apple": "Apple"
 }

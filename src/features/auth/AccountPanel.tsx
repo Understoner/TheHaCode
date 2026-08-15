@@ -21,6 +21,10 @@ export function AccountPanel({ session }: { session: Session }) {
   const fullName = session.user.user_metadata?.full_name;
   const name = typeof fullName === 'string' && fullName ? fullName : session.user.email;
 
+  // Ein Anbieter kann mehrfach auftauchen, wenn Supabase spaeter einmal
+  // mehrere Identitaeten desselben Typs verknuepft - deshalb ueber ein Set.
+  const identities = [...new Set((session.user.identities ?? []).map((i) => i.provider))];
+
   const signOut = async () => {
     setError(null);
     setPending(true);
@@ -35,6 +39,31 @@ export function AccountPanel({ session }: { session: Session }) {
     <View style={styles.card}>
       <Text style={styles.title}>{t('auth.signedIn.title')}</Text>
       <Text style={styles.body}>{t('auth.signedIn.as', { name })}</Text>
+
+      {/* Womit man angemeldet ist, steht in auth.identities - und nicht in
+          einer eigenen Spalte (CLAUDE.md: "keine eigene auth_provider-Spalte.
+          Ein Konto kann mehrere Provider haben"). Genau deshalb ist es eine
+          Liste: wer sich einmal mit E-Mail und einmal mit Google angemeldet
+          hat, sieht hier beides und weiss beim naechsten Mal, was er nehmen
+          kann. */}
+      {identities.length > 0 ? (
+        <View style={styles.identities}>
+          <Text style={styles.identityLabel}>{t('auth.signedIn.providers')}</Text>
+          <View style={styles.identityRow}>
+            {identities.map((provider) => (
+              <View key={provider} style={styles.identityChip}>
+                {/* defaultValue statt eines fehlenden Textes: kommt spaeter
+                    ein Anbieter dazu, steht hier sein Name und nicht der
+                    rohe Schluessel. */}
+                <Text style={styles.identityChipText}>
+                  {t(`auth.provider.${provider}`, { defaultValue: provider })}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       <Text style={styles.body}>{t('auth.signedIn.hint')}</Text>
 
       {error ? (
@@ -79,6 +108,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     color: colors.ink700,
+  },
+  identities: {
+    gap: 6,
+  },
+  identityLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.ink700,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  identityRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  identityChip: {
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.oceanTint,
+  },
+  identityChipText: {
+    fontSize: 13,
+    color: colors.ocean700,
+    fontWeight: '600',
   },
   divider: {
     height: 1,

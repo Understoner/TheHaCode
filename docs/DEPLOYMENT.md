@@ -237,7 +237,9 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 ## 5. Checkliste vor dem allerersten Livegang
 
 - [x] Beide Supabase-Projekte angelegt (Migrationen/Seeds laufen ab jetzt über die Pipeline)
-- [ ] Auth-Provider konfiguriert, E-Mail-Vorlagen auf Deutsch
+- [ ] Auth-Provider (Google/Apple) konfiguriert — Schritt fuer Schritt in [AUTH-PROVIDER.md](AUTH-PROVIDER.md); die App schaltet die Schaltflaechen danach von selbst frei
+- [ ] Apple-Secret laeuft nach spaetestens 6 Monaten ab — Erinnerung eingetragen
+- [ ] E-Mail-Vorlagen auf Deutsch (Bestaetigung, Passwort zuruecksetzen)
 - [x] Staging-Website auf Hostinger läuft, Branch `develop` bestätigt — Production-Website steht noch aus
 - [x] Staging gegen Indexierung geschützt (automatisches `robots.txt`, kein Passwortschutz — der steht bei Node.js Web Apps in hPanel nicht zur Auswahl)
 - [x] GitHub Environments `staging`/`production` mit Secrets und Variables befüllt, `production` hat einen Required Reviewer

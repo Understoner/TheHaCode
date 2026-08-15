@@ -36,6 +36,21 @@ export default function KontoScreen() {
     window.history.replaceState(null, '', window.location.pathname);
   }, []);
 
+  // Nach Google oder Apple haengt ein ?code=... in der Adresse. Bewusst erst
+  // aufgeraeumt, WENN eine Sitzung da ist: supabase-js tauscht diesen Code
+  // beim Laden gegen die Sitzung ein (detectSessionInUrl), und ihn vorher zu
+  // entfernen waere ein Wettlauf mit dem eigenen Anmeldevorgang. Sonst bliebe
+  // er in der Adresszeile stehen - und in jedem Lesezeichen, das von hier aus
+  // gesetzt wird.
+  const angemeldet = Boolean(session);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !angemeldet) return;
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('code')) return;
+    url.searchParams.delete('code');
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  }, [angemeldet]);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{t('konto.title')}</Text>
