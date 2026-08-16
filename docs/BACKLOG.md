@@ -259,6 +259,25 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [ ] Abo im Kundenportal kündbar
 - [ ] Kontoseite zeigt Status, Laufzeit, Einwilligungen, Export, Löschen
 
+### T17a · Auth-Mails ins Dashboard übertragen ⏱1
+**Ziel:** Die deutschen Vorlagen aus `supabase/templates/` gehen tatsächlich raus,
+statt weiter englisch („Confirm your signup").
+**Auslöser:** Sobald der erste zahlende Kunde da ist — dann ist der Supabase-Pro-Plan
+ohnehin gerechtfertigt. **Vorher nicht möglich:** eigene E-Mail-Vorlagen sind im
+Dashboard erst ab Pro änderbar, der freie Plan zeigt sie nur an.
+**Vorgehen:** Supabase → Projekt → Authentication → Emails → Templates. Betreff und
+HTML je Vorlage ersetzen, **in beiden Projekten** (Staging und Live). Zuordnung und
+Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
+**Abnahme:**
+- [ ] „Confirm signup", „Reset Password", „Change Email Address" in Staging ersetzt
+- [ ] Dieselben drei in Live ersetzt
+- [ ] Je eine Testmail ausgelöst und im Postfach geprüft — Link führt ans Ziel
+- [ ] `supabase config push` **nicht** benutzt (überschreibt `site_url` und die
+      Redirect URLs mit den localhost-Werten aus `config.toml`)
+
+> Bis dahin bleiben die Vorlagen im Repo wirkungslos, aber versioniert. Sie sind
+> fertig und reviewt (PR #29) — es fehlt allein der Dashboard-Zugriff.
+
 ---
 
 ## Block 7 — Launch (Woche 12)
