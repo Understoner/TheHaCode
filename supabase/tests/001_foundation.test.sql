@@ -51,12 +51,23 @@ reset role;
 insert into public.exercises (owner_id, type, playback_mode, visibility, title, default_round_count)
 values ('11111111-1111-1111-1111-111111111111', 'paced', 'timer', 'plus', 'Eigene Sequenz', 4);
 
+-- subscriptions (0010) haengt ebenfalls per cascade an auth.users. Der Insert
+-- laeuft unter service_role, weil der Entitlement-Trigger aus 0010 als
+-- security invoker arbeitet und der Schutztrigger oben alles andere abweist -
+-- als postgres scheitert diese Zeile mit genau der Meldung aus Test 3.
+set local role service_role;
+insert into public.subscriptions (user_id, plan, status, current_period_end)
+values ('11111111-1111-1111-1111-111111111111', 'yearly', 'active', now() + interval '1 year');
+reset role;
+
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
   select count(*) from (
     select id as user_id from public.profiles where id = '11111111-1111-1111-1111-111111111111'
     union all
     select owner_id from public.exercises where owner_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.subscriptions where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select * from finish();
