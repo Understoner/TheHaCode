@@ -20,9 +20,28 @@ on:
   # nach main, deshalb stoesst er diesen Workflow hier manuell noch mal an.
   workflow_dispatch:
 
-concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: false
+# Warum die Sperre je Job steht und nicht ueber dem ganzen Workflow
+# ------------------------------------------------------------------
+# Frueher stand hier eine Gruppe fuer den gesamten Lauf. Damit war immer nur
+# EIN Deploy je Branch unterwegs - und ein Lauf gilt erst als beendet, wenn
+# auch seine Befoerderung durch ist. Eine auf Freigabe wartende Befoerderung
+# hat deshalb jeden weiteren Staging-Rollout blockiert, und zwar stumm: der
+# neue Lauf stand einfach auf "pending", ohne Meldung, ohne Grund.
+#
+# Am 15.08.2026 hat das eine Stunde gekostet und obendrein einen falschen
+# Alarm ausgeloest: der verzoegerte Lauf startete 32 Minuten nach dem Build,
+# und die damals zeitbasierte Deployment-Pruefung konnte nie mehr wahr werden.
+#
+# Jetzt hat jeder Job seine eigene Gruppe. Zwei Dinge folgen daraus:
+#   * Eine wartende Befoerderung haelt niemanden mehr auf. Der naechste Push
+#     rollt sofort nach Staging aus.
+#   * Ausrollen bleibt trotzdem serialisiert - zwei Migrationslaeufe gegen
+#     dieselbe Datenbank koennen sich nicht ueberholen.
+#
+# cancel-in-progress bleibt ueberall false, und das ist hier keine Bequemlichkeit:
+# diese Jobs fuehren "supabase db push" aus. Einen laufenden Migrationsschritt
+# abzubrechen, weil zufaellig jemand anderes pusht, waere der teuerste
+# denkbare Weg, ein bisschen Wartezeit zu sparen.
 
 jobs:
   # ---------------------------------------------------------------- STAGING
@@ -31,6 +50,9 @@ jobs:
     name: Staging ausrollen und pruefen
     runs-on: ubuntu-latest
     environment: staging
+    concurrency:
+      group: rollout-staging
+      cancel-in-progress: false
     timeout-minutes: 25
     outputs:
       smoke: ${{ steps.smoke.outcome }}
@@ -88,6 +110,10 @@ jobs:
     name: Nach main befoerdern
     needs: staging
     runs-on: ubuntu-latest
+    # Eigene Gruppe: hier wird gewartet, und Warten darf nichts blockieren.
+    concurrency:
+      group: promote-to-main
+      cancel-in-progress: false
     # Das GitHub-Environment "production" traegt die Freigaberegel.
     # Mit hinterlegtem Reviewer ist die Beförderung ein Klick; ohne Reviewer
     # laeuft sie vollautomatisch durch. Empfehlung siehe docs/DEPLOYMENT.md.
@@ -123,6 +149,9 @@ jobs:
     name: Production ausrollen und pruefen
     runs-on: ubuntu-latest
     environment: production
+    concurrency:
+      group: rollout-production
+      cancel-in-progress: false
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
