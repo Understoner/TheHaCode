@@ -60,7 +60,7 @@ jobs:
         run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
 
       - name: Auf Hostinger-Deployment warten
-        run: bash scripts/wait-for-deploy.sh "${{ vars.STAGING_URL }}" "${{ steps.t0.outputs.value }}"
+        run: bash scripts/wait-for-deploy.sh "${{ vars.STAGING_URL }}" "${{ steps.t0.outputs.value }}" "${{ github.sha }}"
 
       - uses: actions/setup-node@v4
         with:
@@ -150,7 +150,7 @@ jobs:
         run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
 
       - name: Auf Hostinger-Deployment warten
-        run: bash scripts/wait-for-deploy.sh "${{ vars.PRODUCTION_URL }}" "${{ steps.t0.outputs.value }}"
+        run: bash scripts/wait-for-deploy.sh "${{ vars.PRODUCTION_URL }}" "${{ steps.t0.outputs.value }}" "${{ github.sha }}"
 
       - uses: actions/setup-node@v4
         with:
