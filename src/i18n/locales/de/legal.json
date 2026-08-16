@@ -1,6 +1,5 @@
 {
   "placeholderBanner": "Platzhalterdaten — vor Livegang ausfüllen.",
-
   "impressum.title": "Impressum",
   "impressum.sections": [
     {
@@ -52,7 +51,6 @@
       ]
     }
   ],
-
   "datenschutz.title": "Datenschutzerklärung",
   "datenschutz.stand": "Fassung vom 16. August 2026",
   "datenschutz.sections": [
@@ -147,139 +145,221 @@
       ]
     }
   ],
-
   "agb.title": "Allgemeine Geschäftsbedingungen",
   "agb.stand": "Fassung vom 16. August 2026",
   "agb.sections": [
     {
-      "title": "1. Geltungsbereich und Vertragspartner",
+      "title": "Teil A — Allgemeine Bestimmungen",
       "lines": [
-        "Diese Bedingungen gelten für die Nutzung der Website und der Anwendung DER ATEMCODE sowie für alle darüber abgeschlossenen kostenpflichtigen Abonnements.",
-        "Vertragspartner ist TheHaCode by Michael Untersteiner, Weinberg 15, 4674 Altenhof am Hausruck, Österreich (im Folgenden „wir\").",
-        "Vertragssprache ist Deutsch.",
-        "Abweichende Bedingungen der Nutzer:innen werden nicht Vertragsinhalt, außer wir stimmen ihnen ausdrücklich schriftlich zu."
+        "Teil A gilt für alle unsere Leistungen. Teil B enthält die zusätzlichen Regeln für Workshops, Camps, Kurse und Events, Teil C jene für die App und das Abonnement. Widersprechen sich eine allgemeine und eine besondere Regel, geht die besondere vor."
       ]
     },
     {
-      "title": "2. Leistungsbeschreibung",
+      "title": "§ 1 Geltungsbereich und Vertragspartner",
+      "lines": [
+        "Diese Bedingungen gelten für sämtliche Leistungen von TheHaCode by Michael Untersteiner, Weinberg 15, 4674 Altenhof am Hausruck, Österreich (im Folgenden „wir“) — insbesondere für Workshops, Camps, Online- und Offline-Kurse und Events sowie für die Nutzung der Website und der Anwendung DER ATEMCODE einschließlich kostenpflichtiger Abonnements.",
+        "Vertragssprache ist Deutsch.",
+        "Abweichende Bedingungen der Teilnehmer:innen und Nutzer:innen werden nicht Vertragsinhalt, außer wir stimmen ihnen ausdrücklich in Textform zu.",
+        "Verbraucher:in ist, wer den Vertrag zu Zwecken abschließt, die überwiegend weder der gewerblichen noch der selbständigen beruflichen Tätigkeit zugerechnet werden können. Die eigens gekennzeichneten Verbraucherbestimmungen gelten nur für diese Personen."
+      ]
+    },
+    {
+      "title": "§ 2 Art unserer Leistungen",
+      "lines": [
+        "Bei allen angebotenen Workshops, Camps, Events sowie Online- und Offline-Kursen handelt es sich um reine Dienstleistungen. Ein bestimmter Erfolg wird weder geschuldet noch garantiert.",
+        "Das gilt sinngemäß für die Anwendung DER ATEMCODE: wir stellen Übungen und Werkzeuge bereit, schulden aber kein bestimmtes Ergebnis."
+      ]
+    },
+    {
+      "title": "§ 3 Preise, Umsatzsteuer und Zahlung",
+      "lines": [
+        "Es gelten die zum Zeitpunkt der Anmeldung oder Bestellung angegebenen Preise. Alle Preise sind Endpreise in Euro.",
+        "Wir sind Kleinunternehmer gemäß § 6 Abs. 1 Z 27 UStG. Umsatzsteuer wird nicht ausgewiesen und nicht in Rechnung gestellt.",
+        "Die Zahlungswege richten sich nach der jeweiligen Leistung: für Workshops, Camps, Kurse und Events nach § 11, für das Abonnement nach § 16."
+      ]
+    },
+    {
+      "title": "§ 4 Rücktrittsrecht für Verbraucher:innen",
+      "lines": [
+        "Verbraucher:innen können binnen vierzehn Tagen ohne Angabe von Gründen von einem im Fernabsatz oder außerhalb von Geschäftsräumen geschlossenen Vertrag zurücktreten (§ 11 FAGG). Die Frist beginnt mit dem Tag des Vertragsabschlusses.",
+        "Für den Rücktritt genügt eine eindeutige Erklärung, etwa per E-Mail an office@thehacode.com oder per Post an die im Impressum genannte Anschrift. Ein Formular ist nicht erforderlich; die rechtzeitige Absendung genügt zur Fristwahrung.",
+        "Treten Sie fristgerecht zurück, erstatten wir bereits geleistete Zahlungen unverzüglich, spätestens binnen vierzehn Tagen ab Zugang Ihrer Erklärung, und zwar über dasselbe Zahlungsmittel, das Sie eingesetzt haben.",
+        "Das Rücktrittsrecht erlischt vorzeitig, wenn wir die Leistung auf Ihr ausdrückliches Verlangen bereits vor Ablauf der Frist vollständig erbracht haben und Sie vor Vertragsabschluss zur Kenntnis genommen haben, dass Sie damit Ihr Rücktrittsrecht verlieren (§ 18 Abs. 1 Z 11 FAGG). Darauf weisen wir Sie beim Kauf gesondert hin. Holen wir diese Erklärung nicht ein, besteht Ihr Rücktrittsrecht für die volle Dauer der Frist fort.",
+        "Dieses gesetzliche Rücktrittsrecht geht den Stornoregeln des § 12 vor. Solange es besteht und ausgeübt wird, erhalten Sie alle geleisteten Zahlungen zurück — auch eine Anzahlung."
+      ]
+    },
+    {
+      "title": "§ 5 Gesundheitlicher Hinweis",
+      "lines": [
+        "Unsere Angebote arbeiten mit Atemtechniken. Diese wirken auf Kreislauf und Nervensystem und können Schwindel, Kribbeln, Benommenheit und in seltenen Fällen eine kurzzeitige Bewusstlosigkeit auslösen.",
+        "Die ausführlichen Hinweise und Einschränkungen im Haftungsausschluss sind Bestandteil dieses Vertrags. Bitte lesen Sie sie vor der ersten Teilnahme und vor der ersten Anwendung in der App.",
+        "Sie sind verpflichtet, uns vor einem Workshop, Camp oder Kurs unaufgefordert über gesundheitliche Einschränkungen zu informieren, die für die Teilnahme erheblich sein können. Im Zweifel holen Sie vorher ärztlichen Rat ein.",
+        "Unsere Angebote ersetzen keine ärztliche oder therapeutische Behandlung und stellen keine heilkundliche Leistung dar."
+      ]
+    },
+    {
+      "title": "§ 6 Pflichten der Teilnehmer:innen und Nutzer:innen",
+      "lines": [
+        "Sie folgen vor Ort den Anweisungen der Leitung, insbesondere solchen, die der Sicherheit dienen.",
+        "Zugangsdaten zur App sind vertraulich zu behandeln und nicht an Dritte weiterzugeben. Ein Konto ist für die Nutzung durch eine Person bestimmt. Dasselbe gilt für Zugänge zu Online-Kursen.",
+        "Untersagt sind automatisierte Zugriffe, die über die übliche Nutzung hinausgehen, sowie Versuche, Zugangsbeschränkungen zu umgehen oder den Betrieb zu stören.",
+        "Bei begründetem Verdacht auf erhebliche Verstöße dürfen wir den Zugang vorübergehend sperren oder von der weiteren Teilnahme ausschließen. Wir informieren Sie darüber und geben Ihnen Gelegenheit zur Stellungnahme."
+      ]
+    },
+    {
+      "title": "§ 7 Rechte an Inhalten",
+      "lines": [
+        "Sämtliche von uns bereitgestellten Inhalte — Texte, Grafiken, Videos, Kursunterlagen, vorkonfigurierte Sequenzen und Software — sind urheberrechtlich geschützt. Sie erhalten ein einfaches, nicht übertragbares Recht zur Nutzung für eigene, nicht gewerbliche Zwecke für die Dauer des Vertrags.",
+        "Eine Vervielfältigung, Weitergabe, öffentliche Wiedergabe oder gewerbliche Verwertung ist ohne unsere vorherige Zustimmung in Textform nicht gestattet. Das gilt ausdrücklich auch für Zugänge zu Online-Kursen und für Kursunterlagen.",
+        "Ton- und Bildaufnahmen während Workshops, Camps und Kursen sind nur mit unserer Zustimmung und mit Zustimmung der abgebildeten Personen zulässig.",
+        "Die von Ihnen in der App erstellten eigenen Sequenzen bleiben Ihnen zugeordnet. Wir verwerten sie nicht und geben sie nicht weiter."
+      ]
+    },
+    {
+      "title": "§ 8 Haftung",
+      "lines": [
+        "Wir haften uneingeschränkt für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit sowie für Schäden, die wir vorsätzlich oder grob fahrlässig verursacht haben.",
+        "Für leichte Fahrlässigkeit haften wir nur bei Verletzung einer wesentlichen Vertragspflicht und begrenzt auf den vertragstypisch vorhersehbaren Schaden, höchstens jedoch bis zur Deckungssumme unserer Haftpflichtversicherung.",
+        "Eine weitergehende Haftung, insbesondere für entgangenen Gewinn oder mittelbare Schäden, ist ausgeschlossen. Zwingende gesetzliche Bestimmungen, insbesondere nach dem Produkthaftungsgesetz, bleiben unberührt.",
+        "Für mitgebrachte Wertgegenstände übernehmen wir keine Haftung.",
+        "Die Inhalte unserer Workshops, Camps, Kurse und der App stellen Empfehlungen dar. Die Ausübung der gezeigten Techniken erfolgt in eigener Verantwortung; Absatz 1 bleibt davon unberührt."
+      ]
+    },
+    {
+      "title": "§ 9 Datenschutz",
+      "lines": [
+        "Welche Daten wir verarbeiten und zu welchem Zweck, steht in der Datenschutzerklärung. Sie ist über den Fußbereich jeder Seite erreichbar."
+      ]
+    },
+    {
+      "title": "§ 10 Änderungen dieser Bedingungen",
+      "lines": [
+        "Bei Verträgen über eine einmalige Leistung — insbesondere einem gebuchten Workshop oder Kurs — gelten die Bedingungen in der bei der Anmeldung geltenden Fassung. Spätere Änderungen wirken sich darauf nicht aus.",
+        "Bei Dauerschuldverhältnissen, insbesondere dem Abonnement, dürfen wir diese Bedingungen ändern, soweit dies zur Anpassung an geänderte Rechtslage, Rechtsprechung oder an Änderungen des Leistungsumfangs erforderlich ist und Sie dadurch nicht unangemessen benachteiligt werden.",
+        "Über solche Änderungen informieren wir Sie mindestens sechs Wochen vor Wirksamwerden per E-Mail. Widersprechen Sie nicht bis zum Wirksamwerden, gelten die Änderungen als angenommen; auf diese Wirkung weisen wir in der Mitteilung gesondert hin. Im Fall des Widerspruchs endet der Vertrag zum Wirksamwerden der Änderung."
+      ]
+    },
+    {
+      "title": "Teil B — Workshops, Camps, Kurse und Events",
+      "lines": [
+        "Ergänzend zu Teil A gilt für die Buchung und Teilnahme an Workshops, Camps, Online- und Offline-Kursen sowie Events Folgendes."
+      ]
+    },
+    {
+      "title": "§ 11 Anmeldung und Zahlung",
+      "lines": [
+        "Die Anmeldung zu Online-OnDemand-Kursen erfolgt per E-Mail oder über das Anmeldeformular beim jeweiligen Kurs. Die Bezahlung erfolgt per Überweisung.",
+        "Die Anmeldung gilt als verbindlich, sobald Sie eine automatisierte oder persönliche Bestätigung von uns erhalten haben.",
+        "Bei Offline-Workshops und Events mit Gesamtkosten über 130 Euro ist binnen vierzehn Tagen nach der Anmeldung eine Anzahlung von 50 Prozent des Preises zu leisten. Die Anmeldung wird erst mit deren Eingang verbindlich.",
+        "Der Restbetrag muss spätestens vier Wochen vor Beginn auf dem in der Rechnung ausgewiesenen Konto eingegangen sein, sofern nichts anderes ausdrücklich vereinbart ist. Bei einer Anmeldung weniger als vier Wochen vor Beginn ist der Gesamtbetrag umgehend zu überweisen; bitte klären Sie in diesem Fall vorab, ob noch Plätze frei sind.",
+        "Das Rücktrittsrecht nach § 4 bleibt von der Anzahlung unberührt."
+      ]
+    },
+    {
+      "title": "§ 12 Stornierung durch Sie",
+      "lines": [
+        "Eine Stornierung muss in Textform erfolgen, per Post oder per E-Mail an office@thehacode.com. Maßgeblich ist der Zeitpunkt des Zugangs bei uns.",
+        "Bei Stornierung mehr als zwölf Wochen vor Beginn erstatten wir die bereits gezahlte Gebühr abzüglich einer Bearbeitungsgebühr von 5 Prozent, höchstens jedoch 100 Euro.",
+        "Bei Stornierung zwölf bis sechs Wochen vor Beginn erstatten wir die Hälfte der Gebühr.",
+        "Bei Stornierung weniger als sechs Wochen vor Beginn sowie bei Fernbleiben ist die gesamte Gebühr fällig.",
+        "In allen Fällen erstatten wir die volle Gebühr abzüglich der Bearbeitungsgebühr, wenn Sie eine geeignete Ersatzperson stellen, die Ihren Platz übernimmt.",
+        "Bei Einzelkursen und externen Engagements können zusätzlich zur Stornogebühr bereits angefallene Fremdkosten anfallen, die wir Ihnen gesondert nachweisen.",
+        "Ihnen bleibt der Nachweis unbenommen, dass uns kein oder ein wesentlich geringerer Schaden entstanden ist. In diesem Fall reduziert sich die Stornogebühr entsprechend."
+      ]
+    },
+    {
+      "title": "§ 13 Absage durch uns",
+      "lines": [
+        "Müssen wir einen Workshop, ein Camp oder ein Event aus einem wichtigen Grund absagen — etwa wegen zu geringer Teilnehmerzahl, Krankheit der Leitung, höherer Gewalt oder wegen Wetterverhältnissen, die eine Durchführung unmöglich machen — erhalten Sie die bereits gezahlte Gebühr vollständig und umgehend zurück.",
+        "Können einzelne Teilleistungen nicht durchgeführt werden, entscheiden wir nach billigem Ermessen, ob wir sie nachholen oder durch eine gleichwertige Leistung ersetzen. Ist beides nicht möglich, erstatten wir den auf die entfallene Teilleistung entfallenden Anteil.",
+        "Weitergehende Ansprüche, insbesondere auf Ersatz von Reise- und Unterkunftskosten, bestehen nur nach Maßgabe des § 8."
+      ]
+    },
+    {
+      "title": "Teil C — App und Abonnement",
+      "lines": [
+        "Ergänzend zu Teil A gilt für die Nutzung der Anwendung DER ATEMCODE Folgendes."
+      ]
+    },
+    {
+      "title": "§ 14 Leistungsumfang",
       "lines": [
         "Ein Teil der Inhalte — insbesondere vorkonfigurierte Atemsequenzen und Videos — ist dauerhaft und kostenlos zugänglich.",
-        "Kostenpflichtig ist ausschließlich die Möglichkeit, eigene Atemsequenzen anzulegen und zu speichern („Plus\").",
+        "Kostenpflichtig ist ausschließlich die Möglichkeit, eigene Atemsequenzen anzulegen und zu speichern („Plus“).",
         "Bereits gespeicherte eigene Sequenzen bleiben auch nach Ende eines Abonnements abrufbar, abspielbar und löschbar. Neue Sequenzen lassen sich ohne aufrechtes Abonnement nicht anlegen und bestehende nicht mehr ändern.",
         "Es gibt keinen kostenlosen Testzeitraum. Der Konfigurator ist auch ohne Abonnement sichtbar und bedienbar; gesperrt ist allein das Speichern."
       ]
     },
     {
-      "title": "3. Zustandekommen des Vertrags",
+      "title": "§ 15 Nutzerkonto und Vertragsschluss",
       "lines": [
         "Der unentgeltliche Nutzungsvertrag kommt mit der Anlage eines Kontos zustande.",
         "Ein kostenpflichtiges Abonnement kommt zustande, indem Sie ein Modell auswählen und den Bezahlvorgang bei unserem Zahlungsdienstleister abschließen. Die Freischaltung erfolgt unmittelbar nach Bestätigung der Zahlung.",
-        "Die Darstellung der Modelle auf der Website ist kein bindendes Angebot, sondern eine Aufforderung zur Abgabe eines Angebots."
+        "Die Darstellung der Modelle ist kein bindendes Angebot, sondern eine Aufforderung zur Abgabe eines Angebots.",
+        "Sie können Ihr Konto jederzeit selbst und vollständig löschen. Ein aufrechtes Abonnement kündigen Sie bitte zusätzlich nach § 17, da es über den Zahlungsdienstleister geführt wird."
       ]
     },
     {
-      "title": "4. Preise und Zahlung",
+      "title": "§ 16 Entgelt und Abrechnung",
       "lines": [
-        "Es gelten die zum Zeitpunkt der Bestellung auf der Website angegebenen Preise. Alle Preise sind Endpreise in Euro.",
-        "Wir sind Kleinunternehmer gemäß § 6 Abs. 1 Z 27 UStG. Umsatzsteuer wird nicht ausgewiesen und nicht in Rechnung gestellt.",
-        "Die Zahlung erfolgt über Stripe. Es gelten ergänzend die dortigen Bedingungen für den Zahlungsvorgang.",
+        "Das Abonnement wird über Stripe abgewickelt. Ergänzend gelten die dortigen Bedingungen für den Zahlungsvorgang.",
         "Das Entgelt ist im Voraus für die jeweilige Abrechnungsperiode fällig und wird zu deren Beginn eingezogen."
       ]
     },
     {
-      "title": "5. Laufzeit und Kündigung",
+      "title": "§ 17 Laufzeit und Kündigung",
       "lines": [
         "Das Abonnement wird je nach gewähltem Modell für einen Monat oder für ein Jahr abgeschlossen und verlängert sich jeweils um dieselbe Dauer, sofern es nicht vorher gekündigt wird.",
-        "Sie können jederzeit zum Ende der laufenden Abrechnungsperiode kündigen. Die Kündigung erfolgt selbständig über das Kundenportal des Zahlungsdienstleisters, das in Ihrem Konto verlinkt ist; eine formlose Mitteilung an uns genügt ebenfalls.",
+        "Sie können jederzeit zum Ende der laufenden Abrechnungsperiode kündigen. Die Kündigung erfolgt selbständig über das Kundenportal des Zahlungsdienstleisters, das in Ihrem Konto verlinkt ist; eine formlose Mitteilung an office@thehacode.com genügt ebenfalls.",
         "Bis zum Ende der bezahlten Periode bleibt der Zugang uneingeschränkt bestehen. Eine anteilige Rückerstattung für die laufende Periode erfolgt nicht.",
         "Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt für beide Seiten unberührt."
       ]
     },
     {
-      "title": "6. Rücktrittsrecht für Verbraucher:innen",
-      "lines": [
-        "Verbraucher:innen können binnen vierzehn Tagen ohne Angabe von Gründen von einem im Fernabsatz geschlossenen Vertrag zurücktreten (§ 11 FAGG). Die Frist beginnt mit dem Tag des Vertragsabschlusses.",
-        "Für den Rücktritt genügt eine eindeutige Erklärung, etwa per E-Mail an office@thehacode.com oder per Post an die im Impressum genannte Anschrift. Die Verwendung eines Formulars ist nicht erforderlich; die rechtzeitige Absendung genügt zur Fristwahrung.",
-        "Haben Sie ausdrücklich verlangt, dass wir mit der Leistung noch vor Ablauf der Rücktrittsfrist beginnen, und dies zur Kenntnis genommen, so erlischt Ihr Rücktrittsrecht mit vollständiger Vertragserfüllung (§ 18 Abs. 1 Z 11 FAGG). Andernfalls besteht es für die volle Dauer der Frist fort.",
-        "Treten Sie fristgerecht zurück, erstatten wir bereits geleistete Zahlungen unverzüglich, spätestens binnen vierzehn Tagen, über dasselbe Zahlungsmittel."
-      ]
-    },
-    {
-      "title": "7. Pflichten der Nutzer:innen",
-      "lines": [
-        "Ihre Zugangsdaten sind vertraulich zu behandeln und nicht an Dritte weiterzugeben. Ein Konto ist für die Nutzung durch eine Person bestimmt.",
-        "Untersagt sind automatisierte Zugriffe, die über die übliche Nutzung hinausgehen, sowie Versuche, Zugangsbeschränkungen zu umgehen oder den Betrieb zu stören.",
-        "Bei begründetem Verdacht auf erhebliche Verstöße dürfen wir den Zugang vorübergehend sperren. Wir informieren Sie darüber und geben Ihnen Gelegenheit zur Stellungnahme."
-      ]
-    },
-    {
-      "title": "8. Rechte an Inhalten",
-      "lines": [
-        "Sämtliche von uns bereitgestellten Inhalte — Texte, Grafiken, Videos, vorkonfigurierte Sequenzen und Software — sind urheberrechtlich geschützt. Sie erhalten ein einfaches, nicht übertragbares Recht zur Nutzung für eigene, nicht gewerbliche Zwecke für die Dauer des Vertrags.",
-        "Eine Vervielfältigung, Weitergabe, öffentliche Wiedergabe oder gewerbliche Verwertung ist ohne unsere Zustimmung nicht gestattet.",
-        "Die von Ihnen erstellten eigenen Sequenzen bleiben Ihnen zugeordnet. Wir verwerten sie nicht und geben sie nicht weiter."
-      ]
-    },
-    {
-      "title": "9. Verfügbarkeit",
+      "title": "§ 18 Verfügbarkeit",
       "lines": [
         "Wir bemühen uns um einen durchgehenden Betrieb, schulden aber keine bestimmte Verfügbarkeit.",
         "Wartungsarbeiten, Störungen bei Vorleistern und Ereignisse außerhalb unseres Einflussbereichs können zu vorübergehenden Einschränkungen führen. Bei längeren, von uns zu vertretenden Ausfällen erstatten wir das Entgelt anteilig."
       ]
     },
     {
-      "title": "10. Gesundheitlicher Hinweis",
+      "title": "Teil D — Schlussbestimmungen",
       "lines": [
-        "Die angebotenen Atemübungen sind ein Angebot zur allgemeinen Selbstanwendung und ersetzen keine ärztliche oder therapeutische Behandlung.",
-        "Die ausführlichen Hinweise und Einschränkungen im Haftungsausschluss sind Bestandteil dieses Vertrags. Bitte lesen Sie sie vor der ersten Anwendung."
+        "Die folgenden Bestimmungen gelten wiederum für alle Leistungen."
       ]
     },
     {
-      "title": "11. Haftung",
-      "lines": [
-        "Wir haften uneingeschränkt für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit sowie für Schäden, die wir vorsätzlich oder grob fahrlässig verursacht haben.",
-        "Für leichte Fahrlässigkeit haften wir nur bei Verletzung einer wesentlichen Vertragspflicht und begrenzt auf den vertragstypisch vorhersehbaren Schaden.",
-        "Eine weitergehende Haftung, insbesondere für entgangenen Gewinn oder mittelbare Schäden, ist ausgeschlossen. Zwingende gesetzliche Bestimmungen, insbesondere nach dem Produkthaftungsgesetz, bleiben unberührt."
-      ]
-    },
-    {
-      "title": "12. Änderungen dieser Bedingungen",
-      "lines": [
-        "Wir dürfen diese Bedingungen ändern, soweit dies zur Anpassung an geänderte Rechtslage, Rechtsprechung oder an Änderungen des Leistungsumfangs erforderlich ist und Sie dadurch nicht unangemessen benachteiligt werden.",
-        "Über Änderungen informieren wir Sie mindestens sechs Wochen vor Wirksamwerden per E-Mail. Widersprechen Sie nicht bis zum Wirksamwerden, gelten die Änderungen als angenommen; auf diese Wirkung weisen wir in der Mitteilung gesondert hin. Im Fall des Widerspruchs endet der Vertrag zum Wirksamwerden der Änderung."
-      ]
-    },
-    {
-      "title": "13. Datenschutz",
-      "lines": [
-        "Welche Daten wir verarbeiten und zu welchem Zweck, steht in der Datenschutzerklärung. Sie ist über den Fußbereich jeder Seite erreichbar."
-      ]
-    },
-    {
-      "title": "14. Anwendbares Recht und Gerichtsstand",
+      "title": "§ 19 Anwendbares Recht und Gerichtsstand",
       "lines": [
         "Es gilt österreichisches Recht unter Ausschluss der Verweisungsnormen des internationalen Privatrechts und des UN-Kaufrechts.",
         "Gegenüber Verbraucher:innen gilt diese Rechtswahl nur, soweit dadurch der Schutz zwingender Bestimmungen des Rechts jenes Staates nicht entzogen wird, in dem sie ihren gewöhnlichen Aufenthalt haben.",
-        "Für Klagen gegen Verbraucher:innen ist ausschließlich das Gericht am Wohnsitz, gewöhnlichen Aufenthalt oder Ort der Beschäftigung zuständig (§ 14 KSchG). Im Verkehr mit Unternehmern gilt der Sitz unseres Unternehmens als Gerichtsstand vereinbart."
+        "Für Klagen gegen Verbraucher:innen ist ausschließlich das Gericht am Wohnsitz, gewöhnlichen Aufenthalt oder Ort der Beschäftigung zuständig (§ 14 KSchG). Im Verkehr mit Unternehmern gilt Grieskirchen als Gerichtsstand vereinbart."
       ]
     },
     {
-      "title": "15. Schlussbestimmungen",
+      "title": "§ 20 Streitbeilegung",
+      "lines": [
+        "Wir sind weder verpflichtet noch bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+        "Verbraucher:innen in Österreich können sich außergerichtlich an die Internet Ombudsstelle wenden: www.ombudsstelle.at. Der Weg zu den ordentlichen Gerichten bleibt davon unberührt."
+      ]
+    },
+    {
+      "title": "§ 21 Schlussbestimmungen",
       "lines": [
         "Sollte eine Bestimmung unwirksam sein, bleibt die Wirksamkeit der übrigen unberührt. Anstelle der unwirksamen Bestimmung gilt die gesetzliche Regelung.",
         "Änderungen und Ergänzungen des Vertrags bedürfen der Textform."
       ]
     }
   ],
-
   "haftung.title": "Haftungsausschluss",
   "haftung.stand": "Fassung vom 16. August 2026",
   "haftung.sections": [
     {
       "title": "Bitte zuerst lesen",
       "lines": [
+        "Diese Hinweise gelten für alle unsere Angebote: für die Anwendung DER ATEMCODE ebenso wie für Workshops, Camps, Kurse und Events. Sie sind gemäß § 5 der Allgemeinen Geschäftsbedingungen Vertragsbestandteil.",
         "Atemübungen wirken auf Kreislauf und Nervensystem. Bewusst verlängerte Atempausen und schnelles Atmen können Schwindel, Kribbeln, Benommenheit und in seltenen Fällen eine kurzzeitige Bewusstlosigkeit auslösen — auch bei gesunden Menschen und auch dann, wenn sich die Übung angenehm anfühlt.",
-        "Nehmen Sie solche Anzeichen ernst. Beenden Sie die Übung sofort, atmen Sie ruhig weiter und legen Sie sich hin, wenn Ihnen schwindlig wird."
+        "Nehmen Sie solche Anzeichen ernst. Beenden Sie die Übung sofort, atmen Sie ruhig weiter und legen Sie sich hin, wenn Ihnen schwindlig wird. Bei einem Workshop oder Kurs sagen Sie es bitte zusätzlich der Leitung."
       ]
     },
     {
@@ -287,7 +367,8 @@
       "lines": [
         "Niemals im oder unter Wasser, auch nicht im flachen Bereich. Eine Ohnmacht im Wasser ist lebensgefährlich.",
         "Niemals beim Führen eines Fahrzeugs, beim Bedienen von Maschinen, auf Höhen, Leitern oder Treppen.",
-        "Üben Sie im Sitzen oder Liegen an einem sicheren Ort, an dem ein plötzlicher Schwindel keine Folgen hat."
+        "Üben Sie im Sitzen oder Liegen an einem sicheren Ort, an dem ein plötzlicher Schwindel keine Folgen hat.",
+        "Diese Einschränkungen gelten unabhängig davon, ob Sie allein mit der App üben oder unter Anleitung bei einer Veranstaltung."
       ]
     },
     {
@@ -305,17 +386,18 @@
     {
       "title": "Keine medizinische Leistung",
       "lines": [
-        "Die Inhalte dieser Anwendung dienen der allgemeinen Information und der eigenverantwortlichen Selbstanwendung.",
+        "Die Inhalte unserer Anwendung und unserer Veranstaltungen dienen der allgemeinen Information und der eigenverantwortlichen Anwendung.",
         "Sie stellen keine medizinische, psychotherapeutische oder sonstige heilkundliche Beratung dar, ersetzen keine Diagnose und keine Behandlung und sind nicht geeignet, eine Erkrankung zu erkennen, zu lindern oder zu heilen.",
-        "Setzen Sie verordnete Medikamente oder Therapien niemals aufgrund von Inhalten dieser Anwendung ab. Bei anhaltenden oder ernsten Beschwerden wenden Sie sich an eine Ärztin oder einen Arzt.",
-        "Die Anwendung ist kein Medizinprodukt."
+        "Setzen Sie verordnete Medikamente oder Therapien niemals aufgrund unserer Inhalte ab. Bei anhaltenden oder ernsten Beschwerden wenden Sie sich an eine Ärztin oder einen Arzt.",
+        "Die Anwendung ist kein Medizinprodukt. Unsere Trainer:innen üben keinen Heilberuf aus."
       ]
     },
     {
       "title": "Eigenverantwortung",
       "lines": [
-        "Die Anwendung der gezeigten Übungen erfolgt in eigener Verantwortung. Sie entscheiden selbst, ob eine Übung für Sie geeignet ist, und passen Dauer und Intensität Ihrem Befinden an.",
-        "Für Schäden, die aus einer Anwendung entgegen den vorstehenden Hinweisen entstehen, haften wir nicht. Im Übrigen gelten die Haftungsregeln unserer Allgemeinen Geschäftsbedingungen."
+        "Die Ausübung der gezeigten Übungen erfolgt in eigener Verantwortung. Sie entscheiden selbst, ob eine Übung für Sie geeignet ist, und passen Dauer und Intensität Ihrem Befinden an. Bei Veranstaltungen dürfen Sie jede Übung jederzeit abbrechen oder aussetzen.",
+        "Sie sind verpflichtet, uns vor der Teilnahme an einer Veranstaltung über gesundheitliche Einschränkungen zu informieren, die dafür erheblich sein können.",
+        "Für Schäden, die aus einer Anwendung entgegen den vorstehenden Hinweisen entstehen, haften wir nicht. Im Übrigen gilt § 8 der Allgemeinen Geschäftsbedingungen; unsere Haftung für Personenschäden sowie für Vorsatz und grobe Fahrlässigkeit bleibt davon unberührt."
       ]
     },
     {
