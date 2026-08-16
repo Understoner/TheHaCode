@@ -1,0 +1,45 @@
+<!-- Wechsel der E-Mail-Adresse. Platzhalter: {{ .ConfirmationURL }},
+     {{ .Email }} (bisherige), {{ .NewEmail }} (neue).
+     Supabase verschickt diese Mail an BEIDE Adressen, solange
+     double_confirm_changes = true steht (config.toml) - deshalb nennt der Text
+     beide, statt "deine Adresse" zu sagen. -->
+<div style="margin:0;padding:24px;background-color:#EFF3F4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <div style="max-width:520px;margin:0 auto;background-color:#FFFFFF;border:1px solid #E8EDF1;border-radius:12px;padding:32px;">
+
+    <p style="margin:0 0 24px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#5A6B75;">
+      Der Atemcode
+    </p>
+
+    <h1 style="margin:0 0 16px;font-size:20px;line-height:28px;font-weight:600;color:#16242B;">
+      E-Mail-Adresse ändern
+    </h1>
+
+    <p style="margin:0 0 24px;font-size:16px;line-height:26px;color:#5A6B75;">
+      Für dein Konto wurde ein Wechsel von <strong style="color:#16242B;">{{ .Email }}</strong>
+      auf <strong style="color:#16242B;">{{ .NewEmail }}</strong> angefragt.
+      Bestätige ihn hier — aus Sicherheitsgründen fragen wir bei beiden Adressen nach.
+    </p>
+
+    <p style="margin:0 0 24px;">
+      <a href="{{ .ConfirmationURL }}"
+         style="display:inline-block;background-color:#3B6C82;color:#FFFFFF;font-size:16px;font-weight:500;text-decoration:none;padding:14px 28px;border-radius:999px;">
+        Änderung bestätigen
+      </a>
+    </p>
+
+    <p style="margin:0 0 8px;font-size:13px;line-height:21px;color:#5A6B75;">
+      Falls sich der Knopf nicht anklicken lässt, kopier diese Adresse in deinen Browser:
+    </p>
+    <p style="margin:0 0 28px;font-size:13px;line-height:21px;word-break:break-all;">
+      <a href="{{ .ConfirmationURL }}" style="color:#3B6C82;">{{ .ConfirmationURL }}</a>
+    </p>
+
+    <hr style="border:0;border-top:1px solid #E8EDF1;margin:0 0 20px;">
+
+    <p style="margin:0;font-size:13px;line-height:21px;color:#5A6B75;">
+      Wenn du das nicht angefragt hast, bestätige nichts und ändere zur
+      Sicherheit dein Passwort. Ohne Bestätigung bleibt die Adresse, wie sie ist.
+    </p>
+
+  </div>
+</div>
