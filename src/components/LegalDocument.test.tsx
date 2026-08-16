@@ -29,18 +29,25 @@ describe('LegalDocument', () => {
   // auch in Production (siehe LegalPlaceholderBanner). Geprueft wird hier der
   // Text, der tatsaechlich gerendert wird, nicht eine von Hand gepflegte
   // Liste von Feldern.
-  it('zeigt den Warnbanner, solange Impressum und AGB Platzhalter enthalten', () => {
+  // Kontakt- und Unternehmensdaten stammen aus dem Impressum von
+  // thehacode.com. Offen bleiben dort nicht angegebene Angaben:
+  // Gewerbewortlaut, UID und Firmenbuch. Solange die fehlen, muss der Banner
+  // stehen - und zwar auch in Production (siehe LegalPlaceholderBanner).
+  it('zeigt den Warnbanner, solange das Impressum Platzhalter enthält', () => {
     render(<LegalDocument documentKey="impressum" />);
     expect(screen.getByText(PLACEHOLDER_BANNER)).toBeTruthy();
   });
 
-  it('zeigt keinen Warnbanner, wo keine Platzhalter mehr stehen', () => {
-    // Der Haftungsausschluss nennt keine Unternehmensdaten und ist deshalb
-    // schon vollstaendig. Er ist damit die Gegenprobe: der Banner haengt am
-    // Inhalt, nicht daran, dass er einfach immer erscheint.
-    render(<LegalDocument documentKey="haftung" />);
-    expect(screen.queryByText(PLACEHOLDER_BANNER)).toBeNull();
-  });
+  it.each(['datenschutz', 'agb', 'haftung'] as const)(
+    'zeigt in %s keinen Warnbanner - dort steht kein Platzhalter mehr',
+    (documentKey) => {
+      // Die Gegenprobe: der Banner haengt am Inhalt, nicht daran, dass er
+      // einfach immer erscheint. Kaeme in einem dieser drei Texte ein
+      // "[[TODO" dazu, schlaegt genau dieser Test an.
+      render(<LegalDocument documentKey={documentKey} />);
+      expect(screen.queryByText(PLACEHOLDER_BANNER)).toBeNull();
+    },
+  );
 
   it('enthält im Haftungsausschluss die sicherheitskritischen Hinweise', () => {
     // Diese beiden Sätze sind der Grund, warum es das Dokument gibt. Eine

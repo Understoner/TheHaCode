@@ -4,31 +4,30 @@
   "impressum.title": "Impressum",
   "impressum.sections": [
     {
-      "title": "Angaben gemäß § 5 ECG und § 25 MedienG",
+      "title": "Informationen und Offenlegung gemäß § 5 Abs. 1 ECG, § 25 MedienG, § 63 GewO und § 14 UGB",
       "lines": [
-        "Medieninhaber, Herausgeber und für den Inhalt verantwortlich:",
-        "[[TODO: Vor- und Nachname bzw. Firmenwortlaut]]",
-        "[[TODO: Straße und Hausnummer]]",
-        "[[TODO: PLZ und Ort]]",
+        "TheHaCode by Michael Untersteiner",
+        "Medieninhaber, Herausgeber und für den Inhalt verantwortlich: Michael Untersteiner",
+        "Weinberg 15",
+        "4674 Altenhof am Hausruck",
         "Österreich",
-        "E-Mail: [[TODO: E-Mail-Adresse]]",
-        "Telefon: [[TODO: Telefonnummer, optional]]"
+        "E-Mail: office@thehacode.com",
+        "Telefon: +43 664 4252322"
       ]
     },
     {
       "title": "Unternehmensdaten",
       "lines": [
-        "Unternehmensgegenstand: [[TODO: z. B. Atem- und Bewegungstraining, Kurse, digitale Anwendung]]",
-        "UID-Nummer: [[TODO: UID-Nummer, falls vorhanden — bei Kleinunternehmern häufig keine]]",
-        "Firmenbuchnummer und Firmenbuchgericht: [[TODO: nur bei eingetragenem Unternehmen, sonst entfällt dieser Punkt]]",
-        "Mitgliedschaft: [[TODO: z. B. Wirtschaftskammer Österreich, Fachgruppe — falls zutreffend]]"
+        "Unternehmensgegenstand: [[TODO: Wortlaut laut Gewerbeschein — auf thehacode.com nicht angegeben. Im Fließtext dort ist von einer Ausbildung zum Breathwork-Trainer die Rede; der amtliche Wortlaut kann davon abweichen]]",
+        "UID-Nummer: [[TODO: auf thehacode.com nirgends genannt — als Kleinunternehmer vermutlich keine. Falls zutreffend, diese Zeile ersatzlos streichen]]",
+        "Firmenbuchnummer und Firmenbuchgericht: [[TODO: ebenfalls nirgends genannt — bei einem nicht eingetragenen Einzelunternehmen entfällt der Punkt und die Zeile wird gestrichen]]"
       ]
     },
     {
       "title": "Berufsrecht und Aufsichtsbehörde",
       "lines": [
-        "Anwendbare Rechtsvorschrift: [[TODO: z. B. Gewerbeordnung 1994]]",
-        "Aufsichtsbehörde bzw. Gewerbebehörde: [[TODO: zuständige Bezirksverwaltungsbehörde oder Magistrat]]",
+        "Anwendbare Rechtsvorschrift: Gewerbeordnung 1994 (GewO)",
+        "Gewerbeaufsichtsbehörde: Bezirkshauptmannschaft Grieskirchen",
         "Die Rechtsvorschriften sind über das Rechtsinformationssystem des Bundes abrufbar: www.ris.bka.gv.at"
       ]
     },
@@ -68,10 +67,12 @@
     {
       "title": "Verantwortlicher",
       "lines": [
-        "[[TODO: Vor- und Nachname bzw. Firmenwortlaut]]",
-        "[[TODO: Straße und Hausnummer]]",
-        "[[TODO: PLZ und Ort]]",
-        "E-Mail: [[TODO: E-Mail-Adresse]]",
+        "TheHaCode by Michael Untersteiner",
+        "Weinberg 15",
+        "4674 Altenhof am Hausruck",
+        "Österreich",
+        "E-Mail: office@thehacode.com",
+        "Telefon: +43 664 4252322",
         "Ein Datenschutzbeauftragter ist gesetzlich nicht bestellt; für alle Anliegen erreichen Sie uns unter der genannten Adresse."
       ]
     },
@@ -154,7 +155,8 @@
       "title": "1. Geltungsbereich und Vertragspartner",
       "lines": [
         "Diese Bedingungen gelten für die Nutzung der Website und der Anwendung DER ATEMCODE sowie für alle darüber abgeschlossenen kostenpflichtigen Abonnements.",
-        "Vertragspartner ist [[TODO: Vor- und Nachname bzw. Firmenwortlaut]], [[TODO: Anschrift]] (im Folgenden „wir\").",
+        "Vertragspartner ist TheHaCode by Michael Untersteiner, Weinberg 15, 4674 Altenhof am Hausruck, Österreich (im Folgenden „wir\").",
+        "Vertragssprache ist Deutsch.",
         "Abweichende Bedingungen der Nutzer:innen werden nicht Vertragsinhalt, außer wir stimmen ihnen ausdrücklich schriftlich zu."
       ]
     },
@@ -197,7 +199,7 @@
       "title": "6. Rücktrittsrecht für Verbraucher:innen",
       "lines": [
         "Verbraucher:innen können binnen vierzehn Tagen ohne Angabe von Gründen von einem im Fernabsatz geschlossenen Vertrag zurücktreten (§ 11 FAGG). Die Frist beginnt mit dem Tag des Vertragsabschlusses.",
-        "Für den Rücktritt genügt eine eindeutige Erklärung per E-Mail an die im Impressum genannte Adresse. Die Verwendung eines Formulars ist nicht erforderlich; die rechtzeitige Absendung genügt zur Fristwahrung.",
+        "Für den Rücktritt genügt eine eindeutige Erklärung, etwa per E-Mail an office@thehacode.com oder per Post an die im Impressum genannte Anschrift. Die Verwendung eines Formulars ist nicht erforderlich; die rechtzeitige Absendung genügt zur Fristwahrung.",
         "Haben Sie ausdrücklich verlangt, dass wir mit der Leistung noch vor Ablauf der Rücktrittsfrist beginnen, und dies zur Kenntnis genommen, so erlischt Ihr Rücktrittsrecht mit vollständiger Vertragserfüllung (§ 18 Abs. 1 Z 11 FAGG). Andernfalls besteht es für die volle Dauer der Frist fort.",
         "Treten Sie fristgerecht zurück, erstatten wir bereits geleistete Zahlungen unverzüglich, spätestens binnen vierzehn Tagen, über dasselbe Zahlungsmittel."
       ]
