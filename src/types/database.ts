@@ -390,6 +390,90 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_events: {
+        Row: {
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          received_at: string
+          type: string
+        }
+        Insert: {
+          id: string
+          payload?: Json | null
+          processed_at?: string | null
+          received_at?: string
+          type: string
+        }
+        Update: {
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          received_at?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          client_id: string | null
+          country: string | null
+          created_at: string
+          current_period_end: string
+          deleted_at: string | null
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          provider: string
+          started_at: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          stripe_checkout_session_id: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          client_id?: string | null
+          country?: string | null
+          created_at?: string
+          current_period_end: string
+          deleted_at?: string | null
+          id?: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          provider?: string
+          started_at?: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          client_id?: string | null
+          country?: string | null
+          created_at?: string
+          current_period_end?: string
+          deleted_at?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          provider?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           bio: string | null
