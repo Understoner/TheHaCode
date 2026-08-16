@@ -188,6 +188,24 @@ Ausnahme: Der Job `promote` pusht direkt auf `main` — dafür braucht `github-a
 >
 > Wollt ihr es vollautomatisch: Reviewer entfernen, sonst ändert sich nichts. Die Entscheidung ist reversibel und kostet einen Haken.
 
+> **Die Freigabe wird zweimal verlangt, nicht einmal.** Erst für die Beförderung
+> `develop → main`, dann noch einmal für den Production-Job selbst — beide Jobs
+> hängen am Environment `production`. Das ist keine Fehlfunktion: Nach der ersten
+> Freigabe steht der neue Stand auf `main` und Hostinger beginnt zu bauen; die
+> zweite Freigabe erlaubt Migration und Prüfung dagegen. Wer nur die erste
+> erteilt, hat den Code live, aber die Datenbank nicht migriert und nichts
+> geprüft — also unbedingt beide geben.
+>
+> Am 16.08.2026 beim ersten vollständigen Durchlauf so bestätigt.
+
+> **Eine wartende Beförderung blockiert nichts mehr.** Bis dahin hatte der ganze
+> Workflow eine gemeinsame `concurrency`-Gruppe: eine nicht freigegebene
+> Beförderung hielt jeden weiteren Staging-Rollout auf, stumm und ohne Meldung —
+> der neue Lauf stand einfach auf `pending`. Seit dem 16.08.2026 hat jeder Job
+> seine eigene Gruppe. Ausrollen bleibt serialisiert (zwei Migrationsläufe gegen
+> dieselbe Datenbank können sich nicht überholen), aber Warten hält niemanden
+> mehr auf.
+
 ---
 
 ## 4. Der Ablauf im Alltag
