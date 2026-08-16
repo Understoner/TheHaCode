@@ -424,6 +424,17 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Stripe schickt kein Supabase-JWT, sondern signiert den Rohtext seiner
+# Anfrage. Die Echtheit kommt deshalb ausschliesslich aus der Pruefung in
+# stripe-webhook/index.ts gegen STRIPE_WEBHOOK_SECRET (SAD §4.3 Punkt 2).
+# Bliebe verify_jwt an, kaeme kein einziges Ereignis durch.
+#
+# Das ist die einzige Funktion ohne JWT-Pruefung. Wer hier eine zweite
+# eintraegt, oeffnet sie fuer das ganze Internet - dann muss die Funktion
+# selbst beweisen koennen, wer da anruft.
+[functions.stripe-webhook]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
