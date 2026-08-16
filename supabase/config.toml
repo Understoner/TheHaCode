@@ -254,6 +254,31 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# Die Auth-Mails sind das Erste, was ein neuer Nutzer schriftlich von uns
+# bekommt - im Auslieferungszustand englisch ("Confirm your signup"). Die
+# deutschen Fassungen liegen als Dateien im Repo, damit sie im Pull Request
+# lesbar sind und sich lokal ueber Mailpit pruefen lassen
+# (siehe supabase/templates/_HINWEIS.md).
+#
+# ACHTUNG: Auf Staging und Live gehoeren sie von Hand ins Dashboard.
+# "supabase config push" waere der falsche Weg - der schoebe den ganzen
+# auth-Abschnitt hoch, also auch site_url und additional_redirect_urls, die
+# hier auf localhost stehen. Er wuerde damit genau die Einstellungen
+# ueberschreiben, die dort von Hand richtig gesetzt sind.
+[auth.email.template.confirmation]
+subject = "Bestätige deine E-Mail-Adresse"
+content_path = "./supabase/templates/bestaetigung.html"
+
+[auth.email.template.recovery]
+subject = "Neues Passwort für DER ATEMCODE"
+content_path = "./supabase/templates/passwort-zuruecksetzen.html"
+
+[auth.email.template.email_change]
+subject = "Bestätige deine neue E-Mail-Adresse"
+content_path = "./supabase/templates/email-aenderung.html"
+
+# Magic Link, Einladung und Reauthentifizierung bleiben unangetastet: V1 bietet
+# keinen dieser Wege an, sie koennen also gar nicht ausgeloest werden.
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
