@@ -110,7 +110,9 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Vorlage:** `src/features/news/*` (identisches Muster: Migration → Typen → Query-Hook → `QueryBoundary`-Komponente → Test)
 **Abnahme:**
 - [ ] Nur veröffentlichte Kurse sichtbar (`published_at`-Gate wie bei News)
-- [ ] Kein Buchungs-/Zahlungsablauf — Anmeldung über externen Link (`signup_url`)
+- [ ] ~~Kein Buchungs-/Zahlungsablauf — Anmeldung über externen Link (`signup_url`)~~
+      — **am 16.08.2026 aufgehoben, siehe T20.** Der externe Link bleibt, bis
+      T20 gebaut ist; danach ist er der Rückfall, nicht der Regelweg.
 - [ ] Vier Zustände über `QueryBoundary` behandelt
 - [ ] pgTAP: Normal- und Missbrauchsfall (`supabase/tests/003_courses_team.test.sql`)
 
@@ -332,6 +334,56 @@ und der Kauf bricht.** Deshalb Dashboard zuerst, Code danach.
 
 > Ohne T19a gilt: das vierzehntägige Rücktrittsrecht besteht in vollem Umfang,
 > und die AGB sind im Streitfall womöglich nicht wirksam einbezogen.
+
+### T20 · Kurse in der App buchen und bezahlen 🔒 ⏱20
+**Ziel:** Workshops, Camps und Kurse werden nicht mehr über einen externen Link
+angemeldet, sondern in der App gebucht und über Stripe bezahlt.
+**Warum neu:** T07a schließt genau das noch aus („Kein Buchungs-/Zahlungsablauf
+— Anmeldung über externen Link `signup_url`"). Das ist am 16.08.2026 bewusst
+aufgehoben worden. **T07a ist damit überholt**, nicht T20 falsch.
+**Warum 🔒:** Zahlungen und Entgegennahme von Anzahlungen.
+
+**Das Vertragswerk steht schon.** Teil B der AGB (§§ 11–13) regelt Anmeldung,
+Anzahlung, Stornostaffel und Absage bereits vollständig — die Implementierung
+muss sich daran halten, nicht umgekehrt.
+
+**Der entscheidende Unterschied zum Abo:** ein Kurs ist eine Einmalzahlung,
+`mode: 'payment'` statt `mode: 'subscription'`. Daraus folgt fast alles andere:
+
+- `create-checkout` kennt heute nur `subscription`. Entweder ein zweiter
+  Einstiegspunkt `create-course-checkout` oder ein Modus-Parameter — beim
+  Schneiden daran denken, dass die Prüfung „hat schon ein Abo" für Kurse
+  sinnlos ist.
+- Der Webhook darf aus einer Kursbuchung **keine** Zeile in `subscriptions`
+  schreiben. Heute passiert das nicht: `checkout.session.completed` ohne
+  `subscription` liefert in `rowForEvent` `null`, die Funktion quittiert mit
+  200 und tut nichts. Der bestehende Code ist also nicht gefährlich, aber auch
+  nicht zuständig — es braucht einen eigenen Zweig und eine eigene Tabelle.
+- Neue Migration: `course_bookings` (Nutzerbezug, Kurs, Status, gezahlter
+  Betrag, Anzahlung/Restzahlung, Stornozeitpunkt). Regeln aus CLAUDE.md für
+  Nutzertabellen beachten, Eintrag in die UNION-Liste in `001_foundation`.
+- `courses` braucht Preis und Teilnehmerzahl. Additiv, also nullable.
+- **Plätze sind endlich.** Das ist der einzige Ort im Projekt mit einem echten
+  Wettlauf: zwei Personen buchen den letzten Platz gleichzeitig. Die Zählung
+  gehört in die Datenbank, nicht in den Client — und die Reservierung muss vor
+  dem Bezahlen greifen und wieder verfallen, wenn nicht gezahlt wird.
+
+**Die unangenehme Stelle: die Anzahlung.** § 11 AGB verlangt bei Offline-Terminen
+über 130 € eine Anzahlung von 50 %, Rest spätestens vier Wochen vor Beginn.
+Das ist in Stripe kein Standardfall. Vor dem Bauen entscheiden:
+- zwei getrennte Zahlungen (Anzahlung jetzt, Restbetrag später per Zahlungslink), oder
+- Gesamtbetrag sofort, oder
+- die AGB an das anpassen, was ohne Sonderlogik geht.
+Die dritte Möglichkeit ist ausdrücklich erlaubt — die AGB sind für uns
+geschrieben, nicht gegen uns.
+
+**Abnahme:**
+- [ ] Buchung legt eine Zeile in `course_bookings` an, geschrieben ausschließlich vom Webhook
+- [ ] Kursbuchungen erzeugen unter keinen Umständen einen Eintrag in `subscriptions` — pgTAP-Missbrauchstest
+- [ ] Überbuchung ist ausgeschlossen; Test mit zwei gleichzeitigen Buchungen des letzten Platzes
+- [ ] Storno nach § 12 AGB abgebildet oder bewusst als Handarbeit dokumentiert
+- [ ] Entscheidung zur Anzahlung schriftlich festgehalten, AGB und Umsetzung stimmen überein
+- [ ] Bestätigungsmail nach Buchung (§ 11: die Anmeldung wird erst damit verbindlich)
 
 ---
 
