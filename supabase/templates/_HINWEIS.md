@@ -23,6 +23,11 @@ Nutzer ankommt.
 Supabase → Projekt → Authentication → Emails → jeweilige Vorlage → Betreff und
 HTML ersetzen.
 
+> **Noch nicht möglich — braucht den Pro-Plan.** Auf dem freien Plan zeigt das
+> Dashboard die Vorlagen nur an, ändern lassen sie sich nicht. Bis dahin
+> verschickt Supabase die englischen Standardtexte. Nachgeholt wird es mit dem
+> ersten zahlenden Kunden; als Aufgabe **T17a** in `docs/BACKLOG.md` vermerkt.
+
 > **Nicht `supabase config push` benutzen.** Der Befehl schiebt den *gesamten*
 > Auth-Abschnitt aus `config.toml` ins Projekt — also auch `site_url` und
 > `additional_redirect_urls`, die dort auf `http://localhost:8081` stehen. Er
