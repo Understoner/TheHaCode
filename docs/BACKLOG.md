@@ -129,14 +129,23 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [ ] Start/News/Kurse/Team als echte Links
 - [ ] Übungen/Sequenz-Konfigurator als „bald verfügbar" — kein `href` auf eine nicht existierende Route (bricht sonst `typedRoutes: true` aus `app.json`)
 
-### T07d · Impressum & Datenschutz (Minimal) 🔒 ⏱6
+### T07d · Impressum & Datenschutz 🔒 ⏱6
 **Ziel:** Rechtliches Minimum für den Domain-Umzug — ohne erfundene Geschäftsdaten.
 **Dateien:** `src/i18n/locales/de/legal.json`, `src/app/impressum.tsx`, `src/app/datenschutz.tsx`
 **Warum 🔒:** Rechtsverbindlicher Text braucht Review durch einen Menschen, nicht nur einen grünen Test.
 **Abnahme:**
-- [ ] Keine erfundenen Fakten — fehlende Angaben (Nachname, Anschrift, E-Mail, UID) als `[[TODO: ...]]`-Platzhalter
-- [ ] Sichtbarer Warnbanner auf beiden Seiten, solange ein Platzhalter steht — **auch in Production**, nicht nur Staging
-- [ ] Inhaltlich schmal: kein Tracking, keine Nutzerkonten in dieser Phase — Hosting/Supabase als einzige Auftragsverarbeiter genannt
+- [x] Keine erfundenen Fakten — fehlende Angaben (Nachname, Anschrift, E-Mail, UID) als `[[TODO: ...]]`-Platzhalter
+- [x] Sichtbarer Warnbanner auf beiden Seiten, solange ein Platzhalter steht — **auch in Production**, nicht nur Staging
+- [x] ~~Inhaltlich schmal: kein Tracking, keine Nutzerkonten in dieser Phase~~ — überholt, siehe unten
+
+> **Erweitert am 16.08.2026.** Die Annahme „keine Nutzerkonten in dieser Phase"
+> ist mit Auth und Stripe hinfällig geworden; die Datenschutzerklärung
+> behauptete das aber weiterhin und war damit im Livebetrieb inhaltlich falsch.
+> Sie ist jetzt vollständig neu geschrieben: Konto, eigene Sequenzen,
+> Zahlungsabwicklung über Stripe, Speicherung im Browser, Empfänger,
+> Speicherdauer inklusive § 132 BAO. Ebenfalls korrigiert: der Verweis auf die
+> EU-OS-Plattform im Impressum — die wurde eingestellt.
+> AGB und Haftungsausschluss kamen mit T19a dazu.
 
 ### T07e · Storage-Bucket `public-assets` ⏱4
 **Ziel:** Ein öffentlicher Bucket für Kurs-, Team- und (künftig) News-Bilder, Schreibzugriff nur für Admins.
@@ -290,10 +299,39 @@ Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
 > Block 2 vorgezogen, nicht mehr Teil von Launch (geändert in SAD 0.7).
 
 ### T19 · Rechtliches und Launch 🔒 ⏱6
-- [ ] AGB online (erst jetzt nötig — ab hier existieren Nutzerkonten/Zahlungen)
+- [x] AGB online (erst jetzt nötig — ab hier existieren Nutzerkonten/Zahlungen)
+- [x] Haftungsausschluss online — nicht ursprünglich geplant, siehe T19a
 - [ ] Verzeichnis von Verarbeitungstätigkeiten angelegt
 - [ ] AVV mit Supabase, Hostinger, Stripe geschlossen
 - [ ] Checkliste aus `docs/DEPLOYMENT.md` Abschnitt 5 abgehakt
+
+### T19a · Zustimmung zu AGB und Rücktrittsrecht im Bezahlvorgang 🔒 ⏱3
+**Ziel:** Die AGB werden Vertragsbestandteil, und das Rücktrittsrecht ist sauber
+geregelt. Beides fehlt derzeit — die Texte stehen online, sind aber an keiner
+Stelle des Kaufs zu bestätigen.
+**Dateien:** `supabase/functions/create-checkout/index.ts`, Stripe-Dashboard
+**Warum 🔒:** Betrifft den Vertragsschluss selbst.
+**Vorgehen:** Stripe Checkout kann beides einsammeln, ohne dass wir eine eigene
+Oberfläche bauen:
+```ts
+consent_collection: {
+  terms_of_service: 'required',
+},
+```
+Die AGB-Adresse (`<APP_URL>/agb`) muss dafür im Stripe-Dashboard unter
+Einstellungen → Checkout hinterlegt sein — **sonst lehnt Stripe den Aufruf ab
+und der Kauf bricht.** Deshalb Dashboard zuerst, Code danach.
+**Abnahme:**
+- [ ] Zustimmung zu den AGB ist im Checkout verpflichtend, in beiden Umgebungen
+- [ ] Ausdrückliche Zustimmung zum sofortigen Leistungsbeginn samt Hinweis auf
+      das Erlöschen des Rücktrittsrechts (§ 18 Abs. 1 Z 11 FAGG) — als
+      `custom_text`/`consent_collection`, oder bewusst darauf verzichten und
+      die vierzehn Tage stehen lassen. **Das ist eine Entscheidung, keine
+      Implementierungsfrage** — § 6 der AGB deckt beide Wege ab.
+- [ ] Registrierung verweist sichtbar auf AGB und Datenschutzerklärung
+
+> Ohne T19a gilt: das vierzehntägige Rücktrittsrecht besteht in vollem Umfang,
+> und die AGB sind im Streitfall womöglich nicht wirksam einbezogen.
 
 ---
 

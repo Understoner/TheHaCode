@@ -2,26 +2,340 @@
   "placeholderBanner": "Platzhalterdaten — vor Livegang ausfüllen.",
 
   "impressum.title": "Impressum",
-  "impressum.sectionAngaben": "Angaben gemäß § 5 ECG, § 25 MedienG",
-  "impressum.name": "[[TODO: Vor- und Nachname]]",
-  "impressum.address": "[[TODO: Anschrift]]",
-  "impressum.email": "[[TODO: E-Mail-Adresse]]",
-  "impressum.phone": "[[TODO: Telefonnummer, optional]]",
-  "impressum.uid": "[[TODO: UID-Nummer, falls vorhanden]]",
-  "impressum.kleinunternehmer": "Kleinunternehmer gemäß § 6 Abs. 1 Z 27 UStG — keine Umsatzsteuer ausgewiesen.",
-  "impressum.sectionStreit": "Streitschlichtung",
-  "impressum.streitschlichtung": "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: https://ec.europa.eu/consumers/odr. Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+  "impressum.sections": [
+    {
+      "title": "Angaben gemäß § 5 ECG und § 25 MedienG",
+      "lines": [
+        "Medieninhaber, Herausgeber und für den Inhalt verantwortlich:",
+        "[[TODO: Vor- und Nachname bzw. Firmenwortlaut]]",
+        "[[TODO: Straße und Hausnummer]]",
+        "[[TODO: PLZ und Ort]]",
+        "Österreich",
+        "E-Mail: [[TODO: E-Mail-Adresse]]",
+        "Telefon: [[TODO: Telefonnummer, optional]]"
+      ]
+    },
+    {
+      "title": "Unternehmensdaten",
+      "lines": [
+        "Unternehmensgegenstand: [[TODO: z. B. Atem- und Bewegungstraining, Kurse, digitale Anwendung]]",
+        "UID-Nummer: [[TODO: UID-Nummer, falls vorhanden — bei Kleinunternehmern häufig keine]]",
+        "Firmenbuchnummer und Firmenbuchgericht: [[TODO: nur bei eingetragenem Unternehmen, sonst entfällt dieser Punkt]]",
+        "Mitgliedschaft: [[TODO: z. B. Wirtschaftskammer Österreich, Fachgruppe — falls zutreffend]]"
+      ]
+    },
+    {
+      "title": "Berufsrecht und Aufsichtsbehörde",
+      "lines": [
+        "Anwendbare Rechtsvorschrift: [[TODO: z. B. Gewerbeordnung 1994]]",
+        "Aufsichtsbehörde bzw. Gewerbebehörde: [[TODO: zuständige Bezirksverwaltungsbehörde oder Magistrat]]",
+        "Die Rechtsvorschriften sind über das Rechtsinformationssystem des Bundes abrufbar: www.ris.bka.gv.at"
+      ]
+    },
+    {
+      "title": "Umsatzsteuer",
+      "lines": [
+        "Kleinunternehmer gemäß § 6 Abs. 1 Z 27 UStG — es wird keine Umsatzsteuer ausgewiesen und daher auch keine in Rechnung gestellt."
+      ]
+    },
+    {
+      "title": "Blattlinie",
+      "lines": [
+        "Information über Atemtraining, Kursangebote und die Anwendung DER ATEMCODE."
+      ]
+    },
+    {
+      "title": "Verbraucherstreitbeilegung",
+      "lines": [
+        "Wir sind weder verpflichtet noch bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+        "Die von der Europäischen Kommission betriebene Plattform zur Online-Streitbeilegung (OS-Plattform) wurde eingestellt und steht nicht mehr zur Verfügung. Verbraucher:innen in Österreich können sich außergerichtlich an die Internet Ombudsstelle wenden: www.ombudsstelle.at",
+        "Der Weg zu den ordentlichen Gerichten bleibt davon unberührt."
+      ]
+    }
+  ],
 
   "datenschutz.title": "Datenschutzerklärung",
-  "datenschutz.intro": "Diese Website informiert über Kurse und stellt öffentliche Inhalte (News, Kurse, Team) bereit. Es gibt derzeit keine Registrierung und keine Nutzerkonten — entsprechend werden keine personenbezogenen Daten von Besucher:innen aktiv erhoben.",
-  "datenschutz.sectionVerantwortlicher": "Verantwortlicher",
-  "datenschutz.verantwortlicherName": "[[TODO: Vor- und Nachname]]",
-  "datenschutz.verantwortlicherAddress": "[[TODO: Anschrift]]",
-  "datenschutz.verantwortlicherEmail": "[[TODO: E-Mail-Adresse]]",
-  "datenschutz.sectionHosting": "Hosting und Auftragsverarbeitung",
-  "datenschutz.hosting": "Diese Website wird bei Hostinger gehostet; beim Aufruf verarbeitet Hostinger technisch notwendige Zugriffsdaten (u. a. IP-Adresse, Zeitpunkt) zur Auslieferung der Seite. Inhalte (News, Kurse, Team) werden zur Laufzeit von Supabase geladen, das dafür als Auftragsverarbeiter fungiert.",
-  "datenschutz.sectionTracking": "Tracking und Cookies",
-  "datenschutz.tracking": "Es werden keine Analyse- oder Marketing-Cookies eingesetzt und keine Tracking-Dienste eingebunden.",
-  "datenschutz.sectionRechte": "Ihre Rechte",
-  "datenschutz.rechte": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer Daten sowie ein Beschwerderecht bei der österreichischen Datenschutzbehörde."
+  "datenschutz.stand": "Fassung vom 16. August 2026",
+  "datenschutz.sections": [
+    {
+      "title": "Worum es hier geht",
+      "lines": [
+        "Diese Erklärung beschreibt, welche personenbezogenen Daten wir beim Besuch dieser Website und bei der Nutzung eines Nutzerkontos verarbeiten, zu welchem Zweck und auf welcher Rechtsgrundlage.",
+        "Wir verarbeiten so wenig wie möglich. Es gibt keine Analyse- oder Marketing-Werkzeuge, keine Werbenetzwerke, keine Profilbildung und keine automatisierte Entscheidungsfindung im Sinne des Art. 22 DSGVO.",
+        "Gesundheitsdaten im Sinne des Art. 9 DSGVO werden nicht verarbeitet. Die Anwendung führt kein Tagebuch, erhebt keine Messwerte und speichert keine Angaben zu Ihrem Befinden."
+      ]
+    },
+    {
+      "title": "Verantwortlicher",
+      "lines": [
+        "[[TODO: Vor- und Nachname bzw. Firmenwortlaut]]",
+        "[[TODO: Straße und Hausnummer]]",
+        "[[TODO: PLZ und Ort]]",
+        "E-Mail: [[TODO: E-Mail-Adresse]]",
+        "Ein Datenschutzbeauftragter ist gesetzlich nicht bestellt; für alle Anliegen erreichen Sie uns unter der genannten Adresse."
+      ]
+    },
+    {
+      "title": "Beim bloßen Besuch der Website",
+      "lines": [
+        "Beim Aufruf der Seite verarbeitet unser Hoster technisch notwendige Zugriffsdaten: IP-Adresse, Zeitpunkt der Anfrage, aufgerufene Adresse, übertragene Datenmenge, Browser- und Betriebssystemkennung.",
+        "Zweck ist die Auslieferung der Seite sowie die Erkennung und Abwehr von Störungen und Missbrauch. Rechtsgrundlage ist unser berechtigtes Interesse am sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO).",
+        "Diese Daten werden nicht mit anderen Daten zusammengeführt und nicht dazu verwendet, Sie zu identifizieren."
+      ]
+    },
+    {
+      "title": "Nutzerkonto",
+      "lines": [
+        "Für ein Konto verarbeiten wir Ihre E-Mail-Adresse, ein verschlüsselt gespeichertes Passwort, den Zeitpunkt der Registrierung und der letzten Anmeldung sowie einen optionalen Anzeigenamen.",
+        "Die Verwaltung von Konten, Anmeldung, Sitzungen und Passwortzurücksetzung erfolgt über Supabase Auth. Ihr Passwort ist uns zu keinem Zeitpunkt im Klartext zugänglich.",
+        "Zweck ist die Bereitstellung des Kontos und der damit verbundenen Funktionen. Rechtsgrundlage ist die Erfüllung des Nutzungsvertrags (Art. 6 Abs. 1 lit. b DSGVO).",
+        "Im Zuge der Registrierung und beim Zurücksetzen des Passworts versenden wir E-Mails mit Bestätigungslinks. Ohne diese Nachrichten ist eine Kontoführung nicht möglich."
+      ]
+    },
+    {
+      "title": "Von Ihnen erstellte Inhalte",
+      "lines": [
+        "Legen Sie eigene Atemsequenzen an, speichern wir deren Bezeichnung und Aufbau — also Phasen, Dauern, Rundenzahlen und Pausen — verknüpft mit Ihrem Konto.",
+        "Diese Angaben beschreiben eine Übung, nicht Sie. Sie enthalten keine Angaben zu Ihrer Gesundheit, Ihrer Leistung oder Ihrer Nutzung.",
+        "Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO)."
+      ]
+    },
+    {
+      "title": "Zahlungsabwicklung",
+      "lines": [
+        "Kostenpflichtige Abonnements werden über Stripe abgewickelt (Stripe Payments Europe Limited, Irland).",
+        "Ihre Zahlungsdaten — Kartennummer, Ablaufdatum, Prüfziffer — geben Sie unmittelbar bei Stripe ein. Diese Daten erreichen uns nicht und werden von uns weder gespeichert noch verarbeitet.",
+        "Von Stripe erhalten wir zurück: eine Kundennummer, eine Abonnementnummer, das gewählte Modell, den Status des Abonnements, das Ende der laufenden Abrechnungsperiode und das Land, in dem der Kauf getätigt wurde. Das Land benötigen wir zur steuerlichen Einordnung des Umsatzes.",
+        "Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie die Erfüllung steuerrechtlicher Pflichten (Art. 6 Abs. 1 lit. c DSGVO).",
+        "Für die Verarbeitung durch Stripe gelten ergänzend deren Datenschutzhinweise: stripe.com/at/privacy"
+      ]
+    },
+    {
+      "title": "Speicherung im Browser",
+      "lines": [
+        "Wir setzen keine Cookies zu Analyse- oder Werbezwecken ein.",
+        "Nach der Anmeldung wird Ihr Sitzungsmerkmal im lokalen Speicher Ihres Browsers abgelegt, damit Sie beim nächsten Aufruf angemeldet bleiben. Diese Speicherung ist für den von Ihnen ausdrücklich gewünschten Dienst unbedingt erforderlich und bedarf daher keiner Einwilligung.",
+        "Melden Sie sich ab, wird das Merkmal entfernt."
+      ]
+    },
+    {
+      "title": "Empfänger und Auftragsverarbeiter",
+      "lines": [
+        "Hostinger — Betrieb der Website. Auftragsverarbeiter gemäß Art. 28 DSGVO.",
+        "Supabase — Datenbank, Kontoverwaltung und Versand der Kontomails. Auftragsverarbeiter gemäß Art. 28 DSGVO.",
+        "Stripe — Zahlungsabwicklung. Stripe ist hinsichtlich der Zahlungsdaten eigenverantwortlich tätig.",
+        "Eine Übermittlung in Drittländer kann bei diesen Dienstleistern nicht ausgeschlossen werden. Sie ist durch die Standardvertragsklauseln der Europäischen Kommission und ergänzende Maßnahmen abgesichert.",
+        "Darüber hinaus geben wir Ihre Daten nicht weiter — insbesondere nicht zu Werbezwecken und nicht an Dritte zur eigenen Nutzung."
+      ]
+    },
+    {
+      "title": "Speicherdauer",
+      "lines": [
+        "Kontodaten und eigene Sequenzen speichern wir, solange Ihr Konto besteht.",
+        "Löschen Sie Ihr Konto, werden Ihre Kontodaten und Ihre Sequenzen unmittelbar und vollständig entfernt. Die Löschung ist jederzeit in der Anwendung möglich und wird nicht durch uns verzögert.",
+        "Ausgenommen sind Belege und Aufzeichnungen zu Zahlungen: diese unterliegen der siebenjährigen Aufbewahrungspflicht nach § 132 BAO und werden bis zu deren Ablauf aufbewahrt.",
+        "Zugriffsdaten des Hosters werden nach kurzer Zeit automatisch gelöscht."
+      ]
+    },
+    {
+      "title": "Ihre Rechte",
+      "lines": [
+        "Sie haben das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie das Recht, einer Verarbeitung auf Grundlage berechtigter Interessen zu widersprechen (Art. 21 DSGVO).",
+        "Eine Anfrage genügt formlos per E-Mail an die oben genannte Adresse. Wir antworten innerhalb eines Monats.",
+        "Ihnen steht außerdem ein Beschwerderecht bei der Aufsichtsbehörde zu: Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Wien, dsb@dsb.gv.at"
+      ]
+    }
+  ],
+
+  "agb.title": "Allgemeine Geschäftsbedingungen",
+  "agb.stand": "Fassung vom 16. August 2026",
+  "agb.sections": [
+    {
+      "title": "1. Geltungsbereich und Vertragspartner",
+      "lines": [
+        "Diese Bedingungen gelten für die Nutzung der Website und der Anwendung DER ATEMCODE sowie für alle darüber abgeschlossenen kostenpflichtigen Abonnements.",
+        "Vertragspartner ist [[TODO: Vor- und Nachname bzw. Firmenwortlaut]], [[TODO: Anschrift]] (im Folgenden „wir\").",
+        "Abweichende Bedingungen der Nutzer:innen werden nicht Vertragsinhalt, außer wir stimmen ihnen ausdrücklich schriftlich zu."
+      ]
+    },
+    {
+      "title": "2. Leistungsbeschreibung",
+      "lines": [
+        "Ein Teil der Inhalte — insbesondere vorkonfigurierte Atemsequenzen und Videos — ist dauerhaft und kostenlos zugänglich.",
+        "Kostenpflichtig ist ausschließlich die Möglichkeit, eigene Atemsequenzen anzulegen und zu speichern („Plus\").",
+        "Bereits gespeicherte eigene Sequenzen bleiben auch nach Ende eines Abonnements abrufbar, abspielbar und löschbar. Neue Sequenzen lassen sich ohne aufrechtes Abonnement nicht anlegen und bestehende nicht mehr ändern.",
+        "Es gibt keinen kostenlosen Testzeitraum. Der Konfigurator ist auch ohne Abonnement sichtbar und bedienbar; gesperrt ist allein das Speichern."
+      ]
+    },
+    {
+      "title": "3. Zustandekommen des Vertrags",
+      "lines": [
+        "Der unentgeltliche Nutzungsvertrag kommt mit der Anlage eines Kontos zustande.",
+        "Ein kostenpflichtiges Abonnement kommt zustande, indem Sie ein Modell auswählen und den Bezahlvorgang bei unserem Zahlungsdienstleister abschließen. Die Freischaltung erfolgt unmittelbar nach Bestätigung der Zahlung.",
+        "Die Darstellung der Modelle auf der Website ist kein bindendes Angebot, sondern eine Aufforderung zur Abgabe eines Angebots."
+      ]
+    },
+    {
+      "title": "4. Preise und Zahlung",
+      "lines": [
+        "Es gelten die zum Zeitpunkt der Bestellung auf der Website angegebenen Preise. Alle Preise sind Endpreise in Euro.",
+        "Wir sind Kleinunternehmer gemäß § 6 Abs. 1 Z 27 UStG. Umsatzsteuer wird nicht ausgewiesen und nicht in Rechnung gestellt.",
+        "Die Zahlung erfolgt über Stripe. Es gelten ergänzend die dortigen Bedingungen für den Zahlungsvorgang.",
+        "Das Entgelt ist im Voraus für die jeweilige Abrechnungsperiode fällig und wird zu deren Beginn eingezogen."
+      ]
+    },
+    {
+      "title": "5. Laufzeit und Kündigung",
+      "lines": [
+        "Das Abonnement wird je nach gewähltem Modell für einen Monat oder für ein Jahr abgeschlossen und verlängert sich jeweils um dieselbe Dauer, sofern es nicht vorher gekündigt wird.",
+        "Sie können jederzeit zum Ende der laufenden Abrechnungsperiode kündigen. Die Kündigung erfolgt selbständig über das Kundenportal des Zahlungsdienstleisters, das in Ihrem Konto verlinkt ist; eine formlose Mitteilung an uns genügt ebenfalls.",
+        "Bis zum Ende der bezahlten Periode bleibt der Zugang uneingeschränkt bestehen. Eine anteilige Rückerstattung für die laufende Periode erfolgt nicht.",
+        "Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt für beide Seiten unberührt."
+      ]
+    },
+    {
+      "title": "6. Rücktrittsrecht für Verbraucher:innen",
+      "lines": [
+        "Verbraucher:innen können binnen vierzehn Tagen ohne Angabe von Gründen von einem im Fernabsatz geschlossenen Vertrag zurücktreten (§ 11 FAGG). Die Frist beginnt mit dem Tag des Vertragsabschlusses.",
+        "Für den Rücktritt genügt eine eindeutige Erklärung per E-Mail an die im Impressum genannte Adresse. Die Verwendung eines Formulars ist nicht erforderlich; die rechtzeitige Absendung genügt zur Fristwahrung.",
+        "Haben Sie ausdrücklich verlangt, dass wir mit der Leistung noch vor Ablauf der Rücktrittsfrist beginnen, und dies zur Kenntnis genommen, so erlischt Ihr Rücktrittsrecht mit vollständiger Vertragserfüllung (§ 18 Abs. 1 Z 11 FAGG). Andernfalls besteht es für die volle Dauer der Frist fort.",
+        "Treten Sie fristgerecht zurück, erstatten wir bereits geleistete Zahlungen unverzüglich, spätestens binnen vierzehn Tagen, über dasselbe Zahlungsmittel."
+      ]
+    },
+    {
+      "title": "7. Pflichten der Nutzer:innen",
+      "lines": [
+        "Ihre Zugangsdaten sind vertraulich zu behandeln und nicht an Dritte weiterzugeben. Ein Konto ist für die Nutzung durch eine Person bestimmt.",
+        "Untersagt sind automatisierte Zugriffe, die über die übliche Nutzung hinausgehen, sowie Versuche, Zugangsbeschränkungen zu umgehen oder den Betrieb zu stören.",
+        "Bei begründetem Verdacht auf erhebliche Verstöße dürfen wir den Zugang vorübergehend sperren. Wir informieren Sie darüber und geben Ihnen Gelegenheit zur Stellungnahme."
+      ]
+    },
+    {
+      "title": "8. Rechte an Inhalten",
+      "lines": [
+        "Sämtliche von uns bereitgestellten Inhalte — Texte, Grafiken, Videos, vorkonfigurierte Sequenzen und Software — sind urheberrechtlich geschützt. Sie erhalten ein einfaches, nicht übertragbares Recht zur Nutzung für eigene, nicht gewerbliche Zwecke für die Dauer des Vertrags.",
+        "Eine Vervielfältigung, Weitergabe, öffentliche Wiedergabe oder gewerbliche Verwertung ist ohne unsere Zustimmung nicht gestattet.",
+        "Die von Ihnen erstellten eigenen Sequenzen bleiben Ihnen zugeordnet. Wir verwerten sie nicht und geben sie nicht weiter."
+      ]
+    },
+    {
+      "title": "9. Verfügbarkeit",
+      "lines": [
+        "Wir bemühen uns um einen durchgehenden Betrieb, schulden aber keine bestimmte Verfügbarkeit.",
+        "Wartungsarbeiten, Störungen bei Vorleistern und Ereignisse außerhalb unseres Einflussbereichs können zu vorübergehenden Einschränkungen führen. Bei längeren, von uns zu vertretenden Ausfällen erstatten wir das Entgelt anteilig."
+      ]
+    },
+    {
+      "title": "10. Gesundheitlicher Hinweis",
+      "lines": [
+        "Die angebotenen Atemübungen sind ein Angebot zur allgemeinen Selbstanwendung und ersetzen keine ärztliche oder therapeutische Behandlung.",
+        "Die ausführlichen Hinweise und Einschränkungen im Haftungsausschluss sind Bestandteil dieses Vertrags. Bitte lesen Sie sie vor der ersten Anwendung."
+      ]
+    },
+    {
+      "title": "11. Haftung",
+      "lines": [
+        "Wir haften uneingeschränkt für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit sowie für Schäden, die wir vorsätzlich oder grob fahrlässig verursacht haben.",
+        "Für leichte Fahrlässigkeit haften wir nur bei Verletzung einer wesentlichen Vertragspflicht und begrenzt auf den vertragstypisch vorhersehbaren Schaden.",
+        "Eine weitergehende Haftung, insbesondere für entgangenen Gewinn oder mittelbare Schäden, ist ausgeschlossen. Zwingende gesetzliche Bestimmungen, insbesondere nach dem Produkthaftungsgesetz, bleiben unberührt."
+      ]
+    },
+    {
+      "title": "12. Änderungen dieser Bedingungen",
+      "lines": [
+        "Wir dürfen diese Bedingungen ändern, soweit dies zur Anpassung an geänderte Rechtslage, Rechtsprechung oder an Änderungen des Leistungsumfangs erforderlich ist und Sie dadurch nicht unangemessen benachteiligt werden.",
+        "Über Änderungen informieren wir Sie mindestens sechs Wochen vor Wirksamwerden per E-Mail. Widersprechen Sie nicht bis zum Wirksamwerden, gelten die Änderungen als angenommen; auf diese Wirkung weisen wir in der Mitteilung gesondert hin. Im Fall des Widerspruchs endet der Vertrag zum Wirksamwerden der Änderung."
+      ]
+    },
+    {
+      "title": "13. Datenschutz",
+      "lines": [
+        "Welche Daten wir verarbeiten und zu welchem Zweck, steht in der Datenschutzerklärung. Sie ist über den Fußbereich jeder Seite erreichbar."
+      ]
+    },
+    {
+      "title": "14. Anwendbares Recht und Gerichtsstand",
+      "lines": [
+        "Es gilt österreichisches Recht unter Ausschluss der Verweisungsnormen des internationalen Privatrechts und des UN-Kaufrechts.",
+        "Gegenüber Verbraucher:innen gilt diese Rechtswahl nur, soweit dadurch der Schutz zwingender Bestimmungen des Rechts jenes Staates nicht entzogen wird, in dem sie ihren gewöhnlichen Aufenthalt haben.",
+        "Für Klagen gegen Verbraucher:innen ist ausschließlich das Gericht am Wohnsitz, gewöhnlichen Aufenthalt oder Ort der Beschäftigung zuständig (§ 14 KSchG). Im Verkehr mit Unternehmern gilt der Sitz unseres Unternehmens als Gerichtsstand vereinbart."
+      ]
+    },
+    {
+      "title": "15. Schlussbestimmungen",
+      "lines": [
+        "Sollte eine Bestimmung unwirksam sein, bleibt die Wirksamkeit der übrigen unberührt. Anstelle der unwirksamen Bestimmung gilt die gesetzliche Regelung.",
+        "Änderungen und Ergänzungen des Vertrags bedürfen der Textform."
+      ]
+    }
+  ],
+
+  "haftung.title": "Haftungsausschluss",
+  "haftung.stand": "Fassung vom 16. August 2026",
+  "haftung.sections": [
+    {
+      "title": "Bitte zuerst lesen",
+      "lines": [
+        "Atemübungen wirken auf Kreislauf und Nervensystem. Bewusst verlängerte Atempausen und schnelles Atmen können Schwindel, Kribbeln, Benommenheit und in seltenen Fällen eine kurzzeitige Bewusstlosigkeit auslösen — auch bei gesunden Menschen und auch dann, wenn sich die Übung angenehm anfühlt.",
+        "Nehmen Sie solche Anzeichen ernst. Beenden Sie die Übung sofort, atmen Sie ruhig weiter und legen Sie sich hin, wenn Ihnen schwindlig wird."
+      ]
+    },
+    {
+      "title": "Wo Sie nicht üben dürfen",
+      "lines": [
+        "Niemals im oder unter Wasser, auch nicht im flachen Bereich. Eine Ohnmacht im Wasser ist lebensgefährlich.",
+        "Niemals beim Führen eines Fahrzeugs, beim Bedienen von Maschinen, auf Höhen, Leitern oder Treppen.",
+        "Üben Sie im Sitzen oder Liegen an einem sicheren Ort, an dem ein plötzlicher Schwindel keine Folgen hat."
+      ]
+    },
+    {
+      "title": "Wann Sie vorher ärztlichen Rat einholen sollten",
+      "lines": [
+        "Bei Herz-Kreislauf-Erkrankungen, Bluthochdruck oder nach einem Herzinfarkt oder Schlaganfall.",
+        "Bei Epilepsie oder anderen Anfallsleiden.",
+        "Bei Asthma, COPD oder anderen Atemwegserkrankungen.",
+        "In der Schwangerschaft.",
+        "Bei Angst- oder Panikstörungen, da intensive Atemtechniken Symptome auslösen können.",
+        "Bei Glaukom, erhöhtem Hirndruck, nach Operationen oder bei Einnahme von Medikamenten, die Kreislauf oder Atmung beeinflussen.",
+        "Bei Kindern und Jugendlichen sowie im Zweifel grundsätzlich."
+      ]
+    },
+    {
+      "title": "Keine medizinische Leistung",
+      "lines": [
+        "Die Inhalte dieser Anwendung dienen der allgemeinen Information und der eigenverantwortlichen Selbstanwendung.",
+        "Sie stellen keine medizinische, psychotherapeutische oder sonstige heilkundliche Beratung dar, ersetzen keine Diagnose und keine Behandlung und sind nicht geeignet, eine Erkrankung zu erkennen, zu lindern oder zu heilen.",
+        "Setzen Sie verordnete Medikamente oder Therapien niemals aufgrund von Inhalten dieser Anwendung ab. Bei anhaltenden oder ernsten Beschwerden wenden Sie sich an eine Ärztin oder einen Arzt.",
+        "Die Anwendung ist kein Medizinprodukt."
+      ]
+    },
+    {
+      "title": "Eigenverantwortung",
+      "lines": [
+        "Die Anwendung der gezeigten Übungen erfolgt in eigener Verantwortung. Sie entscheiden selbst, ob eine Übung für Sie geeignet ist, und passen Dauer und Intensität Ihrem Befinden an.",
+        "Für Schäden, die aus einer Anwendung entgegen den vorstehenden Hinweisen entstehen, haften wir nicht. Im Übrigen gelten die Haftungsregeln unserer Allgemeinen Geschäftsbedingungen."
+      ]
+    },
+    {
+      "title": "Inhalte dieser Website",
+      "lines": [
+        "Wir erstellen die Inhalte mit Sorgfalt, können aber keine Gewähr für Richtigkeit, Vollständigkeit und Aktualität übernehmen.",
+        "Angaben zu Kursen, Terminen und Preisen können sich ändern. Verbindlich ist jeweils die Auskunft, die Sie bei der Anmeldung erhalten."
+      ]
+    },
+    {
+      "title": "Verweise auf fremde Seiten",
+      "lines": [
+        "Unsere Seiten enthalten Verweise auf Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Für diese Inhalte ist ausschließlich der jeweilige Anbieter verantwortlich.",
+        "Zum Zeitpunkt der Verlinkung waren keine Rechtsverstöße erkennbar. Werden uns solche bekannt, entfernen wir den Verweis umgehend."
+      ]
+    },
+    {
+      "title": "Urheberrecht",
+      "lines": [
+        "Die auf diesen Seiten veröffentlichten Inhalte unterliegen dem österreichischen Urheberrecht. Jede Verwertung außerhalb der Grenzen des Urheberrechts bedarf unserer vorherigen schriftlichen Zustimmung.",
+        "Sollten Sie dennoch auf eine Urheberrechtsverletzung aufmerksam werden, ersuchen wir um einen entsprechenden Hinweis. Bei Bekanntwerden entfernen wir die betreffenden Inhalte umgehend."
+      ]
+    }
+  ]
 }
