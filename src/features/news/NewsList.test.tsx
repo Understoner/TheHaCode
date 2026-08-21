@@ -1,10 +1,28 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import '@/i18n';
 import { NewsList } from './NewsList';
+
+// Seit die Karten auf /news/<slug> verlinken, zieht der Test expo-router mit
+// herein - und dessen Typen-Datei laesst sich unter Vitest nicht laden.
+// Der Ersatz macht aus jedem Link ein <a>, damit die Adresse pruefbar bleibt.
+vi.mock('expo-router', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string | { pathname: string; params: { slug: string } };
+    children: ReactNode;
+  }) => (
+    <a href={typeof href === 'string' ? href : href.pathname.replace('[slug]', href.params.slug)} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
 
@@ -29,6 +47,7 @@ function mockNewsQuery(result: { data: unknown; error: unknown }) {
 function post(overrides: Record<string, unknown>) {
   return {
     id: overrides.id,
+    slug: `beitrag-${overrides.id}`,
     title: overrides.title,
     excerpt: 'Kurzfassung',
     body_md: 'Ein kurzer Beitrag.',
