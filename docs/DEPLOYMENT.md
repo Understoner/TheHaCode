@@ -321,13 +321,13 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 
 - [x] Beide Supabase-Projekte angelegt (Migrationen/Seeds laufen ab jetzt über die Pipeline)
 - [x] Anmeldung steht: Registrierung, Anmeldung, Passwort zuruecksetzen, Kontoloeschung — ueber E-Mail und Passwort. Fremdanmeldung (Google/Apple) ist nicht Teil von V1
-- [ ] `https://<host>/passwort-neu` in den Redirect URLs beider Supabase-Projekte eingetragen — ohne den Eintrag scheitert das Zuruecksetzen (siehe §1)
-- [ ] E-Mail-Vorlagen auf Deutsch (Bestaetigung, Passwort zuruecksetzen)
-- [x] Staging-Website auf Hostinger läuft, Branch `develop` bestätigt — Production-Website steht noch aus
+- [x] `https://<host>/passwort-neu` in den Redirect URLs beider Supabase-Projekte eingetragen — ohne den Eintrag scheitert das Zuruecksetzen (siehe §1). Am 16.08.2026 in beiden Projekten geprüft, mit Gegenprobe über `/auth/v1/verify`
+- [ ] E-Mail-Vorlagen auf Deutsch (Bestaetigung, Passwort zuruecksetzen) — **blockiert:** eigene Vorlagen sind erst ab Supabase Pro änderbar. Fertig im Repo unter `supabase/templates/`, wartet als T17a
+- [x] Staging-Website auf Hostinger läuft, Branch `develop` bestätigt — Production-Website ebenfalls, seit dem Livegang am 16.08.2026
 - [x] Staging gegen Indexierung geschützt (automatisches `robots.txt`, kein Passwortschutz — der steht bei Node.js Web Apps in hPanel nicht zur Auswahl)
 - [x] GitHub Environments `staging`/`production` mit Secrets und Variables befüllt, `production` hat einen Required Reviewer
-- [ ] Branch Protection — bewusst zurückgestellt: GitHub Free auf privatem Repo unterstützt sie nicht. Reviewer-Pflicht auf `production` übernimmt einen Teil der Absicherung bis dahin.
-- [ ] Ein vollständiger Durchlauf feature → develop → main erfolgreich
-- [ ] Supabase Production auf Pro (spätestens am Tag der ersten Zahlung)
+- [ ] Branch Protection — **jetzt möglich, aber nicht eingerichtet.** Die ursprüngliche Sperre (GitHub Free auf privatem Repo) ist weg, seit das Repo öffentlich ist; die Reviewer-Pflicht auf `production` greift seitdem wieder. Der Schutz von `main`/`develop` gegen Direkt-Commits fehlt weiterhin und bleibt Disziplin.
+- [x] Ein vollständiger Durchlauf feature → develop → main erfolgreich — seit 16.08.2026 mehrfach, zuletzt mit T17 am 21.08.2026
+- [ ] Supabase Production auf Pro (spätestens am Tag der ersten Zahlung) — hängt mit T17a zusammen: mit Pro kommen auch die deutschen E-Mail-Vorlagen
 - [ ] Auftragsverarbeitungsverträge: Supabase, Hostinger, Stripe (SAD §5.5)
-- [ ] Impressum und Datenschutzerklärung online
+- [x] Impressum und Datenschutzerklärung online — seit 21.08.2026, dazu AGB und Haftungsausschluss
