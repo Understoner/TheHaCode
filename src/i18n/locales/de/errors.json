@@ -37,5 +37,10 @@
   "buchung.not_bookable": "Dieser Kurs lässt sich gerade nicht buchen. Melde dich bei office@thehacode.com, dann klären wir das direkt.",
   "buchung.agb_required": "Bitte bestätige die AGB und den Haftungsausschluss, dann geht es weiter.",
   "buchung.unauthorized": "Für eine Buchung musst du angemeldet sein. Melde dich an und versuch es noch einmal.",
-  "buchung.unknown": "Die Buchung hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com."
+  "buchung.unknown": "Die Buchung hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
+  "plus.checkout": "Die Bezahlseite ließ sich nicht öffnen. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
+  "konto.aboUnbekannt": "Dein Abo lässt sich gerade nicht abrufen. Lad die Seite bitte neu; an deinem Vertrag ändert das nichts.",
+  "konto.portal": "Das Kundenportal ließ sich nicht öffnen. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
+  "konto.consent": "Das ließ sich nicht speichern. Versuch es bitte noch einmal.",
+  "konto.export": "Der Download hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com."
 }

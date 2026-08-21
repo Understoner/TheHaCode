@@ -57,7 +57,18 @@ test('Mobile: alle Eintraege der Tab-Leiste stehen gleich aufgebaut da', async (
 // /passwort-neu ist hier besonders wichtig: die Adresse kommt IMMER von
 // aussen, naemlich aus dem Link in der E-Mail. Ein 404 waere dort nicht
 // unbequem, sondern ein Konto, an das niemand mehr herankommt.
-const ROUTEN = ['/', '/kurse', '/team', '/impressum', '/datenschutz', '/konto', '/passwort-neu'];
+const ROUTEN = [
+  '/',
+  '/kurse',
+  '/team',
+  '/impressum',
+  '/datenschutz',
+  '/agb',
+  '/haftungsausschluss',
+  '/konto',
+  '/plus',
+  '/passwort-neu',
+];
 
 test('jede Route ist auch direkt aufrufbar, nicht nur ueber einen Klick', async ({ request }) => {
   for (const route of ROUTEN) {

@@ -1,6 +1,6 @@
 # Edge Functions
 
-Fünf Stück, alle unter Deno. `supabase functions deploy` in `deploy.yml` rollt
+Sechs Stück, alle unter Deno. `supabase functions deploy` in `deploy.yml` rollt
 sie bei jedem Durchlauf komplett aus — einzeln benennen muss man nichts.
 
 | Funktion | Wozu | JWT |
@@ -9,6 +9,7 @@ sie bei jedem Durchlauf komplett aus — einzeln benennen muss man nichts.
 | `create-checkout` | Bezahlseite fürs Abo bestellen | ja |
 | `create-course-checkout` | Kursplatz halten und Bezahlseite bestellen (T20) | ja |
 | `create-portal` | Kundenportal öffnen (kündigen, Rechnungen) | ja |
+| `get-prices` | Was Plus kostet — gelesen bei Stripe (T17) | ja |
 | `stripe-webhook` | **die einzige Stelle, die Abos und Buchungen schreibt** | **nein** |
 
 `_shared/` wird nicht ausgerollt — Verzeichnisse mit `_` überspringt die CLI.
@@ -24,6 +25,13 @@ bleibt unberührt. Der Betriebsablauf für Kurse steht in `docs/KURSBUCHUNG.md`.
 `create-course-checkout` braucht **keine eigenen Secrets** — sie nutzt
 dieselben wie `create-checkout`, ohne die Preis-Variablen: Kurspreise stehen
 am Kurs in der Datenbank.
+
+`get-prices` liest die beiden Abo-Preise dort, wo auch abgerechnet wird: an
+`STRIPE_PRICE_MONTHLY` und `STRIPE_PRICE_YEARLY`. Damit kann die Preisseite
+keinen anderen Betrag zeigen als den, der abgebucht wird. Sie ist öffentlich
+erreichbar und braucht trotzdem **kein** `verify_jwt = false`: supabase-js
+schickt den anon-Key als `Authorization` mit, und den nimmt das Gateway als
+gültiges JWT. `stripe-webhook` bleibt die einzige Funktion ohne JWT-Prüfung.
 
 ## Warum der Webhook ohne JWT läuft
 
