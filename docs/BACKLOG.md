@@ -138,7 +138,13 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Ohne Anmeldung erreichbar
 - [x] Neuer News-Beitrag im Studio erscheint **ohne Neubau** (Daten kommen zur Laufzeit)
 - [ ] „Über mich" und Kontakt als gepinnte Beiträge (Angebot zieht nach T07a auf die eigene Kurse-Seite)
-      — redaktionell, gehört zu T18
+      — redaktionell, gehört zu T18. Texte und SQL liegen fertig in
+      `docs/INHALTE.md`.
+      **Dabei aufgefallen:** `body_md` wird von keiner Ansicht gelesen — die
+      Landing Page zeigt Titel und Anriss, eine Detailseite gibt es nicht und
+      sie steht in keiner Aufgabe. Die vorbereiteten Texte tragen deshalb im
+      Anriss. Ob es `/news/[slug]` geben soll, ist eine offene Frage, kein
+      Versäumnis.
 - [x] Vier Zustände über `QueryBoundary` behandelt
 
 > Erledigt bis auf die redaktionelle Befüllung. Freie Sequenzen (T09–T11) folgen erst in Block 3.
@@ -380,8 +386,13 @@ Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
 ### T19 · Rechtliches und Launch 🔒 ⏱6
 - [x] AGB online (erst jetzt nötig — ab hier existieren Nutzerkonten/Zahlungen)
 - [x] Haftungsausschluss online — nicht ursprünglich geplant, siehe T19a
-- [ ] Verzeichnis von Verarbeitungstätigkeiten angelegt
-      — Pflicht nach Art. 30 DSGVO, spätestens vor dem Tagebuch (V1.1)
+- [x] Verzeichnis von Verarbeitungstätigkeiten angelegt
+      — `docs/VERARBEITUNGSVERZEICHNIS.md`, neun Tätigkeiten, aus Migrationen
+      und Edge Functions zusammengetragen. **Entwurf, noch nicht in Kraft:** er
+      wird erst wahr, wenn die AVV geschlossen sind (nächste Zeile), und muss
+      einmal von einem Menschen gegen die Wirklichkeit gelesen werden.
+      Enthält bewusst auch, was *nicht* verarbeitet wird — an genau so einer
+      Auslassung ist die Datenschutzerklärung schon einmal falsch geworden.
 - [ ] AVV mit Supabase, Hostinger, Stripe geschlossen
       — bei allen dreien online abschließbar
 - [ ] Checkliste aus `docs/DEPLOYMENT.md` Abschnitt 5 abgehakt
@@ -403,15 +414,36 @@ Die AGB-Adresse (`<APP_URL>/agb`) muss dafür im Stripe-Dashboard unter
 Einstellungen → Checkout hinterlegt sein — **sonst lehnt Stripe den Aufruf ab
 und der Kauf bricht.** Deshalb Dashboard zuerst, Code danach.
 **Abnahme:**
-- [ ] Zustimmung zu den AGB ist im Checkout verpflichtend, in beiden Umgebungen
-- [ ] Ausdrückliche Zustimmung zum sofortigen Leistungsbeginn samt Hinweis auf
-      das Erlöschen des Rücktrittsrechts (§ 18 Abs. 1 Z 11 FAGG) — als
-      `custom_text`/`consent_collection`, oder bewusst darauf verzichten und
-      die vierzehn Tage stehen lassen. **Das ist eine Entscheidung, keine
-      Implementierungsfrage** — § 6 der AGB deckt beide Wege ab.
-- [ ] Registrierung verweist sichtbar auf AGB und Datenschutzerklärung
+- [x] Zustimmung zu den AGB ist im Checkout verpflichtend
+      — `consent_collection: { terms_of_service: 'required' }` in
+      `create-checkout`. **Wirksam erst, wenn die AGB-Adresse im
+      Stripe-Dashboard steht** — vorher lehnt Stripe den Aufruf ab und niemand
+      kann kaufen. Deshalb Dashboard zuerst, Merge danach.
+- [x] Ausdrückliche Zustimmung zum sofortigen Leistungsbeginn samt Hinweis auf
+      das Erlöschen des Rücktrittsrechts
+      — **Entscheidung vom 21.08.2026: das Recht soll so früh wie möglich
+      erlöschen.** Umgesetzt über `custom_text.terms_of_service_acceptance`:
+      derselbe Haken trägt beide Erklärungen. Maßgeblich ist dabei nicht
+      § 18 Abs. 1 Z 11 FAGG (Dienstleistung, *vollständig* erbracht — bei einem
+      laufenden Abo nie), sondern **§ 18 Abs. 2 FAGG**: bei digitalen Inhalten
+      erlischt das Recht mit dem *Beginn* der Bereitstellung. § 4 der AGB
+      spricht das jetzt ausdrücklich aus.
+- [x] Registrierung verweist sichtbar auf AGB und Datenschutzerklärung
+      — bestand schon seit dem AGB-Pflichthaken (Migration 0013)
+- [x] Hinweis **vor** dem Kauf, nicht nur im Checkout
+      — nachgetragen: § 4 FAGG verlangt die Information vor Vertragsabschluss,
+      der Haken bei Stripe ist die Bestätigung danach. Zwei Pflichten, zwei
+      Stellen. Steht als `plus.widerruf` auf der Preisseite.
+- [ ] In beiden Umgebungen scharf — hängt am Dashboard-Schritt, siehe oben
 
-> Ohne T19a gilt: das vierzehntägige Rücktrittsrecht besteht in vollem Umfang,
+> **Eine Lücke bleibt und ist Absicht.** § 18 Abs. 2 Z 3 FAGG will die
+> Bestätigung des Vertrags samt dieser Erklärung auf einem dauerhaften
+> Datenträger. Was Stripe verschickt, ist der Zahlungsbeleg — ob die
+> Zustimmung darin auftaucht, hängt an den Dashboard-Einstellungen. Eigene
+> Mails versendet das Projekt bewusst nicht (`supabase/functions/_HINWEIS.md`).
+> Beim Einrichten also prüfen, was in der Bestätigungsmail tatsächlich steht.
+
+> Ohne T19a galt: das vierzehntägige Rücktrittsrecht besteht in vollem Umfang,
 > und die AGB sind im Streitfall womöglich nicht wirksam einbezogen.
 
 ### T20 · Kurse in der App buchen und bezahlen 🔒 ⏱20
