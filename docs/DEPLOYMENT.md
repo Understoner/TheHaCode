@@ -242,7 +242,7 @@ entscheidend ist der **curl-Exitcode** in den Wartezeilen:
 | Meldung | Bedeutung | Was zu tun ist |
 |---|---|---|
 | `curl-Exitcode 22: … 403` bei **jedem** Abruf | Der Server antwortet, weist den Runner aber ab. Bot-Schutz. Der Build kann längst fertig sein. | hPanel → CDN/Bot-Schutz für die Subdomain. Nicht im Build-Protokoll suchen. |
-| `curl-Exitcode 28: Connection timed out` bei jedem Abruf | Vom Runner aus gar nicht erreichbar — Firewall oder DNS. | Wie oben, plus DNS der Subdomain prüfen. |
+| `curl-Exitcode 28: Connection timed out` bei jedem Abruf | Vom Runner aus gar nicht erreichbar. Dieselbe Ursache wie 403, nur eine stille Abweisung statt einer gesprochenen — **am 21.08.2026 auf der Hauptdomain erlebt**, siehe unten. | Wie oben, plus DNS der Subdomain prüfen. |
 | `noch die vorherige Version (builtAt=…)` | Die Seite antwortet, Hostinger hat aber nicht neu gebaut. | hPanel → Deployments, Build-Protokoll ansehen. |
 | `curl-Exitcode 22: … 404` | Erreichbar, aber `build-info.json` fehlt — Build unvollständig oder falsches Output-Verzeichnis. | Build-Einstellungen prüfen (Output `dist`). |
 
@@ -255,6 +255,40 @@ Chrome-Kennung, eigene Kennung). Es lag also **an der IP-Adresse, nicht am
 Client**: Hostingers Bot-Schutz blockte die GitHub-Runner. Die Antwort trägt
 `server: hcdn`. Am 10.08. hatte derselbe Schritt noch 11 Sekunden gebraucht.
 
+**Erlebt am 21.08.2026:** derselbe Vorgang, aber als **Timeout** und auf der
+**Hauptdomain**. Beim Ausrollen von T20 (`349ed11`) lief der Wartepunkt gegen
+`https://deratemcode.at/build-info.json` 24-mal in Folge in `curl-Exitcode 28`
+und gab nach 600 Sekunden auf. Von einer gewöhnlichen Adresse aus antwortete
+dieselbe URL sofort — und zwar bereits mit dem neuen Commit, gebaut um 08:29:13,
+also rund drei Minuten **bevor** der Wartepunkt aufgab. Hostinger hatte den
+Build längst fertig.
+
+Drei Dinge unterscheiden diesen Fall vom 14.08. und sind der Grund, warum er
+hier eigens steht:
+
+- **Es traf die Hauptdomain**, nicht die dev-Subdomain. Wer den Abschnitt oben
+  liest und „Subdomain" wörtlich nimmt, sucht sonst an der falschen Stelle.
+- **Es kam als Timeout, nicht als 403.** Die Tabelle oben legt beim Timeout
+  „Firewall oder DNS" nahe; DNS war hier nachweislich in Ordnung, die Seite
+  war von außen ja erreichbar. Ein stilles Verwerfen der Pakete ist bei
+  Bot-Schutz genauso üblich wie eine 403 — der Exitcode sagt also etwas über
+  die *Art* der Abweisung, nicht über ihre Ursache.
+- **Staging war im selben Rollout unauffällig.** Der Staging-Wartepunkt und die
+  Staging-Smoke-Tests liefen wenige Minuten vorher grün durch. Es ist also
+  nichts, was „gerade allgemein kaputt" wäre; es trifft einzelne Hosts.
+
+Die Smoke-Tests gegen Production sind damit ausgefallen und wurden von einer
+gewöhnlichen Verbindung aus nachgeholt:
+
+```bash
+BASE_URL=https://deratemcode.at npx playwright test
+```
+
+5 von 5 grün. **Das gehört nach jedem roten Wartepunkt gemacht.** Ein roter
+Lauf lässt zwei Möglichkeiten offen — die Seite ist kaputt, oder sie war bloß
+nicht prüfbar — und von selbst klärt sich das nicht auf. Ohne die nachgeholten
+Tests steht am Ende eine ausgerollte Version, die niemand geprüft hat.
+
 > **Der Wartepunkt ist dabei nur das erste Opfer.** Die Smoke-Tests laufen von
 > denselben Adressen. Blockt der Bot-Schutz die Runner, ist die gesamte
 > Prüfung von GitHub aus betroffen, nicht bloß dieser eine Schritt — auch wenn
@@ -263,7 +297,7 @@ Client**: Hostingers Bot-Schutz blockte die GitHub-Runner. Die Antwort trägt
 
 Die GitHub-Adressen freizugeben ist **kein** gangbarer Weg: das sind über 7.000
 CIDR-Bereiche, die sich laufend ändern. Entweder der Bot-Schutz für die
-Subdomain fällt weg, oder `/build-info.json` bekommt eine Ausnahme — oder die
+betroffene Domain fällt weg, oder `/build-info.json` bekommt eine Ausnahme — oder die
 Pipeline stößt den Build über Hostingers API an und fragt den Status dort ab,
 statt die Seite abzufragen (siehe §2, „Wenn keine Branch-Auswahl vorhanden ist").
 
