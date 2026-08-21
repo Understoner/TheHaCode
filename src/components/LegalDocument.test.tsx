@@ -29,20 +29,16 @@ describe('LegalDocument', () => {
   // auch in Production (siehe LegalPlaceholderBanner). Geprueft wird hier der
   // Text, der tatsaechlich gerendert wird, nicht eine von Hand gepflegte
   // Liste von Feldern.
-  // Kontakt- und Unternehmensdaten stammen aus dem Impressum von
-  // thehacode.com. Offen bleiben dort nicht angegebene Angaben:
-  // Gewerbewortlaut, UID und Firmenbuch. Solange die fehlen, muss der Banner
-  // stehen - und zwar auch in Production (siehe LegalPlaceholderBanner).
-  it('zeigt den Warnbanner, solange das Impressum Platzhalter enthält', () => {
-    render(<LegalDocument documentKey="impressum" />);
-    expect(screen.getByText(PLACEHOLDER_BANNER)).toBeTruthy();
-  });
-
-  it.each(['datenschutz', 'agb', 'haftung'] as const)(
+  // Seit 21.08.2026 ist auch das Impressum vollstaendig: UID und Firmenbuch
+  // entfallen (Kleinunternehmer, nicht protokolliertes Einzelunternehmen),
+  // der Unternehmensgegenstand ist ausformuliert. Deshalb steht hier kein
+  // Dokument mehr auf der Banner-Seite; dass der Mechanismus greift, prueft
+  // legalPlaceholder.test.ts.
+  it.each([...LEGAL_DOCUMENTS])(
     'zeigt in %s keinen Warnbanner - dort steht kein Platzhalter mehr',
     (documentKey) => {
       // Die Gegenprobe: der Banner haengt am Inhalt, nicht daran, dass er
-      // einfach immer erscheint. Kaeme in einem dieser drei Texte ein
+      // einfach immer erscheint. Kaeme in einem dieser Texte ein
       // "[[TODO" dazu, schlaegt genau dieser Test an.
       render(<LegalDocument documentKey={documentKey} />);
       expect(screen.queryByText(PLACEHOLDER_BANNER)).toBeNull();
