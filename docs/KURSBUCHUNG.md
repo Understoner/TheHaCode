@@ -143,6 +143,111 @@ Platz belegt.
 
 ---
 
+## Testkurse für dev
+
+Zum Ausprobieren des ganzen Wegs. **Supabase Studio (dev) → SQL Editor →
+einfügen → ausführen.** Der SQL Editor läuft als `postgres`; auf
+`public.courses` liegt kein Schutztrigger, das genügt hier. Für
+`course_bookings` oder `subscriptions` ginge es **nicht** — die verlangen
+`service_role`, also den Table Editor.
+
+Die beiden Kurse decken die zwei Wege ab, die T20 unterscheidet: einmal
+Vollzahlung, einmal Anzahlung nach § 11 AGB.
+
+```sql
+insert into public.courses (
+  slug, title, description, location, price_info,
+  price_cents, deposit_cents, capacity, starts_at,
+  booking_enabled, published_at, sort_order
+) values
+  (
+    'test-vollzahlung',
+    'TEST Atem-Abend (Vollzahlung)',
+    'Testkurs fuer die dev-Umgebung. Voller Betrag im Checkout, nur zwei Plaetze.',
+    'Online', '49 EUR',
+    4900, null, 2,
+    now() + interval '10 weeks',
+    true, now() - interval '1 minute', 900
+  ),
+  (
+    'test-anzahlung',
+    'TEST Atem-Wochenende (Anzahlung)',
+    'Testkurs fuer die dev-Umgebung. Ueber 130 EUR und mehr als vier Wochen bis '
+      || 'zum Beginn, also 50 Prozent Anzahlung nach § 11 AGB.',
+    'Altenhof am Hausruck', '300 EUR',
+    30000, 15000, 8,
+    now() + interval '12 weeks',
+    true, now() - interval '1 minute', 901
+  )
+on conflict (slug) do update set
+  starts_at       = excluded.starts_at,
+  published_at    = excluded.published_at,
+  booking_enabled = excluded.booking_enabled,
+  price_cents     = excluded.price_cents,
+  deposit_cents   = excluded.deposit_cents,
+  capacity        = excluded.capacity;
+
+select c.slug,
+       c.price_cents / 100.0   as preis_eur,
+       c.deposit_cents / 100.0 as anzahlung_eur,
+       c.starts_at::date       as beginn,
+       s.seats_left            as frei
+  from public.courses c
+  join public.course_seats() s on s.course_id = c.id
+ where c.slug like 'test-%'
+ order by c.sort_order;
+```
+
+Die Termine sind **relativ** gerechnet, damit die Kurse nicht in der
+Vergangenheit liegen, wenn das erst nächste Woche ausgeführt wird. Beim
+Anzahlungskurs zählt das doppelt: liegt der Beginn näher als vier Wochen,
+verlangt `reserve_course_seat()` den vollen Betrag — auch das ist § 11 AGB.
+Ein erneuter Durchlauf schiebt beide Termine wieder nach vorn, statt an der
+Eindeutigkeit des `slug` zu scheitern.
+
+### Was sich damit prüfen lässt
+
+| Weg | Kurs | Erwartung |
+|---|---|---|
+| Vollzahlung | `test-vollzahlung` | Checkout über 49 €, Buchung danach `confirmed` |
+| Knappe Plätze | `test-vollzahlung` | „Noch 2 Plätze frei", nach zwei Buchungen „Ausgebucht" |
+| Anzahlung | `test-anzahlung` | Checkout über **150 €**, Buchung `confirmed`, `amount_paid_cents` 15000 von 30000 |
+| Restbetrag | `test-anzahlung` | offen — einsammeln wie oben beschrieben |
+
+Nach einer Buchung nachsehen:
+
+```sql
+select status, amount_paid_cents, amount_total_cents, deposit_cents, balance_due_at
+  from public.course_bookings order by created_at desc limit 5;
+
+select count(*) from public.subscriptions;   -- muss unverändert bleiben
+```
+
+Die zweite Abfrage ist die eigentliche: eine Kursbuchung darf niemals ein Abo
+erzeugen.
+
+### Wieder aufräumen
+
+Ein Kurs **mit** Buchungen lässt sich nicht löschen (`on delete restrict`, und
+das ist Absicht — eine bezahlte Buchung soll nicht still verschwinden). Deshalb
+zwei Stufen:
+
+```sql
+-- 1. aus der Ansicht nehmen (geht immer)
+update public.courses
+   set published_at = null, booking_enabled = false
+ where slug like 'test-%';
+
+-- 2. ganz weg, aber nur ohne Buchungen
+delete from public.courses
+ where slug like 'test-%'
+   and not exists (
+     select 1 from public.course_bookings b where b.course_id = courses.id
+   );
+```
+
+---
+
 ## Stripe — Checkliste
 
 Nichts davon steht im Code. Der Stand ist **21.08.2026**; abgehakt heißt: in
