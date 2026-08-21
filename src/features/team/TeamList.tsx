@@ -26,7 +26,12 @@ export function TeamList() {
           <View style={styles.container}>
             {recent.length > 0 ? (
               <View style={styles.section}>
-                <Text style={styles.sectionHeading}>{t('team.recentTitle')}</Text>
+                {/* Kein Abschnittstitel: die Seite heisst schon "Team", und
+                    "Team" darunter noch einmal ist eine Zeile ohne Inhalt.
+                    Bei News und Kursen ist das anders - dort sagt "Aktuelle
+                    Kurse" etwas ueber die Auswahl. Der zweite Abschnitt
+                    ("Weiteres Team") behaelt seine Ueberschrift, weil er sich
+                    ohne sie nicht vom ersten unterscheiden liesse. */}
                 <View {...responsive('team-grid')} style={styles.grid}>
                   {recent.map((member) => {
                     const photoUrl = photoUrlFor(member.photo_path);
