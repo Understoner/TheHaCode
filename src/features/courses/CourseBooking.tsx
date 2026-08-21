@@ -30,6 +30,8 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
   const checkout = useCourseCheckout();
 
   const [agb, setAgb] = useState(false);
+  // Gesetzt, wenn jemand ohne Haken auf "Buchen" drueckt. Siehe start().
+  const [hakenFehlt, setHakenFehlt] = useState(false);
 
   const availability = availabilityOf(seatsLeft);
   const price = course.price_cents;
@@ -45,7 +47,24 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
   );
 
   const deposit = course.deposit_cents;
+
+  // WARUM DER KNOPF NICHT GESPERRT IST
+  // ----------------------------------
+  // Er war es, und das war ein Fehler: ohne Haken sah er aus wie ein Knopf,
+  // liess sich druecken - und tat nichts. Wer den Haken uebersehen hatte,
+  // bekam keinerlei Auskunft, warum die Buchung nicht losgeht. Genau das ist
+  // beim Test auf dev passiert ("Buchungslink ist nicht auswaehlbar").
+  //
+  // Jetzt loest er aus und sagt, was fehlt - dieselbe Machart wie im
+  // Registrierungsformular, wo die Pflichtangabe auch erst beim Absenden
+  // gemeldet wird. Ein gesperrter Knopf ohne Begruendung ist keine
+  // Handlungsoption (CLAUDE.md §Immer).
   const start = () => {
+    if (!agb) {
+      setHakenFehlt(true);
+      return;
+    }
+    setHakenFehlt(false);
     checkout.mutate(course.slug, { onSuccess: (url) => openExternalUrl(url) });
   };
 
@@ -81,8 +100,12 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
         <View style={styles.stack}>
           <Checkbox
             checked={agb}
-            onToggle={() => setAgb((value) => !value)}
+            onToggle={() => {
+              setAgb((value) => !value);
+              setHakenFehlt(false);
+            }}
             label={t('kurse.buchung.agbLabel')}
+            error={hakenFehlt ? t('errors:buchung.agb_required') : undefined}
           >
             {t('kurse.buchung.agbVorspann')}{' '}
             <Link href="/agb" style={styles.link}>
@@ -104,7 +127,7 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
                   : t('kurse.buchung.buchenAktion')
             }
             onPress={start}
-            disabled={!agb || checkout.isPending}
+            disabled={checkout.isPending}
           />
 
           {checkout.isError ? (
