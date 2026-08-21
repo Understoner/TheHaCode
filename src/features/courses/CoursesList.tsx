@@ -7,12 +7,21 @@ import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
 import { RECENT_ITEMS_COUNT } from '@/design/navigation';
 import { responsive } from '@/design/responsive';
+import { CourseBooking } from '@/features/courses/CourseBooking';
+import { useCourseSeats } from '@/features/courses/useCourseBooking';
 import { useCoursesList } from '@/features/courses/useCoursesList';
 import { openExternalUrl, safeExternalUrl } from '@/lib/externalLink';
 
 export function CoursesList() {
   const { t } = useTranslation();
   const query = useCoursesList();
+  // Die freien Plaetze kommen aus einer eigenen Abfrage: sie aendern sich,
+  // waehrend die Kursliste tagelang gleich bleibt, und sie darf auch ohne
+  // Anmeldung gestellt werden (course_seats(), Migration 0011). Faellt sie
+  // aus, fehlt nur die Platzangabe - buchen laesst sich trotzdem, die
+  // verbindliche Zaehlung sitzt ohnehin in der Datenbank.
+  const seats = useCourseSeats();
+  const seatsLeft = (courseId: string) => seats.data?.get(courseId) ?? null;
 
   return (
     <QueryBoundary query={query} empty={{ title: t('kurse.empty.title'), hint: t('kurse.empty.hint') }}>
@@ -43,7 +52,9 @@ export function CoursesList() {
                             {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
                             {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
                           </View>
-                          {signupUrl ? (
+                          {course.booking_enabled ? (
+                            <CourseBooking course={course} seatsLeft={seatsLeft(course.id)} />
+                          ) : signupUrl ? (
                             <Button label={t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
                           ) : null}
                         </View>
@@ -74,8 +85,11 @@ export function CoursesList() {
                             {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
                             {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
                           </View>
+                          {course.booking_enabled ? (
+                            <CourseBooking course={course} seatsLeft={seatsLeft(course.id)} />
+                          ) : null}
                         </View>
-                        {signupUrl ? (
+                        {!course.booking_enabled && signupUrl ? (
                           <Button label={t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
                         ) : null}
                       </View>
@@ -151,7 +165,10 @@ const styles = StyleSheet.create({
   },
   listRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // flex-start statt center: mit dem Buchungsblock ist die Textspalte
+    // deutlich hoeher als das Bild, und ein mittig schwebendes Vorschaubild
+    // saehe daneben aus.
+    alignItems: 'flex-start',
     gap: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,

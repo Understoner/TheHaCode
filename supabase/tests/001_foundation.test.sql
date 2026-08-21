@@ -58,6 +58,19 @@ values ('11111111-1111-1111-1111-111111111111', 'paced', 'timer', 'plus', 'Eigen
 set local role service_role;
 insert into public.subscriptions (user_id, plan, status, current_period_end)
 values ('11111111-1111-1111-1111-111111111111', 'yearly', 'active', now() + interval '1 year');
+
+-- course_bookings (0011) haengt ebenso per cascade an auth.users. Auch hier
+-- service_role: der Client hat auf dieser Tabelle keinerlei Schreibrecht.
+insert into public.courses
+  (id, slug, title, description, published_at,
+   booking_enabled, price_cents, capacity, starts_at)
+values
+  ('11111111-2222-3333-4444-555555555555', 'kaskadenkurs', 'Kaskadenkurs', 'Text',
+   now() - interval '1 day', true, 9900, 5, now() + interval '8 weeks');
+
+insert into public.course_bookings (user_id, course_id, amount_total_cents)
+values ('11111111-1111-1111-1111-111111111111',
+        '11111111-2222-3333-4444-555555555555', 9900);
 reset role;
 
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
@@ -68,6 +81,8 @@ select is((
     select owner_id from public.exercises where owner_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.subscriptions where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.course_bookings where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select * from finish();
