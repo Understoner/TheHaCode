@@ -52,21 +52,28 @@ export function AccountPanel({ session }: { session: Session }) {
 
   return (
     <View style={styles.page}>
-      <View style={styles.card}>
-        <Text style={styles.title}>{t('auth.signedIn.title')}</Text>
-        <Text style={styles.body}>{t('auth.signedIn.as', { name })}</Text>
-
-        {error ? (
-          <View role="alert" style={styles.error}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        ) : null}
+      {/* Der Kopf ist bewusst knapp gehalten: er sagt, wer angemeldet ist, und
+          bietet das Abmelden an - mehr nicht. Alles Weitere steht darunter und
+          soll ohne Scrollen sichtbar sein. Deshalb Titel, Name und Knopf in
+          EINER Reihe statt in dreien; auf schmalen Bildschirmen rutscht der
+          Knopf per flexWrap von selbst darunter, ohne Media Query. */}
+      <View style={[styles.card, styles.header]}>
+        <View style={styles.headerText}>
+          <Text style={styles.title}>{t('auth.signedIn.title')}</Text>
+          <Text style={styles.body}>{t('auth.signedIn.as', { name })}</Text>
+        </View>
 
         <Button
           disabled={pending}
           label={pending ? t('auth.signOutPending') : t('auth.signOut')}
           onPress={() => void signOut()}
         />
+
+        {error ? (
+          <View role="alert" style={styles.error}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
       </View>
 
       <View {...responsive('konto-grid')} style={styles.grid}>
@@ -117,6 +124,17 @@ const styles = StyleSheet.create({
     flexBasis: '100%',
     gap: spacing.md,
     padding: spacing.lg,
+  },
+  header: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    // Knapper als die uebrigen Karten: der Kopf traegt zwei Zeilen Text, kein
+    // Formular. Mit spacing.lg ringsum kostete er ueber 160 Pixel Hoehe und
+    // schob alles Weitere unter den Bildschirmrand.
+    paddingVertical: spacing.md,
+    gap: spacing.sm,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.line,
@@ -125,8 +143,16 @@ const styles = StyleSheet.create({
   quiet: {
     backgroundColor: colors.surfaceSubtle,
   },
+  headerText: {
+    // Waechst in die freie Breite, damit der Knopf rechts steht - und faellt
+    // unter 220px auf eine eigene Zeile.
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 220,
+    gap: 2,
+  },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: colors.ink900,
   },
@@ -141,6 +167,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   error: {
+    // Volle Zeile: der Kopf ist eine flexWrap-Reihe, sonst quetschte sich die
+    // Meldung neben den Abmelden-Knopf.
+    flexBasis: '100%',
     borderWidth: 1,
     borderColor: colors.danger,
     borderRadius: radius.sm,
