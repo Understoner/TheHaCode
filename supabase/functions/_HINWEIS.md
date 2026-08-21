@@ -133,6 +133,47 @@ nicht (SAD §4.5, Kleinunternehmerregelung):
 > Käuferland von Anfang an mit — die steuerliche Bewertung selbst gehört zur
 > Steuerberatung, nicht ins Repo.
 
+## CORS: was der Browser im Preflight verlangt
+
+`Access-Control-Allow-Headers` muss **jede** Kopfzeile nennen, die supabase-js
+mitschickt:
+
+```
+authorization, x-client-info, apikey, content-type
+```
+
+Fehlt eine davon, bricht der Browser den Preflight ab und die eigentliche
+Anfrage geht nie los. In der App sieht das aus wie ein Netzwerkfehler.
+
+**Am 21.08.2026 genau so passiert.** Die Liste stand auf
+`authorization, content-type` — damit war **keine** Edge Function aus dem
+Browser erreichbar: Preisabfrage, Checkout, Kundenportal, Kontolöschung.
+
+Warum es monatelang niemandem auffiel: geprüft wurde mit `curl`, und **curl
+schickt keinen Preflight**. Die Vitest-Tests reden nie mit dem Netz. Es gab
+also grüne Tests, grüne curl-Aufrufe — und Funktionen, die im Browser nie
+liefen.
+
+Die Liste steht seitdem an einer Stelle (`_shared/http.ts`, Konstante
+`ALLOWED_HEADERS`) und wird von `__tests__/http.test.ts` festgehalten.
+`delete-account` hat weiterhin seine eigene Kopie; wer die eine ändert, ändert
+die andere mit.
+
+**So prüft man es von außen** — das ist der Aufruf, der den Fehler gefunden hat:
+
+```bash
+curl -s -o /dev/null -D - -X OPTIONS \
+  https://<ref>.supabase.co/functions/v1/<funktion> \
+  -H "Origin: https://dev.deratemcode.at" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: authorization, content-type, apikey, x-client-info"
+```
+
+In der Antwort muss `access-control-allow-headers` alle vier nennen. Achtung:
+Der **lokale** Runtime beantwortet Preflights selbst und spiegelt die Anfrage
+zurück — dort sieht immer alles gut aus. Prüfen lässt sich das nur gegen eine
+ausgerollte Umgebung.
+
 ## Kursbuchungen örtlich ausprobieren
 
 Ohne Stripe-Konto, mit selbst signierten Ereignissen — dieselbe Machart wie
