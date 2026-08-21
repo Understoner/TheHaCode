@@ -110,7 +110,9 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Vorlage:** `src/features/news/*` (identisches Muster: Migration → Typen → Query-Hook → `QueryBoundary`-Komponente → Test)
 **Abnahme:**
 - [ ] Nur veröffentlichte Kurse sichtbar (`published_at`-Gate wie bei News)
-- [ ] Kein Buchungs-/Zahlungsablauf — Anmeldung über externen Link (`signup_url`)
+- [ ] ~~Kein Buchungs-/Zahlungsablauf — Anmeldung über externen Link (`signup_url`)~~
+      — **am 16.08.2026 aufgehoben, siehe T20.** Der externe Link bleibt, bis
+      T20 gebaut ist; danach ist er der Rückfall, nicht der Regelweg.
 - [ ] Vier Zustände über `QueryBoundary` behandelt
 - [ ] pgTAP: Normal- und Missbrauchsfall (`supabase/tests/003_courses_team.test.sql`)
 
@@ -129,14 +131,23 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [ ] Start/News/Kurse/Team als echte Links
 - [ ] Übungen/Sequenz-Konfigurator als „bald verfügbar" — kein `href` auf eine nicht existierende Route (bricht sonst `typedRoutes: true` aus `app.json`)
 
-### T07d · Impressum & Datenschutz (Minimal) 🔒 ⏱6
+### T07d · Impressum & Datenschutz 🔒 ⏱6
 **Ziel:** Rechtliches Minimum für den Domain-Umzug — ohne erfundene Geschäftsdaten.
 **Dateien:** `src/i18n/locales/de/legal.json`, `src/app/impressum.tsx`, `src/app/datenschutz.tsx`
 **Warum 🔒:** Rechtsverbindlicher Text braucht Review durch einen Menschen, nicht nur einen grünen Test.
 **Abnahme:**
-- [ ] Keine erfundenen Fakten — fehlende Angaben (Nachname, Anschrift, E-Mail, UID) als `[[TODO: ...]]`-Platzhalter
-- [ ] Sichtbarer Warnbanner auf beiden Seiten, solange ein Platzhalter steht — **auch in Production**, nicht nur Staging
-- [ ] Inhaltlich schmal: kein Tracking, keine Nutzerkonten in dieser Phase — Hosting/Supabase als einzige Auftragsverarbeiter genannt
+- [x] Keine erfundenen Fakten — fehlende Angaben (Nachname, Anschrift, E-Mail, UID) als `[[TODO: ...]]`-Platzhalter
+- [x] Sichtbarer Warnbanner auf beiden Seiten, solange ein Platzhalter steht — **auch in Production**, nicht nur Staging
+- [x] ~~Inhaltlich schmal: kein Tracking, keine Nutzerkonten in dieser Phase~~ — überholt, siehe unten
+
+> **Erweitert am 16.08.2026.** Die Annahme „keine Nutzerkonten in dieser Phase"
+> ist mit Auth und Stripe hinfällig geworden; die Datenschutzerklärung
+> behauptete das aber weiterhin und war damit im Livebetrieb inhaltlich falsch.
+> Sie ist jetzt vollständig neu geschrieben: Konto, eigene Sequenzen,
+> Zahlungsabwicklung über Stripe, Speicherung im Browser, Empfänger,
+> Speicherdauer inklusive § 132 BAO. Ebenfalls korrigiert: der Verweis auf die
+> EU-OS-Plattform im Impressum — die wurde eingestellt.
+> AGB und Haftungsausschluss kamen mit T19a dazu.
 
 ### T07e · Storage-Bucket `public-assets` ⏱4
 **Ziel:** Ein öffentlicher Bucket für Kurs-, Team- und (künftig) News-Bilder, Schreibzugriff nur für Admins.
@@ -290,10 +301,89 @@ Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
 > Block 2 vorgezogen, nicht mehr Teil von Launch (geändert in SAD 0.7).
 
 ### T19 · Rechtliches und Launch 🔒 ⏱6
-- [ ] AGB online (erst jetzt nötig — ab hier existieren Nutzerkonten/Zahlungen)
+- [x] AGB online (erst jetzt nötig — ab hier existieren Nutzerkonten/Zahlungen)
+- [x] Haftungsausschluss online — nicht ursprünglich geplant, siehe T19a
 - [ ] Verzeichnis von Verarbeitungstätigkeiten angelegt
 - [ ] AVV mit Supabase, Hostinger, Stripe geschlossen
 - [ ] Checkliste aus `docs/DEPLOYMENT.md` Abschnitt 5 abgehakt
+
+### T19a · Zustimmung zu AGB und Rücktrittsrecht im Bezahlvorgang 🔒 ⏱3
+**Ziel:** Die AGB werden Vertragsbestandteil, und das Rücktrittsrecht ist sauber
+geregelt. Beides fehlt derzeit — die Texte stehen online, sind aber an keiner
+Stelle des Kaufs zu bestätigen.
+**Dateien:** `supabase/functions/create-checkout/index.ts`, Stripe-Dashboard
+**Warum 🔒:** Betrifft den Vertragsschluss selbst.
+**Vorgehen:** Stripe Checkout kann beides einsammeln, ohne dass wir eine eigene
+Oberfläche bauen:
+```ts
+consent_collection: {
+  terms_of_service: 'required',
+},
+```
+Die AGB-Adresse (`<APP_URL>/agb`) muss dafür im Stripe-Dashboard unter
+Einstellungen → Checkout hinterlegt sein — **sonst lehnt Stripe den Aufruf ab
+und der Kauf bricht.** Deshalb Dashboard zuerst, Code danach.
+**Abnahme:**
+- [ ] Zustimmung zu den AGB ist im Checkout verpflichtend, in beiden Umgebungen
+- [ ] Ausdrückliche Zustimmung zum sofortigen Leistungsbeginn samt Hinweis auf
+      das Erlöschen des Rücktrittsrechts (§ 18 Abs. 1 Z 11 FAGG) — als
+      `custom_text`/`consent_collection`, oder bewusst darauf verzichten und
+      die vierzehn Tage stehen lassen. **Das ist eine Entscheidung, keine
+      Implementierungsfrage** — § 6 der AGB deckt beide Wege ab.
+- [ ] Registrierung verweist sichtbar auf AGB und Datenschutzerklärung
+
+> Ohne T19a gilt: das vierzehntägige Rücktrittsrecht besteht in vollem Umfang,
+> und die AGB sind im Streitfall womöglich nicht wirksam einbezogen.
+
+### T20 · Kurse in der App buchen und bezahlen 🔒 ⏱20
+**Ziel:** Workshops, Camps und Kurse werden nicht mehr über einen externen Link
+angemeldet, sondern in der App gebucht und über Stripe bezahlt.
+**Warum neu:** T07a schließt genau das noch aus („Kein Buchungs-/Zahlungsablauf
+— Anmeldung über externen Link `signup_url`"). Das ist am 16.08.2026 bewusst
+aufgehoben worden. **T07a ist damit überholt**, nicht T20 falsch.
+**Warum 🔒:** Zahlungen und Entgegennahme von Anzahlungen.
+
+**Das Vertragswerk steht schon.** Teil B der AGB (§§ 11–13) regelt Anmeldung,
+Anzahlung, Stornostaffel und Absage bereits vollständig — die Implementierung
+muss sich daran halten, nicht umgekehrt.
+
+**Der entscheidende Unterschied zum Abo:** ein Kurs ist eine Einmalzahlung,
+`mode: 'payment'` statt `mode: 'subscription'`. Daraus folgt fast alles andere:
+
+- `create-checkout` kennt heute nur `subscription`. Entweder ein zweiter
+  Einstiegspunkt `create-course-checkout` oder ein Modus-Parameter — beim
+  Schneiden daran denken, dass die Prüfung „hat schon ein Abo" für Kurse
+  sinnlos ist.
+- Der Webhook darf aus einer Kursbuchung **keine** Zeile in `subscriptions`
+  schreiben. Heute passiert das nicht: `checkout.session.completed` ohne
+  `subscription` liefert in `rowForEvent` `null`, die Funktion quittiert mit
+  200 und tut nichts. Der bestehende Code ist also nicht gefährlich, aber auch
+  nicht zuständig — es braucht einen eigenen Zweig und eine eigene Tabelle.
+- Neue Migration: `course_bookings` (Nutzerbezug, Kurs, Status, gezahlter
+  Betrag, Anzahlung/Restzahlung, Stornozeitpunkt). Regeln aus CLAUDE.md für
+  Nutzertabellen beachten, Eintrag in die UNION-Liste in `001_foundation`.
+- `courses` braucht Preis und Teilnehmerzahl. Additiv, also nullable.
+- **Plätze sind endlich.** Das ist der einzige Ort im Projekt mit einem echten
+  Wettlauf: zwei Personen buchen den letzten Platz gleichzeitig. Die Zählung
+  gehört in die Datenbank, nicht in den Client — und die Reservierung muss vor
+  dem Bezahlen greifen und wieder verfallen, wenn nicht gezahlt wird.
+
+**Die unangenehme Stelle: die Anzahlung.** § 11 AGB verlangt bei Offline-Terminen
+über 130 € eine Anzahlung von 50 %, Rest spätestens vier Wochen vor Beginn.
+Das ist in Stripe kein Standardfall. Vor dem Bauen entscheiden:
+- zwei getrennte Zahlungen (Anzahlung jetzt, Restbetrag später per Zahlungslink), oder
+- Gesamtbetrag sofort, oder
+- die AGB an das anpassen, was ohne Sonderlogik geht.
+Die dritte Möglichkeit ist ausdrücklich erlaubt — die AGB sind für uns
+geschrieben, nicht gegen uns.
+
+**Abnahme:**
+- [ ] Buchung legt eine Zeile in `course_bookings` an, geschrieben ausschließlich vom Webhook
+- [ ] Kursbuchungen erzeugen unter keinen Umständen einen Eintrag in `subscriptions` — pgTAP-Missbrauchstest
+- [ ] Überbuchung ist ausgeschlossen; Test mit zwei gleichzeitigen Buchungen des letzten Platzes
+- [ ] Storno nach § 12 AGB abgebildet oder bewusst als Handarbeit dokumentiert
+- [ ] Entscheidung zur Anzahlung schriftlich festgehalten, AGB und Umsetzung stimmen überein
+- [ ] Bestätigungsmail nach Buchung (§ 11: die Anmeldung wird erst damit verbindlich)
 
 ---
 
