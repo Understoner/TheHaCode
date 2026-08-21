@@ -28,6 +28,28 @@ import { json, preflight } from '../_shared/http.ts';
 
 type CheckoutRequest = { plan?: unknown };
 
+// Der Satz ueber dem Haken im Stripe-Checkout.
+//
+// Er traegt zwei Erklaerungen, weil beide zum selben Zeitpunkt faellig sind:
+// die Zustimmung zu den AGB (sonst gelten sie nicht) und das ausdrueckliche
+// Verlangen nach sofortigem Leistungsbeginn samt Kenntnisnahme, dass das
+// Ruecktrittsrecht damit erlischt (§ 18 Abs. 2 FAGG - bei digitalen Inhalten
+// endet es mit dem Beginn der Bereitstellung, nicht erst mit vollstaendiger
+// Erfuellung). Ohne die zweite Haelfte laeuft die Vierzehntagefrist voll
+// weiter, und Plus waere zwei Wochen lang widerrufbar, obwohl es ab der ersten
+// Sekunde nutzbar ist.
+//
+// Der Wortlaut steht hier und nicht in i18next: er gehoert nicht in die App,
+// sondern auf eine fremde Seite, und die Fassung, der jemand zugestimmt hat,
+// ist ueber die Git-Historie belegbar. Stripe speichert am Vorgang nur, DASS
+// zugestimmt wurde - WAS dort stand, steht hier.
+const TOS_HINWEIS =
+  'Mit dem Haken stimmst du den AGB zu. Du verlangst zugleich ausdrücklich, ' +
+  'dass wir sofort mit der Bereitstellung beginnen, und nimmst zur Kenntnis, ' +
+  'dass dein vierzehntägiges Rücktrittsrecht damit erlischt ' +
+  '(§ 18 Abs. 2 FAGG). Kündigen kannst du davon unabhängig jederzeit zum Ende ' +
+  'der Laufzeit.';
+
 Deno.serve(async (request) => {
   const origin = request.headers.get('Origin');
 
@@ -136,6 +158,20 @@ Deno.serve(async (request) => {
       // Rabattcodes fuer Bestandskunden: ein Parameter, angelegt werden sie im
       // Stripe-Dashboard (SAD §4.6).
       allow_promotion_codes: true,
+
+      // T19a - AGB UND RUECKTRITTSRECHT IN EINEM HAKEN
+      // ----------------------------------------------
+      // Bis hierher waren die AGB online, aber an keiner Stelle des Kaufs zu
+      // bestaetigen. Damit waren sie im Streitfall womoeglich gar nicht
+      // Vertragsbestandteil. Stripe sammelt beides ein, ohne dass wir eine
+      // eigene Oberflaeche bauen.
+      //
+      // ACHTUNG, REIHENFOLGE: 'required' setzt voraus, dass die AGB-Adresse im
+      // Stripe-Dashboard unter Einstellungen -> Checkout hinterlegt ist. Fehlt
+      // sie, lehnt Stripe den Aufruf ab und NIEMAND kann kaufen. Deshalb erst
+      // Dashboard, dann diese Zeile ausrollen.
+      consent_collection: { terms_of_service: 'required' },
+      custom_text: { terms_of_service_acceptance: { message: TOS_HINWEIS } },
 
       // Kleinunternehmerregelung (SAD §4.5): keine Steuerberechnung. Der
       // Bruttopreis und tax_behavior = inclusive haengen am Preis im

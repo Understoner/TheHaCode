@@ -126,6 +126,16 @@ nicht (SAD §4.5, Kleinunternehmerregelung):
   § 11 AGB — ohne sie bekommt ein Kursteilnehmer gar nichts Schriftliches.
   Am 21.08.2026 eingeschaltet. Beachte: für Einmalzahlungen verschickt Stripe
   Belege **nur im Live-Modus**.
+- **AGB-Adresse hinterlegen** (Einstellungen → Checkout und Payment Links →
+  „Nutzungsbedingungen"): `https://deratemcode.at/agb`, in **beiden**
+  Umgebungen. **Das muss vor dem Ausrollen von T19a geschehen.**
+  `create-checkout` setzt seither `consent_collection.terms_of_service:
+  'required'`; fehlt die Adresse, antwortet Stripe mit einem Fehler und
+  **niemand kann mehr ein Abo kaufen**. Der Haken trägt zugleich die Erklärung
+  zum sofortigen Leistungsbeginn (§ 18 Abs. 2 FAGG) — der Wortlaut steht als
+  `TOS_HINWEIS` in `create-checkout/index.ts`, nicht im Dashboard.
+  Danach einmal nachsehen, was in der Bestätigungsmail steht: § 18 Abs. 2 Z 3
+  FAGG will diese Erklärung auf einem dauerhaften Datenträger wiederfinden.
 
 > Vorbehalt aus SAD §4.5: die Kleinunternehmerregelung greift für inländische
 > Umsätze. Für digitale Leistungen an Privatpersonen in anderen EU-Ländern gilt

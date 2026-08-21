@@ -86,6 +86,12 @@ export function PlusPricing() {
 
       <Text style={styles.smallprint}>{t('plus.kleingedrucktes')}</Text>
       <Text style={styles.smallprint}>{t('plus.kleinunternehmer')}</Text>
+
+      {/* Der Hinweis auf das erloeschende Ruecktrittsrecht steht VOR dem Kauf,
+          nicht erst im Checkout: § 4 FAGG verlangt die Information vor
+          Vertragsabschluss, der Haken bei Stripe ist die Bestaetigung danach.
+          Zwei Stellen, zwei verschiedene Pflichten (T19a). */}
+      <Text style={styles.smallprint}>{t('plus.widerruf')}</Text>
     </View>
   );
 }
