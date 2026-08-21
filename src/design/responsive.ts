@@ -36,7 +36,12 @@ export type ResponsiveTarget =
   | 'news-grid'
   | 'courses-grid'
   | 'team-grid'
-  | 'sessions-grid';
+  | 'sessions-grid'
+  // Die Kontoseite: Abo, Einwilligungen, Daten und Loeschen stehen mobil
+  // untereinander, ab dem Breakpoint zu zweit nebeneinander. Ohne das haengen
+  // vier Bereiche in einer 420px-Spalte, waehrend rechts daneben die halbe
+  // Seite leer bleibt.
+  | 'konto-grid';
 
 // Nur die Mindestbreiten unterscheiden sich - Teamkarten sind schmaler, weil
 // sie neben dem 96px-Portrait weniger Fliesstext tragen.
@@ -46,6 +51,11 @@ const GRID_MIN_WIDTH: Record<'news-grid' | 'courses-grid' | 'team-grid' | 'sessi
   'team-grid': 260,
   'sessions-grid': 260,
 };
+
+// Die Kontoseite hat ihre eigene Regel: zwei Spalten statt drei. Die Bereiche
+// tragen Fliesstext und Formularelemente, keine Vorschaubilder - bei einem
+// Drittel Breite wuerde jede zweite Zeile umbrechen.
+const KONTO_COLUMN_MIN_WIDTH = 340;
 
 // RNs Style-Typen sind nur fuer Nativ gedacht und fuehren dataSet nicht,
 // obwohl react-native-web es unterstuetzt. Der Cast steht deshalb genau
@@ -74,6 +84,7 @@ export function responsiveCss(): string {
 @media (min-width: ${MOBILE_NAV_BREAKPOINT}px) {
   [data-thc="nav-mobile"] { display: none !important; }
 ${gridRules}
+  [data-thc="konto-grid"] > * { flex-basis: 48% !important; min-width: ${KONTO_COLUMN_MIN_WIDTH}px !important; }
 }
 `.trim();
 }

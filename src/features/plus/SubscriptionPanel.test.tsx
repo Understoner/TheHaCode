@@ -110,6 +110,7 @@ describe('SubscriptionPanel', () => {
           status: 'active',
           current_period_end: inDreissigTagen,
           cancel_at_period_end: false,
+          stripe_customer_id: 'cus_test_1',
         },
       ],
       error: null,
@@ -136,6 +137,56 @@ describe('SubscriptionPanel', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
     expect(screen.queryByText('Kein Abo')).toBeNull();
+  });
+
+  // Ein von Hand eingetragenes Abo (provider = 'manual', SAD §4.6) hat bei
+  // Stripe keinen Kunden. Der Knopf lieferte dort frueher verlaesslich einen
+  // Fehler - jetzt steht an seiner Stelle die Erklaerung.
+  it('bietet ohne Stripe-Kunden kein Portal an', async () => {
+    mockSubscription({
+      data: [
+        {
+          plan: 'yearly',
+          status: 'active',
+          current_period_end: inDreissigTagen,
+          cancel_at_period_end: false,
+          stripe_customer_id: null,
+        },
+      ],
+      error: null,
+    });
+
+    renderPanel(<SubscriptionPanel />);
+
+    await waitFor(() => expect(screen.getByText(/von Hand eingetragen/)).toBeTruthy());
+    expect(screen.queryByText('Kundenportal öffnen')).toBeNull();
+  });
+
+  // Der haeufigste Grund, und einer, den ein zweiter Versuch nie behebt:
+  // das Portal ist im Stripe-Dashboard nicht eingerichtet.
+  it('nennt die fehlende Portal-Einrichtung beim Namen', async () => {
+    mockSubscription({
+      data: [
+        {
+          plan: 'monthly',
+          status: 'active',
+          current_period_end: inDreissigTagen,
+          cancel_at_period_end: false,
+          stripe_customer_id: 'cus_test_1',
+        },
+      ],
+      error: null,
+    });
+    invokeMock.mockResolvedValue({
+      data: null,
+      error: { message: '{"error":"portal_not_configured"}' },
+    });
+
+    renderPanel(<SubscriptionPanel />);
+    await waitFor(() => expect(screen.getByText('Kundenportal öffnen')).toBeTruthy());
+    fireEvent.click(screen.getByText('Kundenportal öffnen'));
+
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/nicht eingerichtet/));
   });
 
   // Die Zusage aus SAD §3.4: die Bezahlschranke sitzt am Anlegen, nicht am

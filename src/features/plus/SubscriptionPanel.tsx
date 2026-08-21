@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { SkeletonList } from '@/components/SkeletonList';
 import { colors, radius, spacing } from '@/design/tokens';
-import { formatDate, subscriptionView } from '@/features/plus/plus';
+import { formatDate, portalErrorCode, subscriptionView } from '@/features/plus/plus';
 import { usePortal, useSubscription } from '@/features/plus/usePlus';
 import { openExternalUrl } from '@/lib/externalLink';
 
@@ -39,6 +39,13 @@ export function SubscriptionPanel() {
 
   const view = subscriptionView(subscription.data);
   const zumPortal = () => portal.mutate(undefined, { onSuccess: (url) => openExternalUrl(url) });
+
+  // Das Kundenportal gehoert Stripe. Ein Abo, das nie durch einen Checkout
+  // gelaufen ist - von Hand im Studio angelegt, provider = 'manual' (SAD §4.6)
+  // -, hat dort keinen Kunden und damit kein Portal. Frueher stand der Knopf
+  // trotzdem da und lieferte verlaesslich einen Fehler; jetzt steht an seiner
+  // Stelle die Erklaerung.
+  const hatStripeKunden = Boolean(subscription.data?.stripe_customer_id);
 
   return (
     <View style={styles.section}>
@@ -81,11 +88,15 @@ export function SubscriptionPanel() {
 
             <Text style={styles.body}>{t('konto.abo.sequenzenBleiben')}</Text>
 
-            <Button
-              label={portal.isPending ? t('konto.abo.portalPending') : t('konto.abo.portal')}
-              onPress={zumPortal}
-              disabled={portal.isPending}
-            />
+            {hatStripeKunden ? (
+              <Button
+                label={portal.isPending ? t('konto.abo.portalPending') : t('konto.abo.portal')}
+                onPress={zumPortal}
+                disabled={portal.isPending}
+              />
+            ) : (
+              <Text style={styles.body}>{t('konto.abo.ohneStripe')}</Text>
+            )}
 
             {view.state === 'ended' ? (
               <Link href="/plus" style={styles.link}>
@@ -97,7 +108,7 @@ export function SubscriptionPanel() {
 
         {portal.isError ? (
           <Text role="alert" style={styles.error}>
-            {t('errors:konto.portal')}
+            {t(`errors:konto.portal.${portalErrorCode(portal.error)}`)}
           </Text>
         ) : null}
       </View>

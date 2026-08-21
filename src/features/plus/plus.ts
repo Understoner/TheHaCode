@@ -72,3 +72,30 @@ export function subscriptionView(sub: Subscription | null | undefined): Subscrip
   // kann das selbst im Kundenportal in Ordnung bringen.
   return { state: 'problem', plan, status: sub.status };
 }
+
+/** Was create-portal an Absagen kennt. */
+export type PortalErrorCode = 'no_customer' | 'portal_not_configured' | 'unknown';
+
+/**
+ * Die Absage von create-portal auf einen unserer Codes bringen.
+ *
+ * Dieselbe Machart wie bei der Kursbuchung (features/courses/booking.ts):
+ * supabase-js verpackt den Antwortkoerper bei einem Fehlerstatus nicht, der
+ * Text steht dann als JSON in message.
+ */
+export function portalErrorCode(error: unknown): PortalErrorCode {
+  const roh = (() => {
+    if (typeof error === 'string') return error;
+    if (!error || typeof error !== 'object') return null;
+    const kandidat = error as { error?: unknown; message?: unknown };
+    if (typeof kandidat.error === 'string') return kandidat.error;
+    if (typeof kandidat.message === 'string') {
+      return kandidat.message.match(/"error"\s*:\s*"([a-z_]+)"/)?.[1] ?? kandidat.message;
+    }
+    return null;
+  })();
+
+  if (roh === 'no_customer') return 'no_customer';
+  if (roh === 'portal_not_configured') return 'portal_not_configured';
+  return 'unknown';
+}
