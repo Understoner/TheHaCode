@@ -96,8 +96,10 @@ invoice.payment_failed
 
 Alles andere quittiert die Funktion mit 200 und tut nichts.
 
-**Die beiden neuen sind je Umgebung nachzutragen** — sonst bleibt ein
-abgebrochener Kurs-Checkout bis zum Ablauf der Haltezeit auf dem Platz sitzen.
+Die beiden neuen sind am 21.08.2026 in beiden Umgebungen nachgetragen worden.
+Fehlt `checkout.session.expired`, bleibt ein abgebrochener Kurs-Checkout bis
+zum Ablauf der Haltezeit auf dem Platz sitzen. Die vollständige Checkliste
+steht in `docs/KURSBUCHUNG.md`.
 
 ## Im Stripe-Dashboard einzustellen
 
@@ -114,6 +116,8 @@ nicht (SAD §4.5, Kleinunternehmerregelung):
 - **Zahlungsbelege per E-Mail einschalten** (Kundenbenachrichtigungen →
   „Erfolgreiche Zahlungen"). Seit T20 sind sie die Buchungsbestätigung nach
   § 11 AGB — ohne sie bekommt ein Kursteilnehmer gar nichts Schriftliches.
+  Am 21.08.2026 eingeschaltet. Beachte: für Einmalzahlungen verschickt Stripe
+  Belege **nur im Live-Modus**.
 
 > Vorbehalt aus SAD §4.5: die Kleinunternehmerregelung greift für inländische
 > Umsätze. Für digitale Leistungen an Privatpersonen in anderen EU-Ländern gilt

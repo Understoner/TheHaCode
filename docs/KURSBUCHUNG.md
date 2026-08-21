@@ -143,22 +143,76 @@ Platz belegt.
 
 ---
 
-## Was in Stripe eingestellt sein muss
+## Stripe — Checkliste
 
-Zusätzlich zu dem, was `supabase/functions/_HINWEIS.md` fürs Abo nennt:
+Nichts davon steht im Code. Der Stand ist **21.08.2026**; abgehakt heißt: in
+beiden Modi eingestellt, Test **und** Live.
 
-- **Zahlungsbelege per E-Mail einschalten.** Sie sind nach der Entscheidung vom
-  21.08.2026 die Bestätigung nach § 11 AGB. Dashboard → Einstellungen →
-  Kundenbenachrichtigungen → „Erfolgreiche Zahlungen".
-- **Der Webhook-Endpunkt braucht zwei Ereignisse mehr:**
-  `checkout.session.expired` und `checkout.session.async_payment_succeeded` —
-  je Umgebung, wie die anderen.
-- Preise werden **nicht** im Dashboard gepflegt. Sie stehen am Kurs in der
+### Wegen T20 dazugekommen
+
+- [x] **Zwei Ereignisse am Webhook nachtragen**, je Umgebung:
+      `checkout.session.expired` und `checkout.session.async_payment_succeeded`.
+      *Developers → Webhooks* (neuere Oberfläche: *Workbench → Webhooks*) →
+      Endpunkt öffnen → Events ergänzen. Danach stehen dort acht Ereignisse,
+      die vollständige Liste in `supabase/functions/_HINWEIS.md`.
+      **Warum:** ohne `expired` bleibt ein abgebrochener Checkout bis zu 40
+      Minuten auf dem Platz sitzen, statt ihn sofort freizugeben.
+- [x] **Zahlungsbelege einschalten**, je Umgebung.
+      *Settings → Business → Customer emails →* „Successful payments" (und
+      gleich „Refunds" dazu, das hilft beim Storno).
+      **Warum:** der Beleg ist die Bestätigung nach § 11 AGB. Ohne ihn bekommt
+      ein Teilnehmer nichts Schriftliches.
+      **Fallstrick:** Stripe verschickt Belege für Einmalzahlungen **nur im
+      Live-Modus**. Bleibt die Mail auf dev aus, ist das kein Fehler — dort
+      wird im Dashboard unter *Payments* nachgesehen.
+
+### Aus T16, ebenfalls erledigt
+
+- [x] Secrets je Projekt gesetzt (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+      `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `APP_URL`)
+- [x] Zwei getrennte Webhook-Endpunkte mit je eigenem Signing Secret
+- [x] Stripe Tax aus, Preise brutto
+- [x] Rechnungsfußzeile „Umsatzsteuerbefreit — Kleinunternehmer gemäß § 6
+      Abs. 1 Z 27 UStG."
+- [x] Kundenportal konfiguriert (*Settings → Billing → Customer portal*)
+
+### Offen — geht erst nach dem Ausrollen
+
+- [ ] **Eine echte Testzahlung auf dev.** Testkurs im Studio buchbar machen,
+      auf `/kurse` buchen, mit `4242 4242 4242 4242` zahlen. Die einzige Probe,
+      die den ganzen Weg abdeckt. Prüfung siehe unten.
+
+### Nicht in Stripe gepflegt
+
+- **Kurspreise nicht als Products/Prices anlegen.** Sie stehen am Kurs in der
   Datenbank und gehen als `price_data` mit; sonst müsste die Redaktion jeden
-  Kurs an zwei Stellen pflegen.
+  Kurs an zwei Stellen pflegen, und ein vergessener Schritt wäre ein falscher
+  Preis.
+- **Rabattcodes gelten nicht für Kurse.** `allow_promotion_codes` steht nur im
+  Abo-Checkout. Sollen sie auch für Kurse gelten, ist das eine Zeile in
+  `create-course-checkout`.
+- **Keine neuen Function Secrets.** `create-course-checkout` nutzt dieselben
+  wie `create-checkout`, ohne die Preis-Variablen.
 
-Neue Function Secrets braucht `create-course-checkout` keine — sie nutzt
-dieselben wie `create-checkout`.
+### Kontrolle, ob es gewirkt hat
+
+```bash
+# 400 = eingerichtet · 500 = Secrets fehlen · 404 = nicht ausgerollt
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -X POST https://<ref>.supabase.co/functions/v1/stripe-webhook
+```
+
+Nach der Testbuchung in der Datenbank:
+
+```sql
+select status, amount_paid_cents, amount_total_cents, confirmed_at
+  from public.course_bookings order by created_at desc limit 1;
+
+select count(*) from public.subscriptions;   -- muss 0 bleiben
+```
+
+Die zweite Abfrage ist die eigentliche: eine Kursbuchung darf niemals ein Abo
+erzeugen.
 
 ---
 
