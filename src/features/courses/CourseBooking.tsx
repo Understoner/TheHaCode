@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Checkbox } from '@/components/Checkbox';
-import { colors, radius, spacing } from '@/design/tokens';
+import { colors, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { availabilityOf, bookingErrorCode, formatPrice } from '@/features/courses/booking';
 import { useCourseCheckout, useMyBookings } from '@/features/courses/useCourseBooking';

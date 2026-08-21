@@ -17,27 +17,24 @@ auf die genannte Version, egal was das Elternpaket verlangt.
 
 | Paket | Von | Auf | Grund |
 |---|---|---|---|
-| `brace-expansion` | 1.1.18 | ^5.0.9 | CVE-2026-14257, DoS durch unbegrenzte Expansion |
 | `uuid` | 7.0.3 | ^11.1.1 | CVE-2026-41907, fehlende Bereichsprüfung in v3/v5/v6 |
 
-Beide kamen **nicht** aus unserem Code:
+`uuid` kommt **nicht** aus unserem Code:
 
 ```
-brace-expansion  <- eslint, eslint-config-expo  ->  minimatch@3
-uuid             <- expo  ->  @expo/config-plugins  ->  xcode
+uuid  <-  expo  ->  @expo/config-plugins  ->  xcode
 ```
 
-Also Werkzeuge: der Linter und die Erzeugung nativer iOS-Projekte. Im
-ausgelieferten Bundle steckt keines von beiden — auf dem Server liegen sie
-trotzdem, weil dort `npm install` läuft, und deshalb sieht der Scanner sie.
+Also die Erzeugung nativer iOS-Projekte. Im ausgelieferten Bundle steckt sie
+nicht — auf dem Server liegt sie trotzdem, weil dort `npm install` läuft, und
+deshalb sieht der Scanner sie.
 
 ### Warum ein Override und kein Update
 
-Weil es nichts zu updaten gibt. `minimatch@3` verlangt ausdrücklich
-`brace-expansion@^1.1.7`, und `minimatch@3` hängt an eslint-Versionen, die wir
-nicht bestimmen. `npm audit fix --force` schlägt als „Lösung" einen Rücksprung
-auf `expo@53` vor — vier Hauptversionen zurück, um ein Werkzeug zu reparieren,
-das wir nie ausführen. Das ist der schlechtere Tausch.
+Weil es nichts zu updaten gibt: `xcode@3` verlangt `uuid@^7`, und `xcode` hängt
+an einer expo-Version, die wir nicht bestimmen. `npm audit fix --force` schlägt
+als „Lösung" einen Rücksprung auf `expo@53` vor — vier Hauptversionen zurück,
+um ein Werkzeug zu reparieren, das wir nie ausführen. Das ist der schlechtere Tausch.
 
 ### Was daran gefährlich ist
 
@@ -46,20 +43,73 @@ ganz andere API erwartet. Bricht das laut, merkt man es. Bricht es leise, nicht:
 ein kaputtes Muster-Matching in `minimatch` würde dazu führen, dass der Linter
 Dateien **überspringt**, statt zu scheitern — und niemand sähe es.
 
-Deshalb ist beides nachgemessen worden, nicht nur „Build läuft":
+Nachgemessen wird deshalb die tatsächliche Funktion, nicht nur „Build läuft":
 
 ```bash
-# minimatch mit brace-expansion@5: fünf Muster, alle mit dem erwarteten Ergebnis
-node -e "const f=require('minimatch').minimatch; console.log(f('src/a.ts','src/*.{ts,tsx}'))"
-
 # uuid v4 liefert weiterhin eine gültige v4-UUID, xcode lädt
 node -e "console.log(require('uuid').v4()); require('xcode')"
 ```
 
-Am 21.08.2026 beides in Ordnung, dazu `npm run verify` und `npm run build:web`
-grün.
+**Und zwar an der Kopie, die das Elternpaket wirklich lädt.** Das ist die
+Lehre aus dem Fehlschlag weiter unten: ein `require('minimatch')` aus dem
+Projektstamm trifft eine ganz andere Kopie als die unter
+`node_modules/@eslint/config-array/node_modules/`. Im Zweifel den vollen Pfad
+angeben.
 
 ---
+
+## Zurückgenommen: `brace-expansion` — und warum
+
+Am 21.08.2026 meldete Hostinger `brace-expansion@1.1.18` als hoch, CVE-2026-14257,
+mit dem Rat „Upgrade auf 5.0.8". Das Paket wurde daraufhin auf `^5.0.9` gepinnt.
+**Beides war falsch — der Rat und die Umsetzung.**
+
+### Der Pin hat den Linter zerlegt
+
+`minimatch@3` schreibt `const expand = require('brace-expansion')` und erwartet
+die Funktion selbst. Ab Version 4 exportiert das Paket ein Objekt:
+
+```
+brace-expansion@5 exportiert: { EXPANSION_MAX, EXPANSION_MAX_LENGTH, expand }
+-> TypeError: expand is not a function
+   at Minimatch.braceExpand (@eslint/config-array/node_modules/minimatch)
+```
+
+Aufgefallen ist das erst, als zwei für sich grüne Pull Requests
+zusammenkamen — der eine brachte den Pin, der andere eine eslint-Konfiguration
+mit `files`-Mustern, die den Codepfad überhaupt erst betritt. Die Prüfung davor
+hatte `require('minimatch')` aus dem Projektstamm benutzt und damit eine
+neuere, gar nicht betroffene Kopie erwischt.
+
+### Der Rat war auch inhaltlich verkehrt
+
+Die Advisory-Datenbank nennt für dieselbe CVE **vier** korrigierte Stände, einen
+je gepflegter Reihe:
+
+| CVE | 1.x | 2.x | 3.x | 5.x |
+|---|---|---|---|---|
+| CVE-2026-14257 | **1.1.17** | 2.1.3 | 3.0.3 | 5.0.8 |
+| CVE-2026-69152 | **1.1.18** | 2.1.4 | 3.0.6 | 5.0.9 |
+
+Installiert war 1.1.18 — also die Fassung, die **beide** CVEs bereits behebt.
+Hostingers Scanner vergleicht offenbar nur gegen die 5er-Reihe und meldet alles
+darunter, unabhängig von Backports. `npm audit` meldet `brace-expansion` seit
+jeher nicht; das war der Hinweis, den man hätte lesen können.
+
+Der Override ist deshalb ersatzlos entfernt.
+
+### Was zu tun ist, wenn der Punkt wieder auftaucht
+
+Hostinger wird ihn vermutlich weiter melden. Bevor irgendetwas gepinnt wird:
+
+```bash
+gh api "/advisories?ecosystem=npm&affects=<paket>" \
+  --jq '.[]|{cve:.cve_id,ranges:[.vulnerabilities[]|{vulnerable:.vulnerable_version_range,patched:.first_patched_version}]}'
+```
+
+Steht die installierte Version über dem korrigierten Stand **ihrer eigenen
+Reihe**, ist nichts zu tun. Ein „Upgrade auf X" im Scanner-Bericht ist eine
+Empfehlung, kein Befund.
 
 ## Was bewusst offen bleibt: `image-size`
 

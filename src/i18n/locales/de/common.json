@@ -241,5 +241,6 @@
   "auth.signUp.termsUnd": "und den",
   "auth.signUp.termsSchluss": " gelesen und stimme ihnen zu.",
   "auth.delete.confirmHint": "Tipp zur Bestätigung deine E-Mail-Adresse ein: {{email}}",
-  "auth.delete.confirmLabel": "E-Mail-Adresse"
+  "auth.delete.confirmLabel": "E-Mail-Adresse",
+  "konto.abo.ohneStripe": "Dieses Abo wurde von Hand eingetragen und läuft nicht über Stripe — deshalb gibt es dafür kein Kundenportal. Für Änderungen schreib uns an office@thehacode.com."
 }

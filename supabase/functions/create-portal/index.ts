@@ -80,7 +80,18 @@ Deno.serve(async (request) => {
 
     return json({ url: session.url }, 200, origin);
   } catch (error) {
-    console.error('Portal fehlgeschlagen', error instanceof Error ? error.message : error);
+    const meldung = error instanceof Error ? error.message : String(error);
+    console.error('Portal fehlgeschlagen', meldung);
+
+    // Der mit Abstand haeufigste Grund, und einer, den man nur im
+    // Stripe-Dashboard behebt: das Kundenportal ist im jeweiligen Modus nie
+    // eingerichtet worden. Test- und Live-Modus zaehlen dabei getrennt.
+    // Ohne diese Unterscheidung meldet die App "hat nicht geklappt, versuch es
+    // noch einmal" - und ein zweiter Versuch aendert daran nie etwas.
+    if (/no configuration|default configuration/i.test(meldung)) {
+      return json({ error: 'portal_not_configured' }, 502, origin);
+    }
+
     return json({ error: 'portal_failed' }, 502, origin);
   }
 });
