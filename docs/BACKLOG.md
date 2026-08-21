@@ -65,13 +65,14 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Alle Farben stammen aus `tokens.ts`, kein Hex-Literal in Komponenten
 - [x] Fließtext nutzt ausschließlich die 700er-Töne (Kontrast ≥ 4,5:1)
 - [x] Keine Schatten; Abgrenzung über 1-px-Linien
-- [ ] Sichtbarer Tastaturfokus auf allen bedienbaren Elementen
-      — `Button` hat einen Fokusring, mehrere `Pressable` haben keinen:
-      der AGB-Haken und „Verbindlich buchen"-Bereich (T20) sowie
-      Zustimmen/Widerrufen und „Daten herunterladen" (T17). Mit der Tastatur
-      bedienbar sind sie, sichtbar fokussiert nicht.
-- [ ] ESLint-Regel verbietet Hex-Literale in `src/components` und `src/app`
-      — die Regel fehlt; eingehalten wird es bisher von Hand
+- [x] Sichtbarer Tastaturfokus auf allen bedienbaren Elementen
+      — betraf dreizehn Dateien, nicht nur die neuen. Gelöst über
+      `components/PressableRing.tsx`: ein Pressable, das seinen Fokus zeigt.
+      Der Zustand gehört je Element, nicht je Bildschirm — sonst hätten in den
+      Filterlisten alle Chips gleichzeitig geleuchtet.
+- [x] ESLint-Regel verbietet Hex-Literale in `src/components` und `src/app`
+      — dazu `src/features`. Gegenprobe gefahren: ein eingesetztes `'#16242B'`
+      lässt `npm run lint` scheitern.
 
 > Diese Aufgabe ist die **Referenzscheibe** aus SAD §13.1. Sie wird von Hand gebaut und ist danach die Vorlage für alles Weitere.
 
@@ -104,10 +105,14 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Abnahme:**
 - [x] Zustimmung schreibt eine Zeile in `user_consents` mit `definition_id`
       — Infrastruktur kam mit Migration 0012 (T17), nicht hier
-- [ ] Ohne Zustimmung kein Abschluss der Registrierung
-      — **nicht umgesetzt.** Die Registrierung läuft ohne Consent-Schritt;
-      zugestimmt wird auf der Kontoseite. Bei Kursbuchungen wird die Zustimmung
-      dagegen erzwungen (`agb_accepted_at`, Fehlercode PT004).
+- [x] Ohne Zustimmung kein Abschluss der Registrierung
+      — Pflichthaken für die **AGB**, und nur für sie. Für die
+      Datenschutzerklärung bewusst keiner: verarbeitet wird auf Grundlage des
+      Vertrags (Art. 6 Abs. 1 lit. b), nicht auf Grundlage einer Einwilligung —
+      ein erzwungenes Häkchen holte eine Zustimmung ein, die niemand braucht
+      und die als erzwungene keine freiwillige wäre. Sichtbar informiert wird
+      weiterhin. Beide Zeilen entstehen im Trigger aus Migration 0013, weil es
+      im Moment der Registrierung noch keine Sitzung gibt.
 - [x] Im Profil sichtbar, welcher Version zugestimmt wurde
 - [x] Widerruf erzeugt eine **neue** Zeile, kein Update
       — durch UPDATE- und DELETE-Verbot in der Datenbank erzwungen, geprüft in
@@ -120,10 +125,10 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Export liefert eine JSON-Datei mit allen Nutzerdaten
       — mit T17 gebaut, im Client unter RLS zusammengestellt
 - [x] Löschen entfernt das Konto restlos; pgTAP-Kaskadentest bleibt grün
-- [ ] Löschen verlangt eine Bestätigung mit Eingabe der E-Mail-Adresse
-      — **bewusst anders gelöst:** zwei Schritte, der erste öffnet nur die
-      Warnung. Wenn die E-Mail-Eingabe gewollt ist, ist das eine kleine
-      Ergänzung in `DeleteAccount.tsx`.
+- [x] Löschen verlangt eine Bestätigung mit Eingabe der E-Mail-Adresse
+      — die zwei Schritte allein waren zu wenig: der Bestätigungsknopf sitzt
+      genau dort, wo eben noch „Konto löschen" stand. Groß- und Kleinschreibung
+      spielt keine Rolle.
 - [x] Beide Functions lehnen Aufrufe ohne gültiges JWT ab
 
 ### T07 · Landing Page und News ⏱16
@@ -223,9 +228,10 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [ ] Auf einem Mittelklasse-Android flüssig
       — nur an einem echten Gerät feststellbar
 - [x] `prefers-reduced-motion`: fester Radius, Marke und Zähler laufen weiter
-- [ ] Bildschirm bleibt während der Übung wach
-      — **nicht umgesetzt.** Kein Wake Lock im Code; nach der
-      Bildschirmsperre des Systems ist die Übung aus dem Blick.
+- [x] Bildschirm bleibt während der Übung wach
+      — Screen Wake Lock API, samt erneuter Anforderung nach einem Tabwechsel
+      (der Browser gibt die Sperre dort von selbst frei). Fehlt die API
+      (Firefox, Safari vor 16.4), läuft die Übung wie bisher.
 
 ### T10 · Töne ⏱3
 **Ziel:** Ein kurzer Ton je Phasenwechsel, ohne eine einzige Audiodatei.
@@ -237,9 +243,9 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Ton am Phasen**beginn**, nicht davor
 - [x] Phasen unter 1,2 s bleiben stumm (`MIN_PHASE_MS`)
 - [x] `AudioContext` startet erst auf Nutzerinteraktion
-- [ ] Abschaltbar über `profiles.sound_enabled`
-      — **die Spalte gibt es, gelesen wird sie nirgends.** Der Ton lässt sich
-      nur im Player selbst regeln, die Einstellung überlebt das Gerät nicht.
+- [x] Abschaltbar über `profiles.sound_enabled`
+      — die Einstellung überlebt jetzt Gerät und Sitzung. Ohne Anmeldung gilt
+      sie für den Besuch; `localStorage` ist für fachliche Daten verboten.
 - [ ] Auf einem echten iPhone prüfen, ob fremde Musik weiterläuft — Ergebnis notieren
 
 ### T11 · Player-Screen ⏱10
@@ -266,10 +272,10 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Vorschau-Ring aktualisiert sich beim Tippen
 - [x] Zeitleiste zeigt Blockanteile proportional inklusive Runden
 - [x] Grenzen aus der Datenbank, Fehlertexte wie in `ui/04_konfigurator.svg`
-- [ ] Optimistisches Speichern mit Rollback bei Fehler
-      — **nicht umgesetzt.** Gespeichert wird über `save_exercise` in einer
-      Transaktion, die Liste wird danach neu geladen. Funktioniert, fühlt sich
-      aber langsamer an als in SAD §6 beschrieben.
+- [x] Optimistisches Speichern mit Rollback bei Fehler
+      — vorweggenommen wird nur, was die Liste zeigt: Titel und Untertitel.
+      Die Blöcke nicht — sie bekommen ihre IDs erst von `save_exercise`, und
+      geratene IDs wären schlimmer als eine kurze Verzögerung.
 - [x] Ohne Plus: bedienbar, Speichern gesperrt, Hinweis auf Plus
       — der Hinweis führt seit T17 auf `/plus`
 - [x] Nach Abo-Ende: eigene Sequenzen abspielbar und löschbar, nicht änderbar
@@ -309,10 +315,11 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Idempotenz über `stripe_events`; doppelte Events ändern nichts
       — zusätzlich in der Fachlogik: dieselbe Sitzung addiert keinen Betrag zweimal
 - [x] `user_id` ausschließlich aus `client_reference_id`
-- [ ] Nach Zahlung schaltet die App über Realtime frei, ohne Neuladen
-      — **nicht umgesetzt.** Es gibt keine Realtime-Verbindung; nach der
-      Rückkehr aus dem Checkout braucht es ein Neuladen, bis `has_plus_access()`
-      neu abgefragt wird.
+- [x] Nach Zahlung schaltet die App über Realtime frei, ohne Neuladen
+      — abonniert wird `profiles`, nicht `subscriptions`: dort steht der Wert,
+      an dem `has_plus_access()` hängt, und `subscriptions` führt
+      Kundennummern und Periodengrenzen, die über eine offene Verbindung
+      niemanden etwas angehen. RLS gilt auch für Realtime.
 - [x] Rechnung trägt den Kleinunternehmer-Hinweis, kein USt.-Ausweis
       — im Stripe-Dashboard hinterlegt (21.08.2026)
 - [x] Tests aus SAD §8.2 grün

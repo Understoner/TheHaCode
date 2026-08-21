@@ -1,9 +1,10 @@
 import { Controller, useFieldArray, type Control } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { TextField } from '@/components/TextField';
 import { colors, radius, spacing } from '@/design/tokens';
+import { PressableRing } from '@/components/PressableRing';
 import {
   EDITABLE_PHASE_KINDS,
   MAX_PHASES_PER_BLOCK,
@@ -47,7 +48,7 @@ export function PhaseFields({ control, stepIndex }: Props) {
                 {EDITABLE_PHASE_KINDS.map((kind) => {
                   const active = kindField.value === kind;
                   return (
-                    <Pressable
+                    <PressableRing
                       key={kind}
                       onPress={() => kindField.onChange(kind)}
                       role="radio"
@@ -57,7 +58,7 @@ export function PhaseFields({ control, stepIndex }: Props) {
                       <Text style={[styles.kindText, active && styles.kindTextActive]}>
                         {t(`phase.${kind}`)}
                       </Text>
-                    </Pressable>
+                    </PressableRing>
                   );
                 })}
               </View>
@@ -83,7 +84,7 @@ export function PhaseFields({ control, stepIndex }: Props) {
             </View>
 
             <View style={styles.tools}>
-              <Pressable
+              <PressableRing
                 disabled={phaseIndex === 0}
                 aria-disabled={phaseIndex === 0}
                 onPress={() => swap(phaseIndex, phaseIndex - 1)}
@@ -91,8 +92,8 @@ export function PhaseFields({ control, stepIndex }: Props) {
                 style={[styles.tool, phaseIndex === 0 && styles.toolOff]}
               >
                 <Text style={styles.toolText}>↑</Text>
-              </Pressable>
-              <Pressable
+              </PressableRing>
+              <PressableRing
                 disabled={phaseIndex === fields.length - 1}
                 aria-disabled={phaseIndex === fields.length - 1}
                 onPress={() => swap(phaseIndex, phaseIndex + 1)}
@@ -100,11 +101,11 @@ export function PhaseFields({ control, stepIndex }: Props) {
                 style={[styles.tool, phaseIndex === fields.length - 1 && styles.toolOff]}
               >
                 <Text style={styles.toolText}>↓</Text>
-              </Pressable>
+              </PressableRing>
               {/* Die letzte Phase laesst sich nicht entfernen - ein Block ohne
                   Phase waere nichts, was sich abspielen liesse, und die
                   Datenbank wiese ihn ohnehin ab (Migration 0009). */}
-              <Pressable
+              <PressableRing
                 disabled={fields.length === 1}
                 aria-disabled={fields.length === 1}
                 onPress={() => remove(phaseIndex)}
@@ -112,19 +113,19 @@ export function PhaseFields({ control, stepIndex }: Props) {
                 style={[styles.tool, fields.length === 1 && styles.toolOff]}
               >
                 <Text style={styles.toolText}>✕</Text>
-              </Pressable>
+              </PressableRing>
             </View>
           </View>
         </View>
       ))}
 
       {fields.length < MAX_PHASES_PER_BLOCK ? (
-        <Pressable
+        <PressableRing
           onPress={() => append({ kind: 'inhale', duration_seconds: '4' })}
           style={styles.add}
         >
           <Text style={styles.addText}>{t('sequenz.phaseHinzufuegen')}</Text>
-        </Pressable>
+        </PressableRing>
       ) : null}
     </View>
   );

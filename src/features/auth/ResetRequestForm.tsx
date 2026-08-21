@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { colors, radius, spacing } from '@/design/tokens';
@@ -10,6 +10,7 @@ import { authErrorMessageKey } from '@/features/auth/authErrors';
 import { TextField } from '@/components/TextField';
 import { resetRequestSchema, type ResetRequestValues } from '@/features/auth/schema';
 import { supabase } from '@/lib/supabase';
+import { PressableRing } from '@/components/PressableRing';
 
 // Schritt 1 von "Passwort vergessen": Adresse eingeben, Link anfordern.
 // Schritt 2 steht auf /passwort-neu.
@@ -50,9 +51,9 @@ export function ResetRequestForm({ onBack }: { onBack: () => void }) {
       <View style={styles.form}>
         <Text style={styles.title}>{t('auth.reset.sentTitle')}</Text>
         <Text style={styles.hint}>{t('auth.reset.sentBody', { email: sentTo })}</Text>
-        <Pressable onPress={onBack} style={styles.back}>
+        <PressableRing onPress={onBack} style={styles.back}>
           <Text style={styles.backText}>{t('auth.reset.back')}</Text>
-        </Pressable>
+        </PressableRing>
       </View>
     );
   }
@@ -93,9 +94,9 @@ export function ResetRequestForm({ onBack }: { onBack: () => void }) {
         onPress={handleSubmit(onSubmit)}
       />
 
-      <Pressable onPress={onBack} style={styles.back}>
+      <PressableRing onPress={onBack} style={styles.back}>
         <Text style={styles.backText}>{t('auth.reset.back')}</Text>
-      </Pressable>
+      </PressableRing>
     </View>
   );
 }

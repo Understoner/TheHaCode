@@ -1,7 +1,7 @@
 import { Link, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { VolumeSlider } from '@/components/VolumeSlider';
@@ -19,6 +19,9 @@ import { useBreathClock } from '@/features/breathing/useBreathClock';
 import { effectColors } from '@/features/sessions/effects';
 import { useSession } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
+import { PressableRing } from '@/components/PressableRing';
+import { useSoundPreference } from '@/features/settings/useSoundPreference';
+import { useWakeLock } from '@/features/breathing/useWakeLock';
 
 function mmss(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
@@ -38,10 +41,17 @@ function Player({ session }: { session: PlayableExercise }) {
   const totalMs = useMemo(() => totalDurationMs(timeline), [timeline]);
 
   const clock = useBreathClock();
+
+  // Ohne das schlaeft der Bildschirm mitten in der Uebung ein - zehn Minuten
+  // ohne Beruehrung sind fuer das Betriebssystem Leerlauf (Backlog T09).
+  useWakeLock(clock.isRunning);
   const [segIndex, setSegIndex] = useState(-1);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [soundOn, setSoundOn] = useState(true);
+  // Der Tonschalter lebt in profiles.sound_enabled, nicht nur in diesem Screen
+  // (Backlog T10) - abgeschaltet bleibt abgeschaltet, auch auf dem naechsten
+  // Geraet.
+  const { soundOn, setSoundOn } = useSoundPreference();
 
   const [musicTrack, setMusicTrack] = useState<TrackId | null>(null);
   // Getrennte Lautstaerken: der Ton markiert den Phasenwechsel und muss sich
@@ -260,45 +270,45 @@ function Player({ session }: { session: PlayableExercise }) {
 
       <View style={styles.controls}>
         {finished ? (
-          <Pressable onPress={restart} style={styles.primary}>
+          <PressableRing onPress={restart} style={styles.primary}>
             <Text style={styles.primaryText}>{t('player.restart')}</Text>
-          </Pressable>
+          </PressableRing>
         ) : clock.isRunning ? (
-          <Pressable onPress={clock.pause} style={styles.secondary}>
+          <PressableRing onPress={clock.pause} style={styles.secondary}>
             <Text style={styles.secondaryText}>{t('player.pause')}</Text>
-          </Pressable>
+          </PressableRing>
         ) : (
-          <Pressable onPress={start} style={styles.primary}>
+          <PressableRing onPress={start} style={styles.primary}>
             <Text style={styles.primaryText}>
               {elapsedMs > 0 ? t('player.resume') : t('sessions.start')}
             </Text>
-          </Pressable>
+          </PressableRing>
         )}
 
-        <Pressable
-          onPress={() => setSoundOn((s) => !s)}
+        <PressableRing
+          onPress={() => setSoundOn(!soundOn)}
           style={[styles.secondary, soundOn && styles.secondaryActive]}
         >
           <Text style={[styles.secondaryText, soundOn && styles.secondaryTextActive]}>
             {soundOn ? t('player.soundOn') : t('player.soundOff')}
           </Text>
-        </Pressable>
+        </PressableRing>
       </View>
 
       {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
       <View style={styles.musicRow}>
         <Text style={styles.musicLabel}>{t('player.musicLabel')}</Text>
         <View style={styles.musicChoices}>
-          <Pressable
+          <PressableRing
             onPress={() => setMusicTrack(null)}
             style={[styles.chip, musicTrack === null && styles.chipActive]}
           >
             <Text style={[styles.chipText, musicTrack === null && styles.chipTextActive]}>
               {t('player.musicOff')}
             </Text>
-          </Pressable>
+          </PressableRing>
           {TRACKS.map((track) => (
-            <Pressable
+            <PressableRing
               key={track.id}
               onPress={() => setMusicTrack(track.id)}
               style={[styles.chip, musicTrack === track.id && styles.chipActive]}
@@ -306,7 +316,7 @@ function Player({ session }: { session: PlayableExercise }) {
               <Text style={[styles.chipText, musicTrack === track.id && styles.chipTextActive]}>
                 {t(`player.music.${track.id}`)}
               </Text>
-            </Pressable>
+            </PressableRing>
           ))}
         </View>
 

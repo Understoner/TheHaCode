@@ -1,7 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing } from '@/design/tokens';
 import {
@@ -11,6 +11,7 @@ import {
   EXPORT_TABLES,
 } from '@/features/auth/dataExport';
 import { supabase } from '@/lib/supabase';
+import { PressableRing } from '@/components/PressableRing';
 
 // Alle eigenen Daten als Datei - Art. 15 und Art. 20 DSGVO.
 //
@@ -65,11 +66,11 @@ export function DataExport({ session }: { session: Session }) {
         </Text>
       ) : null}
 
-      <Pressable onPress={() => void run()} disabled={pending} style={styles.action}>
+      <PressableRing onPress={() => void run()} disabled={pending} style={styles.action}>
         <Text style={styles.actionText}>
           {pending ? t('konto.export.pending') : t('konto.export.aktion')}
         </Text>
-      </Pressable>
+      </PressableRing>
     </View>
   );
 }

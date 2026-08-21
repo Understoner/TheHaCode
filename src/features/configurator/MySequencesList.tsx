@@ -1,13 +1,14 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
 import { buildTimeline, totalDurationMs } from '@/features/breathing/timeline';
 import { useDeleteSequence, useMySequences } from '@/features/configurator/useSequences';
 import type { PlayableExercise } from '@/types/breathing';
+import { PressableRing } from '@/components/PressableRing';
 
 function minuten(sequence: PlayableExercise): number {
   return Math.max(1, Math.round(totalDurationMs(buildTimeline(sequence)) / 60000));
@@ -67,7 +68,7 @@ function SequenceCard({ sequence }: { sequence: PlayableExercise }) {
             steht es hier ohne jede Zugriffspruefung. */}
         {armed ? (
           <View style={styles.confirmRow}>
-            <Pressable
+            <PressableRing
               disabled={remove.isPending}
               aria-disabled={remove.isPending}
               onPress={() => remove.mutate(sequence.id)}
@@ -76,15 +77,15 @@ function SequenceCard({ sequence }: { sequence: PlayableExercise }) {
               <Text style={styles.dangerText}>
                 {remove.isPending ? t('sequenz.loeschtGerade') : t('sequenz.loeschenBestaetigen')}
               </Text>
-            </Pressable>
-            <Pressable onPress={() => setArmed(false)} style={styles.secondaryBox}>
+            </PressableRing>
+            <PressableRing onPress={() => setArmed(false)} style={styles.secondaryBox}>
               <Text style={styles.secondary}>{t('auth.delete.cancel')}</Text>
-            </Pressable>
+            </PressableRing>
           </View>
         ) : (
-          <Pressable onPress={() => setArmed(true)} style={styles.secondaryBox}>
+          <PressableRing onPress={() => setArmed(true)} style={styles.secondaryBox}>
             <Text style={styles.quiet}>{t('sequenz.loeschen')}</Text>
-          </Pressable>
+          </PressableRing>
         )}
       </View>
 

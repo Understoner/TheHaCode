@@ -105,15 +105,17 @@ describe('AuthPanel', () => {
     fireEvent.change(feld('Name (freiwillig)'), { target: { value: 'Michael' } });
     fireEvent.change(feld('Passwort'), { target: { value: 'geheim1234' } });
     fireEvent.change(feld('Passwort wiederholen'), { target: { value: 'geheim1234' } });
+    fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByText('Konto anlegen'));
 
-    await waitFor(() =>
-      expect(signUp).toHaveBeenCalledWith({
-        email: 'neu@example.at',
-        password: 'geheim1234',
-        options: { data: { full_name: 'Michael' } },
-      })
-    );
+    // consented_at ist der Zeitpunkt der Zustimmung; daraus macht der Trigger
+    // aus Migration 0013 die Zeilen in user_consents. Der genaue Wert ist eine
+    // Uhrzeit und wird deshalb nur auf Vorhandensein geprueft.
+    await waitFor(() => expect(signUp).toHaveBeenCalled());
+    const argumente = signUp.mock.calls[0][0];
+    expect(argumente.email).toBe('neu@example.at');
+    expect(argumente.options.data.full_name).toBe('Michael');
+    expect(Date.parse(argumente.options.data.consented_at)).not.toBeNaN();
 
     await waitFor(() => expect(screen.getByText('Fast geschafft')).toBeTruthy());
     expect(screen.getByText('neu@example.at', { exact: false })).toBeTruthy();
@@ -131,6 +133,7 @@ describe('AuthPanel', () => {
     fireEvent.change(feld('E-Mail'), { target: { value: 'alt@example.at' } });
     fireEvent.change(feld('Passwort'), { target: { value: 'geheim1234' } });
     fireEvent.change(feld('Passwort wiederholen'), { target: { value: 'geheim1234' } });
+    fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByText('Konto anlegen'));
 
     await waitFor(() =>

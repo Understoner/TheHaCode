@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
@@ -20,6 +20,7 @@ import {
 } from '@/features/configurator/schema';
 import { useSaveSequence } from '@/features/configurator/useSequences';
 import type { PlayableExercise } from '@/types/breathing';
+import { PressableRing } from '@/components/PressableRing';
 
 /** Bestehende Sequenz -> Formularstand. Zahlen werden zu Text, sonst nichts. */
 function toForm(sequence: PlayableExercise): SequenceFormValues {
@@ -141,7 +142,7 @@ export function SequenceEditor({ sequence }: { sequence?: PlayableExercise }) {
               {t('sequenz.block', { nummer: stepIndex + 1 })}
             </Text>
             <View style={styles.tools}>
-              <Pressable
+              <PressableRing
                 disabled={stepIndex === 0}
                 aria-disabled={stepIndex === 0}
                 onPress={() => steps.swap(stepIndex, stepIndex - 1)}
@@ -149,8 +150,8 @@ export function SequenceEditor({ sequence }: { sequence?: PlayableExercise }) {
                 style={[styles.tool, stepIndex === 0 && styles.toolOff]}
               >
                 <Text style={styles.toolText}>↑</Text>
-              </Pressable>
-              <Pressable
+              </PressableRing>
+              <PressableRing
                 disabled={stepIndex === steps.fields.length - 1}
                 aria-disabled={stepIndex === steps.fields.length - 1}
                 onPress={() => steps.swap(stepIndex, stepIndex + 1)}
@@ -158,8 +159,8 @@ export function SequenceEditor({ sequence }: { sequence?: PlayableExercise }) {
                 style={[styles.tool, stepIndex === steps.fields.length - 1 && styles.toolOff]}
               >
                 <Text style={styles.toolText}>↓</Text>
-              </Pressable>
-              <Pressable
+              </PressableRing>
+              <PressableRing
                 disabled={steps.fields.length === 1}
                 aria-disabled={steps.fields.length === 1}
                 onPress={() => steps.remove(stepIndex)}
@@ -167,7 +168,7 @@ export function SequenceEditor({ sequence }: { sequence?: PlayableExercise }) {
                 style={[styles.tool, steps.fields.length === 1 && styles.toolOff]}
               >
                 <Text style={styles.toolText}>✕</Text>
-              </Pressable>
+              </PressableRing>
             </View>
           </View>
 
@@ -226,9 +227,9 @@ export function SequenceEditor({ sequence }: { sequence?: PlayableExercise }) {
       ))}
 
       {steps.fields.length < MAX_BLOCKS ? (
-        <Pressable onPress={() => steps.append(newStep())} style={styles.addBlock}>
+        <PressableRing onPress={() => steps.append(newStep())} style={styles.addBlock}>
           <Text style={styles.addBlockText}>{t('sequenz.blockHinzufuegen')}</Text>
-        </Pressable>
+        </PressableRing>
       ) : null}
 
       {/* Die Vorschau rechnet mit derselben Engine, die der Player spaeter

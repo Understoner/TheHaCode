@@ -42,5 +42,6 @@
   "konto.aboUnbekannt": "Dein Abo lässt sich gerade nicht abrufen. Lad die Seite bitte neu; an deinem Vertrag ändert das nichts.",
   "konto.portal": "Das Kundenportal ließ sich nicht öffnen. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
   "konto.consent": "Das ließ sich nicht speichern. Versuch es bitte noch einmal.",
-  "konto.export": "Der Download hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com."
+  "konto.export": "Der Download hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
+  "auth.termsRequired": "Ohne Zustimmung zu den AGB können wir kein Konto anlegen. Setz bitte den Haken."
 }

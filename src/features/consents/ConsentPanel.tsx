@@ -1,11 +1,12 @@
 import { Link } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
 import { useConsents, useSetConsent, type ConsentState } from '@/features/consents/useConsents';
 import { formatDate } from '@/features/plus/plus';
+import { PressableRing } from '@/components/PressableRing';
 
 // Einwilligungen auf der Kontoseite.
 //
@@ -70,25 +71,25 @@ function ConsentRow({ state }: { state: ConsentState }) {
 
       {/* Zustimmen darf man immer; widerrufen nur, was keine Pflicht ist. */}
       {!granted ? (
-        <Pressable
+        <PressableRing
           onPress={() => setConsent.mutate({ definition, granted: true })}
           disabled={setConsent.isPending}
           style={styles.action}
         >
           <Text style={styles.actionText}>{t('konto.consents.zustimmen')}</Text>
-        </Pressable>
+        </PressableRing>
       ) : definition.is_required ? (
         <Link href="/agb" style={styles.actionLink}>
           {t('konto.consents.nachlesen')}
         </Link>
       ) : (
-        <Pressable
+        <PressableRing
           onPress={() => setConsent.mutate({ definition, granted: false })}
           disabled={setConsent.isPending}
           style={styles.action}
         >
           <Text style={styles.actionText}>{t('konto.consents.widerrufen_aktion')}</Text>
-        </Pressable>
+        </PressableRing>
       )}
 
       {setConsent.isError ? (

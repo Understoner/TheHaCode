@@ -1,9 +1,10 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Checkbox } from '@/components/Checkbox';
 import { colors, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { availabilityOf, bookingErrorCode, formatPrice } from '@/features/courses/booking';
@@ -78,7 +79,21 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
         <Text style={styles.hint}>{t('kurse.buchung.ausgebuchtHinweis')}</Text>
       ) : (
         <View style={styles.stack}>
-          <AgbCheckbox checked={agb} onToggle={() => setAgb((value) => !value)} />
+          <Checkbox
+            checked={agb}
+            onToggle={() => setAgb((value) => !value)}
+            label={t('kurse.buchung.agbLabel')}
+          >
+            {t('kurse.buchung.agbVorspann')}{' '}
+            <Link href="/agb" style={styles.link}>
+              {t('kurse.buchung.agbLink')}
+            </Link>{' '}
+            {t('kurse.buchung.agbUnd')}{' '}
+            <Link href="/haftungsausschluss" style={styles.link}>
+              {t('kurse.buchung.haftungLink')}
+            </Link>
+            {t('kurse.buchung.agbSchluss')}
+          </Checkbox>
 
           <Button
             label={
@@ -100,41 +115,6 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
         </View>
       )}
     </View>
-  );
-}
-
-/**
- * Ein Haken ohne Bibliothek. react-native-web bringt keine Checkbox mit, und
- * eine neue Abhaengigkeit fuer ein Quadrat mit Rahmen waere keine (CLAUDE.md
- * §Stack). role und aria-checked machen ihn fuer Screenreader zu dem, was er
- * ist.
- */
-function AgbCheckbox({ checked, onToggle }: { checked: boolean; onToggle: () => void }) {
-  const { t } = useTranslation();
-
-  return (
-    <Pressable
-      onPress={onToggle}
-      role="checkbox"
-      aria-checked={checked}
-      accessibilityLabel={t('kurse.buchung.agbLabel')}
-      style={styles.checkRow}
-    >
-      <View style={[styles.box, checked && styles.boxChecked]}>
-        {checked ? <Text style={styles.tick}>✓</Text> : null}
-      </View>
-      <Text style={styles.checkLabel}>
-        {t('kurse.buchung.agbVorspann')}{' '}
-        <Link href="/agb" style={styles.link}>
-          {t('kurse.buchung.agbLink')}
-        </Link>{' '}
-        {t('kurse.buchung.agbUnd')}{' '}
-        <Link href="/haftungsausschluss" style={styles.link}>
-          {t('kurse.buchung.haftungLink')}
-        </Link>
-        {t('kurse.buchung.agbSchluss')}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -183,35 +163,5 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: '600',
     color: colors.ocean700,
-  },
-  checkRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-  },
-  box: {
-    width: 20,
-    height: 20,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  boxChecked: {
-    backgroundColor: colors.ocean700,
-    borderColor: colors.ocean700,
-  },
-  tick: {
-    fontSize: 13,
-    lineHeight: 18,
-    color: colors.surface,
-  },
-  checkLabel: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 20,
-    color: colors.ink700,
   },
 });

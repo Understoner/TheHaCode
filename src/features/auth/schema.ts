@@ -38,6 +38,15 @@ export const signUpSchema = z
       }),
     password: z.string().min(MIN_PASSWORD_LENGTH, { error: 'errors:auth.passwordTooShort' }),
     passwordRepeat: z.string(),
+    // Die AGB muessen bestaetigt werden, sonst sind sie nicht wirksam
+    // einbezogen (Backlog T05). Bewusst NUR die AGB - warum nicht auch die
+    // Datenschutzerklaerung, steht in SignUpForm.tsx.
+    // Der Fehlertext haengt am Typ und nicht nur an der Pruefung: fehlt das
+    // Feld ganz, meldete Zod sonst seinen eigenen englischen Text, und der
+    // steht in keiner Uebersetzungsdatei.
+    acceptsTerms: z
+      .boolean({ error: 'errors:auth.termsRequired' })
+      .refine((value) => value === true, { error: 'errors:auth.termsRequired' }),
   })
   .refine((values) => values.password === values.passwordRepeat, {
     error: 'errors:auth.passwordMismatch',
