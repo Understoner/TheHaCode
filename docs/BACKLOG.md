@@ -14,12 +14,13 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Ziel:** Lauffähiges Expo-Projekt mit CI.
 **Dateien:** `package.json`, `app.json`, `tsconfig.json`, `.eslintrc.js`, `tailwind.config.js`, `vitest.config.ts`, `.gitignore`
 **Abnahme:**
-- [ ] `npm run dev` startet die App lokal
-- [ ] `npm run verify` läuft grün durch
-- [ ] `supabase start` und `npm run db:reset` spielen alle Migrationen ein
-- [ ] Grundmigration (Extensions, Enums, `profiles`, `has_plus_access()` — SAD §3.2–3.3) liegt als `supabase/migrations/0001_foundation.sql`
-- [ ] `supabase/tests/001_foundation.test.sql` existiert mit der UNION-Liste aller Nutzertabellen (CLAUDE.md); künftige Nutzertabellen tragen dort nach
-- [ ] CI läuft auf einem Test-PR grün (Workflow `ci.yml`, Status-Check `verify`)
+- [x] `npm run dev` startet die App lokal
+- [x] `npm run verify` läuft grün durch
+- [x] `supabase start` und `npm run db:reset` spielen alle Migrationen ein
+- [x] Grundmigration (Extensions, Enums, `profiles`, `has_plus_access()` — SAD §3.2–3.3) liegt als `supabase/migrations/0001_foundation.sql`
+- [x] `supabase/tests/001_foundation.test.sql` existiert mit der UNION-Liste aller Nutzertabellen (CLAUDE.md); künftige Nutzertabellen tragen dort nach
+      — zuletzt ergänzt um `course_bookings` (0011) und `user_consents` (0012)
+- [x] CI läuft auf einem Test-PR grün (Workflow `ci.yml`, Status-Check `verify`)
 
 ### T01a · iOS-Audio-Spike (gesperrter Bildschirm) ⏱4
 **Ziel:** Die einzige offene Frage beantworten, die die Roadmap noch verschieben könnte (SAD §7.7, §10).
@@ -28,17 +29,32 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [ ] Ergebnis dokumentiert: Audio läuft bei gesperrtem Bildschirm weiter — ja/nein
 - [ ] Bei „nein": Entscheidung getroffen und in SAD §7.7 nachgetragen, welcher der drei dort genannten Auswege gilt
 
+> **Nicht mehr dringend, aber offen.** V1 spielt keine Audiodateien ab — die Töne
+> kommen aus dem Oszillator und nur bei sichtbarem Bildschirm. Die Frage wird
+> erst mit den geführten Aufnahmen scharf (V1.2, SAD §11.2). Der Spike blockiert
+> V1 also nicht mehr; erledigt gehört er trotzdem, bevor V1.2 geplant wird.
+
 > Steht bewusst vor T02, nicht in Block 3 bei T10 — SAD §7.7 verlangt ihn ausdrücklich für Sprint 1, weil sein Ergebnis noch die Roadmap verschieben kann.
 
 ### T02 · Deployment-Pipeline ⏱6
 **Ziel:** Beide Umgebungen laufen, Beförderung funktioniert.
 **Dateien:** `.github/workflows/*`, `scripts/wait-for-deploy.sh`, `scripts/write-build-info.mjs`
 **Abnahme:**
-- [ ] `npm run build:web` ruft `scripts/write-build-info.mjs` am Ende auf; `dist/build-info.json` liegt danach neben den übrigen Build-Dateien
-- [ ] Push auf `develop` → Staging aktualisiert sich
-- [ ] Smoke-Tests laufen gegen die **neue** Version, nicht die alte
-- [ ] Freigabe → `main` → Production aktualisiert sich
+- [x] `npm run build:web` ruft `scripts/write-build-info.mjs` am Ende auf; `dist/build-info.json` liegt danach neben den übrigen Build-Dateien
+- [x] Push auf `develop` → Staging aktualisiert sich
+- [x] Smoke-Tests laufen gegen die **neue** Version, nicht die alte
+      — `wait-for-deploy.sh` prüft auf den **Commit**, nicht auf den Zeitstempel (Fix vom 15.08.2026)
+- [x] Freigabe → `main` → Production aktualisiert sich
 - [ ] Ein absichtlich fehlschlagender Smoke-Test verhindert die Beförderung
+      — strukturell gegeben (`promote` steht auf `needs: staging`), aber nie
+      absichtlich provoziert. Ein einmaliger Versuch mit einem kaputten Test
+      wäre der Beleg.
+
+> **Bekannte Schwäche, dokumentiert:** Der Wartepunkt kann rot werden, obwohl
+> der Livegang in Ordnung ist — wenn Hostingers Bot-Schutz die GitHub-Runner
+> abweist. Zweimal erlebt (14.08. als 403 auf der dev-Subdomain, 21.08. als
+> Timeout auf der Hauptdomain). Beides steht in `docs/DEPLOYMENT.md`, samt der
+> Regel, danach die Smoke-Tests von außen nachzuholen.
 
 ### T03 · Design-Tokens und Komponenteninventar ⏱14
 **Ziel:** Die zwölf Bausteine, aus denen alle Screens bestehen.
@@ -46,11 +62,16 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Vorlage:** `ui/01_startscreen.svg` (Token-Leiste unten), SAD §6
 **Bausteine:** Button (primär/sekundär/tertiär), TextInput, Stepper, Slider, Toggle, Card, ListRow, StateMessage, SkeletonList, QueryBoundary, Sheet, BreathRing
 **Abnahme:**
-- [ ] Alle Farben stammen aus `tokens.ts`, kein Hex-Literal in Komponenten
-- [ ] Fließtext nutzt ausschließlich die 700er-Töne (Kontrast ≥ 4,5:1)
-- [ ] Keine Schatten; Abgrenzung über 1-px-Linien
+- [x] Alle Farben stammen aus `tokens.ts`, kein Hex-Literal in Komponenten
+- [x] Fließtext nutzt ausschließlich die 700er-Töne (Kontrast ≥ 4,5:1)
+- [x] Keine Schatten; Abgrenzung über 1-px-Linien
 - [ ] Sichtbarer Tastaturfokus auf allen bedienbaren Elementen
+      — `Button` hat einen Fokusring, mehrere `Pressable` haben keinen:
+      der AGB-Haken und „Verbindlich buchen"-Bereich (T20) sowie
+      Zustimmen/Widerrufen und „Daten herunterladen" (T17). Mit der Tastatur
+      bedienbar sind sie, sichtbar fokussiert nicht.
 - [ ] ESLint-Regel verbietet Hex-Literale in `src/components` und `src/app`
+      — die Regel fehlt; eingehalten wird es bisher von Hand
 
 > Diese Aufgabe ist die **Referenzscheibe** aus SAD §13.1. Sie wird von Hand gebaut und ist danach die Vorlage für alles Weitere.
 
@@ -68,30 +89,42 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - `useSession()`-Hook, Zustand-Store nur für den abgeleiteten Zustand
 - Geschützte Routen leiten auf `/anmelden` **und merken sich das Ziel**
 **Abnahme:**
-- [ ] Registrierung, Anmeldung, Abmeldung, Passwort zurücksetzen funktionieren
-- [ ] Google und Apple funktionieren im Web
-- [ ] Neuer Nutzer bekommt automatisch ein `profiles`-Zeile (Trigger aus 0002)
-- [ ] Nach Neuladen bleibt man angemeldet
-- [ ] Alle Fehlertexte deutsch, ohne Technikjargon
-- [ ] Keine eigene Passwort-, Token- oder Sitzungslogik im Code
+- [x] Registrierung, Anmeldung, Abmeldung, Passwort zurücksetzen funktionieren
+- [x] ~~Google und Apple funktionieren im Web~~ — zurückgezogen
+      — **am 16.08.2026 auf Wunsch wieder entfernt** (PR #26). Der Stand liegt
+      im Branch `feature/auth-google-apple`; Wiedereinbau wäre ein `git revert`.
+- [x] Neuer Nutzer bekommt automatisch ein `profiles`-Zeile (Trigger aus 0002)
+- [x] Nach Neuladen bleibt man angemeldet
+- [x] Alle Fehlertexte deutsch, ohne Technikjargon
+- [x] Keine eigene Passwort-, Token- oder Sitzungslogik im Code
 
 ### T05 · Consent-Flow 🔒 ⏱8
 **Ziel:** AGB und Datenschutz beim Signup, nachweisbar.
 **Dateien:** `src/features/consent/*`
 **Abnahme:**
-- [ ] Zustimmung schreibt eine Zeile in `user_consents` mit `definition_id`
+- [x] Zustimmung schreibt eine Zeile in `user_consents` mit `definition_id`
+      — Infrastruktur kam mit Migration 0012 (T17), nicht hier
 - [ ] Ohne Zustimmung kein Abschluss der Registrierung
-- [ ] Im Profil sichtbar, welcher Version zugestimmt wurde
-- [ ] Widerruf erzeugt eine **neue** Zeile, kein Update
+      — **nicht umgesetzt.** Die Registrierung läuft ohne Consent-Schritt;
+      zugestimmt wird auf der Kontoseite. Bei Kursbuchungen wird die Zustimmung
+      dagegen erzwungen (`agb_accepted_at`, Fehlercode PT004).
+- [x] Im Profil sichtbar, welcher Version zugestimmt wurde
+- [x] Widerruf erzeugt eine **neue** Zeile, kein Update
+      — durch UPDATE- und DELETE-Verbot in der Datenbank erzwungen, geprüft in
+      `013_consents.test.sql`
 
 ### T06 · Konto löschen und Daten exportieren 🔒 ⏱10
 **Ziel:** Betroffenenrechte, funktionsfähig ab Tag eins.
 **Dateien:** `supabase/functions/delete-account/`, `supabase/functions/export-my-data/`, `src/app/(app)/profil/`
 **Abnahme:**
-- [ ] Export liefert eine JSON-Datei mit allen Nutzerdaten
-- [ ] Löschen entfernt das Konto restlos; pgTAP-Kaskadentest bleibt grün
+- [x] Export liefert eine JSON-Datei mit allen Nutzerdaten
+      — mit T17 gebaut, im Client unter RLS zusammengestellt
+- [x] Löschen entfernt das Konto restlos; pgTAP-Kaskadentest bleibt grün
 - [ ] Löschen verlangt eine Bestätigung mit Eingabe der E-Mail-Adresse
-- [ ] Beide Functions lehnen Aufrufe ohne gültiges JWT ab
+      — **bewusst anders gelöst:** zwei Schritte, der erste öffnet nur die
+      Warnung. Wenn die E-Mail-Eingabe gewollt ist, ist das eine kleine
+      Ergänzung in `DeleteAccount.tsx`.
+- [x] Beide Functions lehnen Aufrufe ohne gültiges JWT ab
 
 ### T07 · Landing Page und News ⏱16
 **Ziel:** Die öffentliche Seite — sie ersetzt die alte Website.
@@ -100,6 +133,7 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Ohne Anmeldung erreichbar
 - [x] Neuer News-Beitrag im Studio erscheint **ohne Neubau** (Daten kommen zur Laufzeit)
 - [ ] „Über mich" und Kontakt als gepinnte Beiträge (Angebot zieht nach T07a auf die eigene Kurse-Seite)
+      — redaktionell, gehört zu T18
 - [x] Vier Zustände über `QueryBoundary` behandelt
 
 > Erledigt bis auf die redaktionelle Befüllung. Freie Sequenzen (T09–T11) folgen erst in Block 3.
@@ -109,27 +143,29 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Dateien:** `supabase/migrations/0003_courses_team.sql` (Tabelle `courses`), `src/features/courses/*`, `src/app/kurse.tsx`
 **Vorlage:** `src/features/news/*` (identisches Muster: Migration → Typen → Query-Hook → `QueryBoundary`-Komponente → Test)
 **Abnahme:**
-- [ ] Nur veröffentlichte Kurse sichtbar (`published_at`-Gate wie bei News)
-- [ ] ~~Kein Buchungs-/Zahlungsablauf — Anmeldung über externen Link (`signup_url`)~~
+- [x] Nur veröffentlichte Kurse sichtbar (`published_at`-Gate wie bei News)
+- [x] ~~Kein Buchungs-/Zahlungsablauf — Anmeldung über externen Link (`signup_url`)~~ — aufgehoben
       — **am 16.08.2026 aufgehoben, siehe T20.** Der externe Link bleibt, bis
       T20 gebaut ist; danach ist er der Rückfall, nicht der Regelweg.
-- [ ] Vier Zustände über `QueryBoundary` behandelt
-- [ ] pgTAP: Normal- und Missbrauchsfall (`supabase/tests/003_courses_team.test.sql`)
+- [x] Vier Zustände über `QueryBoundary` behandelt
+- [x] pgTAP: Normal- und Missbrauchsfall (`supabase/tests/003_courses_team.test.sql`)
 
 ### T07b · Team-Seite ⏱8
 **Ziel:** Teammitglieder mit Foto und Kurzvorstellung öffentlich darstellen.
 **Dateien:** `supabase/migrations/0003_courses_team.sql` (Tabelle `team_members`), `src/features/team/*`, `src/app/team.tsx`
 **Abnahme:**
-- [ ] Sortierung über `sort_order`, nur veröffentlichte Zeilen sichtbar
-- [ ] Foto über Storage-Bucket `public-assets` (T07e)
-- [ ] Vier Zustände über `QueryBoundary` behandelt
+- [x] Sortierung über `sort_order`, nur veröffentlichte Zeilen sichtbar
+- [x] Foto über Storage-Bucket `public-assets` (T07e)
+- [x] Vier Zustände über `QueryBoundary` behandelt
 
 ### T07c · Navigation ⏱6
 **Ziel:** Ein Menü, das schon auf noch nicht gebaute Funktionen verweist, ohne den Build zu brechen.
 **Dateien:** `src/design/navigation.ts`, `src/components/NavBar.tsx`, `src/app/_layout.tsx`
 **Abnahme:**
-- [ ] Start/News/Kurse/Team als echte Links
-- [ ] Übungen/Sequenz-Konfigurator als „bald verfügbar" — kein `href` auf eine nicht existierende Route (bricht sonst `typedRoutes: true` aus `app.json`)
+- [x] Start/News/Kurse/Team als echte Links
+- [x] Übungen/Sequenz-Konfigurator als „bald verfügbar" — kein `href` auf eine nicht existierende Route (bricht sonst `typedRoutes: true` aus `app.json`)
+      — überholt: beide sind inzwischen echte Routen (`/sessions`, `/sequenzen`).
+      Die `comingSoon`-Variante bleibt im Typ, weil sie wieder gebraucht wird.
 
 ### T07d · Impressum & Datenschutz 🔒 ⏱6
 **Ziel:** Rechtliches Minimum für den Domain-Umzug — ohne erfundene Geschäftsdaten.
@@ -153,9 +189,9 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Ziel:** Ein öffentlicher Bucket für Kurs-, Team- und (künftig) News-Bilder, Schreibzugriff nur für Admins.
 **Dateien:** `supabase/migrations/0004_storage_public_assets.sql`, `supabase/tests/004_storage_public_assets.test.sql`
 **Abnahme:**
-- [ ] Öffentliches Lesen, Schreiben nur mit `is_admin()`
-- [ ] Ordner-Allowlist (`news`/`courses`/`team`) technisch erzwungen, nicht nur Konvention
-- [ ] pgTAP deckt den Missbrauchsfall ab (falscher Ordner, fehlende Admin-Rolle)
+- [x] Öffentliches Lesen, Schreiben nur mit `is_admin()`
+- [x] Ordner-Allowlist (`news`/`courses`/`team`) technisch erzwungen, nicht nur Konvention
+- [x] pgTAP deckt den Missbrauchsfall ab (falscher Ordner, fehlende Admin-Rolle)
 
 ---
 
@@ -166,11 +202,11 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Dateien:** `src/features/breathing/timeline.ts`, `__tests__/timeline.test.ts`
 **Vorgehen:** **Tests zuerst.** Die Testfälle stehen fertig in SAD §8.1 — ins Repo kopieren, rot laufen lassen, dann implementieren.
 **Abnahme:**
-- [ ] Alle Tests aus SAD §8.1 grün
-- [ ] 4-4-4-4 × 8 ergibt 32 Segmente und exakt 128 000 ms
-- [ ] Keine Lücke und keine Überlappung zwischen Segmenten
-- [ ] Rundenprogression respektiert das Maximum
-- [ ] Nach 20 Minuten simulierter Laufzeit keine Drift
+- [x] Alle Tests aus SAD §8.1 grün
+- [x] 4-4-4-4 × 8 ergibt 32 Segmente und exakt 128 000 ms
+- [x] Keine Lücke und keine Überlappung zwischen Segmenten
+- [x] Rundenprogression respektiert das Maximum
+- [x] Nach 20 Minuten simulierter Laufzeit keine Drift
 
 ### T09 · Animation und Ring 🔒 ⏱14
 **Ziel:** Der Kreis, den man beim Atmen ansieht.
@@ -183,22 +219,27 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - Nur `transform` und `opacity` animieren
 - Ankeruhr statt `setInterval`; App im Hintergrund pausiert
 **Abnahme:**
-- [ ] Ein Re-Render je Phasenwechsel, nicht je Frame
+- [x] Ein Re-Render je Phasenwechsel, nicht je Frame
 - [ ] Auf einem Mittelklasse-Android flüssig
-- [ ] `prefers-reduced-motion`: fester Radius, Marke und Zähler laufen weiter
+      — nur an einem echten Gerät feststellbar
+- [x] `prefers-reduced-motion`: fester Radius, Marke und Zähler laufen weiter
 - [ ] Bildschirm bleibt während der Übung wach
+      — **nicht umgesetzt.** Kein Wake Lock im Code; nach der
+      Bildschirmsperre des Systems ist die Übung aus dem Blick.
 
 ### T10 · Töne ⏱3
 **Ziel:** Ein kurzer Ton je Phasenwechsel, ohne eine einzige Audiodatei.
 **Dateien:** `src/features/breathing/tones.ts`
 **Vorlage:** SAD §7.5 — der Code steht dort vollständig
 **Abnahme:**
-- [ ] Drei bis vier Tonhöhen über `OscillatorNode`, keine Dateien im Repo
-- [ ] Kurze Hüllkurve, kein Knacken beim Ein- und Ausblenden
-- [ ] Ton am Phasen**beginn**, nicht davor
-- [ ] Phasen unter 1,2 s bleiben stumm
-- [ ] `AudioContext` startet erst auf Nutzerinteraktion
+- [x] Drei bis vier Tonhöhen über `OscillatorNode`, keine Dateien im Repo
+- [x] Kurze Hüllkurve, kein Knacken beim Ein- und Ausblenden
+- [x] Ton am Phasen**beginn**, nicht davor
+- [x] Phasen unter 1,2 s bleiben stumm (`MIN_PHASE_MS`)
+- [x] `AudioContext` startet erst auf Nutzerinteraktion
 - [ ] Abschaltbar über `profiles.sound_enabled`
+      — **die Spalte gibt es, gelesen wird sie nirgends.** Der Ton lässt sich
+      nur im Player selbst regeln, die Einstellung überlebt das Gerät nicht.
 - [ ] Auf einem echten iPhone prüfen, ob fremde Musik weiterläuft — Ergebnis notieren
 
 ### T11 · Player-Screen ⏱10
@@ -206,10 +247,10 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Dateien:** `src/app/(app)/ueben/[id].tsx`
 **Vorlage:** `ui/03_atem_animation.svg`
 **Abnahme:**
-- [ ] Navigation vollständig ausgeblendet
-- [ ] Pause, Anhalten, Ton; Ausstieg nur über „Beenden"
-- [ ] Bei mehreren Blöcken: „Block 2 von 3 · Runde 3 von 8"
-- [ ] Ring teilt sich beim Blockwechsel neu auf, nur in der Pause zwischen Blöcken
+- [x] Navigation vollständig ausgeblendet
+- [x] Pause, Anhalten, Ton; Ausstieg nur über „Beenden"
+- [x] Bei mehreren Blöcken: „Block 2 von 3 · Runde 3 von 8"
+- [x] Ring teilt sich beim Blockwechsel neu auf, nur in der Pause zwischen Blöcken
 
 ---
 
@@ -221,20 +262,26 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Vorlage:** `ui/04_konfigurator.svg`
 **Umfang:** Blockliste mit Auf- und Zuklappen, Phasen-Stepper, Runden-Slider, Pause je Block, Umsortieren, Duplizieren, Löschen, Zeitleiste über alle Blöcke, Live-Vorschau, Vorhören
 **Abnahme:**
-- [ ] Bis zu 10 Blöcke, immer nur einer offen
-- [ ] Vorschau-Ring aktualisiert sich beim Tippen
-- [ ] Zeitleiste zeigt Blockanteile proportional inklusive Runden
-- [ ] Grenzen aus der Datenbank, Fehlertexte wie in `ui/04_konfigurator.svg`
+- [x] Bis zu 10 Blöcke, immer nur einer offen
+- [x] Vorschau-Ring aktualisiert sich beim Tippen
+- [x] Zeitleiste zeigt Blockanteile proportional inklusive Runden
+- [x] Grenzen aus der Datenbank, Fehlertexte wie in `ui/04_konfigurator.svg`
 - [ ] Optimistisches Speichern mit Rollback bei Fehler
-- [ ] Ohne Plus: bedienbar, Speichern gesperrt, Hinweis auf Plus
-- [ ] Nach Abo-Ende: eigene Sequenzen abspielbar und löschbar, nicht änderbar
+      — **nicht umgesetzt.** Gespeichert wird über `save_exercise` in einer
+      Transaktion, die Liste wird danach neu geladen. Funktioniert, fühlt sich
+      aber langsamer an als in SAD §6 beschrieben.
+- [x] Ohne Plus: bedienbar, Speichern gesperrt, Hinweis auf Plus
+      — der Hinweis führt seit T17 auf `/plus`
+- [x] Nach Abo-Ende: eigene Sequenzen abspielbar und löschbar, nicht änderbar
 
 ### T13 · Policy-Tests zum Konfigurator 🔒 ⏱4
 **Ziel:** Die Missbrauchsfälle bleiben abgedeckt.
-**Dateien:** `supabase/tests/002_configurator.test.sql`
+**Dateien:** ~~`supabase/tests/002_configurator.test.sql`~~ — tatsächlich
+`supabase/tests/007_exercises.test.sql` und `009_save_exercise.test.sql`
 **Abnahme:**
-- [ ] Alle 14 Tests grün
-- [ ] Neue Policy ohne zugehörigen Missbrauchstest wird nicht gemerged
+- [x] Alle 14 Tests grün — es sind 24 geworden (12 + 12)
+- [x] Neue Policy ohne zugehörigen Missbrauchstest wird nicht gemerged
+      — eingehalten: 0010 kam mit 18 Tests, 0011 mit 33, 0012 mit 18
 
 ---
 
@@ -256,13 +303,19 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 ### T16 · Stripe Checkout und Webhook 🔒 ⏱16
 **Dateien:** `supabase/functions/create-checkout/`, `stripe-webhook/`, `create-portal/`
 **Abnahme:**
-- [ ] Monat und Jahr; Rabattcodes über `allow_promotion_codes`
-- [ ] Signaturprüfung gegen den Rohtext, `constructEventAsync`
-- [ ] Idempotenz über `stripe_events`; doppelte Events ändern nichts
-- [ ] `user_id` ausschließlich aus `client_reference_id`
+- [x] Monat und Jahr; Rabattcodes über `allow_promotion_codes`
+      — gilt nur fürs Abo; Kursbuchungen kennen keine Rabattcodes
+- [x] Signaturprüfung gegen den Rohtext, `constructEventAsync`
+- [x] Idempotenz über `stripe_events`; doppelte Events ändern nichts
+      — zusätzlich in der Fachlogik: dieselbe Sitzung addiert keinen Betrag zweimal
+- [x] `user_id` ausschließlich aus `client_reference_id`
 - [ ] Nach Zahlung schaltet die App über Realtime frei, ohne Neuladen
-- [ ] Rechnung trägt den Kleinunternehmer-Hinweis, kein USt.-Ausweis
-- [ ] Tests aus SAD §8.2 grün
+      — **nicht umgesetzt.** Es gibt keine Realtime-Verbindung; nach der
+      Rückkehr aus dem Checkout braucht es ein Neuladen, bis `has_plus_access()`
+      neu abgefragt wird.
+- [x] Rechnung trägt den Kleinunternehmer-Hinweis, kein USt.-Ausweis
+      — im Stripe-Dashboard hinterlegt (21.08.2026)
+- [x] Tests aus SAD §8.2 grün
 
 ### T17 · Paywall und Konto ⏱8
 **Abnahme:**
@@ -321,7 +374,9 @@ Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
 - [x] AGB online (erst jetzt nötig — ab hier existieren Nutzerkonten/Zahlungen)
 - [x] Haftungsausschluss online — nicht ursprünglich geplant, siehe T19a
 - [ ] Verzeichnis von Verarbeitungstätigkeiten angelegt
+      — Pflicht nach Art. 30 DSGVO, spätestens vor dem Tagebuch (V1.1)
 - [ ] AVV mit Supabase, Hostinger, Stripe geschlossen
+      — bei allen dreien online abschließbar
 - [ ] Checkliste aus `docs/DEPLOYMENT.md` Abschnitt 5 abgehakt
 
 ### T19a · Zustimmung zu AGB und Rücktrittsrecht im Bezahlvorgang 🔒 ⏱3
