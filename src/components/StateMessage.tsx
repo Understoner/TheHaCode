@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, spacing } from '@/design/tokens';
+import { PressableRing } from '@/components/PressableRing';
 
 type Props = {
   title: string;
@@ -15,9 +16,9 @@ export function StateMessage({ title, body, actionLabel, onAction }: Props) {
       <Text style={styles.title}>{title}</Text>
       {body ? <Text style={styles.body}>{body}</Text> : null}
       {actionLabel && onAction ? (
-        <Pressable onPress={onAction} style={styles.action}>
+        <PressableRing onPress={onAction} style={styles.action}>
           <Text style={styles.actionText}>{actionLabel}</Text>
-        </Pressable>
+        </PressableRing>
       ) : null}
     </View>
   );

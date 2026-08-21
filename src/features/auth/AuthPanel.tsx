@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing } from '@/design/tokens';
 import { ResetRequestForm } from '@/features/auth/ResetRequestForm';
 import { SignInForm } from '@/features/auth/SignInForm';
 import { SignUpForm } from '@/features/auth/SignUpForm';
+import { PressableRing } from '@/components/PressableRing';
 
 type Mode = 'signIn' | 'signUp' | 'reset';
 
@@ -35,7 +36,7 @@ export function AuthPanel() {
         {(['signIn', 'signUp'] as const).map((value) => {
           const active = mode === value;
           return (
-            <Pressable
+            <PressableRing
               key={value}
               role="tab"
               aria-selected={active}
@@ -45,7 +46,7 @@ export function AuthPanel() {
               <Text style={[styles.tabText, active && styles.tabTextActive]}>
                 {t(`auth.${value}.title`)}
               </Text>
-            </Pressable>
+            </PressableRing>
           );
         })}
       </View>
@@ -53,9 +54,9 @@ export function AuthPanel() {
       {mode === 'signIn' ? <SignInForm /> : <SignUpForm />}
 
       {mode === 'signIn' ? (
-        <Pressable onPress={() => setMode('reset')} style={styles.forgot}>
+        <PressableRing onPress={() => setMode('reset')} style={styles.forgot}>
           <Text style={styles.forgotText}>{t('auth.reset.open')}</Text>
-        </Pressable>
+        </PressableRing>
       ) : null}
     </View>
   );

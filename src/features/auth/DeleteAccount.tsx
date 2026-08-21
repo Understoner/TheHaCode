@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing } from '@/design/tokens';
+import { TextField } from '@/components/TextField';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { supabase } from '@/lib/supabase';
+import { PressableRing } from '@/components/PressableRing';
 
 // Konto endgueltig loeschen.
 //
@@ -18,11 +21,24 @@ import { supabase } from '@/lib/supabase';
 // fuer etwas, das sich nicht rueckgaengig machen laesst.
 export function DeleteAccount() {
   const { t } = useTranslation();
+  const { session } = useAuth();
   const [armed, setArmed] = useState(false);
+  // Die eigene Adresse abtippen (Backlog T06). Zwei Schritte allein waren zu
+  // wenig: der zweite Knopf sitzt genau dort, wo eben noch der erste war, und
+  // wer zweimal schnell drueckt, hat sein Konto geloescht. Etwas abzutippen
+  // laesst sich nicht aus Versehen tun.
+  const [confirmText, setConfirmText] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const email = session?.user.email ?? '';
+  // Gross- und Kleinschreibung ist bei E-Mail-Adressen keine Aussage, und
+  // Leerzeichen fangen wir gleich mit ab - sonst scheitert es an einem
+  // kopierten Zeilenumbruch statt an der Absicht.
+  const matches = confirmText.trim().toLowerCase() === email.trim().toLowerCase() && email !== '';
+
   const remove = async () => {
+    if (!matches) return;
     setError(null);
     setPending(true);
 
@@ -43,9 +59,9 @@ export function DeleteAccount() {
 
   if (!armed) {
     return (
-      <Pressable onPress={() => setArmed(true)} style={styles.trigger}>
+      <PressableRing onPress={() => setArmed(true)} style={styles.trigger}>
         <Text style={styles.triggerText}>{t('auth.delete.open')}</Text>
-      </Pressable>
+      </PressableRing>
     );
   }
 
@@ -53,6 +69,17 @@ export function DeleteAccount() {
     <View style={styles.panel}>
       <Text style={styles.title}>{t('auth.delete.title')}</Text>
       <Text style={styles.body}>{t('auth.delete.body')}</Text>
+      <Text style={styles.body}>{t('auth.delete.confirmHint', { email })}</Text>
+
+      <TextField
+        label={t('auth.delete.confirmLabel')}
+        value={confirmText}
+        onChangeText={setConfirmText}
+        onBlur={() => {}}
+        inputMode="email"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
 
       {error ? (
         <Text role="alert" style={styles.error}>
@@ -61,20 +88,27 @@ export function DeleteAccount() {
       ) : null}
 
       <View style={styles.row}>
-        <Pressable
-          disabled={pending}
-          aria-disabled={pending}
+        <PressableRing
+          disabled={pending || !matches}
+          aria-disabled={pending || !matches}
           onPress={() => void remove()}
-          style={[styles.confirm, pending && styles.confirmPending]}
+          style={[styles.confirm, (pending || !matches) && styles.confirmPending]}
         >
-          <Text style={[styles.confirmText, pending && styles.confirmTextPending]}>
+          <Text style={[styles.confirmText, (pending || !matches) && styles.confirmTextPending]}>
             {pending ? t('auth.delete.pending') : t('auth.delete.confirm')}
           </Text>
-        </Pressable>
+        </PressableRing>
 
-        <Pressable disabled={pending} onPress={() => setArmed(false)} style={styles.cancel}>
+        <PressableRing
+          disabled={pending}
+          onPress={() => {
+            setArmed(false);
+            setConfirmText('');
+          }}
+          style={styles.cancel}
+        >
           <Text style={styles.cancelText}>{t('auth.delete.cancel')}</Text>
-        </Pressable>
+        </PressableRing>
       </View>
     </View>
   );

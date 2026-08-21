@@ -8,6 +8,7 @@ const gueltig = {
   name: '',
   password: 'geheim1234',
   passwordRepeat: 'geheim1234',
+  acceptsTerms: true,
 };
 
 function fehler(werte: Record<string, unknown>) {
@@ -29,6 +30,12 @@ describe('signInSchema', () => {
 describe('signUpSchema', () => {
   it('nimmt eine vollstaendige Registrierung an', () => {
     expect(signUpSchema.safeParse(gueltig).success).toBe(true);
+  });
+
+  // Ohne Zustimmung kein Konto (Backlog T05). Die AGB sind Vertragsinhalt und
+  // gelten nur, wenn sie bei Vertragsschluss angenommen wurden.
+  it('verlangt die Zustimmung zu den AGB', () => {
+    expect(fehler({ ...gueltig, acceptsTerms: false })).toContain('errors:auth.termsRequired');
   });
 
   it('besteht auf zwei gleichen Passwoertern', () => {

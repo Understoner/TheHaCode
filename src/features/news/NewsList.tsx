@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { CoverImage } from '@/components/CoverImage';
 import { QueryBoundary } from '@/components/QueryBoundary';
@@ -10,6 +10,7 @@ import { responsive } from '@/design/responsive';
 import { NEWS_CATEGORIES, newsCategoryColors, type NewsCategory } from '@/features/news/categories';
 import { useNewsList } from '@/features/news/useNewsList';
 import { estimateReadingMinutes } from '@/features/news/readingTime';
+import { PressableRing } from '@/components/PressableRing';
 
 const dateFormatter = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -29,7 +30,7 @@ export function NewsList() {
           const active = value === category;
           const tone = value === 'all' ? null : newsCategoryColors(value);
           return (
-            <Pressable
+            <PressableRing
               key={value}
               onPress={() => setCategory(value)}
               style={[
@@ -45,7 +46,7 @@ export function NewsList() {
               >
                 {value === 'all' ? t('news.filter.all') : t(`news.categories.${value}`)}
               </Text>
-            </Pressable>
+            </PressableRing>
           );
         })}
       </View>

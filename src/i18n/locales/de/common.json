@@ -235,5 +235,11 @@
   "konto.export.text": "Du bekommst alles, was zu deinem Konto gespeichert ist, als JSON-Datei — Profil, Sequenzen, Abo, Buchungen und Einwilligungen.",
   "konto.export.aktion": "Daten herunterladen",
   "konto.export.pending": "Wird zusammengestellt …",
-  "sequenz.gate.zuPlus": "Plus ansehen"
+  "sequenz.gate.zuPlus": "Plus ansehen",
+  "auth.signUp.termsLabel": "AGB und Haftungsausschluss bestätigen",
+  "auth.signUp.termsVorspann": "Ich habe die",
+  "auth.signUp.termsUnd": "und den",
+  "auth.signUp.termsSchluss": " gelesen und stimme ihnen zu.",
+  "auth.delete.confirmHint": "Tipp zur Bestätigung deine E-Mail-Adresse ein: {{email}}",
+  "auth.delete.confirmLabel": "E-Mail-Adresse"
 }

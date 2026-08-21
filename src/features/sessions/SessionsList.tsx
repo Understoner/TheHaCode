@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
@@ -14,6 +14,7 @@ import {
 } from '@/features/sessions/effects';
 import { useSessionsList } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
+import { PressableRing } from '@/components/PressableRing';
 
 type Filter = ExerciseEffect | 'all';
 
@@ -48,7 +49,7 @@ export function SessionsList() {
           const active = value === filter;
           const tone = value === 'all' ? null : effectColors(value);
           return (
-            <Pressable
+            <PressableRing
               key={value}
               onPress={() => setFilter(value)}
               style={[
@@ -68,7 +69,7 @@ export function SessionsList() {
               >
                 {value === 'all' ? t('sessions.filter.all') : t(`sessions.effects.${value}`)}
               </Text>
-            </Pressable>
+            </PressableRing>
           );
         })}
       </View>

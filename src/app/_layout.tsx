@@ -11,7 +11,18 @@ import { StagingBanner } from '@/components/StagingBanner';
 import { colors } from '@/design/tokens';
 import { responsive } from '@/design/responsive';
 import { AuthProvider } from '@/features/auth/AuthProvider';
+import { useEntitlementSync } from '@/features/plus/useEntitlementSync';
 import '@/i18n';
+
+/**
+ * Muss innerhalb des AuthProvider stehen - der Hook braucht die Sitzung.
+ * Rendert nichts; deshalb eine eigene, leere Komponente statt eines
+ * Hook-Aufrufs weiter oben, wo es die Sitzung noch nicht gibt.
+ */
+function EntitlementSync() {
+  useEntitlementSync();
+  return null;
+}
 
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient());
@@ -31,6 +42,11 @@ export default function RootLayout() {
           sobald es Inhalte gibt, die vom Anmeldezustand abhaengen, fragt jede
           Stelle denselben Wert ab. */}
       <AuthProvider>
+        {/* Haengt an der ganzen App, nicht an einer Seite: die Freischaltung
+            trifft ein, waehrend der Nutzer irgendwo unterwegs ist - meist auf
+            /konto nach der Rueckkehr aus dem Checkout, manchmal auf
+            /sequenzen. */}
+        <EntitlementSync />
         {/* Der Titel gehoert hierher und nicht in +html.tsx: Expo rendert den
             <title> ueber react-helmet, und nur ueber <Head> gesetzt aendert er
             sich auch beim Wechsel der Seite ohne Neuladen. Einzelne Screens

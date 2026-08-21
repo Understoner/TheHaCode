@@ -87,6 +87,52 @@ export function useSaveSequence() {
       if (error) throw error;
       return data as string;
     },
+    // Optimistisch: der Titel steht sofort in der Liste, nicht erst nach der
+    // Antwort (SAD §6, Backlog T12). Der Unterschied sind ein bis zwei
+    // Sekunden - lang genug, dass man in der Zwischenzeit noch einmal drueckt.
+    //
+    // Ersetzt wird nur, was die Liste anzeigt: Titel, Untertitel, Zeitstempel.
+    // Die Bloecke werden NICHT vorweggenommen; sie kommen aus save_exercise
+    // mit neuen IDs zurueck, und geratene IDs waeren schlimmer als eine kurze
+    // Verzoegerung.
+    onMutate: async ({ id, values }) => {
+      await queryClient.cancelQueries({ queryKey: ['my-sequences'] });
+      const vorher = queryClient.getQueriesData({ queryKey: ['my-sequences'] });
+
+      queryClient.setQueriesData<PlayableExercise[]>({ queryKey: ['my-sequences'] }, (alt) => {
+        if (!alt) return alt;
+
+        if (id) {
+          return alt.map((eintrag) =>
+            eintrag.id === id
+              ? { ...eintrag, title: values.title, subtitle: values.subtitle ?? null }
+              : eintrag,
+          );
+        }
+
+        // Eine neue Sequenz: ein Platzhalter oben in der Liste. Die echte ID
+        // kommt mit der Antwort, danach wird ohnehin neu geladen.
+        const platzhalter = {
+          id: `optimistisch-${Date.now()}`,
+          title: values.title,
+          subtitle: values.subtitle ?? null,
+          exercise_steps: [],
+        } as unknown as PlayableExercise;
+
+        return [platzhalter, ...alt];
+      });
+
+      return { vorher };
+    },
+
+    // Rollback. Ohne das bliebe nach einem Fehlschlag ein Eintrag stehen, den
+    // es nicht gibt - und der beim Antippen ins Leere fuehrt.
+    onError: (_error, _variablen, context) => {
+      for (const [key, daten] of context?.vorher ?? []) {
+        queryClient.setQueryData(key, daten);
+      }
+    },
+
     onSuccess: (id) => {
       void queryClient.invalidateQueries({ queryKey: ['my-sequences'] });
       // Der Player liest ueber denselben Schluessel - ohne das zeigte er nach
