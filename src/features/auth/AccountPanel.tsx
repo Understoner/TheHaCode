@@ -126,6 +126,18 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   header: {
+    // BEIDE Flex-Angaben aus styles.card muessen hier zurueckgenommen werden,
+    // und der Grund ist derselbe: sie sind fuer das Raster gedacht, in dem die
+    // Hauptrichtung WAAGRECHT ist. Der Kopf steht aber direkt in der Spalte
+    // darueber, und dort wirken sie auf die HOEHE:
+    //
+    //   flexGrow: 1      -> die Karte waechst ueber den ganzen freien Platz
+    //   flexBasis: 100%  -> ihre Ausgangshoehe ist die volle Containerhoehe
+    //
+    // Das zweite war der eigentliche Uebeltaeter: gemessen 785 Pixel fuer zwei
+    // Zeilen Text, auch nachdem flexGrow schon auf 0 stand.
+    flexGrow: 0,
+    flexBasis: 'auto',
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
