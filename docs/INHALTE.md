@@ -14,13 +14,24 @@ Gehört zu **T18**.
 ### 1. Foto hochladen
 
 Die Team-Karte zeigt das Bild als **runden Avatar mit 96 px**. Vorbereitet ist
-deshalb ein quadratischer Zuschnitt mit 384 px Kante (reicht bis zu vierfacher
-Pixeldichte) bei 22 KB — aus `DSCF0042 1.jpg`, quadratisch beschnitten mit dem
-Gesicht im oberen Drittel, sonst hätte der mittige Zuschnitt den Kopf
-abgeschnitten.
+ein quadratischer Zuschnitt mit 384 px Kante (reicht bis zu vierfacher
+Pixeldichte) bei 21 KB, aus `DSCF0042 1.jpg`.
+
+**Der Zuschnitt sitzt ganz oben, und das ist Absicht.** Im Original (870 × 1200)
+beginnt der Kopf bei etwa 72 px. Ein mittiger Zuschnitt schnitte ihn ab; der
+erste Versuch mit 18 % Abstand ließ 13 px Luft — zu wenig, der runde Ausschnitt
+hat den Scheitel gekappt. Bei `y = 0` bleiben 72 px, also 8,3 % der Kantenlänge.
+Mehr gibt das Original nicht her: darüber ist schlicht kein Bild mehr.
 
 **Studio → Storage → Bucket `public-assets` → Ordner `team` → Upload.**
-Dateiname: `michael-untersteiner.jpg`, also Pfad `team/michael-untersteiner.jpg`.
+Dateiname: `michael-untersteiner-v2.jpg`, also Pfad
+`team/michael-untersteiner-v2.jpg`.
+
+> **Warum ein neuer Name statt Überschreiben:** Die öffentliche Storage-Adresse
+> ist stabil und wird zwischengespeichert. Wer dieselbe Datei ersetzt, sieht im
+> Browser womöglich noch tagelang die alte — und sucht den Fehler dann im
+> falschen Eck. Ein neuer Name macht die Frage gegenstandslos. Die alte Datei
+> kann anschließend gelöscht werden.
 
 Der Ordner ist keine Konvention, sondern erzwungen: Migration 0004 lässt nur
 `news`, `courses` und `team` zu. Ein Upload in einen anderen Ordner wird
@@ -43,7 +54,7 @@ values (
   'Seither habe ich gelernt, ihn zu benutzen: für ruhigeren Schlaf, für mehr '
     || 'Belastbarkeit, für den Moment, in dem es eng wird. Aus dieser Erfahrung '
     || 'wurde eine Ausbildung zum Breathwork-Trainer — und daraus das hier.' ,
-  'team/michael-untersteiner.jpg',
+  'team/michael-untersteiner-v2.jpg',
   0,
   now()
 )
@@ -60,6 +71,14 @@ select slug, full_name, role_title, photo_path, published_at is not null as sich
 
 `published_at` ist der Schalter: ohne Zeitstempel bleibt die Zeile unsichtbar
 (Lesepolicy aus Migration 0003). Zum Zurückziehen genügt `set published_at = null`.
+
+Ist die Zeile schon angelegt und nur das Bild neu, genügt eine Zeile:
+
+```sql
+update public.team_members
+   set photo_path = 'team/michael-untersteiner-v2.jpg'
+ where slug = 'michael-untersteiner';
+```
 
 ### Woher der Text kommt
 
