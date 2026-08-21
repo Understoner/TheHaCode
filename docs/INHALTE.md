@@ -125,10 +125,45 @@ Zwei Wege, wenn dir das zu wenig ist:
    es das werden soll.
 
 > **Bilder sind optional.** Ohne `cover_image_path` zeichnet `CoverImage` eine
-> ruhige Fläche in Ocean oder Sage mit dem Titel darin — das sieht bewusst nach
-> Absicht aus, nicht nach fehlendem Bild. Wer doch eines will: Storage →
+> ruhige Fläche in Ocean oder Sage mit einem blassen Ring und Kreuz darin — das
+> Echo des Atem-Rings, kein leerer grauer Block. Wer doch eines will: Storage →
 > `public-assets` → Ordner `news`, dann den Pfad `news/<datei>.jpg` eintragen.
 > Die Ordner-Allowlist aus Migration 0004 lässt nur `news`, `courses`, `team` zu.
+
+### Das Titelbild für „Die App ist da"
+
+Vorbereitet und mitgeschickt: **`die-app-ist-da.jpg`**, 1600 × 900 px, 56 KB.
+
+**Studio → Storage → Bucket `public-assets` → Ordner `news` → Upload.**
+Dateiname unverändert lassen, der Pfad im SQL unten lautet
+`news/die-app-ist-da.jpg`. Andere Ordner als `news`, `courses` und `team` weist
+Migration 0004 ab.
+
+**Woher es kommt:** Unsplash, fotografiert von Sunny Young — ruhiges Meer, das
+in den Himmel übergeht, eine einzige waagrechte Linie. Die
+[Unsplash-Lizenz](https://unsplash.com/license) erlaubt die kostenlose Nutzung
+auch gewerblich, ohne Genehmigung und ohne Namensnennung. Genannt wird der
+Fotograf trotzdem, im Fließtext des Beitrags — es kostet nichts und ist
+anständig.
+
+**Warum dieses und kein anderes.** Drei Bedingungen hatte es zu erfüllen:
+
+1. **Keine Menschen.** Für Personen auf Fotos gibt die Unsplash-Lizenz keine
+   Einwilligung der Abgebildeten mit; bei gewerblicher Nutzung ist das die
+   eine Stelle, an der eine freie Lizenz nicht reicht. Eine Landschaft hat
+   dieses Problem nicht.
+2. **Kalte Töne.** Die Seite läuft auf Ocean (`#3B6C82`) und Sage (`#4F6B4C`).
+   Ein warmes Sepia-Bild daneben sieht aus wie aus einem anderen Projekt.
+3. **Es muss auch als Briefmarke funktionieren.** Dasselbe Bild erscheint in
+   der Liste als 56-px-Quadrat, mittig beschnitten. Alles mit Details zerfällt
+   dort zu Matsch — eine Horizontlinie bleibt eine Horizontlinie.
+
+> **Der leere Platzhalter war Absicht, nicht Mangel.** `CoverImage` zeichnet
+> ohne Bild eine getönte Fläche mit Ring und Kreuz — im Code steht
+> ausdrücklich „kein Stockfoto". Ein Bild an dieser einen Stelle widerspricht
+> dem nicht: der Platzhalter trägt die Beiträge, die keines haben, und das
+> bleiben vorerst zwei von dreien. Wer alle drei bebildert, verliert den
+> ruhigen Rhythmus der Seite.
 
 ### Reihenfolge auf der Seite
 
@@ -143,13 +178,14 @@ neuesten echten Beitrag — deshalb sind es hier drei und nicht vier.
 Texte neu, statt an der Eindeutigkeit zu scheitern.
 
 ```sql
-insert into public.news_posts (slug, title, excerpt, body_md, category, is_pinned, published_at)
+insert into public.news_posts (slug, title, excerpt, body_md, cover_image_path, category, is_pinned, published_at)
 values
   (
     'ueber-mich',
     'Wer hinter DER ATEMCODE steht',
     'Vor fünf Jahren saß ich zwischen Familie, IT-Führungsjob und Dauerstress — und merkte bei meiner ersten Atemmeditation, wie schwer mir Stille fiel. Aus dieser Erfahrung wurde eine Ausbildung zum Breathwork-Trainer und daraus das hier. Die ganze Geschichte steht auf der Team-Seite.',
     'Die ausführliche Fassung steht auf der Team-Seite. Dieser Beitrag ist der Wegweiser dorthin.',
+    null,
     'allgemein',
     true,
     now()
@@ -159,6 +195,7 @@ values
     'Fragen? Schreib mir',
     'Für Fragen zu Kursen, zur App oder zu deinem Konto: office@thehacode.com. Ich antworte selbst, meist innerhalb eines Tages. Anschrift und alle weiteren Angaben stehen im Impressum.',
     'E-Mail: office@thehacode.com · Telefon: +43 664 4252322 · Anschrift und Offenlegung im Impressum.',
+    null,
     'allgemein',
     true,
     now()
@@ -166,21 +203,25 @@ values
   (
     'die-app-ist-da',
     'Die App ist da',
-    'Getaktete Atemübungen mit einem Kreis, dem man beim Atmen zusieht — kostenlos und ohne Konto. Wer eigene Sequenzen bauen will, findet den Konfigurator unter „Meine Sequenzen". Kurse lassen sich ab sofort direkt hier buchen.',
-    'Fünf vorbereitete Sequenzen stehen bereit: Box-Atmung in zwei Längen, 4-7-8, Kohärenzatmung und eine dreiteilige Session. Sie laufen ohne Anmeldung und bleiben dauerhaft kostenlos.' || chr(10) || chr(10) ||
-    'Der Sequenz-Konfigurator ist die bezahlte Funktion: Blöcke, Phasen, Runden und Pausen frei zusammenstellen, mit Vorschau und Vorhören. Bedienen kann ihn jeder — gespeichert wird mit Plus.' || chr(10) || chr(10) ||
-    'Kurse und Workshops werden nicht mehr über einen externen Link angemeldet, sondern direkt hier gebucht und bezahlt.',
+    'Getaktete Atemübungen mit einem Kreis, dem man beim Atmen zusieht: einatmen, halten, ausatmen, halten — der Takt läuft, du folgst ihm. Unter „Sessions" liegen fünf fertige Sequenzen, kostenlos und ohne Anmeldung. Wer seinen eigenen Rhythmus bauen will, findet dort „Meine Sequenzen" — und Kurse lassen sich ab jetzt direkt hier buchen.',
+    'Fünf vorbereitete Sequenzen stehen bereit: Box-Atmung in zwei Längen, 4-7-8, Kohärenzatmung und eine dreiteilige Session, die den Rhythmus mitten im Lauf wechselt. Sie brauchen kein Konto und bleiben dauerhaft kostenlos.' || chr(10) || chr(10) ||
+    'Der Ton kommt aus dem Gerät selbst, nicht aus einer Tondatei: ein kurzer Impuls je Phasenwechsel, abschaltbar. Der Bildschirm bleibt während der Übung wach, und wer lieber ohne Bewegung übt, bekommt einen ruhenden Kreis — die App folgt der Systemeinstellung für reduzierte Bewegung.' || chr(10) || chr(10) ||
+    'Der Sequenz-Konfigurator ist die bezahlte Funktion: Blöcke, Phasen, Runden und Pausen frei zusammenstellen, mit Vorschau und Vorhören. Bedienen kann ihn jeder, auch ohne Konto — gespeichert wird mit Plus. Was einmal gespeichert ist, bleibt abspielbar, auch wenn das Abo endet.' || chr(10) || chr(10) ||
+    'Kurse und Workshops werden nicht mehr über einen externen Link angemeldet, sondern hier gebucht und bezahlt.' || chr(10) || chr(10) ||
+    'Titelbild: Sunny Young via Unsplash (Unsplash-Lizenz).',
+    'news/die-app-ist-da.jpg',
     'allgemein',
     false,
     now()
   )
 on conflict (slug) do update set
-  title        = excluded.title,
-  excerpt      = excluded.excerpt,
-  body_md      = excluded.body_md,
-  category     = excluded.category,
-  is_pinned    = excluded.is_pinned,
-  published_at = excluded.published_at;
+  title            = excluded.title,
+  excerpt          = excluded.excerpt,
+  body_md          = excluded.body_md,
+  cover_image_path = excluded.cover_image_path,
+  category         = excluded.category,
+  is_pinned        = excluded.is_pinned,
+  published_at     = excluded.published_at;
 
 select slug, category, is_pinned, published_at is not null as sichtbar, title
   from public.news_posts
@@ -200,6 +241,12 @@ Zwei Angaben stehen so im Text und stimmen hoffentlich noch: die Antwortzeit
 („meist innerhalb eines Tages") und die Telefonnummer im Kontakt-Beitrag. Wenn
 du keine Telefonnummer in den News haben willst, streiche sie aus `body_md` —
 im Impressum steht sie ohnehin, dort ist sie Pflicht.
+
+Und das Titelbild ist eine Setzung: ein Meer ohne Menschen, das nichts
+verspricht. Wenn du lieber etwas mit Atem, Bewegung oder einem Menschen darauf
+hättest, sag es — dann suche ich in dieser Richtung weiter. Nur Fotos, auf
+denen jemand erkennbar ist, bleiben heikel, solange keine Einwilligung
+vorliegt.
 
 ---
 
