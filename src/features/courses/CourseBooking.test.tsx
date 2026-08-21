@@ -85,15 +85,33 @@ describe('CourseBooking', () => {
     expect(screen.getByText(/Anzahlung.*200,00/)).toBeTruthy();
   });
 
-  // Der Haken ist die Einbeziehung der AGB (§ 11). Ohne ihn darf der Knopf
-  // nicht ausloesen - sonst waere er Zierde.
-  it('haelt den Knopf zu, solange die AGB nicht bestaetigt sind', () => {
+  // Der Haken ist die Einbeziehung der AGB (§ 11). Ohne ihn darf nicht gebucht
+  // werden - aber der Knopf muss trotzdem ausloesen und SAGEN, was fehlt. Ein
+  // gesperrter Knopf ohne Begruendung war genau das Problem beim Test auf dev.
+  it('bucht ohne Haken nicht', () => {
     renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
 
-    const knopf = screen.getByText('Verbindlich buchen');
-    fireEvent.click(knopf);
+    fireEvent.click(screen.getByText('Verbindlich buchen'));
 
     expect(invokeMock).not.toHaveBeenCalled();
+  });
+
+  it('sagt beim Druck ohne Haken, was fehlt', () => {
+    renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+
+    fireEvent.click(screen.getByText('Verbindlich buchen'));
+
+    expect(screen.getByRole('alert').textContent).toMatch(/AGB/);
+  });
+
+  it('nimmt den Hinweis zurueck, sobald der Haken sitzt', () => {
+    renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+
+    fireEvent.click(screen.getByText('Verbindlich buchen'));
+    expect(screen.queryByRole('alert')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('checkbox'));
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('bucht nach dem Haken und schickt zu Stripe', async () => {

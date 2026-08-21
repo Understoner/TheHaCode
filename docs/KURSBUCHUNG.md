@@ -167,7 +167,7 @@ insert into public.courses (
     'Online', '49 EUR',
     4900, null, 2,
     now() + interval '10 weeks',
-    true, now() - interval '1 minute', 900
+    true, now() - interval '1 minute', -2
   ),
   (
     'test-anzahlung',
@@ -177,7 +177,7 @@ insert into public.courses (
     'Altenhof am Hausruck', '300 EUR',
     30000, 15000, 8,
     now() + interval '12 weeks',
-    true, now() - interval '1 minute', 901
+    true, now() - interval '1 minute', -1
   )
 on conflict (slug) do update set
   starts_at       = excluded.starts_at,
@@ -185,7 +185,8 @@ on conflict (slug) do update set
   booking_enabled = excluded.booking_enabled,
   price_cents     = excluded.price_cents,
   deposit_cents   = excluded.deposit_cents,
-  capacity        = excluded.capacity;
+  capacity        = excluded.capacity,
+  sort_order      = excluded.sort_order;
 
 select c.slug,
        c.price_cents / 100.0   as preis_eur,
@@ -197,6 +198,12 @@ select c.slug,
  where c.slug like 'test-%'
  order by c.sort_order;
 ```
+
+**`sort_order` ist negativ, und das ist der Punkt.** Die Kursseite zeigt die
+ersten drei Einträge als große Karten und alles Weitere als schlanke Liste
+darunter (`RECENT_ITEMS_COUNT`). Mit einer hohen Nummer landen die Testkurse in
+dieser Liste — dort sind sie zwar vollständig bedienbar, aber klein und leicht
+zu übersehen. Negativ sortiert stehen sie vorne, wo auch getestet werden soll.
 
 Die Termine sind **relativ** gerechnet, damit die Kurse nicht in der
 Vergangenheit liegen, wenn das erst nächste Woche ausgeführt wird. Beim
