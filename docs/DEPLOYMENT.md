@@ -277,6 +277,30 @@ hier eigens steht:
   Staging-Smoke-Tests liefen wenige Minuten vorher grün durch. Es ist also
   nichts, was „gerade allgemein kaputt" wäre; es trifft einzelne Hosts.
 
+**Und noch einmal am selben Tag, diesmal auf dev.** Beim Ausrollen von
+`b443f46` traf es `dev.deratemcode.at`, wieder als Timeout. Die Seite lieferte
+den erwarteten Commit **22 Sekunden** nach Beginn des Wartepunkts aus; der
+Runner lief trotzdem zehn Minuten ins Leere. Es trifft also **beide Hosts**,
+nicht nur die Hauptdomain — und offenbar in Wellen: der Production-Lauf eine
+Stunde vorher und der Neustart eine Viertelstunde später gingen beide glatt
+durch.
+
+### Das Erste, was zu tun ist: den Job neu starten
+
+```bash
+gh run rerun <run-id> --failed
+```
+
+Das genügt in diesem Fall, und zwar aus einem bestimmten Grund: Die
+Hauptprüfung ist seit dem 15.08.2026 der **Commit**, nicht der Zeitstempel
+(siehe den Kopf von `scripts/wait-for-deploy.sh`). Der ausgelieferte Stand ist
+also bereits der richtige — es fehlt allein ein Durchlauf, bei dem der Runner
+die Seite erreicht. Am 21.08.2026 war der zweite Anlauf grün, Wartepunkt und
+Smoke-Tests inklusive.
+
+Erst wenn auch der Neustart scheitert, lohnt der Weg über die nachgeholten
+Smoke-Tests unten.
+
 Die Smoke-Tests gegen Production sind damit ausgefallen und wurden von einer
 gewöhnlichen Verbindung aus nachgeholt:
 
