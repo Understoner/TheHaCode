@@ -43,12 +43,19 @@ type CheckoutRequest = { plan?: unknown };
 // sondern auf eine fremde Seite, und die Fassung, der jemand zugestimmt hat,
 // ist ueber die Git-Historie belegbar. Stripe speichert am Vorgang nur, DASS
 // zugestimmt wurde - WAS dort stand, steht hier.
-const TOS_HINWEIS =
-  'Mit dem Haken stimmst du den AGB zu. Du verlangst zugleich ausdrücklich, ' +
-  'dass wir sofort mit der Bereitstellung beginnen, und nimmst zur Kenntnis, ' +
-  'dass dein vierzehntägiges Rücktrittsrecht damit erlischt ' +
-  '(§ 18 Abs. 2 FAGG). Kündigen kannst du davon unabhängig jederzeit zum Ende ' +
-  'der Laufzeit.';
+//
+// DER LINK IST PFLICHT, nicht Schmuck: setzt man custom_text, ersetzt der
+// eigene Satz den von Stripe erzeugten - samt dessen Verweis auf die
+// AGB-Adresse aus den oeffentlichen Details. Ohne Markdown-Link stuende dann
+// "stimmst du den AGB zu" ohne jede Moeglichkeit, sie zu lesen, und eine
+// Einbeziehung waere das nicht. Die Adresse kommt aus APP_URL, damit Staging
+// auf die Staging-Fassung zeigt und Live auf die Live-Fassung.
+const tosHinweis = (appUrl: string) =>
+  `Mit dem Haken stimmst du den [AGB](${appUrl}/agb) zu. Du verlangst ` +
+  'zugleich ausdrücklich, dass wir sofort mit der Bereitstellung beginnen, ' +
+  'und nimmst zur Kenntnis, dass dein vierzehntägiges Rücktrittsrecht damit ' +
+  'erlischt (§ 18 Abs. 2 FAGG). Kündigen kannst du davon unabhängig ' +
+  'jederzeit zum Ende der Laufzeit.';
 
 Deno.serve(async (request) => {
   const origin = request.headers.get('Origin');
@@ -171,7 +178,7 @@ Deno.serve(async (request) => {
       // sie, lehnt Stripe den Aufruf ab und NIEMAND kann kaufen. Deshalb erst
       // Dashboard, dann diese Zeile ausrollen.
       consent_collection: { terms_of_service: 'required' },
-      custom_text: { terms_of_service_acceptance: { message: TOS_HINWEIS } },
+      custom_text: { terms_of_service_acceptance: { message: tosHinweis(appUrl) } },
 
       // Kleinunternehmerregelung (SAD §4.5): keine Steuerberechnung. Der
       // Bruttopreis und tax_behavior = inclusive haengen am Preis im

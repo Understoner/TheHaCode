@@ -133,7 +133,11 @@ nicht (SAD §4.5, Kleinunternehmerregelung):
   'required'`; fehlt die Adresse, antwortet Stripe mit einem Fehler und
   **niemand kann mehr ein Abo kaufen**. Der Haken trägt zugleich die Erklärung
   zum sofortigen Leistungsbeginn (§ 18 Abs. 2 FAGG) — der Wortlaut steht als
-  `TOS_HINWEIS` in `create-checkout/index.ts`, nicht im Dashboard.
+  `tosHinweis()` in `create-checkout/index.ts`, nicht im Dashboard. Er bringt
+  den Link zu den AGB selbst mit (aus `APP_URL`), denn eigener `custom_text`
+  **ersetzt** den von Stripe erzeugten Satz samt dessen Verweis.
+  Die Adresse gehört trotzdem hinterlegt: ohne sie verweigert Stripe
+  `terms_of_service: 'required'` überhaupt.
   Danach einmal nachsehen, was in der Bestätigungsmail steht: § 18 Abs. 2 Z 3
   FAGG will diese Erklärung auf einem dauerhaften Datenträger wiederfinden.
 
