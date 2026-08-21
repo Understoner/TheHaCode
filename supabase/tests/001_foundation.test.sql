@@ -73,6 +73,17 @@ values ('11111111-1111-1111-1111-111111111111',
         '11111111-2222-3333-4444-555555555555', 9900);
 reset role;
 
+-- user_consents (0012) haengt ebenfalls per cascade an auth.users. Der Insert
+-- laeuft als authenticated, weil genau das die Policy erlaubt - der Nutzer
+-- erklaert seine Einwilligung selbst.
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+insert into public.user_consents (user_id, definition_id, kind, granted_at)
+select '11111111-1111-1111-1111-111111111111', id, 'terms', now()
+  from public.consent_definitions where kind = 'terms' and version = 1;
+select set_config('request.jwt.claim.sub', null, true);
+reset role;
+
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
   select count(*) from (
@@ -83,6 +94,8 @@ select is((
     select user_id from public.subscriptions where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.course_bookings where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.user_consents where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select * from finish();

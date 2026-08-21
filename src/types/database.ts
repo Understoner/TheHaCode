@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      consent_definitions: {
+        Row: {
+          body_md: string
+          body_sha256: string
+          created_at: string
+          id: string
+          is_required: boolean
+          kind: Database["public"]["Enums"]["consent_kind"]
+          locale: string
+          published_at: string | null
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          body_md: string
+          body_sha256?: string
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          kind: Database["public"]["Enums"]["consent_kind"]
+          locale?: string
+          published_at?: string | null
+          title: string
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          body_md?: string
+          body_sha256?: string
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          kind?: Database["public"]["Enums"]["consent_kind"]
+          locale?: string
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       course_bookings: {
         Row: {
           agb_accepted_at: string | null
@@ -602,6 +644,59 @@ export type Database = {
         }
         Relationships: []
       }
+      user_consents: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          definition_id: string
+          deleted_at: string | null
+          granted_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["consent_kind"]
+          revoked_at: string | null
+          seq: number
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          definition_id: string
+          deleted_at?: string | null
+          granted_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["consent_kind"]
+          revoked_at?: string | null
+          seq?: never
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          definition_id?: string
+          deleted_at?: string | null
+          granted_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["consent_kind"]
+          revoked_at?: string | null
+          seq?: never
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_consents_definition_id_fkey"
+            columns: ["definition_id"]
+            isOneToOne: false
+            referencedRelation: "consent_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       v_exercise_duration: {
@@ -621,6 +716,10 @@ export type Database = {
           seats_left: number
           seats_taken: number
         }[]
+      }
+      has_consent: {
+        Args: { p_kind: Database["public"]["Enums"]["consent_kind"] }
+        Returns: boolean
       }
       has_plus_access: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
@@ -671,6 +770,12 @@ export type Database = {
       }
     }
     Enums: {
+      consent_kind:
+        | "terms"
+        | "privacy"
+        | "health_data"
+        | "marketing_email"
+        | "push_notifications"
       course_booking_status: "reserved" | "confirmed" | "canceled" | "expired"
       exercise_effect:
         | "co2_toleranz"
@@ -823,6 +928,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      consent_kind: [
+        "terms",
+        "privacy",
+        "health_data",
+        "marketing_email",
+        "push_notifications",
+      ],
       course_booking_status: ["reserved", "confirmed", "canceled", "expired"],
       exercise_effect: [
         "co2_toleranz",

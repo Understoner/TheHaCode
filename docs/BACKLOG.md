@@ -266,9 +266,26 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 
 ### T17 · Paywall und Konto ⏱8
 **Abnahme:**
-- [ ] Preisseite; Checkout nur im Web
-- [ ] Abo im Kundenportal kündbar
-- [ ] Kontoseite zeigt Status, Laufzeit, Einwilligungen, Export, Löschen
+- [x] Preisseite; Checkout nur im Web
+      — `/plus`, Beträge zur Laufzeit aus Stripe (Edge Function `get-prices`), damit
+      angezeigter und abgebuchter Preis nicht auseinanderlaufen können.
+- [x] Abo im Kundenportal kündbar
+      — über `create-portal`. Bewusst kein eigener Kündigen-Knopf: was im Portal
+      passiert, kommt als Ereignis über den Webhook zurück und schreibt dieselbe
+      Tabelle wie jede andere Änderung.
+- [x] Kontoseite zeigt Status, Laufzeit, Einwilligungen, Export, Löschen
+      — Einwilligungen brauchten erst die Infrastruktur aus SAD §3.10; sie kam mit
+      Migration 0012 (`consent_definitions`, `user_consents`, `has_consent()`).
+      `health_data` bleibt unveröffentlicht, V1 verarbeitet keine Art.-9-Daten.
+      Export ist eine JSON-Datei aus den eigenen Zeilen, zusammengestellt im
+      Client unter RLS.
+
+> **Gebaut am 21.08.2026.** Zwei Anmerkungen zum Nachlesen:
+> Der SAD behauptet in §5, die Consent-Infrastruktur sei "bereits gebaut" — das
+> stimmte nicht, sie entstand erst hier.
+> Und `has_consent()` sortiert nicht nach `created_at`, sondern nach einer
+> Identity-Spalte: zwei Erklärungen aus derselben Transaktion tragen denselben
+> Zeitstempel, und "die letzte" wäre dann Zufall.
 
 ### T17a · Auth-Mails ins Dashboard übertragen ⏱1
 **Ziel:** Die deutschen Vorlagen aus `supabase/templates/` gehen tatsächlich raus,

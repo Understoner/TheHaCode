@@ -43,6 +43,9 @@ export function PlusGate({ children }: { children: ReactNode }) {
     return (
       <Hinweis titel={t('sequenz.gate.plusTitel')} text={t('sequenz.gate.plusText')}>
         <Text style={styles.small}>{t('sequenz.gate.plusHinweis')}</Text>
+        <Link href="/plus" style={styles.link}>
+          {t('sequenz.gate.zuPlus')}
+        </Link>
       </Hinweis>
     );
   }
