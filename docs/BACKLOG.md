@@ -378,12 +378,24 @@ Die dritte Möglichkeit ist ausdrücklich erlaubt — die AGB sind für uns
 geschrieben, nicht gegen uns.
 
 **Abnahme:**
-- [ ] Buchung legt eine Zeile in `course_bookings` an, geschrieben ausschließlich vom Webhook
-- [ ] Kursbuchungen erzeugen unter keinen Umständen einen Eintrag in `subscriptions` — pgTAP-Missbrauchstest
-- [ ] Überbuchung ist ausgeschlossen; Test mit zwei gleichzeitigen Buchungen des letzten Platzes
-- [ ] Storno nach § 12 AGB abgebildet oder bewusst als Handarbeit dokumentiert
-- [ ] Entscheidung zur Anzahlung schriftlich festgehalten, AGB und Umsetzung stimmen überein
-- [ ] Bestätigungsmail nach Buchung (§ 11: die Anmeldung wird erst damit verbindlich)
+- [x] Buchung legt eine Zeile in `course_bookings` an, geschrieben ausschließlich vom Webhook
+      — angelegt wird sie von `reserve_course_seat()` unter `service_role`, bestätigt
+      ausschließlich vom Webhook. Der Client hat auf der Tabelle kein Schreibrecht.
+- [x] Kursbuchungen erzeugen unter keinen Umständen einen Eintrag in `subscriptions` — pgTAP-Missbrauchstest
+- [x] Überbuchung ist ausgeschlossen; Test mit zwei gleichzeitigen Buchungen des letzten Platzes
+      — `supabase/tests/012_course_booking_race.test.sql`, zwei echte Verbindungen über dblink.
+      Gegenprobe gefahren: ohne `for update` wird der Test rot (zwei Buchungen auf einen Platz).
+- [x] Storno nach § 12 AGB abgebildet oder bewusst als Handarbeit dokumentiert
+      — Handarbeit, Ablauf in `docs/KURSBUCHUNG.md`.
+- [x] Entscheidung zur Anzahlung schriftlich festgehalten, AGB und Umsetzung stimmen überein
+      — zwei Zahlungen, Restbetrag per Zahlungslink. `docs/KURSBUCHUNG.md` und Kopf von Migration 0011.
+- [x] Bestätigungsmail nach Buchung (§ 11: die Anmeldung wird erst damit verbindlich)
+      — der Zahlungsbeleg von Stripe, dazu eine Bestätigungsseite in der App. Kein eigener
+      Versanddienst; die Einstellung dazu steht in `supabase/functions/_HINWEIS.md`.
+
+> **Gebaut am 21.08.2026.** Offen geblieben und bewusst nicht gebaut: Warteliste,
+> Erinnerung an den Restbetrag, Stornoknopf in der App, Teilnehmerliste in der App.
+> Alle vier stehen mit Begründung in `docs/KURSBUCHUNG.md`.
 
 ---
 

@@ -9,46 +9,135 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      course_bookings: {
+        Row: {
+          agb_accepted_at: string | null
+          amount_paid_cents: number
+          amount_total_cents: number
+          balance_due_at: string | null
+          balance_paid_at: string | null
+          canceled_at: string | null
+          client_id: string | null
+          confirmed_at: string | null
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          deposit_cents: number | null
+          id: string
+          reserved_until: string | null
+          status: Database["public"]["Enums"]["course_booking_status"]
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agb_accepted_at?: string | null
+          amount_paid_cents?: number
+          amount_total_cents: number
+          balance_due_at?: string | null
+          balance_paid_at?: string | null
+          canceled_at?: string | null
+          client_id?: string | null
+          confirmed_at?: string | null
+          course_id: string
+          created_at?: string
+          deleted_at?: string | null
+          deposit_cents?: number | null
+          id?: string
+          reserved_until?: string | null
+          status?: Database["public"]["Enums"]["course_booking_status"]
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agb_accepted_at?: string | null
+          amount_paid_cents?: number
+          amount_total_cents?: number
+          balance_due_at?: string | null
+          balance_paid_at?: string | null
+          canceled_at?: string | null
+          client_id?: string | null
+          confirmed_at?: string | null
+          course_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          deposit_cents?: number | null
+          id?: string
+          reserved_until?: string | null
+          status?: Database["public"]["Enums"]["course_booking_status"]
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_bookings_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
+          booking_enabled: boolean
+          capacity: number | null
           cover_image_path: string | null
           created_at: string
+          deposit_cents: number | null
           description: string
           id: string
           location: string | null
+          price_cents: number | null
           price_info: string | null
           published_at: string | null
           signup_url: string | null
           slug: string
           sort_order: number
+          starts_at: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          booking_enabled?: boolean
+          capacity?: number | null
           cover_image_path?: string | null
           created_at?: string
+          deposit_cents?: number | null
           description: string
           id?: string
           location?: string | null
+          price_cents?: number | null
           price_info?: string | null
           published_at?: string | null
           signup_url?: string | null
           slug: string
           sort_order?: number
+          starts_at?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          booking_enabled?: boolean
+          capacity?: number | null
           cover_image_path?: string | null
           created_at?: string
+          deposit_cents?: number | null
           description?: string
           id?: string
           location?: string | null
+          price_cents?: number | null
           price_info?: string | null
           published_at?: string | null
           signup_url?: string | null
           slug?: string
           sort_order?: number
+          starts_at?: string | null
           title?: string
           updated_at?: string
         }
@@ -524,8 +613,53 @@ export type Database = {
       }
     }
     Functions: {
+      course_seats: {
+        Args: never
+        Returns: {
+          capacity: number
+          course_id: string
+          seats_left: number
+          seats_taken: number
+        }[]
+      }
       has_plus_access: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      reserve_course_seat: {
+        Args: {
+          p_agb_accepted?: boolean
+          p_client_id?: string
+          p_course_id: string
+          p_hold_minutes?: number
+          p_user_id: string
+        }
+        Returns: {
+          agb_accepted_at: string | null
+          amount_paid_cents: number
+          amount_total_cents: number
+          balance_due_at: string | null
+          balance_paid_at: string | null
+          canceled_at: string | null
+          client_id: string | null
+          confirmed_at: string | null
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          deposit_cents: number | null
+          id: string
+          reserved_until: string | null
+          status: Database["public"]["Enums"]["course_booking_status"]
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "course_bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       save_exercise: {
         Args: {
           p_exercise_id: string
@@ -537,6 +671,7 @@ export type Database = {
       }
     }
     Enums: {
+      course_booking_status: "reserved" | "confirmed" | "canceled" | "expired"
       exercise_effect:
         | "co2_toleranz"
         | "entspannend"
@@ -688,6 +823,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      course_booking_status: ["reserved", "confirmed", "canceled", "expired"],
       exercise_effect: [
         "co2_toleranz",
         "entspannend",

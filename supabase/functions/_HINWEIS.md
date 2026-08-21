@@ -1,18 +1,29 @@
 # Edge Functions
 
-Vier Stück, alle unter Deno. `supabase functions deploy` in `deploy.yml` rollt
+Fünf Stück, alle unter Deno. `supabase functions deploy` in `deploy.yml` rollt
 sie bei jedem Durchlauf komplett aus — einzeln benennen muss man nichts.
 
 | Funktion | Wozu | JWT |
 |---|---|---|
 | `delete-account` | Konto löschen (Apple-Anforderung, SAD §4.1) | ja |
-| `create-checkout` | Bezahlseite bei Stripe bestellen | ja |
+| `create-checkout` | Bezahlseite fürs Abo bestellen | ja |
+| `create-course-checkout` | Kursplatz halten und Bezahlseite bestellen (T20) | ja |
 | `create-portal` | Kundenportal öffnen (kündigen, Rechnungen) | ja |
-| `stripe-webhook` | **die einzige Stelle, die Abos schreibt** | **nein** |
+| `stripe-webhook` | **die einzige Stelle, die Abos und Buchungen schreibt** | **nein** |
 
 `_shared/` wird nicht ausgerollt — Verzeichnisse mit `_` überspringt die CLI.
-Die reine Logik daraus (`entitlement.ts`, `stripe-events.ts`) läuft unter
-Vitest und ist damit die einzige Stripe-Fachlogik mit Tests.
+Die reine Logik daraus (`entitlement.ts`, `stripe-events.ts`,
+`course-bookings.ts`) läuft unter Vitest und ist damit die einzige
+Stripe-Fachlogik mit Tests.
+
+Der Webhook hat seit T20 **zwei Zweige**, getrennt an `metadata.payment_kind`:
+ist es gesetzt, gehört die Zahlung zu einer Kursbuchung und fasst
+`subscriptions` nicht an; ist es leer, ist es ein Abo und `course_bookings`
+bleibt unberührt. Der Betriebsablauf für Kurse steht in `docs/KURSBUCHUNG.md`.
+
+`create-course-checkout` braucht **keine eigenen Secrets** — sie nutzt
+dieselben wie `create-checkout`, ohne die Preis-Variablen: Kurspreise stehen
+am Kurs in der Datenbank.
 
 ## Warum der Webhook ohne JWT läuft
 
@@ -74,6 +85,8 @@ Zu abonnieren sind die sechs Ereignisse aus SAD §4.3 Punkt 6:
 
 ```
 checkout.session.completed
+checkout.session.expired                 <- seit T20, gibt Kursplaetze frei
+checkout.session.async_payment_succeeded <- seit T20, nachgelagerte Zahlungen
 customer.subscription.created
 customer.subscription.updated
 customer.subscription.deleted
@@ -82,6 +95,11 @@ invoice.payment_failed
 ```
 
 Alles andere quittiert die Funktion mit 200 und tut nichts.
+
+Die beiden neuen sind am 21.08.2026 in beiden Umgebungen nachgetragen worden.
+Fehlt `checkout.session.expired`, bleibt ein abgebrochener Kurs-Checkout bis
+zum Ablauf der Haltezeit auf dem Platz sitzen. Die vollständige Checkliste
+steht in `docs/KURSBUCHUNG.md`.
 
 ## Im Stripe-Dashboard einzustellen
 
@@ -95,12 +113,39 @@ nicht (SAD §4.5, Kleinunternehmerregelung):
   Abs. 1 Z 27 UStG."
 - **Rabattcodes** anlegen, wer welche will. Der Code kennt sie nicht, er setzt
   nur `allow_promotion_codes: true`.
+- **Zahlungsbelege per E-Mail einschalten** (Kundenbenachrichtigungen →
+  „Erfolgreiche Zahlungen"). Seit T20 sind sie die Buchungsbestätigung nach
+  § 11 AGB — ohne sie bekommt ein Kursteilnehmer gar nichts Schriftliches.
+  Am 21.08.2026 eingeschaltet. Beachte: für Einmalzahlungen verschickt Stripe
+  Belege **nur im Live-Modus**.
 
 > Vorbehalt aus SAD §4.5: die Kleinunternehmerregelung greift für inländische
 > Umsätze. Für digitale Leistungen an Privatpersonen in anderen EU-Ländern gilt
 > das Bestimmungslandprinzip. Deshalb schreibt `subscriptions.country` das
 > Käuferland von Anfang an mit — die steuerliche Bewertung selbst gehört zur
 > Steuerberatung, nicht ins Repo.
+
+## Kursbuchungen örtlich ausprobieren
+
+Ohne Stripe-Konto, mit selbst signierten Ereignissen — dieselbe Machart wie
+oben, nur gegen den Kurszweig. Vorbereitung: einen buchbaren Kurs anlegen und
+`select public.reserve_course_seat('<kurs-id>', '<user-id>', true);` aufrufen,
+dann ein Ereignis mit `metadata.booking_id` und
+`metadata.payment_kind = 'course_deposit'` schicken.
+
+Am 21.08.2026 so geprüft, alle vier Wege:
+
+| Ereignis | Erwartung | Ergebnis |
+|---|---|---|
+| `checkout.session.completed` (course_deposit) | Buchung `confirmed`, Anzahlung verbucht | ✓ |
+| dasselbe noch einmal, neue Event-ID | Betrag wird **nicht** doppelt addiert | ✓ |
+| `checkout.session.completed` (course_balance) | Restbetrag verbucht, `balance_paid_at` gesetzt | ✓ |
+| `checkout.session.expired` | Reservierung `expired`, Platz wieder frei | ✓ |
+
+Gegenprobe in derselben Runde: ein Abo-Ereignis ohne `payment_kind` lief
+weiterhin in den Abozweig (erkennbar daran, dass es dort am Dummy-Schlüssel
+scheiterte). Und nach allen vier Kursereignissen stand in `subscriptions`
+keine Zeile und in `profiles` kein Plus.
 
 ## Örtlich ausprobieren
 

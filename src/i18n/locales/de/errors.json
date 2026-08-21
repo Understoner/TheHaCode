@@ -31,5 +31,11 @@
   "sequenz.zuVielePhasen": "Höchstens acht Phasen je Block.",
   "sequenz.zuVieleBloecke": "Höchstens zehn Blöcke je Sequenz.",
   "sequenz.speichern": "Die Sequenz konnte nicht gespeichert werden. Prüf deine Eingaben und versuch es noch einmal.",
-  "sequenz.loeschen": "Das Löschen hat nicht geklappt. Bitte versuch es noch einmal."
+  "sequenz.loeschen": "Das Löschen hat nicht geklappt. Bitte versuch es noch einmal.",
+  "buchung.sold_out": "Dieser Kurs ist inzwischen ausgebucht. Schreib uns an office@thehacode.com — wir melden uns, falls ein Platz frei wird.",
+  "buchung.already_booked": "Diesen Kurs hast du bereits gebucht. Deine Bestätigung liegt in deinem E-Mail-Postfach.",
+  "buchung.not_bookable": "Dieser Kurs lässt sich gerade nicht buchen. Melde dich bei office@thehacode.com, dann klären wir das direkt.",
+  "buchung.agb_required": "Bitte bestätige die AGB und den Haftungsausschluss, dann geht es weiter.",
+  "buchung.unauthorized": "Für eine Buchung musst du angemeldet sein. Melde dich an und versuch es noch einmal.",
+  "buchung.unknown": "Die Buchung hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com."
 }

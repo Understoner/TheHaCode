@@ -1,16 +1,27 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import '@/i18n';
 import { CoursesList } from './CoursesList';
 
-const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
+const { fromMock, rpcMock } = vi.hoisted(() => ({ fromMock: vi.fn(), rpcMock: vi.fn() }));
 
 vi.mock('@/lib/supabase', () => ({
-  supabase: { from: fromMock },
+  supabase: { from: fromMock, rpc: rpcMock, functions: { invoke: vi.fn() } },
 }));
+
+// expo-routers Link zieht react-native-webs unkompilierte Animated-Quelle
+// (Flow-Syntax), die esbuild nicht parsen kann - wie in NavBar.test.tsx.
+vi.mock('expo-router', () => ({
+  Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 
 function renderWithClient(ui: ReactElement) {
   const client = new QueryClient();
@@ -26,6 +37,10 @@ function mockCoursesQuery(result: { data: unknown; error: unknown }) {
 describe('CoursesList', () => {
   beforeEach(() => {
     fromMock.mockReset();
+    // Die freien Plaetze holt CoursesList seit T20 nebenher; ohne Kurs mit
+    // booking_enabled bleibt die Antwort ohne Wirkung.
+    rpcMock.mockReset();
+    rpcMock.mockResolvedValue({ data: [], error: null });
   });
 
   it('zeigt veroeffentlichte Kurse mit Titel und Beschreibung', async () => {

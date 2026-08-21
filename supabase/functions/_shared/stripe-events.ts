@@ -82,6 +82,12 @@ export type SubscriptionRow = {
 /** SAD §4.3 Punkt 6. Alles andere wird quittiert und ignoriert. */
 export const RELEVANT_EVENTS = [
   'checkout.session.completed',
+  // Die beiden folgenden gehoeren dem Kurszweig (T20): eine verfallene
+  // Sitzung gibt den reservierten Platz zurueck, eine nachtraeglich bezahlte
+  // bestaetigt die Buchung. Fuer Abos sind sie ohne Bedeutung - rowForEvent
+  // liefert dort schlicht null.
+  'checkout.session.expired',
+  'checkout.session.async_payment_succeeded',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
