@@ -92,17 +92,25 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # /kurse/ -> /kurse
+  RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+  # /kurse -> /kurse.html, sofern die Datei existiert.
+  #
+  # DIESE REGEL STEHT VOR DER DURCHREICHE, und das ist der ganze Witz: seit es
+  # /kurse/<slug> gibt, legt der Export NEBEN kurse.html auch ein Verzeichnis
+  # kurse/ an. Stand die Durchreiche vorn, traf ein Aufruf von /kurse auf das
+  # Verzeichnis, Apache suchte darin ein Index-Dokument, fand keines und
+  # antwortete mit 403 - eine Seite, die es gab, war ploetzlich verboten.
+  # Gefunden hat das der Smoke-Test "jede Route ist auch direkt aufrufbar";
+  # ein Node-Server, der Dateien einfach ausliefert, bildet es NICHT nach.
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+
   # Vorhandene Dateien und Verzeichnisse unveraendert ausliefern
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
-
-  # /kurse/ -> /kurse
-  RewriteRule ^(.+)/$ /$1 [R=301,L]
-
-  # /kurse -> /kurse.html, sofern die Datei existiert
-  RewriteCond %{REQUEST_FILENAME}.html -f
-  RewriteRule ^(.*)$ $1.html [L]
 
   # /news/<slug> -> news/[slug].html
   #
