@@ -353,5 +353,5 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 - [ ] Branch Protection — **jetzt möglich, aber nicht eingerichtet.** Die ursprüngliche Sperre (GitHub Free auf privatem Repo) ist weg, seit das Repo öffentlich ist; die Reviewer-Pflicht auf `production` greift seitdem wieder. Der Schutz von `main`/`develop` gegen Direkt-Commits fehlt weiterhin und bleibt Disziplin.
 - [x] Ein vollständiger Durchlauf feature → develop → main erfolgreich — seit 16.08.2026 mehrfach, zuletzt mit T17 am 21.08.2026
 - [ ] Supabase Production auf Pro (spätestens am Tag der ersten Zahlung) — hängt mit T17a zusammen: mit Pro kommen auch die deutschen E-Mail-Vorlagen
-- [ ] Auftragsverarbeitungsverträge: Supabase, Hostinger, Stripe (SAD §5.5)
+- [x] Auftragsverarbeitungsverträge: Supabase, Hostinger, Stripe — bei allen dreien Anhang der Nutzungsbedingungen, mit deren Annahme geschlossen; nichts anzufordern. Fassungen und Drittlandgrundlage in `docs/VERARBEITUNGSVERZEICHNIS.md` Abschnitt 4
 - [x] Impressum und Datenschutzerklärung online — seit 21.08.2026, dazu AGB und Haftungsausschluss

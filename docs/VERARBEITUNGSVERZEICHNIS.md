@@ -5,11 +5,11 @@ Nach Art. 30 Abs. 1 DSGVO. Gehört zu **T19**.
 > **Entwurf, noch nicht in Kraft.** Zusammengetragen aus dem, was im Repo
 > tatsächlich steht — Migrationen, Edge Functions, Datenschutzerklärung. Was
 > hier steht, ist damit belegbar; was nicht belegbar war, steht nicht drin.
-> Bevor das Verzeichnis gilt, muss ein Mensch zwei Dinge prüfen: ob die
-> Speicherdauern dem entsprechen, was tatsächlich passiert, und ob die
-> Auftragsverarbeitungsverträge geschlossen sind (siehe unten, Abschnitt 4).
+> Die Auftragsverarbeitungsverträge sind inzwischen geschlossen (Abschnitt 4).
+> Offen bleibt eine Prüfung, die nur ein Mensch machen kann: ob die
+> Speicherdauern dem entsprechen, was tatsächlich passiert.
 
-**Stand:** 21. August 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
+**Stand:** 22. August 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
 Personenbezug, spätestens vor V1.1 (Atem-Tagebuch — dann fallen erstmals
 Gesundheitsdaten nach Art. 9 an, und dieses Verzeichnis braucht einen eigenen
 Eintrag samt Rechtsgrundlage).
@@ -172,15 +172,43 @@ weil dieselben Sätze in der Datenschutzerklärung stehen:
 
 ## 4. Auftragsverarbeiter — Stand der Verträge
 
-| Dienstleister | Rolle | Vertrag nach Art. 28 |
-|---|---|---|
-| Supabase | Datenbank, Auth, Storage, Edge Functions, Kontomails | **offen** — online abschließbar |
-| Hostinger | Hosting der Website | **offen** — online abschließbar |
-| Stripe | Zahlungsabwicklung (eigenverantwortlich für Zahlungsdaten, Auftragsverarbeiter im Übrigen) | **offen** — online abschließbar |
+Alle drei Verträge sind **geschlossen**, und keiner davon wurde einzeln
+angefordert oder unterschrieben. Bei allen dreien ist der Auftragsverarbeitungs-
+vertrag Anhang der Nutzungsbedingungen, und deren Annahme gilt vertraglich als
+Unterschrift — auch für die Standardvertragsklauseln. Art. 28 Abs. 9 DSGVO
+lässt das ausdrücklich zu: schriftlich, „was auch in einem elektronischen Format
+erfolgen kann".
 
-> Solange diese drei Zeilen offen sind, ist das Verzeichnis vollständig, die
-> Verarbeitung aber nicht vollständig abgesichert. Das ist der letzte offene
-> Punkt aus T19 und liegt beim Inhaber, nicht im Repo.
+| Dienstleister | Rolle | Vertrag nach Art. 28 | Fassung |
+|---|---|---|---|
+| Supabase | Datenbank, Auth, Storage, Edge Functions, Kontomails | geschlossen mit Annahme der Nutzungsbedingungen (DPA Klausel 12.2: „acceptance of the Agreement shall have the same effect as signing the SCCs") | Version 1, gültig ab 1. August 2026 |
+| Hostinger | Hosting der Website | geschlossen als Anhang der Nutzungsbedingungen | Stand 18. August 2026 |
+| Stripe | Zahlungsabwicklung (eigenverantwortlich für Zahlungsdaten, Auftragsverarbeiter im Übrigen) | geschlossen als Bestandteil des Services Agreement | Stand 18. November 2025 |
+
+**Drittland.** Alle drei binden die Standardvertragsklauseln der EU ein, Modul 2
+(Verantwortlicher an Auftragsverarbeiter). Die Supabase-Projekte liegen in
+`eu-central-1` (Frankfurt); Supabase legt zusätzlich eine Transfer Impact
+Assessment vor, die den Zugriff US-amerikanischer Behörden bewertet.
+
+**Nachweise gehören als PDF mit Abrufdatum in die private Ablage, nicht ins
+Repo** — dieses ist öffentlich. Anbieter überschreiben ihre Rechtstexte ohne
+Ankündigung und ohne Archiv; Nachweis ist deshalb die abgerufene Fassung, nicht
+der Link. Zur Ablage gehört je Dienst die Liste der Unterauftragsverarbeiter,
+denn die Genehmigung, die wir mit dem Vertrag erteilen, bezieht sich auf genau
+diese Liste.
+
+**Was daraus folgt, aber noch aussteht:**
+
+- **Änderungsbenachrichtigung abonnieren.** Supabase kündigt neue
+  Unterauftragsverarbeiter 30 Tage im Voraus an — aber nur den Abonnenten der
+  Liste. Ohne Abo läuft die Widerspruchsfrist ab, ohne dass wir davon erfahren.
+- **Gegengezeichnete Einzelfassung**, falls gewünscht: bei Supabase über
+  `privacy@supabase.com`, bei Hostinger über `gdpr@hostinger.com`. Rechtlich
+  nicht nötig, im Ernstfall aber ein Dokument mit Namen und Datum statt eines
+  Verweises auf fremde Nutzungsbedingungen.
+- **Bei jedem neuen Dienst** gehört eine Zeile in diese Tabelle, bevor der
+  erste Datensatz fließt. Sentry steht bewusst nicht hier — es ist genannt,
+  aber nicht eingebunden.
 
 ---
 
