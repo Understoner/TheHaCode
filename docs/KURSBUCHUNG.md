@@ -257,7 +257,7 @@ delete from public.courses
 
 ## Stripe — Checkliste
 
-Nichts davon steht im Code. Der Stand ist **21.08.2026**; abgehakt heißt: in
+Nichts davon steht im Code. Der Stand ist **22.08.2026**; abgehakt heißt: in
 beiden Modi eingestellt, Test **und** Live.
 
 ### Wegen T20 dazugekommen
@@ -288,11 +288,34 @@ beiden Modi eingestellt, Test **und** Live.
       Abs. 1 Z 27 UStG."
 - [x] Kundenportal konfiguriert (*Settings → Billing → Customer portal*)
 
-### Offen — geht erst nach dem Ausrollen
+### Die Probe auf dev — gelaufen am 22.08.2026
 
-- [ ] **Eine echte Testzahlung auf dev.** Testkurs im Studio buchbar machen,
-      auf `/kurse` buchen, mit `4242 4242 4242 4242` zahlen. Die einzige Probe,
-      die den ganzen Weg abdeckt. Prüfung siehe unten.
+Der ganze Weg einmal in echt: Kurs im Studio buchbar gemacht, auf `/kurse`
+gebucht, mit `4242 4242 4242 4242` gezahlt.
+
+- [x] **Vollzahlung.** `test-vollzahlung` über 49 €, Buchung danach `confirmed`.
+- [x] **Anzahlung.** `test-anzahlung` über 150 €, `amount_paid_cents` 15000
+      von 30000 — die Stelle, an der Stripe keinen Standardfall kennt und § 11
+      AGB trotzdem eingehalten sein will.
+- [x] **Die eigentliche Gegenprobe:** `select count(*) from public.subscriptions`
+      vor und nach den Buchungen unverändert. Dass eine Kursbuchung kein Abo
+      erzeugt, ist damit nicht mehr nur im pgTAP-Test belegt, sondern auf dem
+      Weg, den Stripe tatsächlich geht.
+
+### Offen
+
+- [ ] **Der Restbetrag.** Der Zahlungslink von Hand ist noch nie in echt
+      gelaufen. Er hängt an zwei Feldern in den Metadaten (`booking_id` und
+      `payment_kind=course_balance`); tippt man sich dort, findet der Webhook
+      die Buchung nicht und quittiert trotzdem mit 200. Der Fehler ist also
+      still — genau deshalb gehört er einmal durchgespielt.
+- [ ] **Ausgebucht.** Zwei Buchungen auf denselben Kurs, danach muss die Kachel
+      „Ausgebucht" zeigen. Der Wettlauf um den letzten Platz ist per pgTAP
+      belegt (`012_course_booking_race`), die Anzeige darüber nicht.
+- [ ] **Dieselbe Probe im Livemodus**, mit echter Karte und Rückerstattung
+      hinterher. Erst dort verschickt Stripe die Zahlungsbelege für
+      Einmalzahlungen — die Bestätigung nach § 11 AGB ist auf dev also
+      grundsätzlich nicht prüfbar.
 
 ### Nicht in Stripe gepflegt
 
