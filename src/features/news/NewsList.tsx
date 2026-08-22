@@ -1,3 +1,4 @@
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
@@ -15,6 +16,10 @@ import { PressableRing } from '@/components/PressableRing';
 const dateFormatter = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
 
 type CategoryFilter = NewsCategory | 'all';
+
+// typedRoutes verlangt die Objektform fuer dynamische Routen - ein
+// zusammengesetzter String waere kein gueltiger Href.
+const detailHref = (slug: string) => ({ pathname: '/news/[slug]' as const, params: { slug } });
 
 export function NewsList() {
   const { t } = useTranslation();
@@ -83,8 +88,23 @@ export function NewsList() {
                             {post.published_at ? ' · ' : ''}
                             {t('news.readingTime', { minutes: estimateReadingMinutes(post.body_md) })}
                           </Text>
-                          <Text style={styles.heroTitle}>{post.title}</Text>
-                          {post.excerpt ? <Text style={styles.excerpt}>{post.excerpt}</Text> : null}
+                          {/* Der Titel ist der Link, nicht die ganze Karte:
+                              expo-router rendert Link nativ als Text, und ein
+                              View darin waere dort ungueltig. */}
+                          <Link href={detailHref(post.slug)} style={styles.heroTitle}>
+                            {post.title}
+                          </Link>
+                          {/* Vier Zeilen reichen als Koeder - der ganze Anriss
+                              steht auf der Detailseite, und gleich hohe Karten
+                              lesen sich ruhiger als eine Treppe. */}
+                          {post.excerpt ? (
+                            <Text style={styles.excerpt} numberOfLines={4}>
+                              {post.excerpt}
+                            </Text>
+                          ) : null}
+                          <Link href={detailHref(post.slug)} style={styles.readOn}>
+                            {t('news.detail.readOn')}
+                          </Link>
                         </View>
                       </View>
                     ))}
@@ -109,7 +129,9 @@ export function NewsList() {
                           <Text style={[styles.listCategory, { color: newsCategoryColors(post.category).text }]}>
                             {t(`news.categories.${post.category}`)}
                           </Text>
-                          <Text style={styles.listTitle}>{post.title}</Text>
+                          <Link href={detailHref(post.slug)} style={styles.listTitle}>
+                            {post.title}
+                          </Link>
                           <Text style={styles.meta}>
                             {post.published_at ? dateFormatter.format(new Date(post.published_at)) : ''}
                           </Text>
@@ -216,6 +238,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.ink900,
+  },
+  readOn: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.ocean700,
   },
   excerpt: {
     fontSize: 13,

@@ -138,13 +138,26 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Ohne Anmeldung erreichbar
 - [x] Neuer News-Beitrag im Studio erscheint **ohne Neubau** (Daten kommen zur Laufzeit)
 - [ ] „Über mich" und Kontakt als gepinnte Beiträge (Angebot zieht nach T07a auf die eigene Kurse-Seite)
-      — redaktionell, gehört zu T18. Texte und SQL liegen fertig in
-      `docs/INHALTE.md`.
-      **Dabei aufgefallen:** `body_md` wird von keiner Ansicht gelesen — die
-      Landing Page zeigt Titel und Anriss, eine Detailseite gibt es nicht und
-      sie steht in keiner Aufgabe. Die vorbereiteten Texte tragen deshalb im
-      Anriss. Ob es `/news/[slug]` geben soll, ist eine offene Frage, kein
-      Versäumnis.
+      — redaktionell, gehört zu T18. Texte, Bilder und SQL liegen fertig in
+      `docs/INHALTE.md`; einzupflegen ist es im Studio.
+      **Zuschnitt geändert am 22.08.2026:** aus drei Beiträgen werden drei
+      andere — „Der Atemcode" (gepinnt, ganz oben), „Wer hinter DER ATEMCODE
+      steht" (gepinnt, mit Portrait und Kontaktangaben) und ein Blog-Beitrag
+      „Besser atmen, besser leben" aus dem eBook. Der eigene Kontakt-Beitrag
+      entfällt, seine Angaben stehen jetzt im Beitrag über Michael.
+- [x] Detailseite `/news/[slug]`
+      — **am 22.08.2026 nachgebaut, vorher in keiner Aufgabe.** Grund: `body_md`
+      ist `not null`, wurde aber von keiner Ansicht gelesen — ein Pflichtfeld,
+      das niemand sieht, ist eine Einladung, es schlecht zu pflegen. Dazu ein
+      eigener kleiner Markdown-Leser (`src/features/news/markdown.ts`), weil
+      CLAUDE.md keine neue Bibliothek zulässt und die üblichen Pakete ohnehin
+      über HTML rendern, das React Native nicht kennt.
+      **Dabei gefunden:** der statische Export legt für eine dynamische Route
+      nur eine Vorlagendatei mit Klammernamen an — ohne Rewrite-Regel hätte der
+      Hoster jeden direkt aufgerufenen Beitrag mit 404 beantwortet. Die Regel
+      steht jetzt in `scripts/write-build-info.mjs`. Dieselbe Lücke haben
+      `/sessions/<id>` und `/sequenzen/<id>`; sie bleibt dort bewusst offen,
+      beide werden nur aus der App heraus angesteuert.
 - [x] Vier Zustände über `QueryBoundary` behandelt
 
 > Erledigt bis auf die redaktionelle Befüllung. Freie Sequenzen (T09–T11) folgen erst in Block 3.

@@ -103,6 +103,19 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   # /kurse -> /kurse.html, sofern die Datei existiert
   RewriteCond %{REQUEST_FILENAME}.html -f
   RewriteRule ^(.*)$ $1.html [L]
+
+  # /news/<slug> -> news/[slug].html
+  #
+  # Der statische Export legt fuer eine dynamische Route EINE Vorlagendatei mit
+  # dem Klammernamen an. Ohne diese Regel beantwortet der Hoster jeden direkt
+  # aufgerufenen Beitrag mit 404 - und News-Beitraege sind genau das, was
+  # jemand verschickt oder verlinkt. Den Rest erledigt der Router im Browser:
+  # er liest den slug aus der Adresse.
+  #
+  # Dieselbe Luecke haben /sessions/<id> und /sequenzen/<id>. Sie bleibt dort
+  # bewusst offen: beide werden nur aus der App heraus angesteuert, und eine
+  # geteilte Sequenz-Adresse zeigte ohnehin auf fremde Daten.
+  RewriteRule ^news/[^/]+$ /news/[slug].html [L]
 </IfModule>
 
 ErrorDocument 404 /+not-found.html
