@@ -127,6 +127,7 @@ export type Database = {
       }
       courses: {
         Row: {
+          body_md: string | null
           booking_enabled: boolean
           capacity: number | null
           cover_image_path: string | null
@@ -146,6 +147,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          body_md?: string | null
           booking_enabled?: boolean
           capacity?: number | null
           cover_image_path?: string | null
@@ -165,6 +167,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          body_md?: string | null
           booking_enabled?: boolean
           capacity?: number | null
           cover_image_path?: string | null

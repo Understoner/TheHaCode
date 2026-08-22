@@ -1,3 +1,4 @@
+import { Link } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -8,9 +9,14 @@ import { colors, radius, spacing } from '@/design/tokens';
 import { RECENT_ITEMS_COUNT } from '@/design/navigation';
 import { responsive } from '@/design/responsive';
 import { CourseBooking } from '@/features/courses/CourseBooking';
+import { formatCourseDate } from '@/features/courses/schedule';
 import { useCourseSeats } from '@/features/courses/useCourseBooking';
 import { useCoursesList } from '@/features/courses/useCoursesList';
 import { openExternalUrl, safeExternalUrl } from '@/lib/externalLink';
+
+// Wie bei den News: der Titel ist der Link, nicht die ganze Kachel.
+// expo-router rendert Link nativ als Text, ein View darin waere dort ungueltig.
+const detailHref = (slug: string) => ({ pathname: '/kurse/[slug]' as const, params: { slug } });
 
 export function CoursesList() {
   const { t } = useTranslation();
@@ -37,6 +43,7 @@ export function CoursesList() {
                 <View {...responsive('courses-grid')} style={styles.grid}>
                   {recent.map((course, i) => {
                     const signupUrl = safeExternalUrl(course.signup_url);
+                    const start = formatCourseDate(course.starts_at);
                     return (
                       <View key={course.id} style={styles.card}>
                         <CoverImage
@@ -46,12 +53,25 @@ export function CoursesList() {
                           style={styles.cover}
                         />
                         <View style={styles.cardBody}>
-                          <Text style={styles.title}>{course.title}</Text>
-                          <Text style={styles.description}>{course.description}</Text>
+                          <Link href={detailHref(course.slug)} style={styles.title}>
+                            {course.title}
+                          </Link>
+                          {/* Drei Zeilen reichen als Koeder. Der ganze Text
+                              steht auf der Detailseite, und gleich hohe Karten
+                              lesen sich ruhiger als eine Treppe. */}
+                          <Text style={styles.description} numberOfLines={3}>
+                            {course.description}
+                          </Text>
                           <View style={styles.metaRow}>
+                            {start ? (
+                              <Text style={styles.metaStrong}>{start}</Text>
+                            ) : null}
                             {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
                             {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
                           </View>
+                          <Link href={detailHref(course.slug)} style={styles.readOn}>
+                            {t('kurse.detail.readOn')}
+                          </Link>
                           {course.booking_enabled ? (
                             <CourseBooking course={course} seatsLeft={seatsLeft(course.id)} />
                           ) : signupUrl ? (
@@ -71,6 +91,7 @@ export function CoursesList() {
                 <View style={styles.list}>
                   {older.map((course) => {
                     const signupUrl = safeExternalUrl(course.signup_url);
+                    const start = formatCourseDate(course.starts_at);
                     return (
                       <View key={course.id} style={styles.listRow}>
                         <CoverImage
@@ -80,8 +101,13 @@ export function CoursesList() {
                           style={styles.listCover}
                         />
                         <View style={styles.listText}>
-                          <Text style={styles.listTitle}>{course.title}</Text>
+                          <Link href={detailHref(course.slug)} style={styles.listTitle}>
+                            {course.title}
+                          </Link>
                           <View style={styles.metaRow}>
+                            {start ? (
+                              <Text style={styles.metaStrong}>{start}</Text>
+                            ) : null}
                             {course.location ? <Text style={styles.meta}>{course.location}</Text> : null}
                             {course.price_info ? <Text style={styles.meta}>{course.price_info}</Text> : null}
                           </View>
@@ -160,6 +186,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.ink700,
   },
+  // Der Termin ist die Angabe, nach der jemand eine Kursliste ueberfliegt -
+  // er darf dunkler sein als Ort und Preis daneben.
+  metaStrong: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.ink900,
+  },
+  readOn: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.ocean700,
+  },
   list: {
     gap: spacing.sm,
   },
@@ -186,8 +224,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   listTitle: {
+    // 600 statt 500, seit der Termin daneben fett steht: der Titel ist der
+    // Einstieg in den Kurs, das Datum nur die Einordnung.
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
     color: colors.ink900,
   },
 });
