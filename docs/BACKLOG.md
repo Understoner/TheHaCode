@@ -524,6 +524,11 @@ geschrieben, nicht gegen uns.
 > **Gebaut am 21.08.2026.** Offen geblieben und bewusst nicht gebaut: Warteliste,
 > Erinnerung an den Restbetrag, Stornoknopf in der App, Teilnehmerliste in der App.
 > Alle vier stehen mit Begründung in `docs/KURSBUCHUNG.md`.
+>
+> **Am 22.08.2026 auf dev durchgezahlt:** Vollzahlung und Anzahlung über den
+> echten Weg, `subscriptions` dabei unverändert. Es fehlen noch der Restbetrag
+> per Zahlungslink, die „Ausgebucht"-Anzeige und dieselbe Probe im Livemodus —
+> Liste in `docs/KURSBUCHUNG.md`.
 
 ---
 
