@@ -401,13 +401,17 @@ Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
 - [x] Haftungsausschluss online — nicht ursprünglich geplant, siehe T19a
 - [x] Verzeichnis von Verarbeitungstätigkeiten angelegt
       — `docs/VERARBEITUNGSVERZEICHNIS.md`, neun Tätigkeiten, aus Migrationen
-      und Edge Functions zusammengetragen. **Entwurf, noch nicht in Kraft:** er
-      wird erst wahr, wenn die AVV geschlossen sind (nächste Zeile), und muss
-      einmal von einem Menschen gegen die Wirklichkeit gelesen werden.
+      und Edge Functions zusammengetragen. **Entwurf, noch nicht in Kraft:**
+      es fehlt die eine Prüfung, die kein Werkzeug abnehmen kann — ob die
+      Speicherdauern dem entsprechen, was tatsächlich passiert.
       Enthält bewusst auch, was *nicht* verarbeitet wird — an genau so einer
       Auslassung ist die Datenschutzerklärung schon einmal falsch geworden.
-- [ ] AVV mit Supabase, Hostinger, Stripe geschlossen
-      — bei allen dreien online abschließbar
+- [x] AVV mit Supabase, Hostinger, Stripe geschlossen
+      — bei allen dreien Anhang der Nutzungsbedingungen, deren Annahme als
+      Unterschrift gilt (Art. 28 Abs. 9 lässt elektronische Form zu). Es gab
+      also nichts anzufordern und nichts zu unterschreiben. Fassungen,
+      Drittlandgrundlage und was daraus noch folgt: Abschnitt 4 des
+      Verzeichnisses.
 - [ ] Checkliste aus `docs/DEPLOYMENT.md` Abschnitt 5 abgehakt
 
 ### T19a · Zustimmung zu AGB und Rücktrittsrecht im Bezahlvorgang 🔒 ⏱3
