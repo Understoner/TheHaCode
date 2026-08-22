@@ -116,6 +116,11 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   # bewusst offen: beide werden nur aus der App heraus angesteuert, und eine
   # geteilte Sequenz-Adresse zeigte ohnehin auf fremde Daten.
   RewriteRule ^news/[^/]+$ /news/[slug].html [L]
+
+  # /kurse/<slug> -> kurse/[slug].html, aus demselben Grund. Ein Kurstermin
+  # ist genau die Adresse, die jemand weiterschickt oder die in einem
+  # VHS-Programm steht.
+  RewriteRule ^kurse/[^/]+$ /kurse/[slug].html [L]
 </IfModule>
 
 ErrorDocument 404 /+not-found.html
