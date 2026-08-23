@@ -57,7 +57,7 @@
     }
   ],
   "datenschutz.title": "Datenschutzerklärung",
-  "datenschutz.stand": "Fassung vom 16. August 2026",
+  "datenschutz.stand": "Fassung vom 23. August 2026",
   "datenschutz.sections": [
     {
       "title": "Worum es hier geht",
@@ -138,7 +138,8 @@
         "Kontodaten und eigene Sequenzen speichern wir, solange Ihr Konto besteht.",
         "Löschen Sie Ihr Konto, werden Ihre Kontodaten und Ihre Sequenzen unmittelbar und vollständig entfernt. Die Löschung ist jederzeit in der Anwendung möglich und wird nicht durch uns verzögert.",
         "Ausgenommen sind Belege und Aufzeichnungen zu Zahlungen: diese unterliegen der siebenjährigen Aufbewahrungspflicht nach § 132 BAO und werden bis zu deren Ablauf aufbewahrt.",
-        "Zugriffsdaten des Hosters werden nach kurzer Zeit automatisch gelöscht."
+        "Die Server-Protokolle unseres Hosters werden nach sieben Tagen automatisch gelöscht.",
+        "E-Mails ohne Vertragsbezug löschen wir nach zwölf Monaten. Nachrichten mit Vertragsbezug unterliegen als Geschäftsbriefe der siebenjährigen Aufbewahrungspflicht nach § 132 BAO."
       ]
     },
     {

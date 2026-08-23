@@ -2,18 +2,19 @@
 
 Nach Art. 30 Abs. 1 DSGVO. Gehört zu **T19**.
 
-> **Entwurf, noch nicht in Kraft.** Zusammengetragen aus dem, was im Repo
+> **In Kraft seit 23. August 2026.** Zusammengetragen aus dem, was im Repo
 > tatsächlich steht — Migrationen, Edge Functions, Datenschutzerklärung. Was
 > hier steht, ist damit belegbar; was nicht belegbar war, steht nicht drin.
 > Die Auftragsverarbeitungsverträge sind geschlossen (Abschnitt 4).
 >
 > **Die Speicherdauern sind am 23. August 2026 gegen die Migrationen geprüft
-> worden**, nicht gegen den eigenen Text. Ergebnis: die Löschung über
-> `on delete cascade` greift bei allen Nutzertabellen tatsächlich, drei
+> worden**, nicht gegen den eigenen Text. Die Löschung über
+> `on delete cascade` greift bei allen Nutzertabellen tatsächlich; drei
 > Angaben waren zu kurz gegriffen und stehen jetzt richtig (Sicherungskopien,
-> Teamfoto, steuerliche Belege). **Zwei Fristen kann nur der Verantwortliche
-> selbst festlegen** — sie sind unten mit ⚠ markiert. Solange sie offen sind,
-> bleibt der Entwurfsvermerk stehen.
+> Teamfoto, steuerliche Belege). Die beiden Fristen, die sich nicht aus dem
+> Repository ableiten ließen, hat der Verantwortliche am selben Tag gesetzt:
+> Server-Protokolle sieben Tage, E-Mail ohne Vertragsbezug zwölf Monate.
+> Damit ist der Entwurfsvermerk gefallen.
 
 **Stand:** 23. August 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
 Personenbezug, spätestens vor V1.1 (Atem-Tagebuch — dann fallen erstmals
@@ -46,13 +47,12 @@ Eintrag samt Rechtsgrundlage).
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. f — berechtigtes Interesse am sicheren Betrieb |
 | **Empfänger** | Hostinger (Auftragsverarbeiter) |
 | **Drittland** | möglich, abgesichert über Standardvertragsklauseln |
-| **Löschfrist** | ⚠ **noch festzulegen** — die Protokolle entstehen beim Hoster und werden von ihm verwaltet; eine eigene Frist ist bisher nicht vereinbart. Wir werten sie nicht aus und führen sie mit nichts zusammen. |
+| **Löschfrist** | **7 Tage** — danach löscht Hostinger die Server-Protokolle automatisch (Auskunft des Hosters, 23.08.2026). Wir werten sie nicht aus und führen sie mit nichts zusammen. |
 
-> ⚠ **Offen: Frist beim Hoster erfragen.** Art. 30 Abs. 1 lit. f verlangt die
-> vorgesehene Löschfrist „wenn möglich" — bei fremdverwalteten Protokollen ist
-> ein Verweis vertretbar, eine Zahl aber besser. Zu klären ist außerdem, ob
-> Hostingers CDN eigene Protokolle führt: es sitzt seit dem 22.08.2026 vor der
-> Seite und sieht damit jede Besucher-IP vor dem Webserver.
+> Das vorgeschaltete CDN gehört demselben Auftragsverarbeiter und ist damit
+> von derselben Vereinbarung erfasst. Es sitzt seit dem 22.08.2026 vor der
+> Seite und sieht jede Besucher-IP vor dem Webserver — führt es dort eigene
+> Protokolle, gilt für sie dieselbe Frist des Hosters.
 
 ### V2 · Nutzerkonto
 
@@ -174,13 +174,12 @@ Eintrag samt Rechtsgrundlage).
 | **Datenkategorien** | Absenderadresse, Inhalt der Nachricht, Zeitpunkt |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b bei Vertragsbezug, sonst Art. 6 Abs. 1 lit. f |
 | **Empfänger** | der Anbieter des Postfachs |
-| **Löschfrist** | ⚠ **noch festzulegen** — bisher: „wenn die Anfrage erledigt ist und keine Aufbewahrungspflicht besteht". Das beschreibt eine Bedingung, keine Frist, und niemand räumt ein Postfach nach dieser Regel auf. |
+| **Löschfrist** | **ohne Vertragsbezug nach zwölf Monaten**; besteht Vertragsbezug, gilt die siebenjährige Frist des § 132 BAO für Geschäftsbriefe |
 
-> ⚠ **Offen: eigene Frist bestimmen.** Sinnvoll ist eine schlichte Zahl, die
-> auch eingehalten wird — etwa „Anfragen ohne Vertragsbezug nach zwölf Monaten
-> aus dem Postfach". Geschäftsbriefe mit Vertragsbezug fallen ohnehin unter
-> § 132 BAO (sieben Jahre). Diese Frist kann nur der Verantwortliche selbst
-> setzen; aus dem Repository ist sie nicht ableitbar.
+> Eine Zahl statt einer Bedingung, weil sich nur eine Zahl einhalten lässt.
+> Vorher stand hier „wenn die Anfrage erledigt ist" — danach räumt niemand ein
+> Postfach auf, und eine Frist, die im Verzeichnis steht, aber nie eintritt,
+> ist schlechter als gar keine.
 
 ### Sicherungskopien — die Frist hinter allen anderen Fristen
 
@@ -316,8 +315,27 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
   sieben Tagen Vorhaltung. Ab diesem Tag ist die Löschung nicht mehr „sofort
   und vollständig", sondern sofort in der Datenbank und binnen sieben Tagen in
   den Sicherungen. Betrifft den Abschnitt „Sicherungskopien" **und** die
-  Datenschutzerklärung. Kein Code ändert sich dabei — deshalb fällt es nur auf,
-  wenn man hier nachsieht.
+  Datenschutzerklärung. Der Satz, der dann unwahr wird, steht wörtlich in
+  `src/i18n/locales/de/legal.json` unter `datenschutz.sections` → „Speicherdauer":
+  „Löschen Sie Ihr Konto, werden Ihre Kontodaten und Ihre Sequenzen unmittelbar
+  und vollständig entfernt." Kein Code ändert sich dabei — deshalb fällt es nur
+  auf, wenn man hier nachsieht.
+- **Ein Rechtstext ändert sich** → im selben Pull Request gehört das Feld
+  `*.stand` in `src/i18n/locales/de/legal.json` mitgeändert. Am 23.08.2026
+  aufgefallen, dass genau das einmal unterblieben ist: die
+  Datenschutzerklärung wurde am 21.08. neu geschrieben (Commit `da75c58`), die
+  AGB bekamen ihre neue Fassungsangabe, die Datenschutzerklärung nicht — sie
+  wies sich weiter als Fassung vom 16. August aus, während die
+  Zustimmungsdefinition in der Datenbank auf „die Fassung vom 21.08.2026"
+  verweist. Der Nachweis zeigte damit auf ein Datum, das kein
+  veröffentlichtes Dokument trug.
+  **Eine neue Zeile in `consent_definitions` braucht es dabei nur, wenn sich
+  ändert, worauf sich die Zustimmung inhaltlich bezieht.** Eine Klarstellung
+  wie die Speicherdauern vom 23.08. ist das nicht: sie beschreibt genauer,
+  was ohnehin geschah, und niemand muss deshalb erneut gefragt werden. Die
+  bestehenden Zustimmungen bleiben also bei Version 1 und beziehen sich
+  weiterhin auf die Fassung vom 21.08. — das ist richtig so, denn zugestimmt
+  wurde dem, was damals dastand.
 - Eine **Auslassung aus Abschnitt 3 fällt weg** → das ist der gefährliche Fall.
   Genau daran ist die Datenschutzerklärung schon einmal falsch geworden (die
   Annahme „keine Nutzerkonten in dieser Phase" überlebte die Einführung von
