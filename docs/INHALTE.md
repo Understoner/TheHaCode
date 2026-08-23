@@ -469,10 +469,18 @@ bleiben gültig.
 
 ### Was dabei bewusst so ist
 
-- **`sort_order` 60 bis 170.** Die Übersicht sortiert allein danach
-  (`useCoursesList`). Die fünf VHS-Kurse liegen auf 10 bis 50 und behalten
-  damit die drei großen Kacheln; die Online-Reihe steht darunter in der Liste
-  „Weitere Kurse". Soll die Reihe nach oben, genügt es, die Zahlen zu tauschen.
+- **`sort_order` 60 bis 170 — entscheidet aber nicht mehr die Reihenfolge.**
+  Seit 23.08.2026 sortiert die Übersicht **nach Termin aufsteigend**
+  (`useCoursesList`), `sort_order` ist nur noch das zweite Kriterium für zwei
+  Kurse zur selben Stunde. Die drei großen Kacheln zeigen damit die drei
+  nächsten Termine, egal aus welcher Reihe sie stammen.
+- **Vergangene Termine verschwinden von selbst** — ebenfalls seit 23.08.2026.
+  Der Schnitt liegt am **Tag**, nicht an der Uhrzeit: ein Abend um 20:00 bleibt
+  den ganzen Tag stehen und fällt erst am nächsten Morgen heraus. Maßgeblich
+  ist der Kalendertag in **Wien**, nicht die Zone des Besuchers.
+  **Die Zeilen bleiben in der Datenbank** und ihre Detailseite bleibt
+  erreichbar — ein Link auf einen vergangenen Kurs läuft also nicht ins Leere.
+  Wer eine Zeile wirklich loswerden will, leert `published_at`.
 - **Zwölf einzelne Zeilen statt einer Reihe.** Jeder Abend ist einzeln buchbar
   und braucht deshalb einen eigenen Preis, ein eigenes Datum und eine eigene
   Buchung. Die Kursseite wird dadurch länger — das ist der Preis dafür, dass

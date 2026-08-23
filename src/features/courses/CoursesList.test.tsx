@@ -38,9 +38,17 @@ function renderWithClient(ui: ReactElement) {
 }
 
 function mockCoursesQuery(result: { data: unknown; error: unknown }) {
-  const order = vi.fn().mockResolvedValue(result);
-  const select = vi.fn(() => ({ order }));
+  // Die Abfrage sortiert seit 23.08.2026 zweistufig (starts_at, dann
+  // sort_order). Der Mock muss deshalb verkettbar UND awaitbar sein: jedes
+  // .order() gibt sich selbst zurueck, und am Ende wird das Ergebnis
+  // aufgeloest.
+  const kette: Record<string, unknown> = {};
+  const order = vi.fn(() => kette);
+  kette.order = order;
+  kette.then = (aufloesen: (wert: unknown) => unknown) => Promise.resolve(result).then(aufloesen);
+  const select = vi.fn(() => kette);
   fromMock.mockReturnValue({ select });
+  return order;
 }
 
 describe('CoursesList', () => {
@@ -50,6 +58,35 @@ describe('CoursesList', () => {
     // booking_enabled bleibt die Antwort ohne Wirkung.
     rpcMock.mockReset();
     rpcMock.mockResolvedValue({ data: [], error: null });
+  });
+
+  it('fragt die Kurse nach Termin aufsteigend ab, Kurse ohne Termin zuletzt', async () => {
+    // Vorher entschied allein sort_order - dann bestimmt die Reihenfolge, wer
+    // zuletzt eine Zahl vergeben hat, und nicht der Kalender.
+    const order = mockCoursesQuery({ data: [], error: null });
+
+    renderWithClient(<CoursesList />);
+
+    await waitFor(() => expect(order).toHaveBeenCalled());
+    expect(order.mock.calls[0]).toEqual(['starts_at', { ascending: true, nullsFirst: false }]);
+    expect(order.mock.calls[1]).toEqual(['sort_order', { ascending: true }]);
+  });
+
+  it('blendet vergangene Termine aus, kuenftige bleiben', async () => {
+    // Weit auseinanderliegende Jahre statt gestellter Uhr: so haengt der Test
+    // an keiner Zeitzone und an keinem Testlauf-Datum.
+    mockCoursesQuery({
+      data: [
+        { id: '1', title: 'Lange vorbei', description: 'x', location: null, price_info: null, signup_url: null, starts_at: '2020-03-01T18:00:00Z' },
+        { id: '2', title: 'Kommt noch', description: 'y', location: null, price_info: null, signup_url: null, starts_at: '2099-03-01T18:00:00Z' },
+      ],
+      error: null,
+    });
+
+    renderWithClient(<CoursesList />);
+
+    await waitFor(() => expect(screen.getByText('Kommt noch')).toBeTruthy());
+    expect(screen.queryByText('Lange vorbei')).toBeNull();
   });
 
   it('zeigt veroeffentlichte Kurse mit Titel und Beschreibung', async () => {

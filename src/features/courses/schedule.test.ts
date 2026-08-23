@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCourseDate, formatCourseStart } from './schedule';
+import { formatCourseDate, formatCourseStart, courseDay, isPastCourse } from './schedule';
 
 describe('Kurstermine', () => {
   it('zeigt die Kurzform mit oesterreichischem Monatsnamen', () => {
@@ -26,5 +26,40 @@ describe('Kurstermine', () => {
     expect(formatCourseDate(null)).toBeNull();
     expect(formatCourseStart(null)).toBeNull();
     expect(formatCourseDate('kein Datum')).toBeNull();
+  });
+});
+
+describe('isPastCourse', () => {
+  // Wien, nicht die Zone des Ausfuehrenden: die Tests setzen deshalb feste
+  // Zeitpunkte in UTC und rechnen die Erwartung von Hand nach.
+  const heute = new Date('2026-10-19T09:00:00Z'); // 19.10.2026, 11:00 in Wien
+
+  it('blendet einen Termin von gestern aus', () => {
+    expect(isPastCourse('2026-10-18T18:00:00Z', heute)).toBe(true);
+  });
+
+  it('zeigt den heutigen Termin noch, auch wenn seine Uhrzeit vorbei ist', () => {
+    // 19.10. um 08:00 Wien - laengst vorbei, aber derselbe Tag.
+    expect(isPastCourse('2026-10-19T06:00:00Z', heute)).toBe(false);
+  });
+
+  it('zeigt kuenftige Termine', () => {
+    expect(isPastCourse('2026-10-26T19:00:00Z', heute)).toBe(false);
+  });
+
+  it('haelt einen Kurs ohne Termin fuer nicht vergangen', () => {
+    expect(isPastCourse(null, heute)).toBe(false);
+  });
+
+  it('faellt bei unlesbarem Datum auf sichtbar zurueck statt zu verstecken', () => {
+    expect(isPastCourse('kein datum', heute)).toBe(false);
+  });
+
+  it('rechnet den Tageswechsel in Wien, nicht in UTC', () => {
+    // 19.10.2026 23:30 Wien ist 21:30 UTC. Ein Termin um 22:30 UTC waere in
+    // UTC schon der 20., in Wien aber noch der 20. um 00:30 - also kuenftig.
+    const spaetAbends = new Date('2026-10-19T21:30:00Z');
+    expect(courseDay(spaetAbends)).toBe('2026-10-19');
+    expect(isPastCourse('2026-10-19T16:00:00Z', spaetAbends)).toBe(false);
   });
 });
