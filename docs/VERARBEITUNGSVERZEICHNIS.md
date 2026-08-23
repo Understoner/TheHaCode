@@ -328,7 +328,10 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
   wies sich weiter als Fassung vom 16. August aus, während die
   Zustimmungsdefinition in der Datenbank auf „die Fassung vom 21.08.2026"
   verweist. Der Nachweis zeigte damit auf ein Datum, das kein
-  veröffentlichtes Dokument trug.
+  veröffentlichtes Dokument trug. Derselbe Ausrutscher traf den
+  Haftungsausschluss: im selben Commit *angelegt*, aber mit „16. August"
+  ausgewiesen, obwohl die AGB-Zustimmung ihn über § 5 AGB ausdrücklich in
+  ihre Geltung einbezieht. Beide Daten stehen seit 23.08.2026 richtig.
   **Eine neue Zeile in `consent_definitions` braucht es dabei nur, wenn sich
   ändert, worauf sich die Zustimmung inhaltlich bezieht.** Eine Klarstellung
   wie die Speicherdauern vom 23.08. ist das nicht: sie beschreibt genauer,
