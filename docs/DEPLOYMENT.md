@@ -171,9 +171,22 @@ develop    Testsystem. Integrationsbranch.
 feature/*  Arbeit. PR nach develop.
 ```
 
-**Branch Protection** auf `main` und `develop`: Pull Request erforderlich, Status-Check `verify` erforderlich, keine Force-Pushes. Ohne diese Einstellung ist die Pipeline Dekoration.
+**Branch Protection** — seit 23.08.2026 eingerichtet, und zwar **asymmetrisch**. Ohne sie wäre die Pipeline Dekoration; mit der falschen Regel auf `main` stünde jeder Livegang.
 
-Ausnahme: Der Job `promote` pusht direkt auf `main` — dafür braucht `github-actions[bot]` eine Ausnahme in der Branch-Protection-Regel („Allow specified actors to bypass").
+| | `develop` | `main` |
+|---|---|---|
+| Pull Request erforderlich | ja, **0 Freigaben** | **nein** |
+| Status-Check `verify` | ja, „up to date" aus | **keiner** |
+| Gilt auch für Admins | ja | ja |
+| Force-Push, Löschen | gesperrt | gesperrt |
+
+**Warum `main` fast nackt ist.** Der Job `promote` pusht mit `git push origin main` direkt auf `main`. Ein PR-Zwang oder ein Status-Check dort blockiert jeden Livegang: `verify` läuft auf `main` gar nicht (`ci.yml` triggert auf `pull_request`), der Check bliebe ewig ausstehend.
+
+> **Frühere Fassung dieses Absatzes war falsch.** Sie versprach, `github-actions[bot]` bekomme eine Ausnahme über „Allow specified actors to bypass". Das geht in einem **nutzereigenen** Repo nicht — `GITHUB_TOKEN` kann Branch Protection dort nicht umgehen, unabhängig vom Tarif; GitHub Pro ändert daran nichts. Möglich wäre es nur über einen PAT, ein GitHub-App-Token oder einen Deploy Key als Bypass-Actor, oder indem das Repo in eine Organisation zieht. Drei bewegliche Teile mehr für einen Branch, der nie einen PR bekommt — deshalb bewusst nicht.
+
+**Warum 0 Freigaben auf `develop`.** GitHub lässt niemanden den eigenen PR freigeben. Bei einem Zweierteam hieße „1 Freigabe", dass niemand allein mergen kann. Die Regel wirkt auch mit 0: Direkt-Commits sind gesperrt, `verify` muss grün sein.
+
+**Voraussetzung, die leicht zurückfällt:** Branch Protection gibt es auf GitHub Free nur in **öffentlichen** Repos. Wird `Understoner/TheHaCode` wieder privat geschaltet, fallen diese Regeln *und* die Reviewer-Pflicht im Environment `production` ersatzlos weg — ohne Warnung. Dann braucht es GitHub Pro.
 
 ### Environments
 
@@ -350,7 +363,7 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 - [x] Staging-Website auf Hostinger läuft, Branch `develop` bestätigt — Production-Website ebenfalls, seit dem Livegang am 16.08.2026
 - [x] Staging gegen Indexierung geschützt (automatisches `robots.txt`, kein Passwortschutz — der steht bei Node.js Web Apps in hPanel nicht zur Auswahl)
 - [x] GitHub Environments `staging`/`production` mit Secrets und Variables befüllt, `production` hat einen Required Reviewer
-- [ ] Branch Protection — **jetzt möglich, aber nicht eingerichtet.** Die ursprüngliche Sperre (GitHub Free auf privatem Repo) ist weg, seit das Repo öffentlich ist; die Reviewer-Pflicht auf `production` greift seitdem wieder. Der Schutz von `main`/`develop` gegen Direkt-Commits fehlt weiterhin und bleibt Disziplin.
+- [x] Branch Protection — **am 23.08.2026 eingerichtet und per API gegengeprüft**, asymmetrisch (siehe §3): `develop` mit PR-Zwang und Status-Check `verify`, `main` nur gegen Force-Push und Löschen, damit die Beförderung nicht bricht. Beide Regeln gelten auch für Admins.
 - [x] Ein vollständiger Durchlauf feature → develop → main erfolgreich — seit 16.08.2026 mehrfach, zuletzt mit T17 am 21.08.2026
 - [ ] Supabase Production auf Pro (spätestens am Tag der ersten Zahlung) — hängt mit T17a zusammen: mit Pro kommen auch die deutschen E-Mail-Vorlagen
 - [x] Auftragsverarbeitungsverträge: Supabase, Hostinger, Stripe — bei allen dreien Anhang der Nutzungsbedingungen, mit deren Annahme geschlossen; nichts anzufordern. Fassungen und Drittlandgrundlage in `docs/VERARBEITUNGSVERZEICHNIS.md` Abschnitt 4

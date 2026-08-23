@@ -45,16 +45,25 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Smoke-Tests laufen gegen die **neue** Version, nicht die alte
       — `wait-for-deploy.sh` prüft auf den **Commit**, nicht auf den Zeitstempel (Fix vom 15.08.2026)
 - [x] Freigabe → `main` → Production aktualisiert sich
-- [ ] Ein absichtlich fehlschlagender Smoke-Test verhindert die Beförderung
-      — strukturell gegeben (`promote` steht auf `needs: staging`), aber nie
-      absichtlich provoziert. Ein einmaliger Versuch mit einem kaputten Test
-      wäre der Beleg.
+- [x] Ein absichtlich fehlschlagender Smoke-Test verhindert die Beförderung
+      — **am 22.08.2026 unabsichtlich belegt, echter als jeder gestellte
+      Versuch.** Der 403 auf `/kurse` (siehe unten) ließ den Smoke-Test von
+      Lauf `32592273532` scheitern; die Beförderung nach `main` wurde
+      übersprungen, Live blieb auf dem alten Stand, bis der Fix (#54) durch
+      war. Ein absichtlich kaputter Test nach `develop` erübrigt sich damit.
 
 > **Bekannte Schwäche, dokumentiert:** Der Wartepunkt kann rot werden, obwohl
 > der Livegang in Ordnung ist — wenn Hostingers Bot-Schutz die GitHub-Runner
 > abweist. Zweimal erlebt (14.08. als 403 auf der dev-Subdomain, 21.08. als
 > Timeout auf der Hauptdomain). Beides steht in `docs/DEPLOYMENT.md`, samt der
 > Regel, danach die Smoke-Tests von außen nachzuholen.
+
+> **Zweiter Fund, 22.08.2026 (#54):** Eine neue dynamische Route unter einem
+> bestehenden Seitennamen (`kurse.html` **plus** Verzeichnis `kurse/`) lässt
+> Apache das Verzeichnis wählen — ohne Index-Dokument antwortet er mit **403,
+> nicht 404**. In der `.htaccess` muss die `.html`-Regel deshalb **vor** der
+> Durchreiche für vorhandene Dateien und Verzeichnisse stehen. Ein
+> Node-Vorschauserver bildet das nicht nach; gefunden hat es der Smoke-Test.
 
 ### T03 · Design-Tokens und Komponenteninventar ⏱14
 **Ziel:** Die zwölf Bausteine, aus denen alle Screens bestehen.
@@ -137,7 +146,7 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Abnahme:**
 - [x] Ohne Anmeldung erreichbar
 - [x] Neuer News-Beitrag im Studio erscheint **ohne Neubau** (Daten kommen zur Laufzeit)
-- [ ] „Über mich" und Kontakt als gepinnte Beiträge (Angebot zieht nach T07a auf die eigene Kurse-Seite)
+- [x] „Über mich" und Kontakt als gepinnte Beiträge (Angebot zieht nach T07a auf die eigene Kurse-Seite)
       — redaktionell, gehört zu T18. Texte, Bilder und SQL liegen fertig in
       `docs/INHALTE.md`; einzupflegen ist es im Studio.
       **Zuschnitt geändert am 22.08.2026:** aus drei Beiträgen werden drei
@@ -145,6 +154,11 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
       steht" (gepinnt, mit Portrait und Kontaktangaben) und ein Blog-Beitrag
       „Besser atmen, besser leben" aus dem eBook. Der eigene Kontakt-Beitrag
       entfällt, seine Angaben stehen jetzt im Beitrag über Michael.
+      **Eingepflegt und live seit 22.08.2026:** `der-atemcode` (gepinnt, oben),
+      `ueber-mich` (gepinnt, mit Portrait) und der Blog
+      `besser-atmen-besser-leben`. Der Haken steht also trotz geändertem
+      Zuschnitt — die Kontaktangaben sind untergebracht, nur nicht in einem
+      eigenen Beitrag.
 - [x] Detailseite `/news/[slug]`
       — **am 22.08.2026 nachgebaut, vorher in keiner Aufgabe.** Grund: `body_md`
       ist `not null`, wurde aber von keiner Ansicht gelesen — ein Pflichtfeld,
@@ -173,6 +187,15 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
       T20 gebaut ist; danach ist er der Rückfall, nicht der Regelweg.
 - [x] Vier Zustände über `QueryBoundary` behandelt
 - [x] pgTAP: Normal- und Missbrauchsfall (`supabase/tests/003_courses_team.test.sql`)
+- [x] Detailseite `/kurse/[slug]`
+      — **am 22.08.2026 nachgebaut (#53), vorher in keiner Aufgabe.** Gleicher
+      Grund und gleiches Muster wie `/news/[slug]`: die Übersicht zeigt die
+      Kurzfassung, der Langtext steht auf der eigenen Seite
+      (`courses.body_md`, Migration 0014). Fünf echte VHS-Kurse sind live.
+      **Dabei aufgefallen:** die neue Route brach `/kurse` mit einem 403,
+      siehe T02.
+      Offen und nicht in unserer Hand: Direktlinks auf die einzelnen VHS-Kurse
+      (heute zeigen alle auf die Kurssuche) und die Kursgebühren.
 
 ### T07b · Team-Seite ⏱8
 **Ziel:** Teammitglieder mit Foto und Kurzvorstellung öffentlich darstellen.
@@ -390,8 +413,11 @@ Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
 ## Block 7 — Launch (Woche 12)
 
 ### T18 · Inhalte einpflegen ⏱6
-- [ ] Vier freie Sequenzen geprüft und veröffentlicht
-- [ ] Erster News-Beitrag steht
+- [x] Vier freie Sequenzen geprüft und veröffentlicht
+      — `atem-4-7-8`, `aufbau-dreiteilig`, `BOXATMUNG 4-4-4-4`, `kohaerenz-5-5`,
+      alle `visibility: free`, `type: paced`. Standen längst live; die Haken
+      waren nur nie gesetzt worden (nachgezogen am 23.08.2026).
+- [x] Erster News-Beitrag steht — drei Beiträge, siehe T07
 
 > Impressum/Datenschutzerklärung und der Domain-Umzug sind mit T07d/T07e in
 > Block 2 vorgezogen, nicht mehr Teil von Launch (geändert in SAD 0.7).
@@ -428,8 +454,13 @@ consent_collection: {
 },
 ```
 Die AGB-Adresse (`<APP_URL>/agb`) muss dafür im Stripe-Dashboard unter
-Einstellungen → Checkout hinterlegt sein — **sonst lehnt Stripe den Aufruf ab
-und der Kauf bricht.** Deshalb Dashboard zuerst, Code danach.
+**Einstellungen → Unternehmen → Öffentliche Angaben**
+(`dashboard.stripe.com/settings/public`) hinterlegt sein — **sonst lehnt Stripe
+den Aufruf ab und der Kauf bricht.** Deshalb Dashboard zuerst, Code danach.
+**Nicht** unter Einstellungen → Checkout: dort stehen nur die *angezeigten*
+Geschäftsrichtlinien, die Pflichtangabe für `terms_of_service` liest Stripe aus
+den Öffentlichen Angaben. Test- und Livemodus haben je eine eigene Fassung,
+beide sind einzeln zu setzen.
 **Abnahme:**
 - [x] Zustimmung zu den AGB ist im Checkout verpflichtend
       — `consent_collection: { terms_of_service: 'required' }` in
@@ -451,7 +482,12 @@ und der Kauf bricht.** Deshalb Dashboard zuerst, Code danach.
       — nachgetragen: § 4 FAGG verlangt die Information vor Vertragsabschluss,
       der Haken bei Stripe ist die Bestätigung danach. Zwei Pflichten, zwei
       Stellen. Steht als `plus.widerruf` auf der Preisseite.
-- [ ] In beiden Umgebungen scharf — hängt am Dashboard-Schritt, siehe oben
+- [x] In beiden Umgebungen scharf
+      — **23.08.2026: AGB-Adresse in beiden Modi eingetragen und der Kauf in
+      beiden Umgebungen geprüft.** Bis dahin war der Aufruf live gebrochen,
+      ohne dass es jemandem auffallen musste: `create-checkout` beantwortet den
+      Fehler mit `502 checkout_failed`, der Käufer sieht nur eine allgemeine
+      Meldung, der Grund steht allein im Function-Log.
 
 > **Eine Lücke bleibt und ist Absicht.** § 18 Abs. 2 Z 3 FAGG will die
 > Bestätigung des Vertrags samt dieser Erklärung auf einem dauerhaften

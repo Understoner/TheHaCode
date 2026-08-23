@@ -126,12 +126,19 @@ nicht (SAD §4.5, Kleinunternehmerregelung):
   § 11 AGB — ohne sie bekommt ein Kursteilnehmer gar nichts Schriftliches.
   Am 21.08.2026 eingeschaltet. Beachte: für Einmalzahlungen verschickt Stripe
   Belege **nur im Live-Modus**.
-- **AGB-Adresse hinterlegen** (Einstellungen → Checkout und Payment Links →
-  „Nutzungsbedingungen"): `https://deratemcode.at/agb`, in **beiden**
-  Umgebungen. **Das muss vor dem Ausrollen von T19a geschehen.**
+- **AGB-Adresse hinterlegen** (Einstellungen → Unternehmen → **Öffentliche
+  Angaben**, `dashboard.stripe.com/settings/public`, Feld „Nutzungsbedingungen"):
+  live `https://deratemcode.at/agb`, im Testmodus `https://dev.deratemcode.at/agb`.
+  **Nicht** unter „Checkout und Payment Links" — dort stehen nur die
+  *angezeigten* Geschäftsrichtlinien; die Pflichtangabe für `terms_of_service`
+  liest Stripe aus den Öffentlichen Angaben. Test- und Livemodus haben je eine
+  eigene Fassung, also **beide** einzeln setzen (am 23.08.2026 geschehen und
+  in beiden Umgebungen geprüft). **Das muss vor dem Ausrollen von T19a
+  geschehen.**
   `create-checkout` setzt seither `consent_collection.terms_of_service:
   'required'`; fehlt die Adresse, antwortet Stripe mit einem Fehler und
-  **niemand kann mehr ein Abo kaufen**. Der Haken trägt zugleich die Erklärung
+  **niemand kann mehr ein Abo kaufen** — sichtbar wird das als
+  `502 checkout_failed`, der Grund steht allein im Function-Log. Der Haken trägt zugleich die Erklärung
   zum sofortigen Leistungsbeginn (§ 18 Abs. 2 FAGG) — der Wortlaut steht als
   `tosHinweis()` in `create-checkout/index.ts`, nicht im Dashboard. Er bringt
   den Link zu den AGB selbst mit (aus `APP_URL`), denn eigener `custom_text`
