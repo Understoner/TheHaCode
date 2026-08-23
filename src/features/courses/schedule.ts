@@ -40,3 +40,42 @@ export function formatCourseStart(startsAt: string | null): string | null {
   const date = new Date(startsAt);
   return Number.isNaN(date.getTime()) ? null : detailFormatter.format(date);
 }
+
+// Der Kalendertag in Wien als "YYYY-MM-DD". en-CA liefert genau diese Form,
+// und in dieser Form laesst sich Datum als Zeichenkette vergleichen - ohne
+// eine einzige Zeile Zeitzonenrechnung. Das ist der Grund fuer die
+// ungewoehnliche Sprachwahl: es geht nicht um Kanada, es geht um das Format.
+const dayFormatter = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: TIME_ZONE,
+});
+
+/** Der Kalendertag in Wien, zu dem dieser Zeitpunkt gehoert. */
+export function courseDay(date: Date): string {
+  return dayFormatter.format(date);
+}
+
+/**
+ * Liegt der Kurstermin vor dem heutigen Tag?
+ *
+ * Der Schnitt liegt am TAG, nicht an der Uhrzeit: ein Abend um 20:00 bleibt
+ * den ganzen Tag ueber sichtbar und verschwindet erst am naechsten Morgen.
+ * Waere die Uhrzeit massgeblich, fiele der Kurs um 20:01 aus der Liste -
+ * waehrend er gerade laeuft und jemand die Seite offen hat.
+ *
+ * Massgeblich ist Wien, nicht die Zone des Besuchers - dieselbe Festlegung
+ * wie bei der Anzeige oben. Sonst sieht ein Leser in Lissabon einen Kurs
+ * schon verschwinden, waehrend er in Oberoesterreich noch bevorsteht.
+ *
+ * Ein Kurs OHNE Termin gilt nie als vergangen. Er hat kein Datum, an dem man
+ * ihn messen koennte, und still zu verschwinden waere das Schlechteste, was
+ * eine redaktionell gepflegte Zeile tun kann.
+ */
+export function isPastCourse(startsAt: string | null, now: Date = new Date()): boolean {
+  if (!startsAt) return false;
+  const date = new Date(startsAt);
+  if (Number.isNaN(date.getTime())) return false;
+  return courseDay(date) < courseDay(now);
+}

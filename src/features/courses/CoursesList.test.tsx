@@ -72,6 +72,23 @@ describe('CoursesList', () => {
     expect(order.mock.calls[1]).toEqual(['sort_order', { ascending: true }]);
   });
 
+  it('blendet vergangene Termine aus, kuenftige bleiben', async () => {
+    // Weit auseinanderliegende Jahre statt gestellter Uhr: so haengt der Test
+    // an keiner Zeitzone und an keinem Testlauf-Datum.
+    mockCoursesQuery({
+      data: [
+        { id: '1', title: 'Lange vorbei', description: 'x', location: null, price_info: null, signup_url: null, starts_at: '2020-03-01T18:00:00Z' },
+        { id: '2', title: 'Kommt noch', description: 'y', location: null, price_info: null, signup_url: null, starts_at: '2099-03-01T18:00:00Z' },
+      ],
+      error: null,
+    });
+
+    renderWithClient(<CoursesList />);
+
+    await waitFor(() => expect(screen.getByText('Kommt noch')).toBeTruthy());
+    expect(screen.queryByText('Lange vorbei')).toBeNull();
+  });
+
   it('zeigt veroeffentlichte Kurse mit Titel und Beschreibung', async () => {
     mockCoursesQuery({
       data: [{ id: '1', title: 'Atem-Grundkurs', description: 'Vier Wochen, wöchentlich', location: null, price_info: null, signup_url: null }],
