@@ -12,6 +12,43 @@ function photoUrlFor(path: string | null) {
   return path ? supabase.storage.from('public-assets').getPublicUrl(path).data.publicUrl : null;
 }
 
+// Das Portrait sitzt jetzt wie das Cover bei News und Kursen: oben, ueber die
+// volle Kartenbreite, quadratisch statt 16:9 - ein Gesicht in einem
+// Breitbildausschnitt waere oben und unten abgeschnitten.
+//
+// Fehlt ein Foto, steht hier bewusst NICHT das Wasserzeichen aus CoverImage
+// (Ring und Kreuz): eine Person ist kein Kursbild, und die Silhouette sagt
+// ohne Umweg, dass hier ein Portrait fehlt. Die Flaeche, die Tokenfarbe und
+// die Rundung sind dieselben.
+function TeamPhoto({ url, label, variant }: { url: string | null; label: string; variant: 'card' | 'row' }) {
+  const isCard = variant === 'card';
+  const frame = isCard ? styles.cover : styles.listCover;
+
+  if (url) {
+    // resizeMode "contain" statt des Vorgabewerts "cover": auf dem Handy ist
+    // der Rahmen wegen maxHeight breiter als hoch, und "cover" schnitte dann
+    // oben und unten ab - also genau dort, wo bei einem Portrait Stirn und
+    // Kinn sitzen. "contain" zeigt das Bild immer vollstaendig; was daneben
+    // frei bleibt, traegt dieselbe Tonflaeche wie die Silhouette unten, so
+    // dass Foto und Platzhalter denselben Grund haben.
+    return (
+      <Image
+        source={{ uri: url }}
+        style={[frame, styles.photoTint]}
+        resizeMode="contain"
+        accessibilityLabel={label}
+      />
+    );
+  }
+
+  return (
+    <View style={[frame, styles.photoFallback]} accessibilityLabel={label}>
+      <View style={isCard ? styles.avatarHead : styles.listAvatarHead} />
+      <View style={isCard ? styles.avatarBody : styles.listAvatarBody} />
+    </View>
+  );
+}
+
 export function TeamList() {
   const { t } = useTranslation();
   const query = useTeamList();
@@ -33,28 +70,29 @@ export function TeamList() {
                     ("Weiteres Team") behaelt seine Ueberschrift, weil er sich
                     ohne sie nicht vom ersten unterscheiden liesse. */}
                 <View {...responsive('team-grid')} style={styles.grid}>
-                  {recent.map((member) => {
-                    const photoUrl = photoUrlFor(member.photo_path);
-                    return (
-                      <View key={member.id} style={styles.card}>
-                        {photoUrl ? (
-                          <Image
-                            source={{ uri: photoUrl }}
-                            style={styles.photo}
-                            accessibilityLabel={member.full_name}
-                          />
-                        ) : (
-                          <View style={styles.photoFallback} accessibilityLabel={member.full_name}>
-                            <View style={styles.avatarHead} />
-                            <View style={styles.avatarBody} />
-                          </View>
-                        )}
-                        <Text style={styles.name}>{member.full_name}</Text>
+                  {recent.map((member) => (
+                    <View key={member.id} style={styles.card}>
+                      <TeamPhoto
+                        url={photoUrlFor(member.photo_path)}
+                        label={member.full_name}
+                        variant="card"
+                      />
+                      <View style={styles.cardBody}>
+                        {/* Rolle ueber dem Namen, wie die Kategorie ueber dem
+                            Titel eines News-Beitrags: die Einordnung zuerst,
+                            dann die Sache selbst. */}
                         {member.role_title ? <Text style={styles.role}>{member.role_title}</Text> : null}
-                        {member.bio ? <Text style={styles.bio}>{member.bio}</Text> : null}
+                        <Text style={styles.name}>{member.full_name}</Text>
+                        {/* Vier Zeilen wie beim News-Anriss - gleich hohe
+                            Karten lesen sich ruhiger als eine Treppe. */}
+                        {member.bio ? (
+                          <Text style={styles.bio} numberOfLines={4}>
+                            {member.bio}
+                          </Text>
+                        ) : null}
                       </View>
-                    );
-                  })}
+                    </View>
+                  ))}
                 </View>
               </View>
             ) : null}
@@ -63,29 +101,20 @@ export function TeamList() {
               <View style={styles.section}>
                 <Text style={styles.sectionHeading}>{t('team.moreTitle')}</Text>
                 <View style={styles.list}>
-                  {older.map((member) => {
-                    const photoUrl = photoUrlFor(member.photo_path);
-                    return (
-                      <View key={member.id} style={styles.listRow}>
-                        {photoUrl ? (
-                          <Image
-                            source={{ uri: photoUrl }}
-                            style={styles.listPhoto}
-                            accessibilityLabel={member.full_name}
-                          />
-                        ) : (
-                          <View style={styles.listPhotoFallback} accessibilityLabel={member.full_name}>
-                            <View style={styles.listAvatarHead} />
-                            <View style={styles.listAvatarBody} />
-                          </View>
-                        )}
-                        <View style={styles.listText}>
-                          <Text style={styles.listName}>{member.full_name}</Text>
-                          {member.role_title ? <Text style={styles.role}>{member.role_title}</Text> : null}
-                        </View>
+                  {older.map((member) => (
+                    <View key={member.id} style={styles.listRow}>
+                      <TeamPhoto
+                        url={photoUrlFor(member.photo_path)}
+                        label={member.full_name}
+                        variant="row"
+                      />
+                      <View style={styles.listDivider} />
+                      <View style={styles.listText}>
+                        {member.role_title ? <Text style={styles.listRole}>{member.role_title}</Text> : null}
+                        <Text style={styles.listName}>{member.full_name}</Text>
                       </View>
-                    );
-                  })}
+                    </View>
+                  ))}
                 </View>
               </View>
             ) : null}
@@ -114,54 +143,70 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.md,
   },
+  // Gleiche Karte wie die News-Hero-Karte: gerundeter Rahmen, kein Innenrand,
+  // das Bild sitzt buendig an drei Kanten (overflow: hidden schneidet es an
+  // den Rundungen ab).
   card: {
     flexGrow: 0,
     flexBasis: '100%',
-    gap: spacing.sm,
-    padding: spacing.lg,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
+    overflow: 'hidden',
   },
   // Die Desktop-Breite ('team-grid') steht als Media Query in
   // src/design/responsive.ts - siehe dort, warum nicht mehr in JavaScript.
-  photo: {
-    width: 96,
-    height: 96,
-    borderRadius: radius.full,
+
+  // Quadratisch statt 16:9 - ein Portrait im Breitbildausschnitt verliert
+  // Stirn und Kinn. Die Deckelung braucht es trotzdem: auf dem Handy ist die
+  // Karte fast fensterbreit, und ein ungedeckeltes Quadrat waere dort ueber
+  // 380px hoch - fast doppelt so hoch wie ein News-Cover, eine einzige Karte
+  // fuellte den halben Bildschirm. Beschnitten wird deswegen nichts, siehe
+  // resizeMode in TeamPhoto.
+  cover: {
+    width: '100%',
+    aspectRatio: 1,
+    maxHeight: 320,
+  },
+  cardBody: {
+    gap: spacing.sm,
+    padding: spacing.md,
+  },
+  photoTint: {
+    backgroundColor: colors.oceanImageBg,
   },
   photoFallback: {
-    width: 96,
-    height: 96,
-    borderRadius: radius.full,
     backgroundColor: colors.oceanImageBg,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
   avatarHead: {
-    width: 30,
-    height: 30,
+    width: 56,
+    height: 56,
     borderRadius: radius.full,
     backgroundColor: colors.ocean500,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   avatarBody: {
-    width: 60,
-    height: 34,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    width: 112,
+    height: 62,
+    borderTopLeftRadius: 56,
+    borderTopRightRadius: 56,
     backgroundColor: colors.ocean500,
   },
+  role: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: colors.ocean700,
+  },
   name: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
     color: colors.ink900,
-  },
-  role: {
-    fontSize: 13,
-    color: colors.ocean700,
   },
   bio: {
     fontSize: 13,
@@ -180,19 +225,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     padding: spacing.sm,
   },
-  listPhoto: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.full,
+  listCover: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.md,
   },
-  listPhotoFallback: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.full,
-    backgroundColor: colors.oceanImageBg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+  // Trennlinie zwischen Bild und Text, wie in den Listenzeilen der News.
+  listDivider: {
+    width: 1,
+    alignSelf: 'stretch',
+    backgroundColor: colors.line,
   },
   listAvatarHead: {
     width: 15,
@@ -210,11 +252,18 @@ const styles = StyleSheet.create({
   },
   listText: {
     flex: 1,
-    gap: 2,
+    gap: 4,
+  },
+  listRole: {
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: colors.ocean700,
   },
   listName: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '500',
     color: colors.ink900,
   },
 });

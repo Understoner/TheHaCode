@@ -204,6 +204,19 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Sortierung über `sort_order`, nur veröffentlichte Zeilen sichtbar
 - [x] Foto über Storage-Bucket `public-assets` (T07e)
 - [x] Vier Zustände über `QueryBoundary` behandelt
+- [x] Gleiche Kartenanatomie wie News und Kurse
+      — **am 23.08.2026 umgebaut**, weil die Seite neben den anderen beiden
+      wie ein Fremdkörper stand: runder 96px-Avatar im gepolsterten Kasten
+      statt Bild oben über die volle Breite. Jetzt derselbe Aufbau wie die
+      News-Hero-Karte — Bild bündig an drei Kanten, darunter der gepolsterte
+      Textkörper, Rolle als Kleinlabel über dem Namen wie dort die Kategorie
+      über dem Titel, Anriss auf vier Zeilen begrenzt. Die Listenzeilen des
+      zweiten Abschnitts übernehmen Vorschaugröße und Trennlinie der News.
+      **Zwei Abweichungen mit Grund:** das Bild ist quadratisch statt 16:9
+      (ein Gesicht im Breitbildausschnitt verliert Stirn und Kinn) und auf
+      320px gedeckelt, weil eine einzelne Karte sonst den halben Handy-
+      bildschirm füllt. Damit die Deckelung nicht doch beschneidet, steht das
+      Portrait auf `resizeMode="contain"` über der Tonfläche.
 
 ### T07c · Navigation ⏱6
 **Ziel:** Ein Menü, das schon auf noch nicht gebaute Funktionen verweist, ohne den Build zu brechen.
@@ -231,6 +244,19 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 > Speicherdauer inklusive § 132 BAO. Ebenfalls korrigiert: der Verweis auf die
 > EU-OS-Plattform im Impressum — die wurde eingestellt.
 > AGB und Haftungsausschluss kamen mit T19a dazu.
+
+> **Hinweis zum Einsatz von KI, ergänzt am 23.08.2026.** Das Impressum trägt
+> jetzt einen eigenen Abschnitt dazu, direkt nach der Blattlinie. **Pflicht ist
+> er nicht:** Art. 50 Abs. 4 KI-VO gilt zwar seit 2. August 2026, greift aber
+> nur für Texte, die die Öffentlichkeit über Angelegenheiten von öffentlichem
+> Interesse informieren — und selbst dort entfällt die Kennzeichnung, wenn ein
+> Mensch den Inhalt vor der Veröffentlichung geprüft hat und die redaktionelle
+> Verantwortung trägt. Beides trifft hier zu, der Hinweis ist also freiwillig
+> und bewusst knapp gehalten. Formuliert ist er genau entlang dieser Ausnahme:
+> KI als Werkzeug für Strukturierung und Beschleunigung, Freigabe erst nach
+> Prüfung auf Richtigkeit, redaktionelle Verantwortung unverändert bei Michael
+> Untersteiner. Steht der Satz einmal da, muss er auch stimmen — wer künftig
+> ungeprüft veröffentlicht, macht aus einer freiwilligen Angabe eine falsche.
 
 ### T07e · Storage-Bucket `public-assets` ⏱4
 **Ziel:** Ein öffentlicher Bucket für Kurs-, Team- und (künftig) News-Bilder, Schreibzugriff nur für Admins.
