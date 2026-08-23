@@ -83,13 +83,15 @@ export function TeamList() {
                             dann die Sache selbst. */}
                         {member.role_title ? <Text style={styles.role}>{member.role_title}</Text> : null}
                         <Text style={styles.name}>{member.full_name}</Text>
-                        {/* Vier Zeilen wie beim News-Anriss - gleich hohe
-                            Karten lesen sich ruhiger als eine Treppe. */}
-                        {member.bio ? (
-                          <Text style={styles.bio} numberOfLines={4}>
-                            {member.bio}
-                          </Text>
-                        ) : null}
+                        {/* Vollstaendig, nicht auf vier Zeilen gekuerzt wie
+                            der News-Anriss. Dort ist das Kuerzen harmlos, weil
+                            eine Detailseite dahinterliegt und der Rest einen
+                            Klick entfernt ist. Eine Teamkarte hat keine
+                            Detailseite - was hier abgeschnitten waere, waere
+                            weg. Gleich hohe Karten bleiben es trotzdem: die
+                            Zeile streckt alle Karten auf die Hoehe der
+                            hoechsten. */}
+                        {member.bio ? <Text style={styles.bio}>{member.bio}</Text> : null}
                       </View>
                     </View>
                   ))}
