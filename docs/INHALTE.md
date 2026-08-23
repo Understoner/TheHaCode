@@ -495,6 +495,7 @@ bleiben gültig.
   Link geht also von Hand raus, und die Teilnehmerliste dafür steht in
   `course_bookings`.
 - **Der Sicherheitshinweis bei „Energy"** (Schwangerschaft, Herz-Kreislauf,
-  Epilepsie) stammt von mir, nicht aus der Vorgabe. Er ist bei aktivierender
-  Atmung üblich und sinnvoll — wenn er nicht zur Praxis passt, gehört er weg
-  statt unbeachtet dazustehen.
+  Epilepsie, nicht im Wasser, nicht beim Autofahren) war nicht Teil der
+  Vorgabe, sondern ein Vorschlag — **am 23.08.2026 ausdrücklich bestätigt und
+  damit gewollt.** Er gehört zu jedem Text mit aktivierender Atmung; wer
+  künftig eine weitere Energy-Einheit anlegt, übernimmt ihn mit.
