@@ -13,7 +13,13 @@ Gehört zu **T18**.
 
 ### 1. Foto hochladen
 
-Die Team-Karte zeigt das Bild als **runden Avatar mit 96 px**. Vorbereitet ist
+> **Veraltet seit 23.08.2026 (PR #56).** Die Team-Karte zeigt das Bild nicht
+> mehr als runden Avatar, sondern wie News und Kurse als quadratisches Bild
+> oben über die volle Kartenbreite (auf 320 px Höhe gedeckelt,
+> `resizeMode="contain"`). Der Zuschnitt unten passt trotzdem weiterhin: ein
+> Quadrat bleibt ein Quadrat, und beschnitten wird jetzt gar nichts mehr.
+
+Die Team-Karte zeigte das Bild als **runden Avatar mit 96 px**. Vorbereitet ist
 ein quadratischer Zuschnitt mit 384 px Kante (reicht bis zu vierfacher
 Pixeldichte) bei 21 KB, aus `DSCF0042 1.jpg`.
 
@@ -401,3 +407,95 @@ select e.slug, e.title, e.is_published, count(p.id) as phasen
 
 Eine Zeile je eingespielter Sequenz, alle `is_published = true` — dann steht
 T18 bis auf die News.
+
+
+---
+
+## Kurse: DER ATEMCODE – ONLINE (Herbst/Winter 2026)
+
+Eine Online-Reihe, jeden **Montag von 20:00 bis 21:00**, **9,99 €** je Abend,
+in der App buchbar. Vier Themen im Wechsel — **Funktionale Atmung, Balance,
+Energy, Relax** — über **zwölf Termine** vom 21.09. bis 14.12.2026.
+Frei bleiben auf Wunsch **12.10., 21.12. und 28.12.2026**.
+
+Die Themen laufen über die *stattfindenden* Termine im Kreis, nicht über den
+Kalender: **fällt ein Termin aus, rückt sein Thema auf den nächsten Termin nach,
+und die folgenden verschieben sich entsprechend.** Deshalb geht es nach dem
+5.10. (Energy) mit Relax weiter und nicht wieder mit Funktionaler Atmung. So
+gehen genau drei volle Durchläufe auf. Die Regel steht auch im Text jedes
+Kurses, damit Teilnehmende sie kennen.
+
+Stattgefunden wird in **Microsoft Teams**; der Link wird vor jedem Termin
+ausgesendet. Das steht in jedem Kurstext unter „Wie es abläuft" und noch einmal
+im Reihen-Hinweis am Ende.
+
+### 1. Titelbilder hochladen
+
+Vier abstrakte Bilder, je eines pro Thema, aus den Tokens gerendert — keine
+Fotos, keine fremden Bildrechte:
+
+```bash
+node docs/inhalte/kurse-online-cover.mjs /tmp/covers
+```
+
+**Studio → Storage → `public-assets` → Ordner `courses` → Upload.** Die
+Dateinamen müssen so bleiben, sonst zeigt die Karte ins Leere:
+
+| Datei | Thema | Motiv |
+|---|---|---|
+| `online-funktionale-atmung.png` | Funktionale Atmung | konzentrische Ringe, die sich nach außen öffnen |
+| `online-balance.png` | Balance | zwei gegenläufige Wellen um eine Mittellinie |
+| `online-energy.png` | Energy | beidseitiges Atemmuster, das auf- und abklingt |
+| `online-relax.png` | Relax | eine Welle, die ausschwingt und ruhig wird |
+
+Wer echte Fotos hat, ersetzt sie — dann aber **unter neuem Namen** und die
+Pfade im SQL mitziehen, sonst zeigt der Browser tagelang das alte Bild
+(siehe den Kasten weiter oben).
+
+Fehlt eine Datei, bricht nichts: `CoverImage` zeigt dann die getönte Fläche
+mit Wasserzeichen statt eines kaputten Bildes.
+
+### 2. Kurse anlegen
+
+**Studio → SQL Editor**, Inhalt von `docs/inhalte/kurse-online-2026.sql`
+einfügen und ausführen. Am Ende zeigt das Skript die zwölf angelegten Zeilen
+mit Wiener Ortszeit zur Gegenprobe.
+
+Das Skript ist **mehrfach ausführbar**: gleicher `slug` heißt Aktualisierung
+statt Doublette, und bereits gebuchte Termine behalten ihre `id` — Buchungen
+bleiben gültig.
+
+**In beiden Umgebungen einspielen**, Staging und Live.
+
+### Was dabei bewusst so ist
+
+- **`sort_order` 60 bis 170.** Die Übersicht sortiert allein danach
+  (`useCoursesList`). Die fünf VHS-Kurse liegen auf 10 bis 50 und behalten
+  damit die drei großen Kacheln; die Online-Reihe steht darunter in der Liste
+  „Weitere Kurse". Soll die Reihe nach oben, genügt es, die Zahlen zu tauschen.
+- **Zwölf einzelne Zeilen statt einer Reihe.** Jeder Abend ist einzeln buchbar
+  und braucht deshalb einen eigenen Preis, ein eigenes Datum und eine eigene
+  Buchung. Die Kursseite wird dadurch länger — das ist der Preis dafür, dass
+  man einen einzelnen Abend buchen kann.
+- **Keine Platzbegrenzung** (`capacity` null): online gibt es keinen Raum, der
+  voll wird. Wer eine Grenze will, trägt sie je Zeile nach; die Anzeige
+  „Ausgebucht" hängt daran.
+- **Keine Anzahlung** (`deposit_cents` null): bei 9,99 € wäre eine Teilzahlung
+  mehr Verwaltung als Nutzen. Es wird im Checkout voll bezahlt.
+- **Die Zeitumstellung ist ausgerechnet.** 20:00 Wiener Zeit sind bis zum
+  25.10.2026 18:00 UTC und danach 19:00 UTC. Im Skript steht deshalb `+02`
+  bzw. `+01`, nicht durchgehend dasselbe.
+
+### Was noch von Hand gehört
+
+- **Das Aussenden des Teams-Links.** Dass er vor dem Termin kommt, steht jetzt
+  im Text — *wer* ihn verschickt und *wann genau*, macht kein Automatismus. Es
+  gibt keine eigene Mailfunktion im Projekt (`supabase/functions/_HINWEIS.md`):
+  nach einer Buchung verschickt Stripe den Zahlungsbeleg, sonst nichts. Der
+  Link geht also von Hand raus, und die Teilnehmerliste dafür steht in
+  `course_bookings`.
+- **Der Sicherheitshinweis bei „Energy"** (Schwangerschaft, Herz-Kreislauf,
+  Epilepsie, nicht im Wasser, nicht beim Autofahren) war nicht Teil der
+  Vorgabe, sondern ein Vorschlag — **am 23.08.2026 ausdrücklich bestätigt und
+  damit gewollt.** Er gehört zu jedem Text mit aktivierender Atmung; wer
+  künftig eine weitere Energy-Einheit anlegt, übernimmt ihn mit.
