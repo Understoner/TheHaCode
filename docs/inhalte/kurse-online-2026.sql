@@ -20,6 +20,12 @@
 -- genau die Art Fehler, die erst der erste Teilnehmer bemerkt.
 --
 -- AUSGENOMMENE MONTAGE (auf Wunsch frei): 12.10., 21.12., 28.12.2026.
+--
+-- REIHENFOLGE DER THEMEN: sie laufen ueber die STATTFINDENDEN Termine im
+-- Kreis, nicht ueber den Kalender - faellt ein Termin aus, rueckt sein Thema
+-- auf den naechsten nach. Deshalb folgt auf Energy (05.10.) direkt Relax
+-- (19.10.) und nicht wieder Funktionale Atmung. So gehen genau drei volle
+-- Durchlaeufe auf. Vom Nutzer am 23.08.2026 ausdruecklich so bestaetigt.
 -- ---------------------------------------------------------------------------
 
 with thema (key, thema_titel, bild, kurz, lang) as (values
@@ -54,9 +60,9 @@ keine.
 
 ## Wie es abläuft
 
-Wir treffen uns online. Du brauchst eine Stunde ungestörte Zeit, eine Matte
-oder Decke und die Möglichkeit, dich hinzulegen. Kopfhörer sind angenehm, aber
-kein Muss.$md$),
+Wir treffen uns in **Microsoft Teams** — den Link bekommst du vor dem Termin
+zugeschickt. Du brauchst eine Stunde ungestörte Zeit, eine Matte oder Decke und
+die Möglichkeit, dich hinzulegen. Kopfhörer sind angenehm, aber kein Muss.$md$),
 
 -- ----------------------------------------------------------------- 2. Balance
 ('balance', 'Balance', 'courses/online-balance.png',
@@ -85,8 +91,9 @@ fehlenden Beweglichkeit.
 
 ## Wie es abläuft
 
-Wir treffen uns online. Du brauchst eine Stunde ungestörte Zeit, eine Matte
-oder Decke und die Möglichkeit, dich hinzulegen.$md$),
+Wir treffen uns in **Microsoft Teams** — den Link bekommst du vor dem Termin
+zugeschickt. Du brauchst eine Stunde ungestörte Zeit, eine Matte oder Decke und
+die Möglichkeit, dich hinzulegen.$md$),
 
 -- ------------------------------------------------------------------ 3. Energy
 ('energy', 'Energy', 'courses/online-energy.png',
@@ -122,8 +129,9 @@ nie im Wasser, nie beim Autofahren.
 
 ## Wie es abläuft
 
-Wir treffen uns online. Du brauchst eine Stunde ungestörte Zeit, eine Matte
-oder Decke und die Möglichkeit, dich hinzulegen.$md$),
+Wir treffen uns in **Microsoft Teams** — den Link bekommst du vor dem Termin
+zugeschickt. Du brauchst eine Stunde ungestörte Zeit, eine Matte oder Decke und
+die Möglichkeit, dich hinzulegen.$md$),
 
 -- ------------------------------------------------------------------- 4. Relax
 ('relax', 'Relax', 'courses/online-relax.png',
@@ -153,9 +161,10 @@ braucht es keine.
 
 ## Wie es abläuft
 
-Wir treffen uns online. Du brauchst eine Stunde ungestörte Zeit, eine Matte
-oder Decke und die Möglichkeit, dich hinzulegen. Diese Einheit eignet sich gut,
-um danach direkt schlafen zu gehen.$md$)
+Wir treffen uns in **Microsoft Teams** — den Link bekommst du vor dem Termin
+zugeschickt. Du brauchst eine Stunde ungestörte Zeit, eine Matte oder Decke und
+die Möglichkeit, dich hinzulegen. Diese Einheit eignet sich gut, um danach
+direkt schlafen zu gehen.$md$)
 
 ),
 
@@ -209,7 +218,9 @@ select
   lang || E'\n\n> Teil der Reihe **DER ATEMCODE – ONLINE**: jeden Montag von '
        || '20:00 bis 21:00, jede Woche ein Thema — Funktionale Atmung, '
        || 'Balance, Energy und Relax. Jeder Abend steht für sich, du kannst '
-       || 'einzeln dabei sein.',
+       || 'einzeln dabei sein. Fällt ein Termin aus, rückt sein Thema auf den '
+       || 'nächsten Termin nach; die folgenden Themen verschieben sich '
+       || 'entsprechend. Der Teams-Link wird vor jedem Termin ausgesendet.',
   'Online',
   '9,99 €',
   bild,

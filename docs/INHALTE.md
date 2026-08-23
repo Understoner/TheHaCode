@@ -419,9 +419,15 @@ Energy, Relax** — über **zwölf Termine** vom 21.09. bis 14.12.2026.
 Frei bleiben auf Wunsch **12.10., 21.12. und 28.12.2026**.
 
 Die Themen laufen über die *stattfindenden* Termine im Kreis, nicht über den
-Kalender: der ausgefallene 12. Oktober verschiebt die Reihenfolge nicht, er
-überspringt sie. Deshalb geht es nach dem 5.10. (Energy) mit Relax weiter und
-nicht mit Funktionaler Atmung. Es sind genau drei volle Durchläufe.
+Kalender: **fällt ein Termin aus, rückt sein Thema auf den nächsten Termin nach,
+und die folgenden verschieben sich entsprechend.** Deshalb geht es nach dem
+5.10. (Energy) mit Relax weiter und nicht wieder mit Funktionaler Atmung. So
+gehen genau drei volle Durchläufe auf. Die Regel steht auch im Text jedes
+Kurses, damit Teilnehmende sie kennen.
+
+Stattgefunden wird in **Microsoft Teams**; der Link wird vor jedem Termin
+ausgesendet. Das steht in jedem Kurstext unter „Wie es abläuft" und noch einmal
+im Reihen-Hinweis am Ende.
 
 ### 1. Titelbilder hochladen
 
@@ -482,10 +488,12 @@ bleiben gültig.
 
 ### Was noch von Hand gehört
 
-- **Der Zugangslink.** In den Texten steht nur „Wir treffen uns online" — mit
-  welchem Werkzeug und wie der Link zu den Teilnehmenden kommt, steht nirgends,
-  weil es mir niemand gesagt hat. Das gehört ergänzt, entweder im Langtext oder
-  in der Bestätigungsmail.
+- **Das Aussenden des Teams-Links.** Dass er vor dem Termin kommt, steht jetzt
+  im Text — *wer* ihn verschickt und *wann genau*, macht kein Automatismus. Es
+  gibt keine eigene Mailfunktion im Projekt (`supabase/functions/_HINWEIS.md`):
+  nach einer Buchung verschickt Stripe den Zahlungsbeleg, sonst nichts. Der
+  Link geht also von Hand raus, und die Teilnehmerliste dafür steht in
+  `course_bookings`.
 - **Der Sicherheitshinweis bei „Energy"** (Schwangerschaft, Herz-Kreislauf,
   Epilepsie) stammt von mir, nicht aus der Vorgabe. Er ist bei aktivierender
   Atmung üblich und sinnvoll — wenn er nicht zur Praxis passt, gehört er weg
