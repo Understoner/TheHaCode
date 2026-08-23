@@ -43,12 +43,14 @@ export type ResponsiveTarget =
   // Seite leer bleibt.
   | 'konto-grid';
 
-// Nur die Mindestbreiten unterscheiden sich - Teamkarten sind schmaler, weil
-// sie neben dem 96px-Portrait weniger Fliesstext tragen.
+// Nur die Mindestbreiten unterscheiden sich. Teamkarten tragen seit dem
+// Umbau auf die News-Anatomie (Bild oben ueber die volle Breite) dieselbe
+// Struktur wie News und Kurse und deshalb auch dieselbe Mindestbreite -
+// schmaler gestellt wuerde das quadratische Portrait unnoetig klein.
 const GRID_MIN_WIDTH: Record<'news-grid' | 'courses-grid' | 'team-grid' | 'sessions-grid', number> = {
   'news-grid': 280,
   'courses-grid': 280,
-  'team-grid': 260,
+  'team-grid': 280,
   'sessions-grid': 260,
 };
 
