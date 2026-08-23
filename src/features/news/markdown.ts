@@ -136,6 +136,21 @@ export function parseMarkdown(source: string): Block[] {
       continue;
     }
 
+    // Fortsetzungszeile eines Listenpunktes: eingerueckt, waehrend eine Liste
+    // offen ist. Ohne diesen Zweig endete die Liste hier und der Rest des
+    // Punktes wurde ein eigener Absatz - sichtbar als abgerissene Zeile
+    // mitten in der Aufzaehlung (am 23.08.2026 auf der Kursseite aufgefallen,
+    // wo die Punkte ueber zwei Zeilen laufen).
+    //
+    // Absichtlich an die Einrueckung gebunden: eine Zeile ohne Einrueckung
+    // beginnt weiterhin einen neuen Absatz. Sonst wuerde jeder Text, der
+    // direkt unter einer Liste ohne Leerzeile weitergeht, still in den letzten
+    // Punkt gezogen.
+    if (list.length && /^\s+\S/.test(raw)) {
+      list[list.length - 1] += ` ${line}`;
+      continue;
+    }
+
     if (list.length || quote.length) flush();
     paragraph.push(line);
   }

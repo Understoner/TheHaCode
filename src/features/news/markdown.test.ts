@@ -36,6 +36,25 @@ describe('parseMarkdown', () => {
     expect(blocks.map((b) => b.kind)).toEqual(['paragraph', 'list']);
   });
 
+  it('fuehrt eine eingerueckte Fortsetzungszeile im selben Listenpunkt weiter', () => {
+    // Vorher endete die Liste an der zweiten Zeile und der Rest des Punktes
+    // wurde ein eigener Absatz - mitten in der Aufzaehlung sichtbar.
+    const blocks = parseMarkdown('- Erster Punkt, der\n  ueber zwei Zeilen laeuft.\n- Zweiter Punkt.');
+
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0]).toMatchObject({ kind: 'list' });
+    const [liste] = blocks as [{ kind: 'list'; items: unknown[] }];
+    expect(liste.items).toHaveLength(2);
+  });
+
+  it('beginnt bei einer NICHT eingerueckten Zeile weiterhin einen neuen Absatz', () => {
+    // Die Gegenprobe zur Zeile darueber: ohne Einrueckung bleibt es Fliesstext,
+    // sonst zoege jeder Text direkt unter einer Liste still in den letzten Punkt.
+    const blocks = parseMarkdown('- Ein Punkt.\nEin eigener Absatz.');
+
+    expect(blocks.map((b) => b.kind)).toEqual(['list', 'paragraph']);
+  });
+
   it('liest Bilder samt Form aus dem Titel-Attribut', () => {
     const blocks = parseMarkdown('![Michael](team/foto.jpg "portrait")');
 
