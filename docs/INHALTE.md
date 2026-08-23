@@ -469,10 +469,11 @@ bleiben gültig.
 
 ### Was dabei bewusst so ist
 
-- **`sort_order` 60 bis 170.** Die Übersicht sortiert allein danach
-  (`useCoursesList`). Die fünf VHS-Kurse liegen auf 10 bis 50 und behalten
-  damit die drei großen Kacheln; die Online-Reihe steht darunter in der Liste
-  „Weitere Kurse". Soll die Reihe nach oben, genügt es, die Zahlen zu tauschen.
+- **`sort_order` 60 bis 170 — entscheidet aber nicht mehr die Reihenfolge.**
+  Seit 23.08.2026 sortiert die Übersicht **nach Termin aufsteigend**
+  (`useCoursesList`), `sort_order` ist nur noch das zweite Kriterium für zwei
+  Kurse zur selben Stunde. Die drei großen Kacheln zeigen damit die drei
+  nächsten Termine, egal aus welcher Reihe sie stammen.
 - **Zwölf einzelne Zeilen statt einer Reihe.** Jeder Abend ist einzeln buchbar
   und braucht deshalb einen eigenen Preis, ein eigenes Datum und eine eigene
   Buchung. Die Kursseite wird dadurch länger — das ist der Preis dafür, dass

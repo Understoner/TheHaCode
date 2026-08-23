@@ -197,9 +197,10 @@ zeile as (
     th.kurz,
     th.lang,
     t.beginn,
-    -- Die Uebersicht sortiert allein nach sort_order (useCoursesList).
-    -- 60 aufwaerts in Zehnerschritten: die fuenf VHS-Kurse liegen auf 10 bis 50
-    -- und behalten damit ihre Reihenfolge und die drei grossen Kacheln.
+    -- Seit 23.08.2026 sortiert die Uebersicht nach Termin aufsteigend;
+    -- sort_order ist nur noch das zweite Kriterium fuer zwei Kurse zur selben
+    -- Stunde. Die Zehnerschritte ab 60 bleiben trotzdem: sie halten die Reihe
+    -- in sich geordnet, falls jemand spaeter doch wieder von Hand sortiert.
     50 + 10 * row_number() over (order by t.beginn) as sortierung
   from termin t
   join thema th on th.key = t.key
