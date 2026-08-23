@@ -453,9 +453,17 @@ Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
 - [x] Haftungsausschluss online — nicht ursprünglich geplant, siehe T19a
 - [x] Verzeichnis von Verarbeitungstätigkeiten angelegt
       — `docs/VERARBEITUNGSVERZEICHNIS.md`, neun Tätigkeiten, aus Migrationen
-      und Edge Functions zusammengetragen. **Entwurf, noch nicht in Kraft:**
-      es fehlt die eine Prüfung, die kein Werkzeug abnehmen kann — ob die
-      Speicherdauern dem entsprechen, was tatsächlich passiert.
+      und Edge Functions zusammengetragen. **Speicherdauern am 23.08.2026
+      gegen die Migrationen geprüft** — nicht gegen den eigenen Text. Die
+      Kaskadenlöschung greift bei allen fünf Nutzertabellen; drei Angaben
+      waren zu kurz gegriffen und stehen jetzt richtig: die Sicherungskopien
+      (heute keine, ab Supabase Pro sieben Tage — der Wechsel ist mit T17a
+      schon geplant), das Teamfoto (unveröffentlichen versteckt die Zeile,
+      löscht aber die Datei im öffentlichen Bucket nicht) und die steuerlichen
+      Belege (aufbewahrungspflichtig ist der Unternehmer, nicht Stripe).
+      **Entwurf bleibt es dennoch:** zwei Fristen kann nur der Verantwortliche
+      selbst setzen — die Protokolle beim Hoster und der eigene E-Mail-Verkehr.
+      Beide sind im Verzeichnis mit ⚠ markiert.
       Enthält bewusst auch, was *nicht* verarbeitet wird — an genau so einer
       Auslassung ist die Datenschutzerklärung schon einmal falsch geworden.
 - [x] AVV mit Supabase, Hostinger, Stripe geschlossen
