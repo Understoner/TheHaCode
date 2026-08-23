@@ -5,11 +5,17 @@ Nach Art. 30 Abs. 1 DSGVO. Gehört zu **T19**.
 > **Entwurf, noch nicht in Kraft.** Zusammengetragen aus dem, was im Repo
 > tatsächlich steht — Migrationen, Edge Functions, Datenschutzerklärung. Was
 > hier steht, ist damit belegbar; was nicht belegbar war, steht nicht drin.
-> Die Auftragsverarbeitungsverträge sind inzwischen geschlossen (Abschnitt 4).
-> Offen bleibt eine Prüfung, die nur ein Mensch machen kann: ob die
-> Speicherdauern dem entsprechen, was tatsächlich passiert.
+> Die Auftragsverarbeitungsverträge sind geschlossen (Abschnitt 4).
+>
+> **Die Speicherdauern sind am 23. August 2026 gegen die Migrationen geprüft
+> worden**, nicht gegen den eigenen Text. Ergebnis: die Löschung über
+> `on delete cascade` greift bei allen Nutzertabellen tatsächlich, drei
+> Angaben waren zu kurz gegriffen und stehen jetzt richtig (Sicherungskopien,
+> Teamfoto, steuerliche Belege). **Zwei Fristen kann nur der Verantwortliche
+> selbst festlegen** — sie sind unten mit ⚠ markiert. Solange sie offen sind,
+> bleibt der Entwurfsvermerk stehen.
 
-**Stand:** 22. August 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
+**Stand:** 23. August 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
 Personenbezug, spätestens vor V1.1 (Atem-Tagebuch — dann fallen erstmals
 Gesundheitsdaten nach Art. 9 an, und dieses Verzeichnis braucht einen eigenen
 Eintrag samt Rechtsgrundlage).
@@ -40,7 +46,13 @@ Eintrag samt Rechtsgrundlage).
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. f — berechtigtes Interesse am sicheren Betrieb |
 | **Empfänger** | Hostinger (Auftragsverarbeiter) |
 | **Drittland** | möglich, abgesichert über Standardvertragsklauseln |
-| **Löschfrist** | nach den Vorgaben des Hosters; wir werten die Protokolle nicht aus und führen sie mit nichts zusammen |
+| **Löschfrist** | ⚠ **noch festzulegen** — die Protokolle entstehen beim Hoster und werden von ihm verwaltet; eine eigene Frist ist bisher nicht vereinbart. Wir werten sie nicht aus und führen sie mit nichts zusammen. |
+
+> ⚠ **Offen: Frist beim Hoster erfragen.** Art. 30 Abs. 1 lit. f verlangt die
+> vorgesehene Löschfrist „wenn möglich" — bei fremdverwalteten Protokollen ist
+> ein Verweis vertretbar, eine Zahl aber besser. Zu klären ist außerdem, ob
+> Hostingers CDN eigene Protokolle führt: es sitzt seit dem 22.08.2026 vor der
+> Seite und sieht damit jede Besucher-IP vor dem Webserver.
 
 ### V2 · Nutzerkonto
 
@@ -52,7 +64,7 @@ Eintrag samt Rechtsgrundlage).
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b — Erfüllung des Nutzungsvertrags |
 | **Empfänger** | Supabase (Auftragsverarbeiter, betreibt auch den Versand der Kontomails) |
 | **Drittland** | möglich, abgesichert über Standardvertragsklauseln |
-| **Löschfrist** | mit der Löschung des Kontos; sie erfolgt sofort und vollständig über `on delete cascade` (Edge Function `delete-account`) |
+| **Löschfrist** | mit der Löschung des Kontos; sie erfolgt sofort und vollständig über `on delete cascade` (Edge Function `delete-account`) — zur Einschränkung siehe „Sicherungskopien" am Ende dieses Abschnitts |
 
 > Kein eigenes Passwort-Hashing, keine eigene Sitzungstabelle — die
 > Nutzerverwaltung liegt vollständig bei Supabase Auth (CLAUDE.md).
@@ -83,6 +95,15 @@ Eintrag samt Rechtsgrundlage).
 | **Empfänger** | Stripe Payments Europe Ltd. (für die Zahlungsdaten eigenverantwortlich), Supabase |
 | **Drittland** | möglich, abgesichert über Standardvertragsklauseln |
 | **Löschfrist** | Zeilen bei uns mit der Löschung des Kontos; die steuerlich aufzubewahrenden Belege liegen bei Stripe und unterliegen der siebenjährigen Frist des § 132 BAO |
+
+> **Das ist eine Entscheidung, keine Selbstverständlichkeit.** Aufbewahrungs-
+> pflichtiger nach § 132 BAO ist der Unternehmer, nicht Stripe. Weil unsere
+> eigenen Zeilen mit dem Konto verschwinden, ist die Buchhaltung **allein**
+> das Stripe-Dashboard. Das ist zulässig und im Kleinbetrieb üblich, hat aber
+> eine Kehrseite: Zugang zu Unterlagen, die sieben Jahre vorzuhalten sind,
+> hängt damit am Fortbestand eines fremden Kontos. Ein regelmäßiger Export der
+> Stripe-Belege in die eigene Ablage schließt diese Lücke — er ist kein
+> Datenschutzthema, sondern eines der Abgabenordnung.
 
 > Zahlungsdaten — Kartennummer, Ablaufdatum, Prüfziffer — werden unmittelbar
 > bei Stripe eingegeben und erreichen uns nie.
@@ -123,7 +144,15 @@ Eintrag samt Rechtsgrundlage).
 | **Datenkategorien** | Name, Funktionsbezeichnung, Kurzvorstellung, Foto (`team_members`, Bucket `public-assets`) |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. f — Darstellung des eigenen Angebots; bei künftigen Teammitgliedern Art. 6 Abs. 1 lit. a (Einwilligung, dann Eintrag in `user_consents`) |
 | **Empfänger** | Supabase; öffentlich abrufbar |
-| **Löschfrist** | bis zum Widerruf oder Ausscheiden — `published_at = null` nimmt die Zeile sofort aus der Ansicht |
+| **Löschfrist** | bis zum Widerruf oder Ausscheiden — `published_at = null` nimmt die Zeile sofort aus der **Ansicht**; das Foto muss zusätzlich im Bucket gelöscht werden |
+
+> **Korrigiert am 23.08.2026.** Der Bucket `public-assets` ist öffentlich
+> (`public = true`, Migration 0004), und die Leseregel gilt für jeden. Wer die
+> Bildadresse kennt, erreicht das Foto weiterhin — auch wenn die Zeile längst
+> unveröffentlicht ist. Beim Ausscheiden oder Widerruf einer künftigen Person
+> gehören deshalb **zwei** Handgriffe dazu: `published_at` leeren **und** die
+> Datei im Bucket entfernen. Für den Inhaber selbst ist das folgenlos, für
+> jede weitere Person ist es der Unterschied zwischen Löschung und Verstecken.
 
 ### V8 · Betroffenenrechte
 
@@ -145,7 +174,38 @@ Eintrag samt Rechtsgrundlage).
 | **Datenkategorien** | Absenderadresse, Inhalt der Nachricht, Zeitpunkt |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b bei Vertragsbezug, sonst Art. 6 Abs. 1 lit. f |
 | **Empfänger** | der Anbieter des Postfachs |
-| **Löschfrist** | wenn die Anfrage erledigt ist und keine Aufbewahrungspflicht besteht |
+| **Löschfrist** | ⚠ **noch festzulegen** — bisher: „wenn die Anfrage erledigt ist und keine Aufbewahrungspflicht besteht". Das beschreibt eine Bedingung, keine Frist, und niemand räumt ein Postfach nach dieser Regel auf. |
+
+> ⚠ **Offen: eigene Frist bestimmen.** Sinnvoll ist eine schlichte Zahl, die
+> auch eingehalten wird — etwa „Anfragen ohne Vertragsbezug nach zwölf Monaten
+> aus dem Postfach". Geschäftsbriefe mit Vertragsbezug fallen ohnehin unter
+> § 132 BAO (sieben Jahre). Diese Frist kann nur der Verantwortliche selbst
+> setzen; aus dem Repository ist sie nicht ableitbar.
+
+### Sicherungskopien — die Frist hinter allen anderen Fristen
+
+| | |
+|---|---|
+| **Zweck** | Wiederherstellung nach technischem Ausfall |
+| **Betroffene** | alle oben Genannten |
+| **Datenkategorien** | vollständige Kopien der Datenbank |
+| **Rechtsgrundlage** | Art. 6 Abs. 1 lit. f in Verbindung mit Art. 32 Abs. 1 lit. c — Wiederherstellbarkeit ist selbst eine Pflicht |
+| **Empfänger** | Supabase |
+| **Löschfrist** | **derzeit gegenstandslos:** die Projekte laufen auf dem kostenlosen Plan, und der enthält **keine** automatischen Sicherungen |
+
+> **Warum dieser Abschnitt trotzdem hier steht.** Ohne ihn liest sich die
+> Zusage bei V2 — Löschung „sofort und vollständig" — wie ein Naturgesetz.
+> Sie ist aber eine Eigenschaft des gebuchten Plans: Supabase sichert auf dem
+> freien Plan gar nicht, auf **Pro** täglich mit sieben Tagen Vorhaltung, auf
+> Team mit vierzehn. Heute stimmt der Satz also. **Am Tag des Wechsels auf Pro
+> stimmt er nicht mehr** — dann überlebt eine gelöschte Zeile bis zu sieben
+> Tage in den Sicherungen, und sowohl dieser Eintrag als auch die
+> Datenschutzerklärung müssen das sagen.
+>
+> Der Wechsel ist bereits geplant (T17a, deutsche Auth-Mails brauchen Pro).
+> Das ist genau der Fall aus Abschnitt 6: eine Auslassung fällt weg, ohne dass
+> jemand eine Migration schreibt. Deshalb steht er dort jetzt als eigener
+> Auslöser.
 
 ---
 
@@ -231,7 +291,13 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
   eingehende Ereignisse werden gegen den Rohtext signaturgeprüft und sind
   gegen Doppelverarbeitung abgesichert.
 - **Löschung durch Bauweise.** Jede Nutzertabelle hängt mit `on delete cascade`
-  an `auth.users`; ein Test prüft laufend, dass keine Zeile zurückbleibt.
+  an `auth.users`; ein Test prüft laufend, dass keine Zeile zurückbleibt. Am
+  23.08.2026 gegen die Migrationen nachgeprüft: `profiles`, `exercises`,
+  `subscriptions`, `course_bookings` und `user_consents` hängen alle so. Dass
+  auf `user_consents` weder UPDATE noch DELETE erlaubt ist, steht dem nicht im
+  Weg — die Sperre ist eine fehlende RLS-Regel, und der Kaskadenlauf der
+  Datenbank unterliegt ihr nicht. Eine Löschsperre als Trigger hätte das
+  Löschen des Kontos dagegen scheitern lassen.
 - **Nachvollziehbarkeit der Änderungen.** Schemaänderungen ausschließlich als
   Migration im Repository, jede Änderung über einen Pull Request, automatische
   Prüfung vor der Auslieferung.
@@ -246,6 +312,12 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
   Abschnitt 2, im selben Pull Request wie die Migration.
 - Ein **neuer Dienstleister** kommt dazu → Zeile in Abschnitt 4 und Prüfung, ob
   die Datenschutzerklärung noch stimmt.
+- Der **Supabase-Plan wechselt** → mit Pro entstehen tägliche Sicherungen mit
+  sieben Tagen Vorhaltung. Ab diesem Tag ist die Löschung nicht mehr „sofort
+  und vollständig", sondern sofort in der Datenbank und binnen sieben Tagen in
+  den Sicherungen. Betrifft den Abschnitt „Sicherungskopien" **und** die
+  Datenschutzerklärung. Kein Code ändert sich dabei — deshalb fällt es nur auf,
+  wenn man hier nachsieht.
 - Eine **Auslassung aus Abschnitt 3 fällt weg** → das ist der gefährliche Fall.
   Genau daran ist die Datenschutzerklärung schon einmal falsch geworden (die
   Annahme „keine Nutzerkonten in dieser Phase" überlebte die Einführung von
