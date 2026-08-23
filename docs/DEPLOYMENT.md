@@ -255,7 +255,7 @@ entscheidend ist der **curl-Exitcode** in den Wartezeilen:
 | Meldung | Bedeutung | Was zu tun ist |
 |---|---|---|
 | `curl-Exitcode 22: … 403` bei **jedem** Abruf | Der Server antwortet, weist den Runner aber ab. Bot-Schutz. Der Build kann längst fertig sein. | hPanel → CDN/Bot-Schutz für die Subdomain. Nicht im Build-Protokoll suchen. |
-| `curl-Exitcode 28: Connection timed out` bei jedem Abruf | Vom Runner aus gar nicht erreichbar. Dieselbe Ursache wie 403, nur eine stille Abweisung statt einer gesprochenen — **am 21.08.2026 auf der Hauptdomain erlebt**, siehe unten. | Wie oben, plus DNS der Subdomain prüfen. |
+| `curl-Exitcode 28: Connection timed out` bei jedem Abruf | Vom Runner aus gar nicht erreichbar. Dieselbe Ursache wie 403, nur eine stille Abweisung statt einer gesprochenen — **am 21.08. und am 23.08.2026 auf der Hauptdomain erlebt**, siehe unten. | Wie oben, plus DNS der Subdomain prüfen. |
 | `noch die vorherige Version (builtAt=…)` | Die Seite antwortet, Hostinger hat aber nicht neu gebaut. | hPanel → Deployments, Build-Protokoll ansehen. |
 | `curl-Exitcode 22: … 404` | Erreichbar, aber `build-info.json` fehlt — Build unvollständig oder falsches Output-Verzeichnis. | Build-Einstellungen prüfen (Output `dist`). |
 
@@ -297,6 +297,30 @@ Runner lief trotzdem zehn Minuten ins Leere. Es trifft also **beide Hosts**,
 nicht nur die Hauptdomain — und offenbar in Wellen: der Production-Lauf eine
 Stunde vorher und der Neustart eine Viertelstunde später gingen beide glatt
 durch.
+
+### Dritter Vorfall, 23.08.2026 — und was er zusätzlich zeigt
+
+Beim Ausrollen von `e519ffd` lief der Production-Wartepunkt (Lauf
+`32654856223`) wieder in `curl-Exitcode 28`, diesmal bis zum Abbruch nach
+600 Sekunden. Ausgeliefert war zu dem Zeitpunkt längst der richtige Stand:
+`build-info.json` trug `e519ffd` mit Bauzeit **17:27:40**, der Wartepunkt
+klopfte von 17:31 bis 17:37 vergeblich. Von einer gewöhnlichen Verbindung aus
+war die Seite die ganze Zeit erreichbar.
+
+Zwei Dinge daran sind neu und ändern die Einordnung:
+
+- **Es ist sporadisch, nicht ein umgelegter Schalter.** Am selben Tag liefen
+  drei Auslieferungen sauber durch (`b441d43`, `fe5ab1a` und der
+  Staging-Anteil dieses Laufs), erst die vierte kippte. Wer nach einem roten
+  Wartepunkt in hPanel nach einer geänderten Einstellung sucht, sucht deshalb
+  womöglich etwas, das es nicht gibt.
+- **Die Absenkung der CDN-Sicherheitsstufe vom 22.08.2026 hat es seltener
+  gemacht, nicht beseitigt.** Sie bleibt trotzdem richtig; sie ist keine
+  Lösung, sondern eine Verringerung der Häufigkeit.
+
+Behandelt wurde der Fall nach der Regel unten: Smoke-Tests von außen
+nachgeholt, 5 von 5 grün, dazu die drei an diesem Tag geänderten Rechtstexte
+einzeln gegen die Livedomain geprüft.
 
 ### Das Erste, was zu tun ist: den Job neu starten
 
