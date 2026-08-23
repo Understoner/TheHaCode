@@ -54,8 +54,9 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 
 > **Bekannte Schwäche, dokumentiert:** Der Wartepunkt kann rot werden, obwohl
 > der Livegang in Ordnung ist — wenn Hostingers Bot-Schutz die GitHub-Runner
-> abweist. Zweimal erlebt (14.08. als 403 auf der dev-Subdomain, 21.08. als
-> Timeout auf der Hauptdomain). Beides steht in `docs/DEPLOYMENT.md`, samt der
+> abweist. Dreimal erlebt (14.08. als 403 auf der dev-Subdomain, 21.08. und
+> 23.08. als Timeout auf der Hauptdomain). Der dritte Fall zeigt, dass es
+> sporadisch ist: drei Auslieferungen am selben Tag liefen sauber durch. Beides steht in `docs/DEPLOYMENT.md`, samt der
 > Regel, danach die Smoke-Tests von außen nachzuholen.
 
 > **Zweiter Fund, 22.08.2026 (#54):** Eine neue dynamische Route unter einem
