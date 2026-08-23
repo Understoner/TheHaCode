@@ -174,9 +174,14 @@ Deno.serve(async (request) => {
       // eigene Oberflaeche bauen.
       //
       // ACHTUNG, REIHENFOLGE: 'required' setzt voraus, dass die AGB-Adresse im
-      // Stripe-Dashboard unter Einstellungen -> Checkout hinterlegt ist. Fehlt
-      // sie, lehnt Stripe den Aufruf ab und NIEMAND kann kaufen. Deshalb erst
-      // Dashboard, dann diese Zeile ausrollen.
+      // Stripe-Dashboard unter Einstellungen -> Unternehmen -> Oeffentliche
+      // Angaben (dashboard.stripe.com/settings/public) hinterlegt ist - NICHT
+      // unter Einstellungen -> Checkout, dort stehen nur die angezeigten
+      // Geschaeftsrichtlinien. Test- und Livemodus haben je eine eigene
+      // Fassung. Fehlt sie, wirft Stripe schon beim Anlegen der Session, der
+      // catch unten macht daraus ein '502 checkout_failed' - und NIEMAND kann
+      // kaufen, ohne dass die Meldung sagt warum. Deshalb erst Dashboard, dann
+      // diese Zeile ausrollen.
       consent_collection: { terms_of_service: 'required' },
       custom_text: { terms_of_service_acceptance: { message: tosHinweis(appUrl) } },
 
