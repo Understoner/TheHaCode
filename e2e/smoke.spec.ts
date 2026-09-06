@@ -44,6 +44,40 @@ test('Mobile: alle Eintraege der Tab-Leiste stehen gleich aufgebaut da', async (
   }
 });
 
+// Der Fussbereich muss auf dem Handy EINE Zeile bleiben. Vorher brach er um,
+// und die zweite Zeile kostete Platz direkt ueber der Tab-Leiste - dort, wo es
+// am engsten ist. Behoben ueber kuerzere Beschriftungen UND einen waagrecht
+// schiebbaren Streifen; geprueft wird hier nur das Ergebnis, nicht der Weg.
+//
+// Wie beim Test der Tab-Leiste geht das nur mit echtem Layout: in jsdom haben
+// alle Kaesten die Groesse null, ein Umbruch waere dort unsichtbar. 320 px ist
+// das schmalste Geraet, das noch vorkommt (iPhone SE der ersten Reihe).
+test('Mobile: die Pflichtlinks stehen auf einer Zeile', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto('/');
+
+  const links = page.locator('a[href="/impressum"], a[href="/datenschutz"], a[href="/agb"], a[href="/haftungsausschluss"]');
+  await expect(links).toHaveCount(4);
+
+  const kaesten = [];
+  for (let i = 0; i < 4; i += 1) {
+    const box = await links.nth(i).boundingBox();
+    if (!box) throw new Error(`Kein Layout fuer Pflichtlink ${i}`);
+    kaesten.push(box);
+  }
+
+  // Alle vier auf derselben Hoehe: dann ist es eine Zeile. Ein Umbruch
+  // verschoebe den dritten oder vierten nach unten.
+  const oben = kaesten[0].y;
+  for (const [i, box] of kaesten.entries()) {
+    expect(Math.abs(box.y - oben), `Pflichtlink ${i} steht auf derselben Zeile`).toBeLessThan(2);
+  }
+
+  // Impressum ganz links - es ist der eine, der rechtlich leicht erkennbar
+  // sein muss, und links bleibt beim Schieben sichtbar.
+  expect(Math.min(...kaesten.map((b) => b.x))).toBe(kaesten[0].x);
+});
+
 // Am 14.08.2026 lieferte jede Route ausser "/" bei DIREKTEM Aufruf einen 404 —
 // auf Staging wie auf Production, und zwar unbemerkt: innerhalb der Seite
 // navigiert expo-router clientseitig, da funktioniert jeder Link. Betroffen war

@@ -10,8 +10,10 @@ export default function SessionsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Kein Untertitel mehr (06.09.2026): was eine Session ist, erklaert
+          sich an der ersten Karte besser als an einem Satz darueber - und die
+          Karten sind das, wofuer der Platz da sein soll. */}
       <Text style={styles.title}>{t('sessions.title')}</Text>
-      <Text style={styles.intro}>{t('sessions.intro')}</Text>
 
       {/* Der Konfigurator haengt bewusst an den Sessions und bekommt keinen
           eigenen Eintrag in der Navigation (so schon in design/navigation.ts
@@ -37,14 +39,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.ink900,
     paddingHorizontal: spacing.md,
-  },
-  intro: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: colors.ink700,
-    paddingHorizontal: spacing.md,
-    maxWidth: 620,
-    marginBottom: spacing.sm,
   },
   mine: {
     alignSelf: 'flex-start',
