@@ -8,6 +8,7 @@ import { VolumeSlider } from '@/components/VolumeSlider';
 import { colors, radius, spacing } from '@/design/tokens';
 import { BreathCircle } from '@/features/breathing/BreathCircle';
 import { createMusicPlayer, TRACKS, type TrackId } from '@/features/breathing/music';
+import { setAudioSessionType } from '@/features/breathing/audioSession';
 import { createAudioContext, createToneBus, type ToneBus } from '@/features/breathing/tones';
 import { createVoicePlayer, type VoicePlayer } from '@/features/breathing/voice';
 import {
@@ -139,6 +140,15 @@ function Player({ session }: { session: PlayableExercise }) {
   useEffect(() => {
     if (voiceOn) voiceRef.current?.preload();
   }, [voiceOn]);
+
+  // Auf dem iPhone entscheidet die Sitzungskategorie darueber, ob unsere Toene
+  // ueberhaupt zu hoeren sind - ohne sie schaltet der Klingelschalter reines
+  // Web Audio stumm (siehe audioSession.ts, am Geraet gemessen). Laeuft unsere
+  // Musik, richtet Safari die Sitzung schon selbst passend ein; nur ohne sie
+  // muessen wir es sagen.
+  useEffect(() => {
+    setAudioSessionType(musicTrack ? 'auto' : 'transient');
+  }, [musicTrack]);
 
   // Musik folgt zwei Dingen: der Auswahl und dem Laufzustand. Pausiert die
   // Uebung, pausiert auch die Musik - sonst laeuft sie weiter, waehrend
