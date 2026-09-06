@@ -87,6 +87,39 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "DENY"
   Header always set Content-Security-Policy "frame-ancestors 'none'"
+
+  # HTML NIE zwischenspeichern, die Dateien mit Inhaltspruefsumme dagegen lange.
+  #
+  # Am 06.09.2026 aufgefallen, und zwar als scheinbar fehlende Funktion: nach
+  # einem Deployment war die neue Oberflaeche nicht da, obwohl der Bundle auf
+  # dem Server nachweislich stimmte. Der Grund ist die Zusammensetzung aus
+  # zwei richtigen Einzelentscheidungen:
+  #
+  #   * Die JavaScript-Dateien tragen eine Pruefsumme im Namen und duerfen
+  #     deshalb lange gecacht werden - ein neuer Inhalt bekommt einen neuen
+  #     Namen.
+  #   * WELCHER Name das ist, steht ausschliesslich in der HTML.
+  #
+  # Ohne Cache-Control cachen Browser nach eigenem Gutduenken (und Hostingers
+  # CDN ebenfalls, erkennbar am age-Header). Eine alte HTML zeigt dann auf
+  # einen alten, noch vorhandenen Bundle - und liefert stundenlang die alte
+  # App aus. Daten aus Supabase sind derweil frisch, was das Bild besonders
+  # verwirrend macht: neue Inhalte in alter Oberflaeche.
+  #
+  # no-cache heisst nicht "nicht speichern", sondern "vor Gebrauch nachfragen".
+  # Zusammen mit dem ETag ist das im Regelfall eine 304-Antwort ohne Inhalt -
+  # also so gut wie kein zusaetzlicher Verkehr, aber immer der richtige Stand.
+  <FilesMatch "\\.html$">
+    Header always set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # Aus demselben Grund, mit einem zweiten dazu: die Auslieferungspipeline
+  # WARTET auf diese Datei (scripts/wait-for-deploy.sh) und entscheidet an
+  # ihrem Inhalt, ob das neue Bauwerk oben ist. Eine zwischengespeicherte
+  # Antwort wuerde ihr den alten Commit zeigen.
+  <Files "build-info.json">
+    Header always set Cache-Control "no-cache, must-revalidate"
+  </Files>
 </IfModule>
 
 <IfModule mod_rewrite.c>
@@ -106,6 +139,34 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   # ein Node-Server, der Dateien einfach ausliefert, bildet es NICHT nach.
   RewriteCond %{REQUEST_FILENAME}.html -f
   RewriteRule ^(.*)$ $1.html [L]
+
+  # /sessions -> /sessions/index.html
+  #
+  # DIE REGEL, DIE ZWEI SEITEN AUS EINER ENDLOSSCHLEIFE HOLT (06.09.2026).
+  #
+  # Der Export legt nicht jede Route gleich ab. Fuer /kurse entstehen
+  # kurse.html UND ein Ordner kurse/ - dort greift die Regel darueber. Fuer
+  # /sessions und /sequenzen entsteht NUR ein Ordner mit index.html darin,
+  # weil die Route im Quelltext als Verzeichnis mit index.tsx liegt. Damit
+  # lief folgendes im Kreis:
+  #
+  #   /sessions/  -> 301 auf /sessions        (die Regel ganz oben)
+  #   /sessions   -> sessions.html? gibt es nicht
+  #               -> ist ein Verzeichnis, also durchgereicht
+  #               -> Apache haengt den Schraegstrich wieder an: 301 auf
+  #                  /sessions/ ... und von vorn.
+  #
+  # Der Browser bricht das nach ein paar Runden mit einer Fehlerseite ab. In
+  # der App faellt es nie auf, weil expo-router clientseitig navigiert; es
+  # trifft nur, was von aussen kommt - Lesezeichen, geteilte Links, Neuladen
+  # auf der Seite. Beide Routen waren so seit ihrer Entstehung unerreichbar.
+  #
+  # Hier wird INTERN umgeschrieben statt umgeleitet, damit kein zweiter
+  # Schraegstrich-Wechsel entstehen kann. ^(.+)$ statt ^(.*)$ ist Absicht:
+  # die leere Anfrage - also / selbst - darf diese Regel nicht treffen.
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_FILENAME}/index.html -f
+  RewriteRule ^(.+)$ /$1/index.html [L]
 
   # Vorhandene Dateien und Verzeichnisse unveraendert ausliefern
   RewriteCond %{REQUEST_FILENAME} -f [OR]
