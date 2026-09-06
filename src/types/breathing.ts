@@ -10,6 +10,7 @@ export type Step = Database['public']['Tables']['exercise_steps']['Row'];
 export type Phase = Database['public']['Tables']['exercise_phases']['Row'];
 
 export type PhaseKind = Database['public']['Enums']['phase_kind'];
+export type BreathRoute = Database['public']['Enums']['breath_route'];
 
 export type PlayableStep = Step & { exercise_phases: Phase[] };
 export type PlayableExercise = Exercise & { exercise_steps: PlayableStep[] };

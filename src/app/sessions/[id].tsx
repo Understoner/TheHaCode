@@ -8,7 +8,8 @@ import { VolumeSlider } from '@/components/VolumeSlider';
 import { colors, radius, spacing } from '@/design/tokens';
 import { BreathCircle } from '@/features/breathing/BreathCircle';
 import { createMusicPlayer, TRACKS, type TrackId } from '@/features/breathing/music';
-import { createAudioContext, playCue } from '@/features/breathing/tones';
+import { createAudioContext, createToneBus, type ToneBus } from '@/features/breathing/tones';
+import { createVoicePlayer, type VoicePlayer } from '@/features/breathing/voice';
 import {
   buildTimeline,
   segmentIndexAt,
@@ -21,6 +22,7 @@ import { useSession } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
 import { PressableRing } from '@/components/PressableRing';
 import { useSoundPreference } from '@/features/settings/useSoundPreference';
+import { useVoicePreference } from '@/features/settings/useVoicePreference';
 import { useWakeLock } from '@/features/breathing/useWakeLock';
 
 function mmss(ms: number): string {
@@ -52,14 +54,22 @@ function Player({ session }: { session: PlayableExercise }) {
   // (Backlog T10) - abgeschaltet bleibt abgeschaltet, auch auf dem naechsten
   // Geraet.
   const { soundOn, setSoundOn } = useSoundPreference();
+  // Die gesprochene Ansage ebenso, in profiles.voice_enabled (Migration 0016).
+  // Vorgabe aus: wer die Uebung kennt, will den Takt hoeren, nicht das Wort.
+  const { voiceOn, setVoiceOn } = useVoicePreference();
 
   const [musicTrack, setMusicTrack] = useState<TrackId | null>(null);
-  // Getrennte Lautstaerken: der Ton markiert den Phasenwechsel und muss sich
-  // durchsetzen, die Musik traegt nur den Hintergrund.
+  // Drei getrennte Lautstaerken, weil die drei Wege verschiedene Aufgaben
+  // haben: der Ton markiert den Wechsel, die Ansage benennt ihn, die Musik
+  // traegt den Hintergrund. Ein gemeinsamer Regler wuerde alle drei
+  // verschieben.
   const [toneVolume, setToneVolume] = useState(0.5);
+  const [voiceVolume, setVoiceVolume] = useState(0.7);
   const [musicVolume, setMusicVolume] = useState(0.18);
 
   const audioRef = useRef<AudioContext | null>(null);
+  const busRef = useRef<ToneBus | null>(null);
+  const voiceRef = useRef<VoicePlayer | null>(null);
   const lastCuedRef = useRef(-1);
   const musicRef = useRef<ReturnType<typeof createMusicPlayer> | null>(null);
 
@@ -99,21 +109,44 @@ function Player({ session }: { session: PlayableExercise }) {
     return () => cancelAnimationFrame(raf);
   }, [clock, timeline, totalMs]);
 
-  // Ton am Phasenbeginn, genau einmal je Segment.
+  // Ton und Ansage am Phasenbeginn, genau einmal je Segment. Beide haengen an
+  // derselben Sperre (lastCuedRef), aber an getrennten Schaltern - wer nur die
+  // Stimme will, bekommt nur die Stimme.
   useEffect(() => {
-    if (!soundOn || !segment || segIndex === lastCuedRef.current) return;
+    if (!segment || segIndex === lastCuedRef.current) return;
     lastCuedRef.current = segIndex;
     // In der Pause zwischen zwei Bloecken schlaegt nichts an - sie ist
     // Ruhe, kein Phasenwechsel.
     if (segment.kind === 'rest') return;
-    playCue(audioRef.current, segment.kind, segment.durationMs, toneVolume);
-  }, [segIndex, segment, soundOn, toneVolume]);
+
+    if (soundOn) busRef.current?.strike(segment.kind, segment.durationMs);
+    if (voiceOn) voiceRef.current?.speak(segment.kind);
+  }, [segIndex, segment, soundOn, voiceOn]);
+
+  // Die Lautstaerken haengen an je einem Summenverstaerker, nicht am einzelnen
+  // Ton: deshalb wirken die Regler sofort und nicht erst beim naechsten
+  // Anschlag.
+  useEffect(() => {
+    busRef.current?.setVolume(toneVolume);
+  }, [toneVolume]);
+
+  useEffect(() => {
+    voiceRef.current?.setVolume(voiceVolume);
+  }, [voiceVolume]);
+
+  // Die Aufnahmen werden beim EINSCHALTEN geholt, nicht beim ersten Wechsel -
+  // sonst schwiege die erste Phase, waehrend die Datei noch laedt.
+  useEffect(() => {
+    if (voiceOn) voiceRef.current?.preload();
+  }, [voiceOn]);
 
   // Musik folgt zwei Dingen: der Auswahl und dem Laufzustand. Pausiert die
   // Uebung, pausiert auch die Musik - sonst laeuft sie weiter, waehrend
   // niemand mehr atmet.
   useEffect(() => {
-    if (!musicRef.current) musicRef.current = createMusicPlayer();
+    // Die Musik laeuft durch denselben AudioContext wie die Toene - nur so
+    // wirkt ihr Regler auch auf dem iPhone (siehe music.ts).
+    if (!musicRef.current) musicRef.current = createMusicPlayer(() => audioRef.current);
     const music = musicRef.current;
 
     if (!musicTrack) {
@@ -125,9 +158,20 @@ function Player({ session }: { session: PlayableExercise }) {
     else music.pause();
   }, [musicTrack, clock.isRunning, musicVolume]);
 
-  // Beim Verlassen des Players verstummt die Musik - ein Stueck, das nach dem
-  // Zurueckgehen weiterlaeuft, waere das Aergerlichste an der Funktion.
-  useEffect(() => () => musicRef.current?.dispose(), []);
+  // Beim Ausbauen verstummt die Musik - ein Stueck, das nach dem Zurueckgehen
+  // weiterlaeuft, waere das Aergerlichste an der Funktion. Und erst hier wird
+  // der AudioContext wirklich geschlossen; siehe useFocusEffect unten.
+  useEffect(
+    () => () => {
+      musicRef.current?.dispose();
+      const audio = audioRef.current;
+      audioRef.current = null;
+      busRef.current = null;
+      voiceRef.current = null;
+      void audio?.close?.().catch(() => undefined);
+    },
+    [],
+  );
 
   // ... und genau darauf war kein Verlass: der Stack von expo-router laesst
   // einen Screen beim Weiternavigieren MONTIERT stehen. Das Aufraeumen oben
@@ -154,14 +198,19 @@ function Player({ session }: { session: PlayableExercise }) {
         pauseClock();
         // Pausieren statt Stoppen: die Stelle im Stueck bleibt stehen.
         musicRef.current?.pause();
-        // Ein bereits angeschlagener Ton klingt bis zu 4,2 Sekunden nach und
-        // wuerde einen sonst auf die naechste Seite begleiten. Schliessen
-        // beendet ihn sofort; der naechste Start legt ueber createAudioContext
-        // einen neuen an - deshalb muss die Referenz leer sein, ein
-        // geschlossener Kontext ist immer noch ein Objekt.
-        const audio = audioRef.current;
-        audioRef.current = null;
-        void audio?.close?.().catch(() => undefined);
+        // Ein bereits angeschlagener Ton klingt sekundenlang nach und wuerde
+        // einen sonst auf die naechste Seite begleiten. Der Summenverstaerker
+        // faehrt ihn in Millisekunden auf Null, danach haelt suspend() den
+        // ganzen Kontext an.
+        //
+        // GESCHLOSSEN wird er hier NICHT mehr. Das Audio-Element der Musik
+        // haengt seit dem Lautstaerke-Fehler an diesem Kontext, und eine
+        // MediaElementSource an einem geschlossenen Kontext ist fuer immer
+        // stumm - die Musik waere nach dem ersten Zurueckgehen tot. Geschlossen
+        // wird beim Ausbauen der Komponente, eine Ebene weiter oben.
+        busRef.current?.silence();
+        voiceRef.current?.silence();
+        void audioRef.current?.suspend?.().catch(() => undefined);
       },
       [pauseClock]
     )
@@ -171,10 +220,14 @@ function Player({ session }: { session: PlayableExercise }) {
     // Der AudioContext darf erst auf eine Nutzergeste entstehen - ein Aufruf
     // aus useEffect heraus wird von Browsern blockiert (SAD §7.5).
     if (!audioRef.current) audioRef.current = createAudioContext();
-    void audioRef.current?.resume?.();
+    const ctx = audioRef.current;
+    if (ctx && !busRef.current) busRef.current = createToneBus(ctx, toneVolume);
+    if (ctx && !voiceRef.current) voiceRef.current = createVoicePlayer(ctx, voiceVolume);
+    if (voiceOn) voiceRef.current?.preload();
+    void ctx?.resume?.();
     setFinished(false);
     clock.start();
-  }, [clock]);
+  }, [clock, toneVolume, voiceVolume, voiceOn]);
 
   const restart = useCallback(() => {
     clock.reset();
@@ -245,6 +298,12 @@ function Player({ session }: { session: PlayableExercise }) {
         ) : segment ? (
           <>
             <Text style={styles.phase}>{t(`phase.${segment.kind}`)}</Text>
+            {/* Wodurch die Luft geht, steht als eigene Zeile und nicht im
+                Anweisungstext: die beiden teilen sich die Arbeit. Bei
+                Haltephasen und bei selbst gebauten Sequenzen fehlt sie. */}
+            {segment.route ? (
+              <Text style={styles.route}>{t(`phase.route.${segment.route}`)}</Text>
+            ) : null}
             {segment.cue ? <Text style={styles.cue}>{segment.cue}</Text> : null}
             <Text style={styles.counter}>
               {stepCount > 1
@@ -293,6 +352,18 @@ function Player({ session }: { session: PlayableExercise }) {
             {soundOn ? t('player.soundOn') : t('player.soundOff')}
           </Text>
         </PressableRing>
+
+        {/* Die Ansage sagt, was zu tun ist; der Ton sagt nur, DASS etwas zu
+            tun ist. Beides laesst sich einzeln schalten - und beides
+            gleichzeitig ist erlaubt. */}
+        <PressableRing
+          onPress={() => setVoiceOn(!voiceOn)}
+          style={[styles.secondary, voiceOn && styles.secondaryActive]}
+        >
+          <Text style={[styles.secondaryText, voiceOn && styles.secondaryTextActive]}>
+            {voiceOn ? t('player.voiceOn') : t('player.voiceOff')}
+          </Text>
+        </PressableRing>
       </View>
 
       {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
@@ -320,15 +391,20 @@ function Player({ session }: { session: PlayableExercise }) {
           ))}
         </View>
 
-        {/* Zwei Regler, weil Ton und Musik unterschiedliche Aufgaben haben:
-        der Ton markiert den Wechsel und muss sich durchsetzen, die Musik
-        traegt den Hintergrund. Ein gemeinsamer Regler wuerde beide
+        {/* Drei Regler, weil die drei Wege unterschiedliche Aufgaben haben:
+        der Ton markiert den Wechsel, die Ansage benennt ihn, die Musik traegt
+        den Hintergrund. Ein gemeinsamer Regler wuerde alle drei
         verschieben. */}
         <View style={styles.sliders}>
           <VolumeSlider
             label={t('player.volumeTone')}
             value={toneVolume}
             onChange={setToneVolume}
+          />
+          <VolumeSlider
+            label={t('player.volumeVoice')}
+            value={voiceVolume}
+            onChange={setVoiceVolume}
           />
           <VolumeSlider
             label={t('player.volumeMusic')}
@@ -406,6 +482,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.ink900,
   },
+  route: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.ocean700,
+    textAlign: 'center',
+  },
   cue: {
     fontSize: 15,
     color: colors.ink700,
@@ -417,6 +499,9 @@ const styles = StyleSheet.create({
   },
   controls: {
     flexDirection: 'row',
+    // Drei Knoepfe passen auf einem schmalen Telefon nicht mehr nebeneinander.
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: spacing.sm,
     alignItems: 'center',
   },

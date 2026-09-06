@@ -1,4 +1,4 @@
-import type { Phase, PhaseKind, PlayableExercise } from '@/types/breathing';
+import type { BreathRoute, Phase, PhaseKind, PlayableExercise } from '@/types/breathing';
 
 // Schicht 1 der Breathing Engine (SAD §7.3): der Step/Phase-Baum wird einmal
 // in eine flache, absolute Zeitachse uebersetzt. Alles hier ist rein und
@@ -30,6 +30,11 @@ export interface TimelineSegment {
   round: number; // 1-basiert, innerhalb des Steps
   roundsInStep: number;
   cue: string | null;
+  /**
+   * Wodurch die Luft stroemt. null bei Haltephasen - dort stroemt nichts - und
+   * bei selbst gebauten Sequenzen, die die Angabe nicht kennen.
+   */
+  route: BreathRoute | null;
 }
 
 const SEC = 1000;
@@ -75,6 +80,7 @@ export function buildTimeline(exercise: PlayableExercise): TimelineSegment[] {
           round,
           roundsInStep: step.repeat_count,
           cue: phase.cue_text,
+          route: phase.route,
         });
         cursor += durationMs;
       }
@@ -93,6 +99,7 @@ export function buildTimeline(exercise: PlayableExercise): TimelineSegment[] {
         round: step.repeat_count,
         roundsInStep: step.repeat_count,
         cue: null,
+        route: null,
       });
       cursor += restMs;
     }

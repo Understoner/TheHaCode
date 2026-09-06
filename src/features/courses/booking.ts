@@ -1,12 +1,15 @@
 // Die reinen Regeln der Kursbuchung - ohne React, ohne Netz, damit sie
 // einzeln pruefbar sind.
 
+import { z } from 'zod';
+
 /** Was die Edge Function create-course-checkout an Absagen kennt. */
 export type BookingErrorCode =
   | 'sold_out'
   | 'already_booked'
   | 'not_bookable'
   | 'agb_required'
+  | 'guest_email_required'
   | 'unauthorized'
   | 'unknown';
 
@@ -24,6 +27,7 @@ export function bookingErrorCode(error: unknown): BookingErrorCode {
     'already_booked',
     'not_bookable',
     'agb_required',
+    'guest_email_required',
     'unauthorized',
   ];
 
@@ -83,3 +87,29 @@ export function availabilityOf(seatsLeft: number | null | undefined): CourseAvai
     scarce: seatsLeft > 0 && seatsLeft <= SCARCE_FROM,
   };
 }
+
+/**
+ * Was jemand ohne Konto angeben muss, um einen Kurs zu buchen.
+ *
+ * Der Name ist Pflicht, anders als bei der Registrierung: dort ist er
+ * Beiwerk, hier ist er die Teilnehmerliste. Wer im Kursraum steht, muss
+ * benannt werden koennen.
+ *
+ * Die Adresse ist die einzige Verbindung zum Gast - an sie gehen
+ * Zahlungsbeleg und Bestaetigung (§ 11 AGB). Ein Tippfehler darin faellt
+ * sonst erst auf, wenn jemand nicht auftaucht.
+ *
+ * Die Fehlertexte stehen als i18next-Schluessel da, nicht als deutscher Text
+ * (CLAUDE.md) - dieselbe Machart wie in features/auth/schema.ts.
+ */
+export const guestBookingSchema = z.object({
+  name: z.string().trim().min(2, { error: 'errors:buchung.gastNameKurz' }),
+  email: z.email({ error: 'errors:auth.emailInvalid' }),
+  // § 11 AGB: die Anmeldung wird erst mit der Bestaetigung verbindlich, und
+  // das traegt nur, wenn die AGB einbezogen wurden.
+  agb: z
+    .boolean({ error: 'errors:buchung.agb_required' })
+    .refine((value) => value === true, { error: 'errors:buchung.agb_required' }),
+});
+
+export type GuestBookingValues = z.infer<typeof guestBookingSchema>;

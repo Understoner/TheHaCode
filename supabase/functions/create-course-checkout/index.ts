@@ -22,6 +22,22 @@
 //   3. Erst dann zu Stripe     - mit der Buchungs-ID in den Metadaten.
 // Andersherum - erst zahlen, dann zaehlen - waere die Ueberbuchung eingebaut.
 //
+// GAESTE (seit 06.09.2026)
+// ------------------------
+// Ein Kurs ist ein Kaufvorgang, kein Zugang: die App bietet dem Teilnehmer
+// danach nichts, wofuer er ein Konto braeuchte. Deshalb darf hier auch jemand
+// ohne Anmeldung buchen und gibt statt einer user_id eine Adresse an.
+//
+// An Schritt 1 aendert das nichts Grundsaetzliches: WER anruft, sagt weiterhin
+// Supabase und nicht die Anfrage. Nur wenn Supabase niemanden kennt - der
+// Aufruf kam mit dem anon-Key statt mit einem Zugangstoken - wird aus der
+// Anfrage eine Adresse gelesen. Eine Anfrage MIT gueltigem Token kann sich
+// damit nicht als jemand anderes ausgeben: dort gewinnt immer das Konto.
+//
+// Die Adresse ist ausdruecklich KEIN Schluessel (SAD §4.3 Punkt 5). Sie sagt
+// nur, an wen der Zahlungsbeleg geht und wer auf der Teilnehmerliste steht;
+// zugeordnet wird die Zahlung ueber die booking_id.
+//
 // Scheitert Schritt 3, wird die Reservierung sofort wieder freigegeben. Sonst
 // blockierte ein Stripe-Ausfall den Platz bis zum Ablauf der Haltezeit.
 
@@ -30,7 +46,33 @@ import Stripe from 'npm:stripe@18';
 
 import { json, preflight } from '../_shared/http.ts';
 
-type CourseCheckoutRequest = { courseSlug?: unknown; agbAccepted?: unknown };
+type CourseCheckoutRequest = {
+  courseSlug?: unknown;
+  agbAccepted?: unknown;
+  /** Nur ausgewertet, wenn kein Konto angemeldet ist. */
+  guest?: unknown;
+};
+
+/** Wer bucht: ein angemeldetes Konto oder ein Gast mit Adresse. */
+type Buyer =
+  | { kind: 'user'; id: string; email: string | null }
+  | { kind: 'guest'; email: string; name: string | null };
+
+/**
+ * Kein vollstaendiger Adresspruefer - den gibt es nicht, und die Datenbank
+ * haelt dieselbe Schranke noch einmal (chk_course_bookings_guest_email). Das
+ * hier faengt den Tippfehler ab, bevor ein Platz dafuer reserviert wird.
+ */
+function readGuest(value: unknown): Buyer | null {
+  if (!value || typeof value !== 'object') return null;
+
+  const raw = value as { email?: unknown; name?: unknown };
+  const email = typeof raw.email === 'string' ? raw.email.trim().toLowerCase() : '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return null;
+
+  const name = typeof raw.name === 'string' ? raw.name.trim() : '';
+  return { kind: 'guest', email, name: name.length > 0 ? name : null };
+}
 
 /** So lange haelt die Datenbank den Platz ... */
 const HOLD_MINUTES = 40;
@@ -45,6 +87,7 @@ const RESERVATION_ERRORS: Record<string, { error: string; status: number }> = {
   PT002: { error: 'sold_out', status: 409 },
   PT003: { error: 'already_booked', status: 409 },
   PT004: { error: 'agb_required', status: 400 },
+  PT005: { error: 'guest_email_required', status: 400 },
 };
 
 Deno.serve(async (request) => {
@@ -77,9 +120,10 @@ Deno.serve(async (request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data: userData, error: userError } = await userClient.auth.getUser();
-  if (userError || !userData.user) return json({ error: 'unauthorized' }, 401, origin);
-  const user = userData.user;
+  // Kein Fehlerfall mehr, wenn niemand angemeldet ist: dann kommt der Aufruf
+  // mit dem anon-Key, und es kann eine Gastbuchung werden.
+  const { data: userData } = await userClient.auth.getUser();
+  const user = userData?.user ?? null;
 
   let body: CourseCheckoutRequest;
   try {
@@ -99,6 +143,16 @@ Deno.serve(async (request) => {
   // bekommt statt eines Datenbankfehlers.
   if (body.agbAccepted !== true) {
     return json({ error: 'agb_required' }, 400, origin);
+  }
+
+  // Das Konto gewinnt immer: eine Anfrage mit gueltigem Token kann sich ueber
+  // guest nicht als jemand anderes ausgeben.
+  const buyer: Buyer | null = user
+    ? { kind: 'user', id: user.id, email: user.email ?? null }
+    : readGuest(body.guest);
+
+  if (!buyer) {
+    return json({ error: 'guest_email_required' }, 400, origin);
   }
 
   const adminClient = createClient(url, serviceRoleKey, {
@@ -121,11 +175,24 @@ Deno.serve(async (request) => {
   }
 
   // ---------- 2. Den Platz halten ----------
-  const { data: booking, error: reserveError } = await adminClient.rpc('reserve_course_seat', {
-    p_course_id: course.id,
-    p_user_id: user.id,
-    p_agb_accepted: true,
-  });
+  // Zwei Tueren, dieselbe Sperre dahinter (Migration 0015). Die Haltezeit
+  // steht hier und nicht auf dem Vorgabewert der Datenbank: sie muss laenger
+  // sein als die Stripe-Sitzung, und beide Zahlen gehoeren nebeneinander.
+  const { data: booking, error: reserveError } =
+    buyer.kind === 'user'
+      ? await adminClient.rpc('reserve_course_seat', {
+          p_course_id: course.id,
+          p_user_id: buyer.id,
+          p_agb_accepted: true,
+          p_hold_minutes: HOLD_MINUTES,
+        })
+      : await adminClient.rpc('reserve_course_seat_for_guest', {
+          p_course_id: course.id,
+          p_guest_email: buyer.email,
+          p_guest_name: buyer.name,
+          p_agb_accepted: true,
+          p_hold_minutes: HOLD_MINUTES,
+        });
 
   if (reserveError) {
     const known = RESERVATION_ERRORS[reserveError.code ?? ''];
@@ -188,20 +255,27 @@ Deno.serve(async (request) => {
         },
       ],
 
-      // Die Bruecke zwischen Zahlung und Buchung. client_reference_id sagt, wer
-      // zahlt; booking_id sagt, wofuer. Beides kommt im Webhook zurueck.
-      client_reference_id: user.id,
+      // Die Bruecke zwischen Zahlung und Buchung. booking_id sagt, wofuer
+      // gezahlt wird; client_reference_id beziehungsweise guest_email sagt,
+      // wer zahlt. Beides kommt im Webhook unveraendert zurueck.
+      //
+      // Bei einer Gastbuchung bleibt client_reference_id leer - es gibt keine
+      // user_id, und eine erfundene waere schlimmer als keine.
+      client_reference_id: buyer.kind === 'user' ? buyer.id : undefined,
       metadata: {
         booking_id: booking.id,
-        user_id: user.id,
         course_slug: course.slug,
         payment_kind: isDeposit ? 'course_deposit' : 'course_full',
+        ...(buyer.kind === 'user' ? { user_id: buyer.id } : { guest_email: buyer.email }),
       },
       payment_intent_data: {
-        metadata: { booking_id: booking.id, user_id: user.id },
+        metadata: {
+          booking_id: booking.id,
+          ...(buyer.kind === 'user' ? { user_id: buyer.id } : { guest_email: buyer.email }),
+        },
       },
 
-      customer_email: user.email,
+      customer_email: buyer.email ?? undefined,
 
       // Kleinunternehmerregelung (SAD §4.5): keine Steuerberechnung.
       automatic_tax: { enabled: false },

@@ -1,259 +1,526 @@
 -- Wird bei jedem `npm run db:reset` nach den Migrationen eingespielt.
 --
--- Vier fertige Atemsequenzen als ARBEITSVORLAGE. Sie stehen hier und nicht in
+-- Zehn fertige Atemsequenzen als ARBEITSVORLAGE. Sie stehen hier und nicht in
 -- einer Migration, weil redaktionelle Inhalte ueber Supabase Studio gepflegt
 -- werden (CLAUDE.md) - eine Migration wuerde sie ungefragt auch nach Staging
 -- und Production schreiben.
 --
--- FUER DIE ECHTEN UMGEBUNGEN: einen der Bloecke unten im Studio unter
--- "SQL Editor" ausfuehren und die Werte anpassen. Danach laesst sich alles
--- im Table Editor bearbeiten. Absichtlich ohne Hilfsfunktion ausgeschrieben,
--- damit jeder Block fuer sich kopierbar ist.
+-- FUER DIE ECHTEN UMGEBUNGEN: diese Datei im Studio unter "SQL Editor"
+-- ausfuehren. Sie ersetzt den redaktionellen Bestand vollstaendig (siehe das
+-- DELETE gleich unten) und laesst selbst gebaute Nutzersequenzen unangetastet.
+-- Danach ist alles im Table Editor bearbeitbar. Absichtlich ohne
+-- Hilfsfunktion ausgeschrieben, damit jeder Block fuer sich kopierbar ist.
 --
 -- Aufbau je Sequenz (SAD §3.4):
 --   exercises              die Uebung selbst (type 'paced', playback_mode 'timer')
 --    └── exercise_steps         ein Block, repeat_count = Anzahl Runden
 --         └── exercise_phases        die Atemphasen in Reihenfolge
 --
--- Box-Atmung braucht genau EINEN Block. Mehrere Bloecke sind fuer Protokolle
--- gedacht, die den Rhythmus wechseln (30 schnelle Atemzuege, dann Retention,
--- dann Recovery) - dafuer eine zweite Zeile in exercise_steps mit position 2.
+-- Eine Sequenz mit gleichbleibendem Takt braucht genau EINEN Block. Mehrere
+-- Bloecke sind fuer Protokolle gedacht, die den Rhythmus wechseln - die
+-- Sequenzen 8 bis 10 sind genau das, mit einer Zeile in exercise_steps je
+-- Stufe.
 --
--- Phasen mit Dauer 0 werden weggelassen statt mit 0 eingetragen: 4-7-8 hat
--- kein Halten nach dem Ausatmen, und eine Nullphase waere in der Animation
--- ein Sprung.
+-- Phasen mit Dauer 0 werden weggelassen statt mit 0 eingetragen: eine
+-- Nullphase waere in der Animation ein Sprung.
 --
--- "on conflict (slug) do nothing" macht die Datei mehrfach ausfuehrbar: ist
--- der slug schon da, liefert das INSERT keine Zeile zurueck und die
--- nachfolgenden Bloecke legen ebenfalls nichts an.
+-- ---------------------------------------------------------------------------
+-- WAS DIESE ZEHN SEQUENZEN INHALTLICH LEITET
+-- ---------------------------------------------------------------------------
+-- Funktionale Atmung und die Prinzipien der Restorative Breathing®:
+--
+--   * NASE VOR MUND. Eingeatmet wird durchgehend durch die Nase - sie filtert,
+--     befeuchtet und erzeugt den Widerstand, der das Zwerchfell ueberhaupt
+--     erst arbeiten laesst. Durch den Mund wird nur dort ausgeatmet, wo der
+--     Reiz gewollt ist (Sequenz 1 und 10, Stufe 1).
+--   * WEICHER KEHLKOPF. Keine Ujjayi-Enge, kein hoerbares Reiben. Wo ein
+--     Widerstand gewollt ist, kommt er von den Lippen (Lippenbremse), nicht
+--     von der Glottis.
+--   * KEINE ERZWUNGENEN HALTEPHASEN. Gehalten wird die Ruhe, nicht die Luft:
+--     ohne Zudruecken, ohne Pressen, ohne Anspannen von Bauch oder Kehle. Wo
+--     eine lange Haltephase Lufthunger erzeugen wuerde, ist sie verkuerzt -
+--     Sequenz 3 ist genau darum die restorative Fassung der klassischen Box.
+--   * BIOMECHANISCHE ENTLASTUNG. Dreidimensionale Zwerchfellbewegung statt
+--     Brustkorbheben; Schultern, Kiefer und Nacken bleiben unbeteiligt. Die
+--     cue_text-Zeilen sagen das an genau den Stellen, an denen es kippt.
+--
+-- Der Atemweg steht seit Migration 0016 als eigene Spalte (route) und nicht
+-- mehr nur im Fliesstext. Haltephasen bekommen keinen Atemweg: dort stroemt
+-- nichts.
+--
+-- Weil der Player den Atemweg jetzt selbst anzeigt, sagt cue_text ihn NICHT
+-- noch einmal. Die beiden Zeilen teilen sich die Arbeit: die eine sagt,
+-- wodurch die Luft geht, die andere, worauf dabei zu achten ist.
+--
+-- estimated_seconds traegt die tatsaechliche Gesamtdauer, nicht die gerundete
+-- Wunschdauer: die Rundenzahl muss ganzzahlig sein, und ein angezeigter Wert,
+-- der nicht zur laufenden Uhr passt, waere eine zweite Wahrheit. Wo beides
+-- auseinanderfaellt, steht es im Kommentar ueber der Sequenz.
+-- ---------------------------------------------------------------------------
+
+-- Der redaktionelle Bestand wird ersetzt, nicht ergaenzt. Die Bedingung auf
+-- owner_id ist die ganze Sicherheit dieser Zeile: selbst gebaute Sequenzen
+-- haben eine owner_id und bleiben stehen. Bloecke und Phasen haengen per
+-- cascade daran und verschwinden mit.
+delete from public.exercises where owner_id is null;
 
 insert into public.exercise_categories (slug, title, description, sort_order) values
-  ('box',       'Box-Atmung', 'Gleich lange Phasen. Der ruhige Einstieg.',              1),
-  ('beruhigen', 'Beruhigen',  'Längeres Ausatmen als Einatmen - senkt die Erregung.',  2)
-on conflict (slug) do nothing;
+  ('aktivieren', 'Aktivieren', 'Kurzes Einatmen, betontes Ausatmen. Bringt in Gang.',      1),
+  ('box',        'Box-Atmung', 'Gleich lange Phasen. Der ruhige Einstieg.',                2),
+  ('beruhigen',  'Beruhigen',  'Längeres Ausatmen als Einatmen - senkt die Erregung.',     3)
+on conflict (slug) do update
+  set title = excluded.title,
+      description = excluded.description,
+      sort_order = excluded.sort_order;
 
 
 -- ---------------------------------------------------------------------------
--- 1) Box-Atmung 4-4-4-4 - der Klassiker, 8 Runden
+-- 1) Morning Ignition - 5-3-2-2, 15 Runden = 180 s (3 Min)
 -- ---------------------------------------------------------------------------
 with e as (
   insert into public.exercises (
     slug, category_id, type, playback_mode, visibility, title, subtitle,
     description_md, benefits_md, effects, contraindications_md,
-    default_round_count, difficulty, sort_order, is_published
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
   ) values (
-    'box-4-4-4-4',
+    'morning-ignition',
+    (select id from public.exercise_categories where slug = 'aktivieren'),
+    'paced', 'timer', 'free',
+    'Morning Ignition', 'Wachwerden in drei Minuten',
+    'Langes Einatmen durch die Nase, kurzes kräftiges Ausatmen durch den Mund. Das Verhältnis ist umgekehrt zu allem, was beruhigt - genau darum wirkt es.',
+    'Hebt den Sympathikustonus sanft an, vertreibt morgendliche Trägheit und steigert die Vigilanz. Das betonte Ausatmen durch den Mund macht den Reiz spürbar, ohne dass es in eine Hyperventilation kippt: die kurzen Haltephasen halten den CO₂-Wert in Grenzen. Eingeatmet wird trotzdem konsequent durch die Nase - sie erzeugt den Widerstand, den das Zwerchfell zum Arbeiten braucht.',
+    '{aktivierend}',
+    'Nicht bei Neigung zu Hyperventilation, Panikattacken oder Migräne mit Aura. Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    15, 2, 180, 1, true
+  )
+  returning id
+), s as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
+  select id, 1, 'Zyklus', 15 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+from s, (values
+  (1, 'inhale',   5, 'nose', 'In die Flanken einatmen, Schultern bleiben unten'),
+  (2, 'hold_in',  3, null,   'Halten ohne zuzudrücken - Kehle bleibt weich'),
+  (3, 'exhale',   2, 'mouth','Kräftig ausstoßen'),
+  (4, 'hold_out', 2, null,   'Kurz leer bleiben, ohne nachzuschieben')
+) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 2) Oxygen-Charge - 4-6-4-2, 15 Runden = 240 s (4 Min)
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'oxygen-charge',
+    (select id from public.exercise_categories where slug = 'aktivieren'),
+    'paced', 'timer', 'free',
+    'Oxygen-Charge', 'Wach, aber ruhig',
+    'Die betonte Haltephase nach dem Einatmen ist der Kern: sechs Sekunden, in denen die Luft in den Lungenbläschen steht und Zeit für den Gasaustausch hat. Ein- und ausgeatmet wird durch die Nase.',
+    'Verlängert die Kontaktzeit in den Alveolen und schärft dadurch die Sinne, ohne die Unruhe zu erzeugen, die schnelles Atmen mitbringt. Die kurze Haltephase am Ende hält den Zyklus in Bewegung. Gehalten wird locker - sobald sich Druck im Hals oder Bauch aufbaut, ist die Phase zu lang und die Sequenz die falsche für heute.',
+    '{aktivierend,co2_toleranz}',
+    'Bei Schwangerschaft, Epilepsie, Bluthochdruck oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    15, 2, 240, 2, true
+  )
+  returning id
+), s as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
+  select id, 1, 'Zyklus', 15 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+from s, (values
+  (1, 'inhale',   4, 'nose', 'Ruhig einatmen, unten breit werden'),
+  (2, 'hold_in',  6, null,   'Halten, ohne zu pressen - Kiefer und Kehle locker'),
+  (3, 'exhale',   4, 'nose', 'Gleichmäßig ausatmen'),
+  (4, 'hold_out', 2, null,   'Kurz leer, dann weiter')
+) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 3) Grounded Flow - 4-2-4-2, 25 Runden = 300 s (5 Min)
+--    Die restorative Fassung der Box: verkuerzte Haltephasen.
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'grounded-flow',
     (select id from public.exercise_categories where slug = 'box'),
     'paced', 'timer', 'free',
-    'Box-Atmung 4-4-4-4', 'Der Klassiker',
-    'Vier gleich lange Phasen. Der einfachste Einstieg in die getaktete Atmung: einatmen, halten, ausatmen, halten - jeweils vier Sekunden.',
-    'Der gleichmäßige Takt verlängert das Ausatmen gegenüber dem Alltagsatem und beruhigt den Puls. Die gleich langen Haltephasen gewöhnen den Körper sanft an einen höheren CO₂-Wert – das ist der Kern des Trainings.',
-    '{entspannend,co2_toleranz,stressreduktion}',
-    'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
-    8, 1, 1, true
-  )
-  on conflict (slug) do nothing
-  returning id
-), s as (
-  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
-  select id, 1, 'Zyklus', 8 from e
-  returning id
-)
-insert into public.exercise_phases (step_id, position, kind, duration_seconds, cue_text)
-select s.id, v.pos, v.kind::phase_kind, v.dur, v.cue
-from s, (values
-  (1, 'inhale',   4, 'Ruhig durch die Nase einatmen'),
-  (2, 'hold_in',  4, 'Halten, Schultern locker'),
-  (3, 'exhale',   4, 'Langsam ausatmen'),
-  (4, 'hold_out', 4, 'Leer halten')
-) as v(pos, kind, dur, cue);
-
-
--- ---------------------------------------------------------------------------
--- 2) Box-Atmung 6-6-6-6 - dieselbe Form, laenger, 6 Runden
--- ---------------------------------------------------------------------------
-with e as (
-  insert into public.exercises (
-    slug, category_id, type, playback_mode, visibility, title, subtitle,
-    description_md, benefits_md, effects, contraindications_md,
-    default_round_count, difficulty, sort_order, is_published
-  ) values (
-    'box-6-6-6-6',
-    (select id from public.exercise_categories where slug = 'box'),
-    'paced', 'timer', 'free',
-    'Box-Atmung 6-6-6-6', 'Wenn 4-4-4-4 zu kurz wird',
-    'Dieselbe Form wie 4-4-4-4, nur länger. Sinnvoll, sobald sich der Viererrhythmus mühelos anfühlt.',
-    'Die längeren Phasen senken die Atemfrequenz auf etwa 2,5 Atemzüge pro Minute. Der Reiz auf die CO₂-Toleranz ist deutlich stärker als bei 4-4-4-4, die beruhigende Wirkung ebenso.',
-    '{co2_toleranz,entspannend,stressreduktion}',
-    'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
-    6, 2, 2, true
-  )
-  on conflict (slug) do nothing
-  returning id
-), s as (
-  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
-  select id, 1, 'Zyklus', 6 from e
-  returning id
-)
-insert into public.exercise_phases (step_id, position, kind, duration_seconds, cue_text)
-select s.id, v.pos, v.kind::phase_kind, v.dur, v.cue
-from s, (values
-  (1, 'inhale',   6, 'Ruhig durch die Nase einatmen'),
-  (2, 'hold_in',  6, 'Halten, Schultern locker'),
-  (3, 'exhale',   6, 'Langsam ausatmen'),
-  (4, 'hold_out', 6, 'Leer halten')
-) as v(pos, kind, dur, cue);
-
-
--- ---------------------------------------------------------------------------
--- 3) Atmung 4-7-8 - kein Halten nach dem Ausatmen, nur 3 Phasen, 4 Runden
--- ---------------------------------------------------------------------------
-with e as (
-  insert into public.exercises (
-    slug, category_id, type, playback_mode, visibility, title, subtitle,
-    description_md, benefits_md, effects, contraindications_md,
-    default_round_count, difficulty, sort_order, is_published
-  ) values (
-    'atem-4-7-8',
-    (select id from public.exercise_categories where slug = 'beruhigen'),
-    'paced', 'timer', 'free',
-    'Atmung 4-7-8', 'Zum Herunterkommen',
-    'Das Ausatmen dauert doppelt so lang wie das Einatmen. Vier Runden genügen - diese Sequenz ist bewusst kurz.',
-    'Das doppelt so lange Ausatmen betont den Teil des Atems, der den Körper herunterfährt. Die lange Haltephase erhöht zusätzlich den CO₂-Wert. Gut vor dem Einschlafen.',
-    '{entspannend,stressreduktion,co2_toleranz}',
-    'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
-    4, 2, 3, true
-  )
-  on conflict (slug) do nothing
-  returning id
-), s as (
-  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
-  select id, 1, 'Zyklus', 4 from e
-  returning id
-)
-insert into public.exercise_phases (step_id, position, kind, duration_seconds, cue_text)
-select s.id, v.pos, v.kind::phase_kind, v.dur, v.cue
-from s, (values
-  (1, 'inhale',  4, 'Ruhig durch die Nase einatmen'),
-  (2, 'hold_in', 7, 'Halten, Schultern locker'),
-  (3, 'exhale',  8, 'Langsam durch den Mund ausatmen')
-) as v(pos, kind, dur, cue);
-
-
--- ---------------------------------------------------------------------------
--- 4) Kohärenzatmung 5,5 - nur Ein- und Ausatmen, 20 Runden
--- ---------------------------------------------------------------------------
-with e as (
-  insert into public.exercises (
-    slug, category_id, type, playback_mode, visibility, title, subtitle,
-    description_md, benefits_md, effects, contraindications_md,
-    default_round_count, difficulty, sort_order, is_published
-  ) values (
-    'kohaerenz-5-5',
-    (select id from public.exercise_categories where slug = 'beruhigen'),
-    'paced', 'timer', 'free',
-    'Kohärenzatmung 5,5', 'Gleichmäßig, ohne Halten',
-    'Ein- und Ausatmen gleich lang, ohne Pause dazwischen. Etwa fünfeinhalb Atemzüge pro Minute.',
-    'Ein- und Ausatmen gleich lang bei etwa fünfeinhalb Atemzügen pro Minute – der Bereich, in dem Herzschlag und Atmung in einen gemeinsamen Rhythmus finden. Ohne Halten, deshalb ohne CO₂-Reiz: reine Beruhigung.',
+    'Grounded Flow', 'Box-Atmung, restorativ',
+    'Die klassische Box mit halbierten Haltephasen. Vier Sekunden ein, zwei halten, vier aus, zwei halten - lautlos durch die Nase, mit dreidimensionaler Zwerchfellbewegung.',
+    'Die verkürzten Haltephasen sind der ganze Unterschied: Sie verhindern den Lufthunger, der bei 4-4-4-4 viele dazu bringt, die Luft zuzudrücken und den Rumpf zu verspannen. Genau diese Verspannung ist es, die eine beruhigend gemeinte Übung anstrengend macht. Was bleibt, ist der gleichmäßige Takt - regulierend, entlastend und lange durchhaltbar.',
     '{entspannend,stressreduktion}',
     'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
-    20, 1, 4, true
+    25, 1, 300, 3, true
   )
-  on conflict (slug) do nothing
   returning id
 ), s as (
   insert into public.exercise_steps (exercise_id, position, label, repeat_count)
-  select id, 1, 'Zyklus', 20 from e
+  select id, 1, 'Zyklus', 25 from e
   returning id
 )
-insert into public.exercise_phases (step_id, position, kind, duration_seconds, cue_text)
-select s.id, v.pos, v.kind::phase_kind, v.dur, v.cue
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
 from s, (values
-  (1, 'inhale', 5.5, 'Ruhig durch die Nase einatmen'),
-  (2, 'exhale', 5.5, 'Gleichmäßig ausatmen')
-) as v(pos, kind, dur, cue);
+  (1, 'inhale',   4, 'nose', 'Lautlos einatmen - Bauch, Flanken und Rücken weiten sich'),
+  (2, 'hold_in',  2, null,   'Kurz halten, nichts festhalten'),
+  (3, 'exhale',   4, 'nose', 'Ausatmen lassen, ohne zu drücken'),
+  (4, 'hold_out', 2, null,   'Zwei Sekunden Ruhe, dann kommt der Atem von selbst')
+) as v(pos, kind, dur, route, cue);
 
 
 -- ---------------------------------------------------------------------------
--- 5) Dreiteilige Session - MEHRERE Bloecke hintereinander
---
--- Das ist die Vorlage fuer alles, was den Rhythmus wechselt. Der Unterschied
--- zu den vier Sequenzen oben: hier gibt es DREI Zeilen in exercise_steps
--- statt einer, jede mit eigener Rundenzahl, eigenen Phasen und einer Pause
--- danach (rest_seconds). Der Player zaehlt dann "Block 2 von 3".
---
--- rest_seconds steht hier ueberall auf 0: die Bloecke sollen ohne
--- Unterbrechung ineinander uebergehen. Die Spalte bleibt trotzdem nutzbar -
--- wer eine Pause will, traegt dort Sekunden ein, und der Player zeigt sie als
--- eigenen Abschnitt an.
---
--- Zum Erweitern: eine weitere Zeile in exercise_steps mit position 4 und die
--- zugehoerigen Phasen. Die Reihenfolge steuert position, nicht die
--- Einfuegereihenfolge.
+-- 4) Classical SEAL Balance - 4-4-4-4, 19 Runden = 304 s
+--    Wunschdauer 300 s; 19 Runden liegen naeher dran als 18 (288 s).
 -- ---------------------------------------------------------------------------
 with e as (
   insert into public.exercises (
     slug, category_id, type, playback_mode, visibility, title, subtitle,
     description_md, benefits_md, effects, contraindications_md,
-    default_round_count, difficulty, sort_order, is_published
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
   ) values (
-    'aufbau-dreiteilig',
+    'classical-seal-balance',
     (select id from public.exercise_categories where slug = 'box'),
     'paced', 'timer', 'free',
-    'Aufbau-Session', 'Drei Blöcke, ruhiger werdend',
-    'Drei Abschnitte, die ohne Unterbrechung ineinander übergehen: erst ankommen im Viererrhythmus, dann längere Phasen, zum Schluss betont langes Ausatmen.',
-    'Der Aufbau nimmt den Körper mit, statt ihn zu überfordern: die CO₂-Toleranz wird über die längeren Haltephasen im zweiten Block trainiert, der dritte Block führt gezielt herunter. Als Ganzes wirkt die Session eher beruhigend.',
-    '{co2_toleranz,entspannend,stressreduktion}',
+    'Classical SEAL Balance', 'Die klassische Box',
+    'Vier gleich lange Phasen, das bekannteste Muster der getakteten Atmung. Durch die Nase ein und aus, fünf Minuten lang.',
+    'Neutralisiert Stressspitzen, stabilisiert die Herzratenvariabilität und ordnet die Gedanken. Der gleichmäßige Takt gibt dem Nervensystem eine Struktur, an der es sich ausrichtet. Wenn sich die Haltephasen eng anfühlen oder der Bauch dabei hart wird, ist Grounded Flow die passendere Sequenz - erzwungenes Halten arbeitet gegen den Zweck der Übung.',
+    '{stressreduktion,entspannend,co2_toleranz}',
     'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
-    4, 2, 5, true
+    19, 1, 304, 4, true
   )
-  on conflict (slug) do nothing
+  returning id
+), s as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
+  select id, 1, 'Zyklus', 19 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+from s, (values
+  (1, 'inhale',   4, 'nose', 'Ruhig einatmen'),
+  (2, 'hold_in',  4, null,   'Halten, Schultern und Kiefer locker'),
+  (3, 'exhale',   4, 'nose', 'Gleichmäßig ausatmen'),
+  (4, 'hold_out', 4, null,   'Leer halten, ohne Anspannung')
+) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 5) Deep Cognitive Focus - 5-5-5-5, 18 Runden = 360 s (6 Min)
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'deep-cognitive-focus',
+    (select id from public.exercise_categories where slug = 'box'),
+    'paced', 'timer', 'free',
+    'Deep Cognitive Focus', 'Drei Atemzüge pro Minute',
+    'Fünf Sekunden je Phase - ein Zyklus dauert zwanzig Sekunden, macht drei Atemzüge in der Minute. Der ruhigste Takt dieser Sammlung ohne Betonung des Ausatmens.',
+    'Die langen, gleich langen Phasen holen ein hohes Lungenvolumen ohne Anstrengung und geben dem mentalen Rauschen nichts mehr, woran es sich halten kann. Gedacht als Vorbereitung auf konzentrierte Arbeit, nicht zum Einschlafen: der Takt ist ruhig, aber symmetrisch - er führt nicht herunter, er stellt still.',
+    '{co2_toleranz,stressreduktion}',
+    'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    18, 2, 360, 5, true
+  )
+  returning id
+), s as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
+  select id, 1, 'Zyklus', 18 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+from s, (values
+  (1, 'inhale',   5, 'nose', 'Langsam einatmen, bis unten breit'),
+  (2, 'hold_in',  5, null,   'Halten - der Brustkorb bleibt ruhig, nichts drückt'),
+  (3, 'exhale',   5, 'nose', 'Fein und gleichmäßig ausatmen'),
+  (4, 'hold_out', 5, null,   'Leer bleiben, ohne auf den nächsten Atemzug zu warten')
+) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 6) Vagal Downshift - 4-4-6-2, 19 Runden = 304 s
+--    Wunschdauer 300 s; 19 Runden liegen naeher dran als 18 (288 s).
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'vagal-downshift',
+    (select id from public.exercise_categories where slug = 'beruhigen'),
+    'paced', 'timer', 'free',
+    'Vagal Downshift', 'Runterkommen über die Lippenbremse',
+    'Ausgeatmet wird gegen einen sanften Widerstand: die Lippen leicht gespitzt, als würde man eine Kerze zum Flackern und nicht zum Ausgehen bringen. Sechs Sekunden lang, doppelt so lang wie die Ruhe danach.',
+    'Der dosierte Ausatemwiderstand stimuliert den Vagusnerv und senkt die Herzfrequenz rascher, als es ein gleich langes Ausatmen ohne Widerstand täte. Wichtig ist, wo der Widerstand entsteht: an den Lippen, nicht im Hals. Eine enggestellte Glottis erzeugt zwar ein ähnliches Geräusch, aber Druck statt Entlastung.',
+    '{entspannend,stressreduktion}',
+    'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    19, 1, 304, 6, true
+  )
+  returning id
+), s as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
+  select id, 1, 'Zyklus', 19 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+from s, (values
+  (1, 'inhale',   4, 'nose',        'Ruhig einatmen'),
+  (2, 'hold_in',  4, null,          'Halten, ohne die Kehle zu schließen'),
+  (3, 'exhale',   6, 'pursed_lips', 'Lippen leicht spitzen und fein ausströmen lassen'),
+  (4, 'hold_out', 2, null,          'Kurz leer, dann kommt der Atem von selbst')
+) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 7) Night-Downfall - 4-3-8-3, 23 Runden = 414 s
+--    Wunschdauer 420 s; 23 Runden liegen naeher dran als 24 (432 s).
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'night-downfall',
+    (select id from public.exercise_categories where slug = 'beruhigen'),
+    'paced', 'timer', 'free',
+    'Night-Downfall', 'Sieben Minuten vor dem Schlafen',
+    'Das Ausatmen dauert doppelt so lang wie das Einatmen und läuft sacht durch die Nase - ohne Lippenbremse, ohne Betonung, ohne Anstrengung. Die stärkste beruhigende Sequenz dieser Sammlung.',
+    'Ein Ausatmen, das doppelt so lang ist wie das Einatmen, bringt den Parasympathikus in die Führung: Herzfrequenz, Muskeltonus und Blutdruck gehen mit. Die kurzen Haltephasen halten den Takt zusammen, ohne Lufthunger zu erzeugen. Im Liegen üben, und wenn das Zählen dabei einschläft, ist das kein Abbruch, sondern das Ziel.',
+    '{entspannend}',
+    'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    23, 1, 414, 7, true
+  )
+  returning id
+), s as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count)
+  select id, 1, 'Zyklus', 23 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+from s, (values
+  (1, 'inhale',   4, 'nose', 'Sacht einatmen, ohne den Brustkorb zu heben'),
+  (2, 'hold_in',  3, null,   'Kurz halten, alles bleibt weich'),
+  (3, 'exhale',   8, 'nose', 'Lang und leise ausströmen lassen'),
+  (4, 'hold_out', 3, null,   'Leer bleiben und nachspüren')
+) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 8) Progressive Down-Regulator - drei Stufen = 361 s
+--    Wunschdauer 360 s, je Stufe 120 s. Ganzzahlige Rundenzahlen ergeben
+--    128 + 119 + 114 s; in der Summe eine Sekunde ueber dem Ziel.
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'progressive-down-regulator',
+    (select id from public.exercise_categories where slug = 'beruhigen'),
+    'paced', 'timer', 'free',
+    'Progressive Down-Regulator', 'Drei Stufen in den Schlafmodus',
+    'Drei Abschnitte, die ohne Unterbrechung ineinander übergehen: erst ein neutraler Reset im Viererrhythmus, dann die Lippenbremse, zuletzt das doppelt lange Ausatmen durch die Nase.',
+    'Stufenweiser Spannungsabbau statt eines Sprungs: Wer aus dem Alltag kommt, findet einen 4-3-8-4-Takt oft zu ruhig, um sich darauf einzulassen. Der neutrale Einstieg holt ab, die vagale Dehnung in Stufe zwei senkt die Erregung, und erst die dritte Stufe führt in die Tiefe. Der Atemweg wechselt mit: Nase, Lippenbremse, Nase.',
+    '{entspannend,stressreduktion}',
+    'Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    8, 2, 361, 8, true
+  )
   returning id
 ),
--- Block 1: ankommen, 4-4-4-4, ohne Pause danach
+-- Stufe 1: neutraler Reset, 4-4-4-4, 8 Runden = 128 s
 s1 as (
   insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
-  select id, 1, 'Ankommen', 4, 0 from e
+  select id, 1, 'Reset', 8, 0 from e
   returning id
 ),
 p1 as (
-  insert into public.exercise_phases (step_id, position, kind, duration_seconds, cue_text)
-  select s1.id, v.pos, v.kind::phase_kind, v.dur, v.cue
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select s1.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
   from s1, (values
-    (1, 'inhale',   4, 'Ruhig durch die Nase einatmen'),
-    (2, 'hold_in',  4, 'Halten, Schultern locker'),
-    (3, 'exhale',   4, 'Langsam ausatmen'),
-    (4, 'hold_out', 4, 'Leer halten')
-  ) as v(pos, kind, dur, cue)
+    (1, 'inhale',   4, 'nose', 'Ruhig einatmen'),
+    (2, 'hold_in',  4, null,   'Halten, Schultern locker'),
+    (3, 'exhale',   4, 'nose', 'Gleichmäßig ausatmen'),
+    (4, 'hold_out', 4, null,   'Leer halten, ohne Anspannung')
+  ) as v(pos, kind, dur, route, cue)
   returning step_id
 ),
--- Block 2: vertiefen, 6-6-6-6, ohne Pause danach
+-- Stufe 2: vagale Dehnung, 4-4-6-3, 7 Runden = 119 s
 s2 as (
   insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
-  select id, 2, 'Vertiefen', 4, 0 from e
+  select id, 2, 'Vagale Dehnung', 7, 0 from e
   returning id
 ),
 p2 as (
-  insert into public.exercise_phases (step_id, position, kind, duration_seconds, cue_text)
-  select s2.id, v.pos, v.kind::phase_kind, v.dur, v.cue
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select s2.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
   from s2, (values
-    (1, 'inhale',   6, 'Tiefer einatmen, ohne zu pressen'),
-    (2, 'hold_in',  6, 'Halten, Kiefer locker'),
-    (3, 'exhale',   6, 'Gleichmäßig ausatmen'),
-    (4, 'hold_out', 6, 'Leer halten')
-  ) as v(pos, kind, dur, cue)
+    (1, 'inhale',   4, 'nose',        'Ruhig einatmen'),
+    (2, 'hold_in',  4, null,          'Halten, ohne die Kehle zu schließen'),
+    (3, 'exhale',   6, 'pursed_lips', 'Lippen leicht spitzen, fein ausströmen lassen'),
+    (4, 'hold_out', 3, null,          'Kurz leer bleiben')
+  ) as v(pos, kind, dur, route, cue)
   returning step_id
 ),
--- Block 3: herunterfahren, 4-7-8
+-- Stufe 3: tiefe Sedierung, 4-3-8-4, 6 Runden = 114 s
 s3 as (
   insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
-  select id, 3, 'Herunterfahren', 4, 0 from e
+  select id, 3, 'Tiefe', 6, 0 from e
   returning id
 )
-insert into public.exercise_phases (step_id, position, kind, duration_seconds, cue_text)
-select s3.id, v.pos, v.kind::phase_kind, v.dur, v.cue
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s3.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
 from s3, (values
-  (1, 'inhale',  4, 'Ruhig einatmen'),
-  (2, 'hold_in', 7, 'Halten'),
-  (3, 'exhale',  8, 'Lang durch den Mund ausatmen')
-) as v(pos, kind, dur, cue);
+  (1, 'inhale',   4, 'nose', 'Sacht einatmen'),
+  (2, 'hold_in',  3, null,   'Kurz halten, alles bleibt weich'),
+  (3, 'exhale',   8, 'nose', 'Lang und leise ausströmen lassen'),
+  (4, 'hold_out', 4, null,   'Leer bleiben und nachspüren')
+) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 9) CO₂-Tolerance Ladder - drei Stufen = 368 s
+--    Wunschdauer 360 s, je Stufe 120 s. Stufe 2 geht mit ganzen Runden nicht
+--    auf (16 s Takt): 8 Runden = 128 s, 7 waeren 112 s. 8 gewaehlt, damit
+--    keine Stufe unter ihrer Zeit bleibt.
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'co2-tolerance-ladder',
+    (select id from public.exercise_categories where slug = 'box'),
+    'paced', 'timer', 'free',
+    'CO₂-Tolerance Ladder', 'Drei Stufen, immer länger',
+    'Dreimal dieselbe Form, dreimal langsamer: 3-3-3-3, dann 4-4-4-4, dann 6-6-6-6. Durchgehend durch die Nase.',
+    'Baut die CO₂-Toleranz stufenweise auf, statt sie zu erzwingen. Die Gewöhnungsstufe stellt den Takt her, die Konsolidierung hält ihn, die Expansion dehnt ihn - und weil der Aufbau langsam kommt, bleibt die Stressreaktion aus, die ein Sprung auf 6-6-6-6 auslösen würde. Wird die letzte Stufe eng, ist das die Grenze für heute und keine Aufforderung durchzuhalten: das Training wirkt über die Wiederholung, nicht über die Anstrengung.',
+    '{co2_toleranz}',
+    'Bei Schwangerschaft, Epilepsie, Bluthochdruck oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    10, 2, 368, 9, true
+  )
+  returning id
+),
+-- Stufe 1: Gewoehnung, 3-3-3-3, 10 Runden = 120 s
+s1 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 1, 'Gewöhnung', 10, 0 from e
+  returning id
+),
+p1 as (
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select s1.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+  from s1, (values
+    (1, 'inhale',   3, 'nose', 'Einatmen'),
+    (2, 'hold_in',  3, null,   'Kurz halten'),
+    (3, 'exhale',   3, 'nose', 'Ausatmen'),
+    (4, 'hold_out', 3, null,   'Kurz leer bleiben')
+  ) as v(pos, kind, dur, route, cue)
+  returning step_id
+),
+-- Stufe 2: Konsolidierung, 4-4-4-4, 8 Runden = 128 s
+s2 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 2, 'Konsolidierung', 8, 0 from e
+  returning id
+),
+p2 as (
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select s2.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+  from s2, (values
+    (1, 'inhale',   4, 'nose', 'Ruhig einatmen'),
+    (2, 'hold_in',  4, null,   'Halten, Schultern locker'),
+    (3, 'exhale',   4, 'nose', 'Gleichmäßig ausatmen'),
+    (4, 'hold_out', 4, null,   'Leer halten, ohne Anspannung')
+  ) as v(pos, kind, dur, route, cue)
+  returning step_id
+),
+-- Stufe 3: Expansion, 6-6-6-6, 5 Runden = 120 s
+s3 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 3, 'Expansion', 5, 0 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s3.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+from s3, (values
+  (1, 'inhale',   6, 'nose', 'Langsam einatmen, unten breit werden'),
+  (2, 'hold_in',  6, null,   'Halten ohne zuzudrücken - sobald es eng wird, ist die Grenze da'),
+  (3, 'exhale',   6, 'nose', 'Fein ausatmen'),
+  (4, 'hold_out', 6, null,   'Leer bleiben, ohne nachzuschieben')
+) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 10) Activation-to-Focus Shift - zwei Stufen = 294 s
+--     Wunschdauer 300 s, je Stufe 150 s. Stufe 2 geht mit ganzen Runden nicht
+--     auf (16 s Takt): 9 Runden = 144 s, 10 waeren 160 s. 9 gewaehlt.
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'activation-to-focus-shift',
+    (select id from public.exercise_categories where slug = 'aktivieren'),
+    'paced', 'timer', 'free',
+    'Activation-to-Focus Shift', 'Erst wach, dann fokussiert',
+    'Zwei Abschnitte ohne Unterbrechung: zweieinhalb Minuten kurzes, kräftiges Ausatmen durch den Mund, danach zweieinhalb Minuten klassische Box durch die Nase.',
+    'Treibt die morgendliche Lethargie aus und schwingt nahtlos in ruhige Arbeitskonzentration ein - das ist der Grund für die zwei Stufen. Aktivierung allein lässt aufgedreht zurück, Box-Atmung allein kommt gegen die Trägheit nicht an. Der Wechsel des Atemwegs macht den Übergang spürbar: erst durch den Mund hinaus, dann wieder ausschließlich durch die Nase.',
+    '{aktivierend,stressreduktion}',
+    'Nicht bei Neigung zu Hyperventilation, Panikattacken oder Migräne mit Aura. Bei Schwangerschaft, Epilepsie oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    15, 2, 294, 10, true
+  )
+  returning id
+),
+-- Stufe 1: Wake-Up, 5-2-2-1, 15 Runden = 150 s
+s1 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 1, 'Wake-Up', 15, 0 from e
+  returning id
+),
+p1 as (
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select s1.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+  from s1, (values
+    (1, 'inhale',   5, 'nose',  'Durch die Nase in die Flanken einatmen'),
+    (2, 'hold_in',  2, null,    'Kurz halten - Kehle bleibt weich'),
+    (3, 'exhale',   2, 'mouth', 'Kräftig ausstoßen'),
+    (4, 'hold_out', 1, null,    'Eine Sekunde leer')
+  ) as v(pos, kind, dur, route, cue)
+  returning step_id
+),
+-- Stufe 2: Zentrierung, 4-4-4-4, 9 Runden = 144 s
+s2 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 2, 'Fokus', 9, 0 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select s2.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+from s2, (values
+  (1, 'inhale',   4, 'nose', 'Ruhiger werden'),
+  (2, 'hold_in',  4, null,   'Halten, Schultern locker'),
+  (3, 'exhale',   4, 'nose', 'Gleichmäßig ausatmen'),
+  (4, 'hold_out', 4, null,   'Leer halten, ohne Anspannung')
+) as v(pos, kind, dur, route, cue);

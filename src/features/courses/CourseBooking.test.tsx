@@ -126,6 +126,8 @@ describe('CourseBooking', () => {
       expect(openExternalUrlMock).toHaveBeenCalledWith('https://checkout.stripe.com/c/pay/cs_test'),
     );
 
+    // Ohne guest im Koerper: wer angemeldet ist, bucht als Konto - die Adresse
+    // steht dort und wird nicht aus dem Formular genommen.
     expect(invokeMock).toHaveBeenCalledWith('create-course-checkout', {
       method: 'POST',
       body: { courseSlug: 'atem-camp', agbAccepted: true },
@@ -139,13 +141,94 @@ describe('CourseBooking', () => {
     expect(screen.queryByText('Verbindlich buchen')).toBeNull();
   });
 
-  it('weist Nichtangemeldete zum Konto, statt sie in den Checkout zu schicken', () => {
-    useAuthMock.mockReturnValue({ session: null, loading: false });
+  // ---------- Ohne Konto buchen ----------
+  // Ein Kurs ist ein Kaufvorgang, kein Zugang. Vor dem 06.09.2026 stand hier
+  // ein Verweis auf die Anmeldung und sonst nichts - eine Huerde ohne
+  // Gegenwert.
+  describe('als Gast', () => {
+    beforeEach(() => {
+      useAuthMock.mockReturnValue({ session: null, loading: false });
+    });
 
-    renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+    it('bietet Nichtangemeldeten das Buchen an, statt sie wegzuschicken', () => {
+      renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
 
-    expect(screen.getByText('Anmelden oder registrieren')).toBeTruthy();
-    expect(screen.queryByText('Verbindlich buchen')).toBeNull();
+      expect(screen.getByLabelText('Vor- und Nachname')).toBeTruthy();
+      expect(screen.getByLabelText('E-Mail-Adresse')).toBeTruthy();
+      expect(screen.getByText('Verbindlich buchen')).toBeTruthy();
+    });
+
+    // Der Weg ueber ein Konto bleibt sichtbar: wer eines hat, soll es
+    // benutzen, dann steht die Buchung spaeter auch dort.
+    it('laesst den Weg ueber das Konto trotzdem offen', () => {
+      renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+
+      expect(screen.getByText('Anmelden oder registrieren')).toBeTruthy();
+    });
+
+    it('bucht ohne Name und Adresse nicht und sagt, was fehlt', async () => {
+      renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+
+      fireEvent.click(screen.getByText('Verbindlich buchen'));
+
+      await waitFor(() => expect(screen.getAllByRole('alert').length).toBeGreaterThan(0));
+      expect(invokeMock).not.toHaveBeenCalled();
+    });
+
+    it('bucht ohne Haken bei den AGB nicht', async () => {
+      renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+
+      fireEvent.change(screen.getByLabelText('Vor- und Nachname'), {
+        target: { value: 'Gerda Gast' },
+      });
+      fireEvent.change(screen.getByLabelText('E-Mail-Adresse'), {
+        target: { value: 'gerda@example.at' },
+      });
+      fireEvent.click(screen.getByText('Verbindlich buchen'));
+
+      await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/AGB/));
+      expect(invokeMock).not.toHaveBeenCalled();
+    });
+
+    it('schickt Name und Adresse mit und wechselt zu Stripe', async () => {
+      invokeMock.mockResolvedValue({
+        data: { url: 'https://checkout.stripe.com/c/pay/cs_gast' },
+        error: null,
+      });
+
+      renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+
+      fireEvent.change(screen.getByLabelText('Vor- und Nachname'), {
+        target: { value: '  Gerda Gast  ' },
+      });
+      fireEvent.change(screen.getByLabelText('E-Mail-Adresse'), {
+        target: { value: 'gerda@example.at' },
+      });
+      fireEvent.click(screen.getByRole('checkbox'));
+      fireEvent.click(screen.getByText('Verbindlich buchen'));
+
+      await waitFor(() =>
+        expect(openExternalUrlMock).toHaveBeenCalledWith('https://checkout.stripe.com/c/pay/cs_gast'),
+      );
+
+      expect(invokeMock).toHaveBeenCalledWith('create-course-checkout', {
+        method: 'POST',
+        body: {
+          courseSlug: 'atem-camp',
+          agbAccepted: true,
+          guest: { email: 'gerda@example.at', name: 'Gerda Gast' },
+        },
+      });
+    });
+
+    // Ein ausgebuchter Kurs sagt das - er zeigt kein Formular, das ohnehin an
+    // der Reservierung scheitern wuerde.
+    it('bietet bei einem ausgebuchten Kurs kein Formular an', () => {
+      renderBooking(<CourseBooking course={course()} seatsLeft={0} />);
+
+      expect(screen.queryByLabelText('E-Mail-Adresse')).toBeNull();
+      expect(screen.getByText(/Alle Plätze sind vergeben/)).toBeTruthy();
+    });
   });
 
   it('zeigt eine bestehende Buchung, statt sie ein zweites Mal anzubieten', async () => {

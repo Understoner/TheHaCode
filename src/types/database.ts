@@ -65,13 +65,15 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           deposit_cents: number | null
+          guest_email: string | null
+          guest_name: string | null
           id: string
           reserved_until: string | null
           status: Database["public"]["Enums"]["course_booking_status"]
           stripe_checkout_session_id: string | null
           stripe_payment_intent_id: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           agb_accepted_at?: string | null
@@ -86,13 +88,15 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           deposit_cents?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
           id?: string
           reserved_until?: string | null
           status?: Database["public"]["Enums"]["course_booking_status"]
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           agb_accepted_at?: string | null
@@ -107,13 +111,15 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           deposit_cents?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
           id?: string
           reserved_until?: string | null
           status?: Database["public"]["Enums"]["course_booking_status"]
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -225,6 +231,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["phase_kind"]
           max_duration_seconds: number | null
           position: number
+          route: Database["public"]["Enums"]["breath_route"] | null
           step_id: string
         }
         Insert: {
@@ -236,6 +243,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["phase_kind"]
           max_duration_seconds?: number | null
           position: number
+          route?: Database["public"]["Enums"]["breath_route"] | null
           step_id: string
         }
         Update: {
@@ -247,6 +255,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["phase_kind"]
           max_duration_seconds?: number | null
           position?: number
+          route?: Database["public"]["Enums"]["breath_route"] | null
           step_id?: string
         }
         Relationships: [
@@ -493,6 +502,7 @@ export type Database = {
           sound_enabled: boolean
           timezone: string
           updated_at: string
+          voice_enabled: boolean
         }
         Insert: {
           avatar_url?: string | null
@@ -507,6 +517,7 @@ export type Database = {
           sound_enabled?: boolean
           timezone?: string
           updated_at?: string
+          voice_enabled?: boolean
         }
         Update: {
           avatar_url?: string | null
@@ -521,6 +532,7 @@ export type Database = {
           sound_enabled?: boolean
           timezone?: string
           updated_at?: string
+          voice_enabled?: boolean
         }
         Relationships: []
       }
@@ -747,13 +759,94 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           deposit_cents: number | null
+          guest_email: string | null
+          guest_name: string | null
           id: string
           reserved_until: string | null
           status: Database["public"]["Enums"]["course_booking_status"]
           stripe_checkout_session_id: string | null
           stripe_payment_intent_id: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "course_bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reserve_course_seat_any: {
+        Args: {
+          p_agb_accepted: boolean
+          p_client_id: string
+          p_course_id: string
+          p_guest_email: string
+          p_guest_name: string
+          p_hold_minutes: number
+          p_user_id: string
+        }
+        Returns: {
+          agb_accepted_at: string | null
+          amount_paid_cents: number
+          amount_total_cents: number
+          balance_due_at: string | null
+          balance_paid_at: string | null
+          canceled_at: string | null
+          client_id: string | null
+          confirmed_at: string | null
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          deposit_cents: number | null
+          guest_email: string | null
+          guest_name: string | null
+          id: string
+          reserved_until: string | null
+          status: Database["public"]["Enums"]["course_booking_status"]
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "course_bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reserve_course_seat_for_guest: {
+        Args: {
+          p_agb_accepted?: boolean
+          p_client_id?: string
+          p_course_id: string
+          p_guest_email: string
+          p_guest_name?: string
+          p_hold_minutes?: number
+        }
+        Returns: {
+          agb_accepted_at: string | null
+          amount_paid_cents: number
+          amount_total_cents: number
+          balance_due_at: string | null
+          balance_paid_at: string | null
+          canceled_at: string | null
+          client_id: string | null
+          confirmed_at: string | null
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          deposit_cents: number | null
+          guest_email: string | null
+          guest_name: string | null
+          id: string
+          reserved_until: string | null
+          status: Database["public"]["Enums"]["course_booking_status"]
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string | null
         }
         SetofOptions: {
           from: "*"
@@ -773,6 +866,7 @@ export type Database = {
       }
     }
     Enums: {
+      breath_route: "nose" | "mouth" | "pursed_lips"
       consent_kind:
         | "terms"
         | "privacy"
@@ -931,6 +1025,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      breath_route: ["nose", "mouth", "pursed_lips"],
       consent_kind: [
         "terms",
         "privacy",

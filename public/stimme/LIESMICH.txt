@@ -1,0 +1,38 @@
+Gesprochene Ansagen fuer die Sessions - eine je Atemphase.
+
+Wie die Musik nebenan liegen die Dateien in public/ und damit ausserhalb des
+JavaScript-Bundles: der statische Export kopiert sie unveraendert nach dist/,
+und der Browser laedt sie erst, wenn jemand die Stimme einschaltet.
+
+Anders als die Musik werden sie NICHT gestreamt, sondern einmal geholt und in
+den AudioContext dekodiert (src/features/breathing/voice.ts). Eine Ansage muss
+im selben Moment da sein, in dem die Phase wechselt - ein Audio-Element, das
+erst zu laden anfaengt, kaeme zu spaet.
+
+  einatmen.wav   ->  inhale
+  halten-1.wav   ->  hold_in    (Halten nach dem Einatmen)
+  ausatmen.wav   ->  exhale
+  halten-2.wav   ->  hold_out   (Halten nach dem Ausatmen)
+
+FORMAT: WAV, 16 Bit, mono, 48 kHz. Zusammen rund 350 KB.
+16 Bit und nicht 24: Safari dekodiert 24-Bit-WAV nicht zuverlaessig.
+Mono und nicht stereo: eine Ansage braucht keine Buehne, und es ist die Haelfte.
+
+AUFBEREITUNG am 06.09.2026 aus den Originalen (24 Bit, stereo, 48 kHz):
+
+  1. Stereo zu mono gemischt.
+  2. Auf den Worteinsatz geschnitten, nicht auf eine feste Pegelschwelle.
+     Zwei der vier Aufnahmen hatten 110 bis 190 ms Raumton vor dem ersten
+     Laut - die Ansage waere hoerbar zu spaet gekommen, und zwar nur bei
+     zweien von vieren. Gesucht wird die Stelle, ab der es sicher Sprache ist
+     (25 dB unter dem lautesten Fenster), von dort wird zurueck bis knapp
+     ueber den Raumton gelaufen. Eine feste Schwelle haette das weiche "H"
+     von "Halten" abgeschnitten. Vorlauf 12 ms, Nachlauf 60 ms.
+  3. Alle vier auf denselben Spitzenpegel gebracht (-3 dBFS). Vorher lagen sie
+     5,4 dB auseinander - "Ausatmen" waere deutlich lauter gekommen als
+     "Halten".
+  4. 8 ms Ein- und Ausblendung gegen das Knacken an den Puffergrenzen.
+
+Neue Aufnahmen: dieselbe Aufbereitung wieder anwenden, sonst springt der Pegel
+zwischen den Phasen. Die Zuordnung Phase -> Datei steht in voice.ts unter
+VOICE_FILES.

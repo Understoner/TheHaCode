@@ -224,7 +224,7 @@ async function handleCourseEvent(
 
   const { data: booking, error: readError } = await admin
     .from('course_bookings')
-    .select('id, user_id, status, amount_total_cents, amount_paid_cents, deposit_cents, stripe_checkout_session_id')
+    .select('id, user_id, guest_email, status, amount_total_cents, amount_paid_cents, deposit_cents, stripe_checkout_session_id')
     .eq('id', facts.bookingId)
     .maybeSingle();
 

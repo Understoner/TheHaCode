@@ -4,10 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
-import { Checkbox } from '@/components/Checkbox';
 import { colors, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { AgbConsent } from '@/features/courses/AgbConsent';
 import { availabilityOf, bookingErrorCode, formatPrice } from '@/features/courses/booking';
+import { GuestBookingForm } from '@/features/courses/GuestBookingForm';
 import { useCourseCheckout, useMyBookings } from '@/features/courses/useCourseBooking';
 import { openExternalUrl } from '@/lib/externalLink';
 import type { Course } from '@/features/courses/useCoursesList';
@@ -23,6 +24,15 @@ import type { Course } from '@/features/courses/useCoursesList';
 // Der Haken bei den AGB ist keine Zierde: § 11 AGB macht die Anmeldung erst
 // mit der Bestaetigung verbindlich, und das traegt nur, wenn die AGB
 // einbezogen wurden. Der Zeitpunkt landet in course_bookings.agb_accepted_at.
+//
+// ZWEI WEGE ZUM SELBEN CHECKOUT (seit 06.09.2026)
+// -----------------------------------------------
+// Angemeldet: Haken setzen, buchen - die Adresse steht schon im Konto.
+// Ohne Konto: Name und Adresse dazu, sonst derselbe Weg (GuestBookingForm).
+// Frueher stand hier statt des zweiten Wegs ein Verweis auf die Anmeldung. Das
+// war eine Huerde ohne Gegenwert: die App bietet einem Kursteilnehmer nichts,
+// wofuer er ein Konto braeuchte. Der Verweis steht weiterhin darunter - wer
+// eines hat, soll es benutzen, dann taucht die Buchung spaeter im Konto auf.
 export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft: number | null }) {
   const { t } = useTranslation();
   const { session } = useAuth();
@@ -65,8 +75,15 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
       return;
     }
     setHakenFehlt(false);
-    checkout.mutate(course.slug, { onSuccess: (url) => openExternalUrl(url) });
+    checkout.mutate({ courseSlug: course.slug }, { onSuccess: (url) => openExternalUrl(url) });
   };
+
+  // Derselbe Text auf beiden Wegen: "Buchen und 200,00 anzahlen", wenn der
+  // Kurs eine Anzahlung verlangt, sonst "Verbindlich buchen".
+  const aktion =
+    deposit !== null
+      ? t('kurse.buchung.anzahlenAktion', { betrag: formatPrice(deposit) })
+      : t('kurse.buchung.buchenAktion');
 
   return (
     <View style={styles.container}>
@@ -87,45 +104,32 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
 
       {existing?.status === 'confirmed' ? (
         <Text style={styles.confirmed}>{t('kurse.buchung.gebucht')}</Text>
-      ) : !session ? (
-        <View style={styles.stack}>
-          <Text style={styles.hint}>{t('kurse.buchung.anmeldenText')}</Text>
-          <Link href="/konto" style={styles.link}>
-            {t('kurse.buchung.anmeldenLink')}
-          </Link>
-        </View>
       ) : availability.soldOut ? (
         <Text style={styles.hint}>{t('kurse.buchung.ausgebuchtHinweis')}</Text>
+      ) : !session ? (
+        <View style={styles.stack}>
+          <GuestBookingForm courseSlug={course.slug} label={aktion} />
+
+          <Text style={styles.hint}>
+            {t('kurse.buchung.kontoText')}{' '}
+            <Link href="/konto" style={styles.link}>
+              {t('kurse.buchung.anmeldenLink')}
+            </Link>
+          </Text>
+        </View>
       ) : (
         <View style={styles.stack}>
-          <Checkbox
+          <AgbConsent
             checked={agb}
             onToggle={() => {
               setAgb((value) => !value);
               setHakenFehlt(false);
             }}
-            label={t('kurse.buchung.agbLabel')}
             error={hakenFehlt ? t('errors:buchung.agb_required') : undefined}
-          >
-            {t('kurse.buchung.agbVorspann')}{' '}
-            <Link href="/agb" style={styles.link}>
-              {t('kurse.buchung.agbLink')}
-            </Link>{' '}
-            {t('kurse.buchung.agbUnd')}{' '}
-            <Link href="/haftungsausschluss" style={styles.link}>
-              {t('kurse.buchung.haftungLink')}
-            </Link>
-            {t('kurse.buchung.agbSchluss')}
-          </Checkbox>
+          />
 
           <Button
-            label={
-              checkout.isPending
-                ? t('kurse.buchung.wirdGeoeffnet')
-                : deposit !== null
-                  ? t('kurse.buchung.anzahlenAktion', { betrag: formatPrice(deposit) })
-                  : t('kurse.buchung.buchenAktion')
-            }
+            label={checkout.isPending ? t('kurse.buchung.wirdGeoeffnet') : aktion}
             onPress={start}
             disabled={checkout.isPending}
           />
