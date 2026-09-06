@@ -11,7 +11,6 @@ export default function HomeScreen() {
     <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
       <View style={styles.hero}>
         <Text style={styles.title}>{t('home.title')}</Text>
-        <Text style={styles.intro}>{t('home.intro')}</Text>
       </View>
       {/* Trennung zwischen Begruessung und Inhalt: Weissraum traegt die
           Hauptlast, die Haarlinie setzt nur den Schlusspunkt. Beides sind die
@@ -33,14 +32,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl,
     gap: spacing.lg,
   },
-  // Ohne die Unterzeile "In Entwicklung" traegt der Bereich nur noch zwei
-  // Elemente - der Abstand darf dafuer groesser ausfallen, sonst kleben
-  // Ueberschrift und Fliesstext aneinander.
+  // Seit dem 06.09.2026 steht hier nur noch der Name. Der Einleitungsabsatz
+  // ist weg, und zwar nicht aus Platznot allein: er sagte dasselbe wie der
+  // erste News-Beitrag, nur kuerzer. Zweimal dieselbe Auskunft
+  // uebereinandergestapelt kostet auf dem Handy den halben ersten Bildschirm -
+  // und der gehoert den News.
+  //
+  // Ohne den Absatz braucht der Bereich auch keinen Innenabstand mehr: gap
+  // trennte zwei Elemente, jetzt ist es eines.
   hero: {
     alignItems: 'center',
-    gap: spacing.md,
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
   },
   title: {
     fontSize: 28,
@@ -58,19 +60,10 @@ const styles = StyleSheet.create({
     maxWidth: 620,
     alignSelf: 'center',
     backgroundColor: colors.line,
-    marginTop: spacing.lg,
+    // Enger als vorher: der Abstand war auf einen Absatz darueber bemessen,
+    // jetzt steht dort eine einzelne Zeile.
+    marginTop: spacing.md,
     marginBottom: spacing.md,
-  },
-  // maxWidth begrenzt die Zeilenlaenge: ueber die volle Desktop-Breite gezogen
-  // waere der Absatz rund 200 Zeichen breit und damit muehsam zu lesen. 620px
-  // ergeben etwa 75 Zeichen pro Zeile. lineHeight grosszuegiger als bei
-  // Meta-Text, weil das hier der einzige laengere Fliesstext der Seite ist.
-  intro: {
-    fontSize: 16,
-    lineHeight: 26,
-    color: colors.ink700,
-    textAlign: 'center',
-    maxWidth: 620,
   },
   sectionTitle: {
     fontSize: 18,

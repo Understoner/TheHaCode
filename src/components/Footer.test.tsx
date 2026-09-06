@@ -21,14 +21,25 @@ describe('Footer', () => {
   // vollstaendig - deshalb steht hier jeder einzeln.
   it.each([
     ['Impressum', '/impressum'],
-    ['Datenschutzerklärung', '/datenschutz'],
+    ['Datenschutz', '/datenschutz'],
     ['AGB', '/agb'],
-    ['Haftungsausschluss', '/haftungsausschluss'],
+    ['Haftung', '/haftungsausschluss'],
   ])('verlinkt %s auf %s', (label, href) => {
     render(<Footer />);
 
     const link = screen.getByText(label);
     expect(link).toBeTruthy();
     expect(link.getAttribute('href')).toBe(href);
+  });
+
+  // Seit der Streifen einzeilig und waagrecht schiebbar ist, kann ein Verweis
+  // aus dem sichtbaren Bereich rutschen. Impressum darf das nicht: es ist der
+  // eine, der rechtlich "leicht erkennbar" sein muss, und links ist die
+  // Stelle, die immer sichtbar bleibt.
+  it('stellt Impressum voran, damit es beim Schieben nicht verschwindet', () => {
+    const { container } = render(<Footer />);
+
+    const hrefs = [...container.querySelectorAll('a')].map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(['/impressum', '/datenschutz', '/agb', '/haftungsausschluss']);
   });
 });
