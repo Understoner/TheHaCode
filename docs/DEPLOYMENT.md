@@ -380,7 +380,7 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 
 ## 5. Checkliste vor dem allerersten Livegang
 
-- [x] Beide Supabase-Projekte angelegt (Migrationen/Seeds laufen ab jetzt über die Pipeline)
+- [x] Beide Supabase-Projekte angelegt — **Migrationen** laufen ab jetzt über die Pipeline (`supabase db push`), `supabase/seed.sql` **nicht**: redaktionelle Inhalte kommen über das Studio (CLAUDE.md §2.4). Wer die vorkonfigurierten Sequenzen ändert, führt die Datei dort einmal je Umgebung im SQL Editor aus — **erst nachdem die Migrationen dieser Umgebung ausgerollt sind**, sonst fehlt die Spalte für den Atemweg. Die Datei prüft das selbst und bricht ab, bevor sie etwas anfasst. Sie ersetzt den redaktionellen Bestand und lässt selbst gebaute Nutzersequenzen stehen.
 - [x] Anmeldung steht: Registrierung, Anmeldung, Passwort zuruecksetzen, Kontoloeschung — ueber E-Mail und Passwort. Fremdanmeldung (Google/Apple) ist nicht Teil von V1
 - [x] `https://<host>/passwort-neu` in den Redirect URLs beider Supabase-Projekte eingetragen — ohne den Eintrag scheitert das Zuruecksetzen (siehe §1). Am 16.08.2026 in beiden Projekten geprüft, mit Gegenprobe über `/auth/v1/verify`
 - [ ] E-Mail-Vorlagen auf Deutsch (Bestaetigung, Passwort zuruecksetzen) — **blockiert:** eigene Vorlagen sind erst ab Supabase Pro änderbar. Fertig im Repo unter `supabase/templates/`, wartet als T17a

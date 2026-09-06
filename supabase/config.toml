@@ -21,7 +21,26 @@ max_rows = 1000
 # without explicit GRANTs. When unset, new entities are NOT auto-exposed, matching the new cloud
 # default. Set to `true` to keep the legacy behaviour of auto-exposing new entities; this is
 # deprecated and the field is removed on 2026-10-30 once the always-revoked behaviour is permanent.
-# auto_expose_new_tables = true
+# AM 06.09.2026 AUSDRUECKLICH AUF false GESETZT - vorher stand hier nur der
+# auskommentierte Vorschlag, und das reichte nicht mehr:
+#
+# Supabase-CLI 2.116.0 legt bei nicht gesetztem Feld wieder die alte Automatik
+# an und erteilt anon und authenticated pauschal Rechte auf alles im Schema
+# public. In der Cloud ist das laengst nicht mehr so - dort gilt, was die
+# Migrationen explizit granten. Die oertliche Umgebung wich damit von der
+# echten ab, und zwar genau in der Richtung, die niemand bemerkt: sie war
+# grosszuegiger.
+#
+# Aufgefallen ist es an dreizehn pgTAP-Zusicherungen in sechs Dateien, die
+# alle dasselbe sagen ("anon darf hier nicht schreiben", "der Client kommt an
+# diese Funktion nicht heran") und die alle auf einmal stumm blieben - ohne
+# dass sich eine Migration geaendert haette. Mit CLI 2.111.0 waren sie gruen,
+# mit 2.116.0 rot. Die CI zieht "version: latest", deshalb traf es sie zuerst.
+#
+# false ist der Zustand, den die Cloud hat. Faellt das Feld wie angekuendigt
+# am 30.10.2026 weg, ist genau das der dann dauerhafte Vorgabewert - diese
+# Zeile ist also kein Provisorium, sondern nimmt ihn vorweg.
+auto_expose_new_tables = false
 
 [api.tls]
 # Enable HTTPS endpoints locally using a self-signed certificate.

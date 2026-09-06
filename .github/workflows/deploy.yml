@@ -65,7 +65,22 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # FESTGENAGELT statt "latest" (06.09.2026). Grund: das CLI bestimmt
+          # nicht nur sich selbst, sondern auch die Images und das Verhalten der
+          # oertlichen Datenbank - und damit, was die pgTAP-Tests ueberhaupt
+          # pruefen koennen. Mit 2.116.0 erteilte die oertliche Umgebung bei
+          # nicht gesetztem auto_expose_new_tables wieder pauschale Rechte an
+          # anon und authenticated; dreizehn Missbrauchstests in sechs Dateien
+          # wurden dadurch stumm, ohne dass sich eine Zeile Code geaendert
+          # haette. Die CI war an dem Tag rot, obwohl niemand etwas kaputt
+          # gemacht hatte. Ein Werkzeug, das sich unter der Hand aendert, ist
+          # bei einer Pruefstrecke das Gegenteil dessen, was sie leisten soll.
+          #
+          # Hochziehen ist eine bewusste Handlung: Version hier aendern,
+          # "supabase db reset && supabase test db" oertlich mit genau dieser
+          # Version laufen lassen, erst dann committen. Dieselbe Zahl steht in
+          # deploy.yml an zwei Stellen - alle drei gehoeren gemeinsam bewegt.
+          version: 2.116.0
 
       - name: Migrationen nach Staging
         env:
@@ -162,7 +177,22 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # FESTGENAGELT statt "latest" (06.09.2026). Grund: das CLI bestimmt
+          # nicht nur sich selbst, sondern auch die Images und das Verhalten der
+          # oertlichen Datenbank - und damit, was die pgTAP-Tests ueberhaupt
+          # pruefen koennen. Mit 2.116.0 erteilte die oertliche Umgebung bei
+          # nicht gesetztem auto_expose_new_tables wieder pauschale Rechte an
+          # anon und authenticated; dreizehn Missbrauchstests in sechs Dateien
+          # wurden dadurch stumm, ohne dass sich eine Zeile Code geaendert
+          # haette. Die CI war an dem Tag rot, obwohl niemand etwas kaputt
+          # gemacht hatte. Ein Werkzeug, das sich unter der Hand aendert, ist
+          # bei einer Pruefstrecke das Gegenteil dessen, was sie leisten soll.
+          #
+          # Hochziehen ist eine bewusste Handlung: Version hier aendern,
+          # "supabase db reset && supabase test db" oertlich mit genau dieser
+          # Version laufen lassen, erst dann committen. Dieselbe Zahl steht in
+          # deploy.yml an zwei Stellen - alle drei gehoeren gemeinsam bewegt.
+          version: 2.116.0
 
       - name: Migrationen nach Production
         env:

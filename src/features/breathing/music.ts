@@ -14,6 +14,19 @@
 // ein Stueck erst beim Auswaehlen und streamt es per Range-Request. Eine
 // eingebundene 15-MB-Datei muesste dagegen beim ersten Seitenaufruf komplett
 // mitgeladen werden.
+//
+// WARUM DIE LAUTSTAERKE NICHT AN element.volume HAENGT
+// ---------------------------------------------------
+// Weil sie dort auf dem iPhone nichts tut. Safari auf iOS behandelt
+// HTMLMediaElement.volume als schreibgeschuetzt: der Wert laesst sich setzen,
+// die Wiedergabe wird davon nicht leiser - Lautstaerke ist dort allein Sache
+// der Hardwaretasten. Genau so ist der Regler in der App aufgefallen: er
+// bewegte sich, und es aenderte sich nichts.
+//
+// Ein GainNode dagegen wirkt auf jeder Plattform. Deshalb laeuft das
+// Audio-Element durch denselben AudioContext, in dem auch die Phasentoene
+// entstehen. Ohne Kontext - serverseitig, oder wenn der Browser keine Web
+// Audio API mitbringt - bleibt element.volume als Rueckfall.
 
 export type TrackId = 'afternoon-highway' | 'doku-marimba';
 
@@ -40,7 +53,7 @@ export type MusicPlayer = {
  * kein Zustand in React: die Wiedergabe ueberlebt jedes Neuzeichnen, und ein
  * laufendes Stueck soll bei einem Phasenwechsel nicht stocken.
  */
-export function createMusicPlayer(): MusicPlayer {
+export function createMusicPlayer(getContext?: () => AudioContext | null): MusicPlayer {
   if (typeof window === 'undefined' || typeof Audio === 'undefined') {
     const noop = () => undefined;
     return { play: noop, stop: noop, pause: noop, resume: noop, setVolume: noop, dispose: noop };
@@ -49,6 +62,45 @@ export function createMusicPlayer(): MusicPlayer {
   let element: HTMLAudioElement | null = null;
   let current: TrackId | null = null;
   let volume = DEFAULT_VOLUME;
+  // Der Verstaerker je Element. createMediaElementSource laesst sich pro
+  // Element nur einmal aufrufen, deshalb entsteht er zusammen mit dem Element
+  // und verschwindet mit ihm.
+  let gain: GainNode | null = null;
+  let source: MediaElementAudioSourceNode | null = null;
+
+  /** Die Knoten des vorigen Stuecks abhaengen - sie gehoeren zu einem Element,
+   *  das nicht mehr spielt, und blieben sonst am Ausgang haengen. */
+  const unroute = () => {
+    source?.disconnect();
+    gain?.disconnect();
+    source = null;
+    gain = null;
+  };
+
+  /** Element an den Klanggraphen haengen. Ohne Kontext bleibt es beim Element. */
+  const route = (audio: HTMLAudioElement) => {
+    const ctx = getContext?.() ?? null;
+    if (!ctx || typeof ctx.createMediaElementSource !== 'function') {
+      audio.volume = volume;
+      return;
+    }
+
+    try {
+      source = ctx.createMediaElementSource(audio);
+      gain = ctx.createGain();
+      gain.gain.value = volume;
+      source.connect(gain).connect(ctx.destination);
+      // Ab hier regelt der GainNode. Das Element bleibt voll aufgedreht,
+      // sonst multiplizierten sich zwei Regelungen.
+      audio.volume = 1;
+    } catch {
+      // Ein Element, das schon einmal verbunden wurde, oder ein Kontext, der
+      // gerade zumacht. Musik ohne Regler ist besser als keine Musik.
+      source = null;
+      gain = null;
+      audio.volume = volume;
+    }
+  };
 
   const play = (id: TrackId) => {
     const track = TRACKS.find((t) => t.id === id);
@@ -60,11 +112,12 @@ export function createMusicPlayer(): MusicPlayer {
     }
 
     element?.pause();
+    unroute();
     element = new Audio(track.src);
     element.loop = true;
-    element.volume = volume;
     element.preload = 'none';
     current = id;
+    route(element);
     // Schlaegt die Wiedergabe fehl (Autoplay-Sperre, Datei fehlt), bleibt es
     // still - eine Session ohne Musik ist kein Fehlerfall, der den Player
     // anhalten duerfte.
@@ -74,6 +127,7 @@ export function createMusicPlayer(): MusicPlayer {
   const stop = () => {
     element?.pause();
     if (element) element.currentTime = 0;
+    unroute();
     element = null;
     current = null;
   };
@@ -83,7 +137,8 @@ export function createMusicPlayer(): MusicPlayer {
     stop,
     setVolume: (value: number) => {
       volume = Math.min(1, Math.max(0, value));
-      if (element) element.volume = volume;
+      if (gain) gain.gain.value = volume;
+      else if (element) element.volume = volume;
     },
     pause: () => element?.pause(),
     resume: () => {

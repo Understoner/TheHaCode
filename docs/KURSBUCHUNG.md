@@ -3,7 +3,8 @@
 Gehört zu T20. Was hier steht, ist die Betriebsanleitung: was die App macht,
 was von Hand passiert und warum es so geschnitten ist.
 
-Technische Begründungen stehen im Kopf von `supabase/migrations/0011_course_bookings.sql`.
+Technische Begründungen stehen im Kopf von `supabase/migrations/0011_course_bookings.sql`
+und, für Gastbuchungen, in `0015_course_bookings_guest.sql`.
 
 ---
 
@@ -23,13 +24,16 @@ Technische Begründungen stehen im Kopf von `supabase/migrations/0011_course_boo
 ```
 Nutzer klickt "Verbindlich buchen"
    │
-   ├─ 1. create-course-checkout prüft: angemeldet? AGB bestätigt?
+   ├─ 1. create-course-checkout prüft: AGB bestätigt? Wer bucht?
+   │        angemeldet    -> das Konto, aus dem Token
+   │        nicht angemeldet -> Name und Adresse aus dem Formular (Gast)
    │
-   ├─ 2. reserve_course_seat() in der Datenbank
+   ├─ 2. reserve_course_seat() bzw. reserve_course_seat_for_guest()
    │        sperrt die Kurszeile  ->  zählt belegte Plätze  ->  legt die
    │        Buchung als 'reserved' an, 40 Minuten gültig
    │        Absagen: PT001 nicht buchbar · PT002 ausgebucht
    │                 PT003 schon gebucht · PT004 AGB fehlen
+   │                 PT005 weder Konto noch Adresse
    │
    ├─ 3. Stripe-Checkout, mode = 'payment', gültig 32 Minuten
    │        metadata.booking_id ist die Brücke zurück
@@ -44,6 +48,56 @@ nicht, verfällt sie von selbst — der nächste Buchungsversuch räumt sie weg.
 
 **Die Reservierung ist nicht der Vertrag.** Verbindlich wird die Anmeldung
 nach § 11 AGB erst mit der Bestätigung, also mit der Zahlung.
+
+---
+
+## Ohne Konto buchen (seit 06.09.2026)
+
+Ein Kurs ist ein **Kaufvorgang, kein Zugang**: wer den Online-Kurs bucht,
+bekommt einen Termin und einen Link — nichts, wofür er sich anmelden müsste.
+Eine Registrierung davorzusetzen kostet Buchungen und bringt niemandem etwas.
+Deshalb steht auf der Kursseite jetzt ein Formular mit Name und
+E-Mail-Adresse statt eines Verweises auf die Anmeldung. Der Verweis steht
+weiterhin darunter — wer ein Konto hat, soll es benutzen.
+
+| | Mit Konto | Als Gast |
+|---|---|---|
+| Wer bucht | `user_id` aus dem Zugangstoken | `guest_email`, `guest_name` aus dem Formular |
+| Bestätigung | Zahlungsbeleg von Stripe | Zahlungsbeleg von Stripe |
+| Buchung in der App sichtbar | ja | **nein** — es gibt kein Konto, an dem eine Policy hängen könnte |
+| Teilnehmerliste im Studio | `user_id` → `profiles` | `guest_name` in der Buchungszeile |
+
+**Wer bucht, entscheidet der Server, nicht die Anfrage.** Liegt ein gültiges
+Token vor, gilt das Konto und das Feld `guest` wird nicht angesehen — sonst
+könnte jemand auf fremden Namen buchen.
+
+**Eine Gastbuchung wird nie nachträglich einem Konto zugeschlagen.** Das wäre
+eine Zuordnung über die E-Mail-Adresse, und die ist laut SAD §4.3 Punkt 5 kein
+Schlüssel. Wer seine Buchung im Konto sehen will, bucht angemeldet.
+
+**Für die Teilnehmerliste heißt das:** eine Buchung ohne `user_id` gehört zu
+`guest_name` und `guest_email`. Im Studio:
+
+```sql
+select coalesce(p.display_name, b.guest_name)  as teilnehmer,
+       coalesce(u.email,        b.guest_email) as adresse,
+       b.status, b.amount_paid_cents, b.amount_total_cents
+  from public.course_bookings b
+  left join auth.users     u on u.id = b.user_id
+  left join public.profiles p on p.id = b.user_id
+ where b.course_id = '<kurs-id>'
+   and b.deleted_at is null
+   and b.status in ('reserved', 'confirmed')
+ order by b.created_at;
+```
+
+**Missbrauch, offen benannt:** ohne Konto kostet ein Reservierungsversuch
+nichts als eine Adresse. Dagegen steht die Haltezeit von 40 Minuten, ein Index,
+der je Adresse und Kurs nur eine offene Buchung zulässt, und dass die
+Gastreservierung ausschließlich unter `service_role` läuft. Ein entschlossener
+Störer käme trotzdem durch — bei Kursgrößen im zweistelligen Bereich ist das
+ein Fall für den Blick in die Buchungsliste, nicht für eine Betrugserkennung im
+Code.
 
 ---
 
@@ -359,6 +413,8 @@ erzeugen.
 - **Stornoknopf in der App.** Eine falsch gerechnete Staffel wäre ein
   Geldfehler.
 - **Teilnehmerliste in der App.** Die steht im Studio.
+- **Gastbuchung im Konto nachtragen.** Siehe oben: die Adresse ist kein
+  Schlüssel.
 - **AGB-Bestätigung im Stripe-Checkout** (`consent_collection`). Bei
   Kursbuchungen wird stattdessen in der App bestätigt und der Zeitpunkt in
   `course_bookings.agb_accepted_at` festgehalten. Für das Abo bleibt es bei

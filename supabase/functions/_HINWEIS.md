@@ -7,10 +7,18 @@ sie bei jedem Durchlauf komplett aus — einzeln benennen muss man nichts.
 |---|---|---|
 | `delete-account` | Konto löschen (Apple-Anforderung, SAD §4.1) | ja |
 | `create-checkout` | Bezahlseite fürs Abo bestellen | ja |
-| `create-course-checkout` | Kursplatz halten und Bezahlseite bestellen (T20) | ja |
+| `create-course-checkout` | Kursplatz halten und Bezahlseite bestellen (T20) | ja¹ |
 | `create-portal` | Kundenportal öffnen (kündigen, Rechnungen) | ja |
 | `get-prices` | Was Plus kostet — gelesen bei Stripe (T17) | ja |
 | `stripe-webhook` | **die einzige Stelle, die Abos und Buchungen schreibt** | **nein** |
+
+¹ JWT-Prüfung bleibt eingeschaltet, seit dem 06.09.2026 aber **nicht mehr
+gleichbedeutend mit „angemeldet"**: supabase-js schickt ohne Sitzung den
+anon-Key als `Authorization`, und den nimmt das Gateway als gültiges JWT. Die
+Funktion fragt Supabase, wer dahintersteckt — kennt Supabase niemanden, wird
+aus Name und Adresse im Anfragekörper eine **Gastbuchung**. Liegt ein echtes
+Token vor, gewinnt immer das Konto; `guest` wird dann nicht angesehen. Details
+in `docs/KURSBUCHUNG.md`.
 
 `_shared/` wird nicht ausgerollt — Verzeichnisse mit `_` überspringt die CLI.
 Die reine Logik daraus (`entitlement.ts`, `stripe-events.ts`,

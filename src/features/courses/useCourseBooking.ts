@@ -51,6 +51,13 @@ export function useMyBookings() {
   });
 }
 
+/** Wer bucht. Ohne guest ist es die angemeldete Sitzung. */
+export type CourseCheckoutRequest = {
+  courseSlug: string;
+  /** Nur fuer Buchungen ohne Konto. */
+  guest?: { email: string; name: string };
+};
+
 /**
  * Buchen: Platz halten lassen und zu Stripe wechseln.
  *
@@ -58,13 +65,17 @@ export function useMyBookings() {
  * Anzahlung - entscheidet der Server. Hier steht bewusst keine Zeile, die
  * einen Betrag berechnet: was der Client rechnet, kann der Client auch
  * aendern.
+ *
+ * Auch WER bucht, entscheidet der Server: liegt eine Sitzung vor, gilt das
+ * Konto, und guest wird nicht angesehen. Sonst waere die Angabe einer fremden
+ * Adresse eine Buchung auf fremden Namen.
  */
 export function useCourseCheckout() {
   return useMutation({
-    mutationFn: async (courseSlug: string): Promise<string> => {
+    mutationFn: async ({ courseSlug, guest }: CourseCheckoutRequest): Promise<string> => {
       const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>(
         'create-course-checkout',
-        { method: 'POST', body: { courseSlug, agbAccepted: true } },
+        { method: 'POST', body: { courseSlug, agbAccepted: true, ...(guest ? { guest } : {}) } },
       );
 
       if (error) throw error;

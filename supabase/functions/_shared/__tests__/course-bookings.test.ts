@@ -10,6 +10,7 @@ import {
 
 const USER = 'd0000000-0000-0000-0000-000000000001';
 const BOOKING = 'b0000000-0000-0000-0000-000000000001';
+const GAST = 'gerda@example.at';
 
 function session(overrides: Partial<StripeCourseSessionLike> = {}): StripeCourseSessionLike {
   return {
@@ -24,10 +25,20 @@ function session(overrides: Partial<StripeCourseSessionLike> = {}): StripeCourse
   };
 }
 
+/** Eine Sitzung, wie sie eine Gastbuchung erzeugt: kein Konto, dafuer eine Adresse. */
+function gastSession(overrides: Partial<StripeCourseSessionLike> = {}): StripeCourseSessionLike {
+  return session({
+    client_reference_id: null,
+    metadata: { booking_id: BOOKING, payment_kind: 'course_full', guest_email: GAST },
+    ...overrides,
+  });
+}
+
 function booking(overrides: Partial<BookingRow> = {}): BookingRow {
   return {
     id: BOOKING,
     user_id: USER,
+    guest_email: null,
     status: 'reserved',
     amount_total_cents: 40000,
     amount_paid_cents: 0,
@@ -44,11 +55,29 @@ describe('coursePaymentFacts', () => {
     expect(facts).toEqual({
       bookingId: BOOKING,
       userId: USER,
+      guestEmail: null,
       kind: 'course_deposit',
       amountCents: 20000,
       paymentIntentId: 'pi_test_1',
       checkoutSessionId: 'cs_test_kurs',
     });
+  });
+
+  it('liest bei einer Gastbuchung die Adresse statt eines Kontos', () => {
+    const facts = coursePaymentFacts(gastSession());
+
+    expect(facts?.userId).toBeNull();
+    expect(facts?.guestEmail).toBe(GAST);
+  });
+
+  // Klein und ohne Leerzeichen - genau so liegt die Adresse in der Datenbank
+  // (Migration 0015). Sonst faende der Vergleich unten seine eigene Buchung nicht.
+  it('vergleicht Adressen unabhaengig von Schreibweise und Leerzeichen', () => {
+    const facts = coursePaymentFacts(
+      gastSession({ metadata: { booking_id: BOOKING, payment_kind: 'course_full', guest_email: '  Gerda@Example.AT ' } }),
+    );
+
+    expect(facts?.guestEmail).toBe(GAST);
   });
 
   // Die Abgrenzung, auf der T20 steht: ein Abo-Checkout darf hier nicht
@@ -70,10 +99,21 @@ describe('coursePaymentFacts', () => {
     );
   });
 
-  it('wirft ohne client_reference_id - geraten wird die Zuordnung nie', () => {
+  it('wirft ohne Konto und ohne Gastadresse - geraten wird die Zuordnung nie', () => {
     expect(() => coursePaymentFacts(session({ client_reference_id: null }))).toThrow(
-      /client_reference_id/,
+      /weder ein Konto noch eine Gastadresse/,
     );
+  });
+
+  // Eine Sitzung, die beides nennt, ist widerspruechlich: sie koennte zu einer
+  // Kontobuchung gehoeren oder zu einer Gastbuchung. Raten waere hier die
+  // teuerste aller Loesungen.
+  it('wirft, wenn eine Sitzung Konto und Gastadresse zugleich nennt', () => {
+    expect(() =>
+      coursePaymentFacts(
+        session({ metadata: { booking_id: BOOKING, payment_kind: 'course_full', guest_email: GAST } }),
+      ),
+    ).toThrow(/zugleich/);
   });
 
   it('wirft ohne Betrag', () => {
@@ -136,6 +176,36 @@ describe('bookingUpdateFor', () => {
     expect(() =>
       bookingUpdateFor(booking({ user_id: 'd0000000-0000-0000-0000-00000000ffff' }), coursePaymentFacts(session())!),
     ).toThrow(/gehoert nicht/);
+  });
+
+  // ---------- Gastbuchungen ----------
+  it('bestaetigt eine Gastbuchung wie jede andere', () => {
+    const gast = booking({ user_id: null, guest_email: GAST, deposit_cents: null, amount_total_cents: 20000 });
+
+    expect(bookingUpdateFor(gast, coursePaymentFacts(gastSession())!)).toMatchObject({
+      status: 'confirmed',
+      amount_paid_cents: 20000,
+    });
+  });
+
+  // Dieselbe Schranke wie oben, nur fuer die andere Art von Bucher: eine
+  // Gastzahlung darf keine fremde Gastbuchung bestaetigen.
+  it('wirft, wenn die Gastbuchung zu einer anderen Adresse gehoert', () => {
+    const fremd = booking({ user_id: null, guest_email: 'jemand.anderer@example.at' });
+
+    expect(() => bookingUpdateFor(fremd, coursePaymentFacts(gastSession())!)).toThrow(/gehoert nicht/);
+  });
+
+  // Und sie darf erst recht keine Kontobuchung bestaetigen - sonst koennte
+  // jemand mit einer eigenen Zahlung den Platz eines Kontos uebernehmen.
+  it('wirft, wenn eine Gastzahlung auf eine Kontobuchung trifft', () => {
+    expect(() => bookingUpdateFor(booking(), coursePaymentFacts(gastSession())!)).toThrow(/Konto/);
+  });
+
+  it('wirft, wenn eine Kontozahlung auf eine Gastbuchung trifft', () => {
+    const gast = booking({ user_id: null, guest_email: GAST });
+
+    expect(() => bookingUpdateFor(gast, coursePaymentFacts(session())!)).toThrow(/gehoert nicht/);
   });
 
   it('wirft bei einer Zahlung auf eine stornierte Buchung', () => {

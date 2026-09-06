@@ -14,6 +14,15 @@
 // metadata.booking_id setzen wir beim Anlegen der Checkout-Sitzung, genau wie
 // client_reference_id. Beides kommt unveraendert zurueck. Eine E-Mail-Adresse
 // wird auch hier nirgends zur Zuordnung benutzt (SAD §4.3 Punkt 5).
+//
+// GAESTE (seit 06.09.2026)
+// -----------------------
+// Wer ohne Konto bucht, hat keine user_id - client_reference_id bleibt dann
+// leer, und in den Metadaten steht stattdessen guest_email. Zugeordnet wird
+// die Zahlung auch dann ueber booking_id und nichts anderes; die Adresse ist
+// nur die Gegenprobe, dass die Zahlung zur richtigen Buchung gehoert. Genau
+// eines von beiden muss dastehen: eine Sitzung, die Konto und Gastadresse
+// zugleich nennt, ist widerspruechlich und wird abgelehnt statt geraten.
 
 /** Wofuer eine Zahlung steht. Steht so in den Metadaten der Sitzung. */
 export type CoursePaymentKind = 'course_deposit' | 'course_full' | 'course_balance';
@@ -33,7 +42,10 @@ export type StripeCourseSessionLike = {
 /** Was eine Kurszahlung ueber sich sagt. */
 export type CoursePaymentFacts = {
   bookingId: string;
-  userId: string;
+  /** Das zahlende Konto - null bei einer Gastbuchung. */
+  userId: string | null;
+  /** Die Adresse des Gasts - null, wenn ein Konto gebucht hat. */
+  guestEmail: string | null;
   kind: CoursePaymentKind;
   amountCents: number;
   paymentIntentId: string | null;
@@ -43,7 +55,8 @@ export type CoursePaymentFacts = {
 /** Die Buchung, so wie sie in der Datenbank steht - nur die gelesenen Felder. */
 export type BookingRow = {
   id: string;
-  user_id: string;
+  user_id: string | null;
+  guest_email: string | null;
   status: 'reserved' | 'confirmed' | 'canceled' | 'expired';
   amount_total_cents: number;
   amount_paid_cents: number;
@@ -54,6 +67,13 @@ export type BookingRow = {
 function idOf(reference: string | { id?: string | null } | null | undefined): string | null {
   if (typeof reference === 'string') return reference || null;
   return reference?.id ?? null;
+}
+
+/** Adressen werden klein und ohne Leerzeichen verglichen - so liegen sie auch
+ *  in der Datenbank (Migration 0015, chk_course_bookings_guest_email). */
+function normalizeEmail(value: string | null | undefined): string | null {
+  const trimmed = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 /**
@@ -75,9 +95,14 @@ export function coursePaymentFacts(session: StripeCourseSessionLike): CoursePaym
     throw new Error(`Sitzung ${session.id} ist als ${kind} gekennzeichnet, hat aber keine booking_id`);
   }
 
-  const userId = session.client_reference_id;
-  if (!userId) {
-    throw new Error(`Sitzung ${session.id} traegt keine client_reference_id`);
+  const userId = session.client_reference_id || null;
+  const guestEmail = normalizeEmail(session.metadata?.guest_email);
+
+  if (!userId && !guestEmail) {
+    throw new Error(`Sitzung ${session.id} nennt weder ein Konto noch eine Gastadresse`);
+  }
+  if (userId && guestEmail) {
+    throw new Error(`Sitzung ${session.id} nennt Konto und Gastadresse zugleich`);
   }
 
   const amount = session.amount_total;
@@ -88,6 +113,7 @@ export function coursePaymentFacts(session: StripeCourseSessionLike): CoursePaym
   return {
     bookingId,
     userId,
+    guestEmail,
     kind: kind as CoursePaymentKind,
     amountCents: amount,
     paymentIntentId: idOf(session.payment_intent),
@@ -103,16 +129,30 @@ export function coursePaymentFacts(session: StripeCourseSessionLike): CoursePaym
  * Betrag nicht ein zweites Mal addieren. Erkennungsmerkmal ist die Sitzung:
  * dieselbe Sitzung auf einer bereits bestaetigten Buchung ist ein Wiedergaenger.
  *
- * Wirft, wenn die Buchung einem anderen Konto gehoert. Dass das nie vorkommen
- * sollte, ist kein Grund, es nicht zu pruefen - es waere der eine Fehler, der
- * einen Fremden auf die Teilnehmerliste setzt.
+ * Wirft, wenn die Buchung jemand anderem gehoert - einem anderen Konto, oder
+ * bei einer Gastbuchung einer anderen Adresse. Dass das nie vorkommen sollte,
+ * ist kein Grund, es nicht zu pruefen: es waere der eine Fehler, der einen
+ * Fremden auf die Teilnehmerliste setzt.
  */
 export function bookingUpdateFor(
   booking: BookingRow,
   facts: CoursePaymentFacts,
 ): Record<string, unknown> | null {
-  if (booking.user_id !== facts.userId) {
-    throw new Error(`Buchung ${booking.id} gehoert nicht zu Konto ${facts.userId}`);
+  if (facts.userId) {
+    if (booking.user_id !== facts.userId) {
+      throw new Error(`Buchung ${booking.id} gehoert nicht zu Konto ${facts.userId}`);
+    }
+  } else {
+    // Eine Gastzahlung darf keine Kontobuchung bestaetigen und keine fremde
+    // Gastbuchung. Dass das nie vorkommen sollte, ist kein Grund, es nicht zu
+    // pruefen - es waere der eine Fehler, der einen Fremden auf die
+    // Teilnehmerliste setzt.
+    if (booking.user_id !== null) {
+      throw new Error(`Buchung ${booking.id} gehoert zu einem Konto, die Zahlung kam als Gast`);
+    }
+    if (normalizeEmail(booking.guest_email) !== facts.guestEmail) {
+      throw new Error(`Buchung ${booking.id} gehoert nicht zu ${facts.guestEmail}`);
+    }
   }
 
   if (booking.status === 'canceled') {
