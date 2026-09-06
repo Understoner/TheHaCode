@@ -120,13 +120,36 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   <Files "build-info.json">
     Header always set Cache-Control "no-cache, must-revalidate"
   </Files>
+
+  # UND UMLEITUNGEN AUCH NICHT. Die Luecke im Cache-Fix von vorhin, gefunden
+  # am selben Tag auf Staging (06.09.2026):
+  #
+  # Die beiden Regeln oben haengen an DATEIEN. Eine 301-Antwort ist keine
+  # Datei, bekommt also kein Cache-Control - und eine 301 heisst "dauerhaft".
+  # Genau so behandeln CDNs und Browser sie auch: sie behalten sie, teils
+  # unbegrenzt. Solange die Umleitung stimmt, ist das sparsam. Stimmt sie
+  # nicht, ist sie eingefroren, und der Fehler ueberlebt seine eigene
+  # Behebung.
+  #
+  # Erlebt an /sessions: der Ursprungsserver lieferte laengst wieder 200,
+  # waehrend das CDN weiter die alte Umleitung in die Endlosschleife ausgab
+  # (x-hcdn-cache-status: HIT, age 3054). Erst ein angehaengter Zufallswert
+  # in der Adresse foerderte die richtige Antwort zutage.
+  #
+  # E=UMLEITUNG setzt die Regel unten, hier wird sie ausgewertet. Kennt der
+  # Server die Verbindung von mod_rewrite und mod_headers nicht, bleibt alles
+  # wie bisher - schlechter wird es dadurch nicht.
+  Header always set Cache-Control "no-cache, must-revalidate" env=UMLEITUNG
 </IfModule>
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
   # /kurse/ -> /kurse
-  RewriteRule ^(.+)/$ /$1 [R=301,L]
+  # E=UMLEITUNG: siehe den Kommentar zum Cache-Control weiter oben. Ohne das
+  # friert ein CDN diese Antwort ein, und eine falsche Umleitung ueberlebt
+  # ihre eigene Behebung.
+  RewriteRule ^(.+)/$ /$1 [R=301,L,E=UMLEITUNG:1]
 
   # /kurse -> /kurse.html, sofern die Datei existiert.
   #
