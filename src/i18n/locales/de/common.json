@@ -192,6 +192,7 @@
   "kurse.buchung.buchenAktion": "Verbindlich buchen",
   "kurse.buchung.anzahlenAktion": "Buchen und {{betrag}} anzahlen",
   "kurse.buchung.wirdGeoeffnet": "Zahlung wird geöffnet …",
+  "kurse.buchung.abbrechen": "Abbrechen",
   "kurse.buchung.agbLabel": "AGB und Haftungsausschluss bestätigen",
   "kurse.buchung.agbVorspann": "Ich habe die",
   "kurse.buchung.agbLink": "AGB",
