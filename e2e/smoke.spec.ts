@@ -57,8 +57,17 @@ test('Mobile: alle Eintraege der Tab-Leiste stehen gleich aufgebaut da', async (
 // /passwort-neu ist hier besonders wichtig: die Adresse kommt IMMER von
 // aussen, naemlich aus dem Link in der E-Mail. Ein 404 waere dort nicht
 // unbequem, sondern ein Konto, an das niemand mehr herankommt.
+// /sessions und /sequenzen stehen seit dem 06.09.2026 mit drauf, und zwar aus
+// genau dem Grund, aus dem diese Liste ueberhaupt existiert: beide liefen in
+// eine Endlosschleife aus 301-Antworten, und niemand hat es gemerkt. Sie sind
+// die einzigen Routen, die der Export als Verzeichnis mit index.html ablegt
+// statt als eigene .html-Datei - eine Form, die diese Liste bis dahin nicht
+// abgedeckt hat. Playwright folgt Weiterleitungen von selbst und scheitert an
+// der Schleife, der Test faengt sie also.
 const ROUTEN = [
   '/',
+  '/sessions',
+  '/sequenzen',
   '/kurse',
   '/team',
   '/impressum',
