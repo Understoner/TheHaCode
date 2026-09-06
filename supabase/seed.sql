@@ -11,6 +11,12 @@
 -- Danach ist alles im Table Editor bearbeitbar. Absichtlich ohne
 -- Hilfsfunktion ausgeschrieben, damit jeder Block fuer sich kopierbar ist.
 --
+-- ERST DIE MIGRATIONEN, DANN DIESE DATEI. Die Sequenzen tragen den Atemweg,
+-- und die Spalte dafuer entsteht in Migration 0016. In den echten Umgebungen
+-- rollt die Pipeline die Migrationen nach dem Merge nach develop bzw. main aus
+-- (docs/DEPLOYMENT.md) - vorher steht die Spalte dort nicht. Die Pruefung
+-- gleich unten sagt das notfalls noch einmal.
+--
 -- Aufbau je Sequenz (SAD §3.4):
 --   exercises              die Uebung selbst (type 'paced', playback_mode 'timer')
 --    └── exercise_steps         ein Block, repeat_count = Anzahl Runden
@@ -57,6 +63,37 @@
 -- der nicht zur laufenden Uhr passt, waere eine zweite Wahrheit. Wo beides
 -- auseinanderfaellt, steht es im Kommentar ueber der Sequenz.
 -- ---------------------------------------------------------------------------
+
+-- ---------------------------------------------------------------------------
+-- Laeuft diese Datei zu frueh?
+-- ---------------------------------------------------------------------------
+-- Ohne diese Pruefung scheitert der erste INSERT weiter unten mit
+--
+--   ERROR: 42703: column "route" of relation "exercise_phases" does not exist
+--
+-- und dieser Satz sagt niemandem, was zu tun ist. Er sagt vor allem nicht,
+-- dass bis dahin schon geloescht wurde: das DELETE gleich darunter waere
+-- gelaufen, die neuen Sequenzen nicht - die Umgebung stuende ohne jede
+-- Sequenz da, bis jemand die Datei ein zweites Mal ausfuehrt.
+--
+-- Deshalb wird hier abgebrochen, bevor irgendetwas angefasst wird. Deutsch,
+-- ohne Technikjargon, mit Handlungsoption (CLAUDE.md §Immer).
+do $$
+begin
+  if to_regtype('public.breath_route') is null
+     or not exists (
+       select 1 from information_schema.columns
+        where table_schema = 'public'
+          and table_name   = 'exercise_phases'
+          and column_name  = 'route'
+     ) then
+    raise exception
+      'In dieser Umgebung fehlt Migration 0016 (Atemweg). Es wurde nichts '
+      'geaendert. Erst die Migrationen ausrollen lassen - nach dem Merge '
+      'erledigt das die Pipeline von selbst, siehe docs/DEPLOYMENT.md - und '
+      'diese Datei danach noch einmal ausfuehren.';
+  end if;
+end $$;
 
 -- Der redaktionelle Bestand wird ersetzt, nicht ergaenzt. Die Bedingung auf
 -- owner_id ist die ganze Sicherheit dieser Zeile: selbst gebaute Sequenzen
