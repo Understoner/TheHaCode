@@ -507,3 +507,55 @@ bleiben gültig.
   Vorgabe, sondern ein Vorschlag — **am 23.08.2026 ausdrücklich bestätigt und
   damit gewollt.** Er gehört zu jedem Text mit aktivierender Atmung; wer
   künftig eine weitere Energy-Einheit anlegt, übernimmt ihn mit.
+
+---
+
+## News: zwei Beiträge zu den Kursen
+
+**Fertig zum Ausführen:** `docs/inhalte/news-kurse-2026.sql` (Studio → SQL Editor).
+
+Zwei Beiträge der Kategorie **Kurs**, beide mehrfach ausführbar — bei gleichem
+`slug` werden nur die Texte aktualisiert, `published_at` bleibt stehen.
+
+| Beitrag | slug | Bild |
+|---|---|---|
+| DER ATEMCODE ONLINE: jeden Montag eine Stunde für deinen Atem | `online-kurse-2026` | `courses/online-energy.png` |
+| Besser atmen – besser leben: die Kurse an der Volkshochschule | `vhs-kurse-2026-27` | `courses/besser-atmen-vhs.jpg` |
+
+**Es ist nichts hochzuladen.** Beide Bilder liegen bereits im Bucket
+`public-assets` und werden schon von den Kursen selbst verwendet — der
+Online-Beitrag nimmt das Bild von *Energy*, der VHS-Beitrag das der
+VHS-Reihen.
+
+**Eine eigene Detailseite braucht es nicht.** Die Route `/news/<slug>` gibt es
+bereits; `body_md` ist die Detailseite. Beide Beiträge verweisen von dort mit
+`[Zu den Kursterminen](/kurse)` auf die Kursseite — der Markdown-Leser der App
+erkennt Adressen mit führendem Schrägstrich und navigiert innerhalb der App,
+statt den Browser zu verlassen.
+
+### Eine Zeile mit Vorbedingung
+
+Im Online-Beitrag steht **„ein Konto brauchst du dafür nicht"**. Das gilt erst,
+wenn die Gastbuchung (PR #62) in der jeweiligen Umgebung ausgerollt ist — auf
+Staging seit dem 06.09.2026, auf Live erst nach der Beförderung. Wer die Datei
+vorher auf Live ausführt, verspricht etwas, das dort noch nicht geht: dann
+entweder die Beförderung abwarten oder den Halbsatz streichen.
+
+### Was inhaltlich drinsteht
+
+Der **Online-Beitrag** beschreibt den Ablauf eines Abends, die vier Themen im
+Wechsel (Funktionale Atmung, Balance, Energy, Relax — Texte aus den Kursen
+übernommen, damit News und Kursseite nicht auseinanderlaufen), die Rahmendaten
+(montags 20:00 Uhr, rund eine Stunde, 9,99 €) und den Hinweis auf ärztliche
+Rücksprache bei Schwangerschaft, Epilepsie und Herz-Kreislauf-Erkrankungen.
+
+Der **VHS-Beitrag** stellt heraus, was die Reihen von den Online-Stunden
+unterscheidet — vier aufeinander aufbauende Abende statt einzelner Termine —,
+nennt den kostenlosen Infoabend am 29.09.2026 und die vier Reihen in
+Vöcklabruck, Buchkirchen und Ampflwang, und sagt deutlich, dass die Anmeldung
+über die VHS Oberösterreich läuft und nicht über diese App.
+
+Die Termine stehen im Fließtext mit Datum, aber **ohne Uhrzeit je Termin** —
+alle beginnen um 19:00 Uhr, und das steht einmal darüber. Ändert sich ein
+Termin, ändert er sich am Kurs; der Beitrag verweist für die verbindliche Liste
+auf `/kurse`.
