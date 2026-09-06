@@ -63,6 +63,15 @@ function renderBooking(ui: ReactElement) {
   return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
 }
 
+/**
+ * Die Karte ist zugeklappt: erst der Knopf, dann das Formular. Der Knopf im
+ * zugeklappten Zustand und der zum Absenden tragen dieselbe Beschriftung -
+ * sichtbar ist aber immer nur einer, deshalb genuegt getByText.
+ */
+function aufklappen() {
+  fireEvent.click(screen.getByText('Verbindlich buchen'));
+}
+
 describe('CourseBooking', () => {
   beforeEach(() => {
     invokeMock.mockReset();
@@ -88,16 +97,37 @@ describe('CourseBooking', () => {
   // Der Haken ist die Einbeziehung der AGB (§ 11). Ohne ihn darf nicht gebucht
   // werden - aber der Knopf muss trotzdem ausloesen und SAGEN, was fehlt. Ein
   // gesperrter Knopf ohne Begruendung war genau das Problem beim Test auf dev.
+  // Auf der Karte selbst steht nur der Knopf. Bei siebzehn Terminen
+  // untereinander war die Liste sonst nicht mehr ueberblickbar.
+  it('zeigt auf der Karte nur den Knopf, nicht das Formular', () => {
+    renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+
+    expect(screen.getByText('Verbindlich buchen')).toBeTruthy();
+    expect(screen.queryByRole('checkbox')).toBeNull();
+  });
+
   it('bucht ohne Haken nicht', () => {
     renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+    aufklappen();
 
     fireEvent.click(screen.getByText('Verbindlich buchen'));
 
     expect(invokeMock).not.toHaveBeenCalled();
   });
 
+  it('laesst sich wieder zuklappen', () => {
+    renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+    aufklappen();
+    expect(screen.getByRole('checkbox')).toBeTruthy();
+
+    fireEvent.click(screen.getByText('Abbrechen'));
+
+    expect(screen.queryByRole('checkbox')).toBeNull();
+  });
+
   it('sagt beim Druck ohne Haken, was fehlt', () => {
     renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+    aufklappen();
 
     fireEvent.click(screen.getByText('Verbindlich buchen'));
 
@@ -106,6 +136,7 @@ describe('CourseBooking', () => {
 
   it('nimmt den Hinweis zurueck, sobald der Haken sitzt', () => {
     renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+    aufklappen();
 
     fireEvent.click(screen.getByText('Verbindlich buchen'));
     expect(screen.queryByRole('alert')).toBeTruthy();
@@ -118,6 +149,7 @@ describe('CourseBooking', () => {
     invokeMock.mockResolvedValue({ data: { url: 'https://checkout.stripe.com/c/pay/cs_test' }, error: null });
 
     renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+    aufklappen();
 
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByText('Verbindlich buchen'));
@@ -150,8 +182,19 @@ describe('CourseBooking', () => {
       useAuthMock.mockReturnValue({ session: null, loading: false });
     });
 
+    // Auch ohne Konto steht auf der Karte zuerst nur der Knopf - das war der
+    // Anlass fuer die ganze Umstellung.
+    it('zeigt auf der Karte nur den Knopf', () => {
+      renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+
+      expect(screen.getByText('Verbindlich buchen')).toBeTruthy();
+      expect(screen.queryByLabelText('E-Mail-Adresse')).toBeNull();
+      expect(screen.queryByText('Anmelden oder registrieren')).toBeNull();
+    });
+
     it('bietet Nichtangemeldeten das Buchen an, statt sie wegzuschicken', () => {
       renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+      aufklappen();
 
       expect(screen.getByLabelText('Vor- und Nachname')).toBeTruthy();
       expect(screen.getByLabelText('E-Mail-Adresse')).toBeTruthy();
@@ -160,14 +203,19 @@ describe('CourseBooking', () => {
 
     // Der Weg ueber ein Konto bleibt sichtbar: wer eines hat, soll es
     // benutzen, dann steht die Buchung spaeter auch dort.
-    it('laesst den Weg ueber das Konto trotzdem offen', () => {
+    // Nach dem Klick steht beides nebeneinander: als Gast buchen, oder ueber
+    // ein Konto gehen. Das ist die Auswahl, um die es geht.
+    it('stellt nach dem Klick Gastbuchung und Konto zur Wahl', () => {
       renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+      aufklappen();
 
+      expect(screen.getByLabelText('E-Mail-Adresse')).toBeTruthy();
       expect(screen.getByText('Anmelden oder registrieren')).toBeTruthy();
     });
 
     it('bucht ohne Name und Adresse nicht und sagt, was fehlt', async () => {
       renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+      aufklappen();
 
       fireEvent.click(screen.getByText('Verbindlich buchen'));
 
@@ -177,6 +225,7 @@ describe('CourseBooking', () => {
 
     it('bucht ohne Haken bei den AGB nicht', async () => {
       renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+      aufklappen();
 
       fireEvent.change(screen.getByLabelText('Vor- und Nachname'), {
         target: { value: 'Gerda Gast' },
@@ -197,6 +246,7 @@ describe('CourseBooking', () => {
       });
 
       renderBooking(<CourseBooking course={course()} seatsLeft={5} />);
+      aufklappen();
 
       fireEvent.change(screen.getByLabelText('Vor- und Nachname'), {
         target: { value: '  Gerda Gast  ' },
@@ -226,6 +276,7 @@ describe('CourseBooking', () => {
     it('bietet bei einem ausgebuchten Kurs kein Formular an', () => {
       renderBooking(<CourseBooking course={course()} seatsLeft={0} />);
 
+      expect(screen.queryByText('Verbindlich buchen'), 'gar kein Knopf').toBeNull();
       expect(screen.queryByLabelText('E-Mail-Adresse')).toBeNull();
       expect(screen.getByText(/Alle Plätze sind vergeben/)).toBeTruthy();
     });
@@ -246,6 +297,7 @@ describe('CourseBooking', () => {
     invokeMock.mockResolvedValue({ data: null, error: { message: '{"error":"sold_out"}' } });
 
     renderBooking(<CourseBooking course={course()} seatsLeft={1} />);
+    aufklappen();
 
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByText('Verbindlich buchen'));

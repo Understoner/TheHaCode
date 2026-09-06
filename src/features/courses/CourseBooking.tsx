@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { PressableRing } from '@/components/PressableRing';
 import { colors, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { AgbConsent } from '@/features/courses/AgbConsent';
@@ -33,12 +34,30 @@ import type { Course } from '@/features/courses/useCoursesList';
 // war eine Huerde ohne Gegenwert: die App bietet einem Kursteilnehmer nichts,
 // wofuer er ein Konto braeuchte. Der Verweis steht weiterhin darunter - wer
 // eines hat, soll es benutzen, dann taucht die Buchung spaeter im Konto auf.
+//
+// ERST AUF KLICK (06.09.2026, nachgezogen)
+// ----------------------------------------
+// Das Formular stand zunaechst offen auf jeder Kurskarte. Bei einem einzelnen
+// Kurs faellt das nicht auf; in der Uebersicht stehen siebzehn Termine
+// untereinander, und jeder trug zwei Eingabefelder, einen Hinweis, einen Haken
+// mit zwei Verweisen und einen Knopf. Die Liste war nicht mehr ueberblickbar -
+// man scrollte an Kursen vorbei, statt sie zu vergleichen.
+//
+// Jetzt steht auf der Karte nur der Knopf. Wer ihn drueckt, bekommt darunter,
+// was er zum Buchen braucht - und zwar bei genau diesem einen Kurs.
+//
+// Das gilt fuer BEIDE Wege, auch fuer Angemeldete: sonst haette die Karte je
+// nach Anmeldezustand zwei verschiedene Bauformen, und der Haken bei den AGB
+// nimmt mit seinen zwei Verweisen ebenfalls Platz. Rechtlich aendert sich
+// nichts - der Haken kommt weiterhin vor der Buchung, nur einen Klick spaeter.
 export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft: number | null }) {
   const { t } = useTranslation();
   const { session } = useAuth();
   const bookings = useMyBookings();
   const checkout = useCourseCheckout();
 
+  // Zugeklappt, bis jemand buchen will. Siehe den Kommentar bei der Anzeige.
+  const [offen, setOffen] = useState(false);
   const [agb, setAgb] = useState(false);
   // Gesetzt, wenn jemand ohne Haken auf "Buchen" drueckt. Siehe start().
   const [hakenFehlt, setHakenFehlt] = useState(false);
@@ -106,6 +125,11 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
         <Text style={styles.confirmed}>{t('kurse.buchung.gebucht')}</Text>
       ) : availability.soldOut ? (
         <Text style={styles.hint}>{t('kurse.buchung.ausgebuchtHinweis')}</Text>
+      ) : !offen ? (
+        // Zugeklappt: nur der Knopf. Er verspricht nichts, was er nicht haelt -
+        // "verbindlich" wird die Anmeldung erst mit der Bestaetigung im
+        // naechsten Schritt (§ 11 AGB), und genau der kommt jetzt.
+        <Button label={aktion} onPress={() => setOffen(true)} />
       ) : !session ? (
         <View style={styles.stack}>
           <GuestBookingForm courseSlug={course.slug} label={aktion} />
@@ -116,6 +140,10 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
               {t('kurse.buchung.anmeldenLink')}
             </Link>
           </Text>
+
+          <PressableRing onPress={() => setOffen(false)} style={styles.abbrechen}>
+            <Text style={styles.abbrechenText}>{t('kurse.buchung.abbrechen')}</Text>
+          </PressableRing>
         </View>
       ) : (
         <View style={styles.stack}>
@@ -139,6 +167,10 @@ export function CourseBooking({ course, seatsLeft }: { course: Course; seatsLeft
               {t(`errors:buchung.${bookingErrorCode(checkout.error)}`)}
             </Text>
           ) : null}
+
+          <PressableRing onPress={() => setOffen(false)} style={styles.abbrechen}>
+            <Text style={styles.abbrechenText}>{t('kurse.buchung.abbrechen')}</Text>
+          </PressableRing>
         </View>
       )}
     </View>
@@ -190,5 +222,16 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: '600',
     color: colors.ocean700,
+  },
+  // Zurueck zur zugeklappten Karte. Bewusst zurueckhaltend: wer hier gelandet
+  // ist, wollte buchen - der Weg heraus soll erreichbar sein, aber nicht mit
+  // dem Knopf konkurrieren, der zum Ziel fuehrt.
+  abbrechen: {
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+  },
+  abbrechenText: {
+    fontSize: 13,
+    color: colors.ink700,
   },
 });
