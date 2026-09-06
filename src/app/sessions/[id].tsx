@@ -8,7 +8,7 @@ import { VolumeSlider } from '@/components/VolumeSlider';
 import { colors, radius, spacing } from '@/design/tokens';
 import { BreathCircle } from '@/features/breathing/BreathCircle';
 import { createMusicPlayer, TRACKS, type TrackId } from '@/features/breathing/music';
-import { setAudioSessionType } from '@/features/breathing/audioSession';
+import { createSessionKeepAlive, type SessionKeepAlive } from '@/features/breathing/audioSession';
 import { createAudioContext, createToneBus, type ToneBus } from '@/features/breathing/tones';
 import { createVoicePlayer, type VoicePlayer } from '@/features/breathing/voice';
 import {
@@ -73,6 +73,7 @@ function Player({ session }: { session: PlayableExercise }) {
   const voiceRef = useRef<VoicePlayer | null>(null);
   const lastCuedRef = useRef(-1);
   const musicRef = useRef<ReturnType<typeof createMusicPlayer> | null>(null);
+  const keepAliveRef = useRef<SessionKeepAlive | null>(null);
 
   const segment: TimelineSegment | null = segIndex >= 0 ? timeline[segIndex] : null;
 
@@ -141,14 +142,17 @@ function Player({ session }: { session: PlayableExercise }) {
     if (voiceOn) voiceRef.current?.preload();
   }, [voiceOn]);
 
-  // Auf dem iPhone entscheidet die Sitzungskategorie darueber, ob unsere Toene
-  // ueberhaupt zu hoeren sind - ohne sie schaltet der Klingelschalter reines
-  // Web Audio stumm (siehe audioSession.ts, am Geraet gemessen). Laeuft unsere
-  // Musik, richtet Safari die Sitzung schon selbst passend ein; nur ohne sie
-  // muessen wir es sagen.
+  // Auf dem iPhone ist Web Audio stumm, solange kein Medienelement spielt -
+  // der Klingelschalter schaltet es sonst ab (am Geraet gemessen, siehe
+  // audioSession.ts). Laeuft unsere Musik, ist das Element schon da; ohne sie
+  // haelt ein erzeugter, unhoerbarer Schnipsel die Sitzung wach.
   useEffect(() => {
-    setAudioSessionType(musicTrack ? 'auto' : 'transient');
-  }, [musicTrack]);
+    if (!keepAliveRef.current) keepAliveRef.current = createSessionKeepAlive();
+    const keepAlive = keepAliveRef.current;
+
+    if (!musicTrack && clock.isRunning) keepAlive.start(audioRef.current);
+    else keepAlive.stop();
+  }, [musicTrack, clock.isRunning]);
 
   // Musik folgt zwei Dingen: der Auswahl und dem Laufzustand. Pausiert die
   // Uebung, pausiert auch die Musik - sonst laeuft sie weiter, waehrend
@@ -174,6 +178,8 @@ function Player({ session }: { session: PlayableExercise }) {
   useEffect(
     () => () => {
       musicRef.current?.dispose();
+      keepAliveRef.current?.stop();
+      keepAliveRef.current = null;
       const audio = audioRef.current;
       audioRef.current = null;
       busRef.current = null;
@@ -220,6 +226,7 @@ function Player({ session }: { session: PlayableExercise }) {
         // wird beim Ausbauen der Komponente, eine Ebene weiter oben.
         busRef.current?.silence();
         voiceRef.current?.silence();
+        keepAliveRef.current?.stop();
         void audioRef.current?.suspend?.().catch(() => undefined);
       },
       [pauseClock]
