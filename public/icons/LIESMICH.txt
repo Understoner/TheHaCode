@@ -1,0 +1,20 @@
+Das Bild fuer den Startbildschirm.
+
+Erzeugt von scripts/write-app-icons.mjs - nicht von Hand bearbeiten. Das Skript
+zeichnet den Atemring aus ui/references/03_atem_animation.svg in den Farben aus
+src/design/tokens.ts und schreibt daneben public/manifest.json.
+
+  node scripts/write-app-icons.mjs
+
+Es laeuft NICHT beim Build: die Dateien aendern sich nur, wenn sich das Motiv
+oder die Marke aendert, und dann soll das Ergebnis im Diff stehen.
+
+Wer die Icons aendert, prueft danach beides:
+  * Android/Chrome nimmt icon-192, icon-512 und icon-maskable-512 aus dem
+    Manifest. Die maskierbare Fassung wird je nach Geraet zu einem Kreis oder
+    einem Kleeblatt beschnitten - garantiert sind nur die mittleren 80 Prozent.
+  * iOS/Safari liest das Manifest dafuer gar nicht und nimmt ausschliesslich
+    apple-touch-icon.png. Fehlt die Datei, legt iOS einen verkleinerten
+    Bildschirmabzug ab.
+
+Die Verweise darauf stehen in src/app/+html.tsx.

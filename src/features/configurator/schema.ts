@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { playlistUrl, type PlaylistProvider } from '@/features/sessions/playlists';
 import type { PhaseKind } from '@/types/breathing';
 
 // Der Konfigurator - die bezahlte Funktion (CLAUDE.md §Was V1 ist).
@@ -41,6 +42,23 @@ function zahl(min: number, max: number, fehler: string) {
     .refine((value) => value >= min && value <= max, { error: fehler });
 }
 
+/**
+ * Ein Playlist-Feld: leer oder eine Adresse, die zu genau diesem Dienst
+ * gehoert.
+ *
+ * Leer ist ausdruecklich erlaubt - eine Sequenz braucht keine Musik. Und die
+ * Pruefung ist dieselbe wie in der Datenbank (Migration 0017, CHECK-Constraint
+ * auf den Host): sie steht doppelt, weil das Formular es einem VOR dem
+ * Absenden sagen soll und die Datenbank nichts Falsches hereinlaesst - genau
+ * wie bei den Grenzwerten oben.
+ */
+function playlistFeld(provider: PlaylistProvider, fehler: string) {
+  return z
+    .string()
+    .trim()
+    .refine((value) => value === '' || playlistUrl(provider, value) !== null, { error: fehler });
+}
+
 const phaseSchema = z.object({
   kind: z.enum(EDITABLE_PHASE_KINDS),
   duration_seconds: zahl(0.5, MAX_PHASE_SECONDS, 'errors:sequenz.dauer'),
@@ -63,6 +81,8 @@ export const sequenceSchema = z.object({
     .min(2, { error: 'errors:sequenz.titel' })
     .max(80, { error: 'errors:sequenz.titelZuLang' }),
   subtitle: z.string().trim().max(120, { error: 'errors:sequenz.untertitelZuLang' }),
+  spotify_url: playlistFeld('spotify', 'errors:sequenz.spotifyUrl'),
+  apple_music_url: playlistFeld('apple_music', 'errors:sequenz.appleMusicUrl'),
   steps: z
     .array(stepSchema)
     .min(1, { error: 'errors:sequenz.brauchtBlock' })
@@ -85,5 +105,5 @@ export function newStep(): SequenceFormValues['steps'][number] {
 }
 
 export function emptySequence(): SequenceFormValues {
-  return { title: '', subtitle: '', steps: [newStep()] };
+  return { title: '', subtitle: '', spotify_url: '', apple_music_url: '', steps: [newStep()] };
 }

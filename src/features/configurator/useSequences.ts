@@ -73,6 +73,12 @@ export function useSaveSequence() {
         p_exercise_id: id as string,
         p_title: values.title,
         p_subtitle: values.subtitle,
+        // Seit Migration 0017 nimmt save_exercise die beiden Playlist-Adressen
+        // mit. Leere Felder gehen als leerer String hinueber und werden dort zu
+        // null - die Funktion trimmt und nullift selbst, damit beide Wege
+        // (Formular und Studio) dasselbe Ergebnis liefern.
+        p_spotify_url: values.spotify_url,
+        p_apple_music_url: values.apple_music_url,
         p_steps: values.steps.map((step) => ({
           label: step.label,
           repeat_count: step.repeat_count,

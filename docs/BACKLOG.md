@@ -603,6 +603,59 @@ geschrieben, nicht gegen uns.
 
 ---
 
+### T21 · Favoriten, Playlist-Links und das Bild fuer den Startbildschirm ⏱6
+**Ziel:** Drei kleine Ergaenzungen, die der Reihe nach am selben Ort ansetzen —
+an der Session-Karte.
+
+**1. Favoriten.** Ein Stern an jeder Sequenz, dazu ein Filter „Favoriten" in
+derselben Chip-Reihe wie die Wirkeffekte. Er gilt fuer die allgemein
+bereitgestellten Sequenzen **und** fuer die selbst gebauten: dahinter steht eine
+Tabelle, nicht zwei, denn fuer den Stern ist eine Sequenz eine Sequenz (SAD §3.4).
+SAD §3.6 hatte das als `user_favorites` skizziert; gebaut ist es als
+`exercise_favorites` — der Name passt zur bestehenden Familie
+(`exercise_steps`, `exercise_phases`), und die Spalten folgen der
+Nutzertabellen-Regel aus CLAUDE.md, die der Skizze noch fehlte. Der SAD ist
+entsprechend nachgezogen.
+
+**2. Playlist-Links.** Zwei nullable Spalten an `exercises`: eine Spotify- und
+eine Apple-Music-Adresse, redaktionell im Studio zu pflegen und im Konfigurator
+fuer eigene Sequenzen. Der Player zeigt daraus zwei Knoepfe, die die Adresse
+oeffnen — mehr nicht. **Das ist keine Integration** und widerspricht SAD §7.5
+nicht: kein API-Zugang, keine Anmeldung, keine Steuerung der Wiedergabe. Die
+Musik laeuft in der App des Nutzers, genau wie es dort steht; die App erspart
+ihm nur das Suchen. Die Einschraenkung auf die beiden Hosts steht doppelt —
+als CHECK-Constraint (Studio kennt keine Formularvalidierung) und im Formular.
+
+**3. Startbildschirm.** Manifest und Icons sind in SAD §0 seit jeher als Teil
+der PWA-Auslieferung genannt, haben aber gefehlt: iOS legte bis dahin einen
+verkleinerten Bildschirmabzug ab. Das Motiv ist der Atemring aus
+`ui/references/03_atem_animation.svg`, gezeichnet von
+`scripts/write-app-icons.mjs` aus den Design-Tokens — kein fremdes Bild, keine
+Lizenzfrage, keine Bildbibliothek.
+
+**Abnahme:**
+- [x] Der Stern wirkt an redaktionellen wie an eigenen Sequenzen und ueberlebt das Neuladen
+- [x] Vier Policies, vier Missbrauchsfaelle in `supabase/tests/017_favoriten_und_playlists.test.sql`:
+      fremde Sterne lesen, fremde setzen, fremde loeschen — und der Stern als Weg,
+      unsichtbare IDs zu bestaetigen (deshalb die `exists`-Pruefung im `with check`)
+- [x] `exercise_favorites` steht in der UNION-Liste in `001_foundation.test.sql`
+- [x] Eine Playlist-Adresse, die nicht zu Spotify oder Apple Music gehoert, kommt
+      weder durch das Formular noch in die Datenbank — `javascript:` ebenso wenig
+- [x] `save_exercise` hat eine neue Signatur; die alte bleibt stehen und **erhaelt**
+      dabei die hinterlegten Adressen, statt sie zu leeren (additive Migration,
+      alte App-Version und neues Schema laufen zusammen)
+- [x] Manifest und Icons liegen nach `npm run build:web` in `dist/`, die Verweise stehen im `<head>`
+
+> **Gebaut am 13.09.2026.** Bewusst nicht gebaut: eine Favoritenliste als
+> eigener Menuepunkt (der Filter reicht, solange es keine dritte Ansicht gibt),
+> Favoriten ohne Konto (ein Favorit ist eine fachliche Angabe, `localStorage`
+> ist dafuer verboten — der Stern fuehrt stattdessen zum Konto) und jede Form
+> von Wiedergabesteuerung fuer Spotify/Apple Music (geht im Web nicht ohne
+> Anmeldung beim Dienst, und dann waere es die Integration, die SAD §7.5
+> ausschliesst).
+
+---
+
 ## Nicht in V1
 
 Atem-Tagebuch und Micro Habits (V1.1) · Session-Protokoll (V1.1) · geführte Aufnahmen mit Markern (V1.2) · native Apps, Programme, Coach-Sicht, Offline (V2) · In-App-Redaktionsoberfläche für News/Kurse/Team (vorgemerkt, SAD §11.6 — Supabase Studio reicht vorerst).
