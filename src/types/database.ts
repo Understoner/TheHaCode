@@ -221,6 +221,51 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_favorites: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          deleted_at: string | null
+          exercise_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          exercise_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          exercise_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_favorites_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercise_favorites_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "v_exercise_duration"
+            referencedColumns: ["exercise_id"]
+          },
+        ]
+      }
       exercise_phases: {
         Row: {
           cue_text: string | null
@@ -312,6 +357,7 @@ export type Database = {
       }
       exercises: {
         Row: {
+          apple_music_url: string | null
           audio_path: string | null
           benefits_md: string | null
           category_id: string | null
@@ -332,6 +378,7 @@ export type Database = {
           playback_mode: Database["public"]["Enums"]["playback_mode"]
           slug: string | null
           sort_order: number
+          spotify_url: string | null
           subtitle: string | null
           title: string
           type: Database["public"]["Enums"]["exercise_type"]
@@ -342,6 +389,7 @@ export type Database = {
           visibility: Database["public"]["Enums"]["visibility_level"]
         }
         Insert: {
+          apple_music_url?: string | null
           audio_path?: string | null
           benefits_md?: string | null
           category_id?: string | null
@@ -362,6 +410,7 @@ export type Database = {
           playback_mode?: Database["public"]["Enums"]["playback_mode"]
           slug?: string | null
           sort_order?: number
+          spotify_url?: string | null
           subtitle?: string | null
           title: string
           type: Database["public"]["Enums"]["exercise_type"]
@@ -372,6 +421,7 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["visibility_level"]
         }
         Update: {
+          apple_music_url?: string | null
           audio_path?: string | null
           benefits_md?: string | null
           category_id?: string | null
@@ -392,6 +442,7 @@ export type Database = {
           playback_mode?: Database["public"]["Enums"]["playback_mode"]
           slug?: string | null
           sort_order?: number
+          spotify_url?: string | null
           subtitle?: string | null
           title?: string
           type?: Database["public"]["Enums"]["exercise_type"]
@@ -855,15 +906,27 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      save_exercise: {
-        Args: {
-          p_exercise_id: string
-          p_steps: Json
-          p_subtitle: string
-          p_title: string
-        }
-        Returns: string
-      }
+      save_exercise:
+        | {
+            Args: {
+              p_exercise_id: string
+              p_steps: Json
+              p_subtitle: string
+              p_title: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_apple_music_url: string
+              p_exercise_id: string
+              p_spotify_url: string
+              p_steps: Json
+              p_subtitle: string
+              p_title: string
+            }
+            Returns: string
+          }
     }
     Enums: {
       breath_route: "nose" | "mouth" | "pursed_lips"

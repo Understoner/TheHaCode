@@ -3,10 +3,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { FavoriteStar } from '@/components/FavoriteStar';
 import { QueryBoundary } from '@/components/QueryBoundary';
+import { SkeletonList } from '@/components/SkeletonList';
+import { StateMessage } from '@/components/StateMessage';
 import { colors, radius, spacing } from '@/design/tokens';
 import { buildTimeline, totalDurationMs } from '@/features/breathing/timeline';
 import { useDeleteSequence, useMySequences } from '@/features/configurator/useSequences';
+import { useFavorites } from '@/features/sessions/useFavorites';
 import type { PlayableExercise } from '@/types/breathing';
 import { PressableRing } from '@/components/PressableRing';
 
@@ -17,19 +21,64 @@ function minuten(sequence: PlayableExercise): number {
 export function MySequencesList() {
   const { t } = useTranslation();
   const query = useMySequences();
+  const favoriten = useFavorites();
+  // Zwei Chips statt der fuenf aus der Sessions-Liste: hier gibt es keine
+  // Wirkeffekte zu filtern, eigene Sequenzen tragen keine (0007: die Spalte
+  // ist redaktionell).
+  const [nurFavoriten, setNurFavoriten] = useState(false);
 
   return (
     <QueryBoundary
       query={query}
       empty={{ title: t('sequenz.leer.titel'), hint: t('sequenz.leer.hinweis') }}
     >
-      {(sequences) => (
-        <View style={styles.list}>
-          {sequences.map((sequence) => (
-            <SequenceCard key={sequence.id} sequence={sequence} />
-          ))}
-        </View>
-      )}
+      {(sequences) => {
+        const sichtbar = nurFavoriten
+          ? sequences.filter((sequence) => favoriten.istFavorit(sequence.id))
+          : sequences;
+
+        return (
+          <View style={styles.list}>
+            <View style={styles.filterRow}>
+              {([false, true] as const).map((wert) => (
+                <PressableRing
+                  key={String(wert)}
+                  role="button"
+                  aria-pressed={nurFavoriten === wert}
+                  onPress={() => setNurFavoriten(wert)}
+                  style={[styles.filterChip, nurFavoriten === wert && styles.filterChipActive]}
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      nurFavoriten === wert && styles.filterChipTextActive,
+                    ]}
+                  >
+                    {t(wert ? 'favoriten.filter' : 'sessions.filter.all')}
+                  </Text>
+                </PressableRing>
+              ))}
+            </View>
+
+            {/* Der Leerzustand von QueryBoundary haengt an der Antwort des
+                Servers: es KAMEN Sequenzen, nur keine mit Stern. Und solange
+                die Sterne selbst noch unterwegs sind, wird gar nichts
+                behauptet. */}
+            {nurFavoriten && favoriten.laedt ? (
+              <SkeletonList count={2} />
+            ) : nurFavoriten && sichtbar.length === 0 ? (
+              <StateMessage
+                title={t('favoriten.leer.eigeneTitel')}
+                body={t('favoriten.leer.eigeneHinweis')}
+              />
+            ) : (
+              sichtbar.map((sequence) => (
+                <SequenceCard key={sequence.id} sequence={sequence} />
+              ))
+            )}
+          </View>
+        );
+      }}
     </QueryBoundary>
   );
 }
@@ -43,12 +92,17 @@ function SequenceCard({ sequence }: { sequence: PlayableExercise }) {
 
   return (
     <View style={styles.card}>
-      <View style={styles.head}>
-        <Text style={styles.title}>{sequence.title}</Text>
-        <Text style={styles.meta}>
-          {t('sessions.duration', { minutes: minuten(sequence) })}
-          {bloecke > 1 ? ` · ${t('sessions.blocks', { count: bloecke })}` : ''}
-        </Text>
+      <View style={styles.headRow}>
+        <View style={styles.head}>
+          <Text style={styles.title}>{sequence.title}</Text>
+          <Text style={styles.meta}>
+            {t('sessions.duration', { minutes: minuten(sequence) })}
+            {bloecke > 1 ? ` · ${t('sessions.blocks', { count: bloecke })}` : ''}
+          </Text>
+        </View>
+        {/* Derselbe Stern wie an den allgemeinen Sequenzen - und dieselbe
+            Tabelle dahinter. Fuer den Stern ist eine Sequenz eine Sequenz. */}
+        <FavoriteStar exerciseId={sequence.id} />
       </View>
 
       {sequence.subtitle ? <Text style={styles.subtitle}>{sequence.subtitle}</Text> : null}
@@ -113,8 +167,40 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     borderRadius: radius.md,
   },
+  headRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
   head: {
+    flexShrink: 1,
     gap: 2,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  filterChip: {
+    paddingVertical: 7,
+    paddingHorizontal: 16,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  },
+  filterChipActive: {
+    backgroundColor: colors.ocean700,
+    borderColor: colors.ocean700,
+  },
+  filterChipText: {
+    fontSize: 13,
+    color: colors.ink700,
+  },
+  filterChipTextActive: {
+    color: colors.surface,
+    fontWeight: '600',
   },
   title: {
     fontSize: 16,

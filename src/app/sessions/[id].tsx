@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { FavoriteStar } from '@/components/FavoriteStar';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { VolumeSlider } from '@/components/VolumeSlider';
 import { colors, radius, spacing } from '@/design/tokens';
@@ -19,6 +20,7 @@ import {
 } from '@/features/breathing/timeline';
 import { useBreathClock } from '@/features/breathing/useBreathClock';
 import { effectColors } from '@/features/sessions/effects';
+import { PlaylistLinks } from '@/features/sessions/PlaylistLinks';
 import { useSession } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
 import { PressableRing } from '@/components/PressableRing';
@@ -263,9 +265,14 @@ function Player({ session }: { session: PlayableExercise }) {
         <Link href="/sessions" style={styles.back}>
           {`‹ ${t('player.end')}`}
         </Link>
-        <Text style={styles.clock}>
-          {mmss(elapsedMs)} / {mmss(totalMs)}
-        </Text>
+        <View style={styles.topRight}>
+          <Text style={styles.clock}>
+            {mmss(elapsedMs)} / {mmss(totalMs)}
+          </Text>
+          {/* Der Stern steht auch hier und nicht nur in der Liste: gemerkt
+              wird eine Sequenz meist NACH dem Atmen, nicht davor. */}
+          <FavoriteStar exerciseId={session.id} />
+        </View>
       </View>
 
       {/* Die Effekte stehen ueber dem Kreis: sie sagen, worauf die Uebung
@@ -383,6 +390,11 @@ function Player({ session }: { session: PlayableExercise }) {
         </PressableRing>
       </View>
 
+      {/* Die passende Playlist beim Nutzer selbst - Spotify oder Apple Music.
+          Sie laeuft dort, nicht hier; deshalb steht sie ueber der eigenen
+          Hintergrundmusik und nicht als dritter Regler darunter. */}
+      <PlaylistLinks exercise={session} />
+
       {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
       <View style={styles.musicRow}>
         <Text style={styles.musicLabel}>{t('player.musicLabel')}</Text>
@@ -474,6 +486,11 @@ const styles = StyleSheet.create({
   back: {
     fontSize: 14,
     color: colors.ink700,
+  },
+  topRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   clock: {
     fontSize: 13,

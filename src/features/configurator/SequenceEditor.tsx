@@ -32,6 +32,10 @@ function toForm(sequence: PlayableExercise): SequenceFormValues {
   return {
     title: sequence.title,
     subtitle: sequence.subtitle ?? '',
+    // Leerer String statt null: das Formular arbeitet durchgehend mit Text,
+    // und ein Textfeld mit value={null} waere im Web ein unkontrolliertes Feld.
+    spotify_url: sequence.spotify_url ?? '',
+    apple_music_url: sequence.apple_music_url ?? '',
     steps: [...sequence.exercise_steps]
       .sort((a, b) => a.position - b.position)
       .map((step) => ({
@@ -130,6 +134,49 @@ export function SequenceEditor({ sequence }: { sequence?: PlayableExercise }) {
               onBlur={field.onBlur}
               error={fieldError(fieldState.error?.message)}
               placeholder={t('sequenz.untertitelPlatzhalter')}
+            />
+          )}
+        />
+      </View>
+
+      {/* Die Musik zur Sequenz - nicht hier, sondern beim Nutzer selbst.
+          Eingetragen wird eine Adresse aus dem Teilen-Menue von Spotify oder
+          Apple Music; abgespielt wird sie spaeter dort, waehrend hier geatmet
+          wird (features/sessions/PlaylistLinks.tsx). Beide Felder duerfen leer
+          bleiben - eine Sequenz braucht keine Musik. */}
+      <View style={styles.card}>
+        <Text style={styles.blockTitle}>{t('sequenz.musik')}</Text>
+        <Text style={styles.musikHinweis}>{t('sequenz.musikHinweis')}</Text>
+
+        <Controller
+          control={control}
+          name="spotify_url"
+          render={({ field, fieldState }) => (
+            <TextField
+              label={t('playlist.spotify')}
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              error={fieldError(fieldState.error?.message)}
+              placeholder={t('sequenz.spotifyPlatzhalter')}
+              inputMode="url"
+              autoCapitalize="none"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="apple_music_url"
+          render={({ field, fieldState }) => (
+            <TextField
+              label={t('playlist.apple_music')}
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              error={fieldError(fieldState.error?.message)}
+              placeholder={t('sequenz.applePlatzhalter')}
+              inputMode="url"
+              autoCapitalize="none"
             />
           )}
         />
@@ -282,6 +329,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.ink900,
+  },
+  musikHinweis: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.ink700,
+    marginTop: -spacing.sm,
   },
   pairRow: {
     flexDirection: 'row',

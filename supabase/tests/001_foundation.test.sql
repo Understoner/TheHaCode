@@ -81,6 +81,14 @@ select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111
 insert into public.user_consents (user_id, definition_id, kind, granted_at)
 select '11111111-1111-1111-1111-111111111111', id, 'terms', now()
   from public.consent_definitions where kind = 'terms' and version = 1;
+
+-- exercise_favorites (0017) haengt ebenfalls per cascade an auth.users. Auch
+-- hier authenticated: einen Stern setzt der Nutzer selbst, genau das erlaubt
+-- die Policy. Er steht auf der eigenen Sequenz von oben - der Stern gilt fuer
+-- eigene wie fuer redaktionelle Sequenzen gleichermassen.
+insert into public.exercise_favorites (user_id, exercise_id)
+select '11111111-1111-1111-1111-111111111111', id
+  from public.exercises where owner_id = '11111111-1111-1111-1111-111111111111';
 select set_config('request.jwt.claim.sub', null, true);
 reset role;
 
@@ -96,6 +104,8 @@ select is((
     select user_id from public.course_bookings where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.user_consents where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.exercise_favorites where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select * from finish();

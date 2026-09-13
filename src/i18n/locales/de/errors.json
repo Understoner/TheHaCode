@@ -47,5 +47,7 @@
   "auth.termsRequired": "Ohne Zustimmung zu den AGB können wir kein Konto anlegen. Setz bitte den Haken.",
   "konto.portal.no_customer": "Für dieses Konto gibt es bei Stripe keinen Kunden — das passiert bei einem von Hand eingetragenen Abo. Schreib uns an office@thehacode.com, dann ändern wir es direkt.",
   "konto.portal.portal_not_configured": "Das Kundenportal ist bei Stripe noch nicht eingerichtet. Wir kümmern uns darum — schreib uns an office@thehacode.com, wenn du etwas an deinem Abo ändern möchtest.",
-  "konto.portal.unknown": "Das Kundenportal ließ sich nicht öffnen. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com."
+  "konto.portal.unknown": "Das Kundenportal ließ sich nicht öffnen. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
+  "sequenz.spotifyUrl": "Das sieht nicht nach einem Spotify-Link aus. Öffne die Playlist in Spotify, tipp auf „Teilen“ und füg die Adresse hier ein — oder lass das Feld leer.",
+  "sequenz.appleMusicUrl": "Das sieht nicht nach einem Apple-Music-Link aus. Öffne die Playlist in Apple Music, tipp auf „Teilen“ und füg die Adresse hier ein — oder lass das Feld leer."
 }

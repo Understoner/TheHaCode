@@ -733,13 +733,32 @@ create unique index uq_sessions_client on public.exercise_sessions (user_id, cli
   where client_id is not null;
 create index idx_sessions_user_time on public.exercise_sessions (user_id, started_at desc);
 
-create table public.user_favorites (
-  user_id     uuid not null references auth.users(id) on delete cascade,
+-- Gebaut am 13.09.2026 in Migration 0017, unter dem Namen exercise_favorites:
+-- er passt zur bestehenden Familie (exercise_steps, exercise_phases), und die
+-- Spalten folgen der Nutzertabellen-Regel aus CLAUDE.md, die dieser Skizze
+-- noch fehlte (updated_at, deleted_at, client_id, Eintrag in die UNION-Liste).
+create table public.exercise_favorites (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id)       on delete cascade,
   exercise_id uuid not null references public.exercises(id) on delete cascade,
   created_at  timestamptz not null default now(),
-  primary key (user_id, exercise_id)
+  updated_at  timestamptz not null default now(),
+  deleted_at  timestamptz,
+  client_id   uuid,
+  unique (user_id, exercise_id)
 );
 ```
+
+**Ein Stern gilt fuer beide Sorten Sequenzen** — die redaktionellen und die
+selbst gebauten. Deshalb haengt er an `exercises` und nicht an einer der beiden
+Haelften; fuer den Stern ist eine Sequenz eine Sequenz (§3.4).
+
+**Die `insert`-Policy prueft nicht nur `user_id = auth.uid()`, sondern auch,
+dass die Sequenz ueberhaupt sichtbar ist.** Ohne das waere ein erfolgreich
+gesetzter Stern die Auskunft „diese ID gibt es" — fuer jede ID, die jemand
+durchprobiert. `has_plus_access()` steht dort bewusst **nicht**: Favorisieren
+ist keine bezahlte Faehigkeit, die Bezahlschranke bleibt der `INSERT` in
+`exercises` (§3.4).
 
 ### 3.7 Subscriptions & Stripe-Events
 
@@ -1812,6 +1831,8 @@ export function playCue(ctx: AudioContext, kind: PhaseKind, volume = 0.25) {
 Keine Dateien, keine Ladezeit, kein Service-Worker-Cache, keine Lizenzfragen, keine Sprachaufnahmen. Etwa zwei Stunden Arbeit statt zehn — und für den Nutzer funktioniert es in jeder Sprache.
 
 **Musik bringt der Nutzer selbst mit.** Es gibt keine Integration mit Spotify oder anderen Diensten und es braucht keine: Wer Musik hören will, startet sie in seiner eigenen App. Die Atem-App spielt nur die kurzen Töne dazu.
+
+> **Ergänzung vom 13.09.2026 — ein Link ist keine Integration.** Seit Migration 0017 trägt jede Sequenz zwei optionale Adressen (`exercises.spotify_url`, `exercises.apple_music_url`), und der Player zeigt daraus zwei Knöpfe. Sie *öffnen* die Playlist, mehr nicht: kein API-Zugang, keine Anmeldung beim Dienst, keine Steuerung der Wiedergabe, kein Wissen darüber, ob überhaupt etwas läuft. Der Satz oben gilt damit unverändert — die App erspart dem Nutzer nur das Suchen. Was die Tabelle darunter über das Nebeneinander sagt, gilt genauso: auf dem iPhone ist es weiterhin Glückssache, und das steht als Hinweis auch in der App. Erlaubt sind ausschließlich die Hosts `open.spotify.com`, `spotify.link` und `music.apple.com`, geprüft in der Datenbank (CHECK) *und* im Formular — redaktionelle Sequenzen werden im Studio ohne Formularvalidierung gepflegt (§2.4), und die Adresse landet am Ende in `Linking.openURL`.
 
 **Ob das nebeneinander funktioniert, hängt vom Gerät ab** — und das gehört ehrlich gesagt:
 
