@@ -18,6 +18,9 @@ auf die genannte Version, egal was das Elternpaket verlangt.
 | Paket | Von | Auf | Grund |
 |---|---|---|---|
 | `uuid` | 7.0.3 | ^11.1.1 | CVE-2026-41907, fehlende Bereichsprüfung in v3/v5/v6 |
+| `@xmldom/xmldom` | 0.8.13 / 0.9.10 | ^0.9.12 | 13.09.2026 — rund zwanzig Meldungen, „hoch": Injection, ReDoS, quadratischer Speicher |
+| `fast-uri` | 3.1.5 | ^3.1.7 | 13.09.2026 — SSRF und Host-Verwechslung, „hoch" |
+| `js-yaml` | 4.3.1 | ^4.3.2 | 13.09.2026 — `maxTotalMergeKeys` begrenzt die CPU-Last nicht, „hoch" |
 
 `uuid` kommt **nicht** aus unserem Code:
 
@@ -55,6 +58,121 @@ Lehre aus dem Fehlschlag weiter unten: ein `require('minimatch')` aus dem
 Projektstamm trifft eine ganz andere Kopie als die unter
 `node_modules/@eslint/config-array/node_modules/`. Im Zweifel den vollen Pfad
 angeben.
+
+---
+
+## `@xmldom/xmldom` — der Pin mit einem Preis
+
+Der Scanner meldet hier am lautesten: rund zwanzig Einträge, alle „hoch",
+alle aus zwei Wurzeln:
+
+```
+@xmldom/xmldom 0.8.13  <-  expo  ->  @expo/cli  ->  @expo/plist
+@xmldom/xmldom 0.9.10  <-  expo  ->  @expo/config-plugins  ->  xcode -> simple-plist -> plist
+```
+
+Beide Wege bearbeiten `Info.plist` und Xcode-Projekte, also die Erzeugung
+nativer iOS-Projekte. Im ausgelieferten Bundle steckt nichts davon
+(`grep -r xmldom dist/` ist leer), und das Projekt parst an keiner Stelle XML.
+
+**Der Preis ist echt und steht hier, damit ihn niemand später sucht.**
+
+Eine reparierte 0.8er-Reihe gibt es nicht — die Meldungen decken `<=0.8.14` ab,
+korrigiert ist erst 0.9.12. `@expo/plist` verlangt aber `^0.8.8`, und zwar
+**auch in seiner neuesten Fassung 0.9.0** (am 13.09.2026 alle Versionen
+nachgesehen). Der Override zwingt es also über seine erklärte Spanne hinaus,
+und in 0.9 ist `parseFromString` nicht mehr ohne MIME-Typ aufrufbar:
+
+```bash
+node -e "const p=require('@expo/plist').default;
+         p.build({a:1});          # laeuft
+         p.parse('<plist/>')"     # DOMParser.parseFromString: mimeType 'undefined' is not valid
+```
+
+`build()` läuft weiter, **`parse()` ist kaputt**. Für V1 ohne Belang: das ist
+der iOS-Prebuild-Pfad, `/ios/` ist nicht einmal im Repo, und `verify`,
+`build:web` und die Smoke-Tests sind grün.
+
+**Vor den nativen Builds in V2 muss dieser Override wieder raus.** Nachzusehen
+ist dann, ob `@expo/plist` inzwischen auf `^0.9` verlangt:
+
+```bash
+npm view @expo/plist dependencies.@xmldom/xmldom
+```
+
+Steht dort `^0.9.x`, ist der Override überflüssig und gehört gelöscht. Steht
+dort weiter `^0.8.8`, ist er zu entfernen und die Meldung hinzunehmen, solange
+native Builds laufen — ein kaputtes `parse()` bricht den Prebuild lauter, als
+diese Lücken jemals wehtun.
+
+`fast-uri` und `js-yaml` sind dagegen der einfache Fall aus der Liste unten:
+die Korrektur liegt im selben Hauptversionszweig und **innerhalb** der Spanne,
+die das Elternpaket ohnehin verlangt (`ajv` will `^3.0.1`, eslint will `^4`).
+Nachgemessen:
+
+```bash
+node -e "const Ajv=require('ajv'); const v=new Ajv().compile({type:'string'}); console.log(v('x'), v(1))"
+node -e "console.log(require('js-yaml').load('a: 1'))"
+```
+
+---
+
+## Was bewusst offen bleibt: `decode-uri-component`
+
+```
+decode-uri-component@0.2.2  <-  expo-router  ->  query-string
+```
+
+**Das einzige der gemeldeten Pakete, das wirklich im Browser landet.** Nachweis
+im gebauten Bundle über eine Zeichenkette aus seiner Ersetzungstabelle:
+
+```bash
+grep -c "%FE%FF" dist/_expo/static/js/web/*.js    # 1
+```
+
+DoS über exponentielles Dekodieren missgebildeter Prozentkodierung. Der Schaden
+träfe den Tab dessen, der die kaputte Adresse selbst aufruft — kein fremder
+Zugriff, keine Daten.
+
+**Nicht gepinnt, und das ist eine Entscheidung.** Korrigiert ist erst 0.5.0, und
+die Reihe ist ab 0.3.0 **reines ESM** (`"type": "module"`, nur ein
+Default-Export). `query-string@7.1.3` lädt sie so:
+
+```js
+const decodeComponent = require('decode-uri-component');   // Zeile 3
+return decodeComponent(value);                             // Zeile 233
+```
+
+Ein `require()` auf ein ESM-Paket liefert den Namensraum, keine Funktion — am
+13.09.2026 gegengeprüft, `d is not a function`. Der Override bräche damit das
+Auflösen der Query-Parameter im Router, also die Navigation. Genau die Sorte
+Bruch, vor der der Abschnitt „Was daran gefährlich ist" oben warnt, nur eben
+zur Laufzeit beim Besucher statt im Linter.
+
+**Wann geht es weg?** Wenn `expo-router` auf ein `query-string@8+` wechselt, das
+ESM lädt. Nachzusehen mit `npm ls decode-uri-component`.
+
+## Was bewusst offen bleibt: `@vitest/mocker`
+
+Eine `devDependency`, sonst nichts — sie wird nie ausgeliefert und läuft nur in
+`npm test`.
+
+Korrigiert wäre sie mit `vitest@4.1.11`, einer Patch-Anhebung innerhalb unserer
+Spanne `^4.1.10`. **Die bringt `npm install` zum Absturz:**
+
+```
+npm error Cannot read properties of null (reading 'edgesOut')
+  at #loadPeerSet (.../arborist/lib/arborist/build-ideal-tree.js:1289:38)
+```
+
+Ein Fehler in npm 10.9.8 beim Auflösen der Peers von
+`@vitest/browser-playwright`, nicht in vitest selbst. Am 13.09.2026 zweimal
+isoliert gegengeprobt: mit der Anhebung rot, ohne sie grün, sonst nichts
+verändert.
+
+**Wann geht es weg?** Mit einer npm-Fassung, die den Peer-Satz auflösen kann,
+oder mit dem nächsten vitest-Sprung. Vor einem erneuten Versuch lohnt
+`npm --version`.
 
 ---
 
