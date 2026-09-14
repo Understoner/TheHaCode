@@ -56,10 +56,19 @@ describe('useVoicePreference', () => {
     expect(update).toHaveBeenCalledWith({ voice_enabled: true });
   });
 
-  // Anders als beim Ton: eine Ansage bei jedem Phasenwechsel ist eine
-  // Entscheidung, keine Grundeinstellung.
-  it('faellt auf "aus" zurueck, wenn nichts gespeichert ist', async () => {
+  // Seit Migration 0018 wie beim Ton: an, solange nichts anderes gespeichert ist.
+  it('faellt auf "an" zurueck, wenn nichts gespeichert ist', async () => {
     mockProfile(null);
+
+    const { result } = renderHook(() => useVoicePreference(), { wrapper });
+
+    await waitFor(() => expect(result.current.voiceOn).toBe(true));
+  });
+
+  // Abgeschaltet bleibt abgeschaltet - die neue Vorgabe ueberschreibt keinen
+  // gespeicherten Stand.
+  it('respektiert eine gespeicherte Abschaltung trotz Vorgabe an', async () => {
+    mockProfile({ sound_enabled: true, voice_enabled: false });
 
     const { result } = renderHook(() => useVoicePreference(), { wrapper });
 
@@ -68,27 +77,29 @@ describe('useVoicePreference', () => {
 
   it('funktioniert ohne Anmeldung, ohne zu schreiben', () => {
     useAuthMock.mockReturnValue({ session: null, loading: false });
-    const { update } = mockProfile({ voice_enabled: true });
+    const { update } = mockProfile({ voice_enabled: false });
 
     const { result } = renderHook(() => useVoicePreference(), { wrapper });
 
-    expect(result.current.voiceOn).toBe(false);
-    act(() => result.current.setVoiceOn(true));
     expect(result.current.voiceOn).toBe(true);
+    act(() => result.current.setVoiceOn(false));
+    expect(result.current.voiceOn).toBe(false);
     expect(update).not.toHaveBeenCalled();
   });
 
   // Beide Schalter lesen dieselbe Zeile. Zwei Abfragen fuer eine Zeile waeren
   // eine zu viel - der gemeinsame Abfrageschluessel verhindert das.
   it('holt fuer beide Schalter zusammen nur eine Zeile', async () => {
-    const { select } = mockProfile({ sound_enabled: false, voice_enabled: true });
+    // Beide Werte gegen die Vorgabe (beide an) - sonst waere das Warten schon
+    // vor der Antwort erfuellt.
+    const { select } = mockProfile({ sound_enabled: false, voice_enabled: false });
 
     const { result } = renderHook(
       () => ({ ton: useSoundPreference(), stimme: useVoicePreference() }),
       { wrapper },
     );
 
-    await waitFor(() => expect(result.current.stimme.voiceOn).toBe(true));
+    await waitFor(() => expect(result.current.stimme.voiceOn).toBe(false));
     expect(result.current.ton.soundOn).toBe(false);
     expect(select).toHaveBeenCalledTimes(1);
   });

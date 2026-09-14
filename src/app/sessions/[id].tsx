@@ -69,8 +69,13 @@ function Player({ session }: { session: PlayableExercise }) {
   // Geraet.
   const { soundOn, setSoundOn } = useSoundPreference();
   // Die gesprochene Ansage ebenso, in profiles.voice_enabled (Migration 0016).
-  // Vorgabe aus: wer die Uebung kennt, will den Takt hoeren, nicht das Wort.
+  // Vorgabe an seit Migration 0018.
   const { voiceOn, setVoiceOn } = useVoicePreference();
+
+  // Alles Einstellbare steht in einem eingeklappten Block. Ausgeklappt schob
+  // es die Beschreibung auf dem Telefon unter den ersten Bildschirm - und die
+  // soll man sehen, bevor man startet.
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [musicTrack, setMusicTrack] = useState<TrackId | null>(null);
   // Drei getrennte Lautstaerken, weil die drei Wege verschiedene Aufgaben
@@ -333,7 +338,16 @@ function Player({ session }: { session: PlayableExercise }) {
       ) : null}
 
       <View style={styles.stage}>
-        <BreathCircle segment={segment} round={roundSegments} running={clock.isRunning} />
+        {/* Was jetzt dran ist, steht IM Kreis - kurz und in Grossbuchstaben,
+            damit es auch in den kleinsten Ring passt. Was genau zu tun ist
+            und die Runde stehen weiter darunter. */}
+        <BreathCircle
+          segment={segment}
+          round={roundSegments}
+          running={clock.isRunning}
+          label={segment ? t(`player.circle.${segment.kind}`) : null}
+          sublabel={segment?.route ? t(`player.circle.route.${segment.route}`) : null}
+        />
       </View>
 
       <View style={styles.readout}>
@@ -348,7 +362,6 @@ function Player({ session }: { session: PlayableExercise }) {
           </>
         ) : segment?.kind === 'rest' ? (
           <>
-            <Text style={styles.phase}>{t('phase.rest')}</Text>
             <Text style={styles.cue}>{t('player.restCue')}</Text>
             <Text style={styles.counter}>
               {segment.stepIndex + 1 < stepCount
@@ -361,13 +374,6 @@ function Player({ session }: { session: PlayableExercise }) {
           </>
         ) : segment ? (
           <>
-            <Text style={styles.phase}>{t(`phase.${segment.kind}`)}</Text>
-            {/* Wodurch die Luft geht, steht als eigene Zeile und nicht im
-                Anweisungstext: die beiden teilen sich die Arbeit. Bei
-                Haltephasen und bei selbst gebauten Sequenzen fehlt sie. */}
-            {segment.route ? (
-              <Text style={styles.route}>{t(`phase.route.${segment.route}`)}</Text>
-            ) : null}
             {segment.cue ? <Text style={styles.cue}>{segment.cue}</Text> : null}
             <Text style={styles.counter}>
               {stepCount > 1
@@ -408,80 +414,109 @@ function Player({ session }: { session: PlayableExercise }) {
           </PressableRing>
         )}
 
-        <PressableRing
-          onPress={() => setSoundOn(!soundOn)}
-          style={[styles.secondary, soundOn && styles.secondaryActive]}
-        >
-          <Text style={[styles.secondaryText, soundOn && styles.secondaryTextActive]}>
-            {soundOn ? t('player.soundOn') : t('player.soundOff')}
-          </Text>
-        </PressableRing>
+        {/* Von vorn, sobald die Session einmal gestartet wurde - laufend oder
+            angehalten. Auf dem Schlussbildschirm ist "Von vorn" schon der
+            Hauptknopf. clock.isRunning mit abgefragt, weil elapsedMs erst
+            nach einer Viertelsekunde nachzieht: sonst sprang der Knopf
+            verspaetet in die Reihe. */}
+        {!finished && (clock.isRunning || elapsedMs > 0) ? (
+          <PressableRing onPress={restart} role="button" style={styles.secondary}>
+            <Text style={styles.secondaryText}>{t('player.restart')}</Text>
+          </PressableRing>
+        ) : null}
 
-        {/* Die Ansage sagt, was zu tun ist; der Ton sagt nur, DASS etwas zu
-            tun ist. Beides laesst sich einzeln schalten - und beides
-            gleichzeitig ist erlaubt. */}
         <PressableRing
-          onPress={() => setVoiceOn(!voiceOn)}
-          style={[styles.secondary, voiceOn && styles.secondaryActive]}
+          onPress={() => setSettingsOpen((open) => !open)}
+          role="button"
+          aria-expanded={settingsOpen}
+          style={[styles.secondary, settingsOpen && styles.secondaryActive]}
         >
-          <Text style={[styles.secondaryText, voiceOn && styles.secondaryTextActive]}>
-            {voiceOn ? t('player.voiceOn') : t('player.voiceOff')}
+          <Text style={[styles.secondaryText, settingsOpen && styles.secondaryTextActive]}>
+            {t('player.settings')}
           </Text>
         </PressableRing>
       </View>
 
-      {/* Die passende Playlist beim Nutzer selbst - Spotify oder Apple Music.
-          Sie laeuft dort, nicht hier; deshalb steht sie ueber der eigenen
-          Hintergrundmusik und nicht als dritter Regler darunter. */}
-      <PlaylistLinks exercise={session} />
-
-      {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
-      <View style={styles.musicRow}>
-        <Text style={styles.musicLabel}>{t('player.musicLabel')}</Text>
-        <View style={styles.musicChoices}>
-          <PressableRing
-            onPress={() => setMusicTrack(null)}
-            style={[styles.chip, musicTrack === null && styles.chipActive]}
-          >
-            <Text style={[styles.chipText, musicTrack === null && styles.chipTextActive]}>
-              {t('player.musicOff')}
-            </Text>
-          </PressableRing>
-          {TRACKS.map((track) => (
+      {settingsOpen ? (
+        <View style={styles.settings}>
+          {/* Die Ansage sagt, was zu tun ist; der Ton sagt nur, DASS etwas zu
+              tun ist. Beides laesst sich einzeln schalten - und beides
+              gleichzeitig ist erlaubt. */}
+          <View style={styles.settingsRow}>
             <PressableRing
-              key={track.id}
-              onPress={() => setMusicTrack(track.id)}
-              style={[styles.chip, musicTrack === track.id && styles.chipActive]}
+              onPress={() => setSoundOn(!soundOn)}
+              style={[styles.secondary, soundOn && styles.secondaryActive]}
             >
-              <Text style={[styles.chipText, musicTrack === track.id && styles.chipTextActive]}>
-                {t(`player.music.${track.id}`)}
+              <Text style={[styles.secondaryText, soundOn && styles.secondaryTextActive]}>
+                {soundOn ? t('player.soundOn') : t('player.soundOff')}
               </Text>
             </PressableRing>
-          ))}
-        </View>
+            <PressableRing
+              onPress={() => setVoiceOn(!voiceOn)}
+              style={[styles.secondary, voiceOn && styles.secondaryActive]}
+            >
+              <Text style={[styles.secondaryText, voiceOn && styles.secondaryTextActive]}>
+                {voiceOn ? t('player.voiceOn') : t('player.voiceOff')}
+              </Text>
+            </PressableRing>
+          </View>
 
-        {/* Drei Regler, weil die drei Wege unterschiedliche Aufgaben haben:
-        der Ton markiert den Wechsel, die Ansage benennt ihn, die Musik traegt
-        den Hintergrund. Ein gemeinsamer Regler wuerde alle drei
-        verschieben. */}
-        <View style={styles.sliders}>
-          <VolumeSlider
-            label={t('player.volumeTone')}
-            value={toneVolume}
-            onChange={setToneVolume}
-          />
-          <VolumeSlider
-            label={t('player.volumeVoice')}
-            value={voiceVolume}
-            onChange={setVoiceVolume}
-          />
-          <VolumeSlider
-            label={t('player.volumeMusic')}
-            value={musicVolume}
-            onChange={setMusicVolume}
-          />
+          {/* Die passende Playlist beim Nutzer selbst - Spotify oder Apple
+              Music. Sie laeuft dort, nicht hier; deshalb steht sie ueber der
+              eigenen Hintergrundmusik und nicht als dritter Regler darunter. */}
+          <PlaylistLinks exercise={session} />
+
+          {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
+          <View style={styles.musicRow}>
+            <Text style={styles.musicLabel}>{t('player.musicLabel')}</Text>
+            <View style={styles.musicChoices}>
+              <PressableRing
+                onPress={() => setMusicTrack(null)}
+                style={[styles.chip, musicTrack === null && styles.chipActive]}
+              >
+                <Text style={[styles.chipText, musicTrack === null && styles.chipTextActive]}>
+                  {t('player.musicOff')}
+                </Text>
+              </PressableRing>
+              {TRACKS.map((track) => (
+                <PressableRing
+                  key={track.id}
+                  onPress={() => setMusicTrack(track.id)}
+                  style={[styles.chip, musicTrack === track.id && styles.chipActive]}
+                >
+                  <Text
+                    style={[styles.chipText, musicTrack === track.id && styles.chipTextActive]}
+                  >
+                    {t(`player.music.${track.id}`)}
+                  </Text>
+                </PressableRing>
+              ))}
+            </View>
+
+            {/* Drei Regler, weil die drei Wege unterschiedliche Aufgaben haben:
+                der Ton markiert den Wechsel, die Ansage benennt ihn, die Musik
+                traegt den Hintergrund. Ein gemeinsamer Regler wuerde alle drei
+                verschieben. */}
+            <View style={styles.sliders}>
+              <VolumeSlider
+                label={t('player.volumeTone')}
+                value={toneVolume}
+                onChange={setToneVolume}
+              />
+              <VolumeSlider
+                label={t('player.volumeVoice')}
+                value={voiceVolume}
+                onChange={setVoiceVolume}
+              />
+              <VolumeSlider
+                label={t('player.volumeMusic')}
+                value={musicVolume}
+                onChange={setMusicVolume}
+              />
+            </View>
+          </View>
         </View>
-      </View>
+      ) : null}
 
       {session.description_md ? (
         <View style={styles.section}>
@@ -508,10 +543,12 @@ function Player({ session }: { session: PlayableExercise }) {
 }
 
 const styles = StyleSheet.create({
+  // Abstaende knapper als auf den uebrigen Seiten: auf dem Telefon soll vor dem
+  // Start noch der Anfang der Beschreibung im ersten Bildschirm stehen.
   screen: {
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
-    gap: spacing.lg,
+    gap: spacing.md,
     alignItems: 'center',
     backgroundColor: colors.background,
   },
@@ -543,24 +580,22 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.sm,
   },
+  // Der Ring fuellt seinen Kasten bei vollem Radius genau aus; die Marke ragt
+  // 6 px darueber. Mehr als spacing.sm braucht es darum nicht.
   stage: {
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
   },
+  // Die Phase steht jetzt im Kreis; darunter bleiben Anweisung und Runde.
+  // Weniger Mindesthoehe als vorher, sonst stuende dort ein Loch.
   readout: {
     alignItems: 'center',
     gap: spacing.sm,
-    minHeight: 96,
+    minHeight: 64,
   },
   phase: {
     fontSize: 24,
     fontWeight: '600',
     color: colors.ink900,
-  },
-  route: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.ocean700,
-    textAlign: 'center',
   },
   cue: {
     fontSize: 15,
@@ -596,7 +631,10 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     backgroundColor: colors.surface,
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    // 12 statt 20: Anhalten, Von vorn und Einstellungen sollen auch auf einem
+    // 360-px-Telefon in eine Reihe passen. Mit 16 brach die Reihe schon bei
+    // 375 px um (im Browser nachgemessen).
+    paddingHorizontal: 12,
   },
   secondaryText: {
     color: colors.ink700,
@@ -609,6 +647,25 @@ const styles = StyleSheet.create({
   secondaryTextActive: {
     color: colors.ocean700,
     fontWeight: '600',
+  },
+  // Abgegrenzt ueber eine 1-px-Linie, nicht ueber Schatten (CLAUDE.md).
+  settings: {
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 620,
+    alignItems: 'center',
+    gap: spacing.lg,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  },
+  settingsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: spacing.sm,
   },
   musicRow: {
     alignItems: 'center',

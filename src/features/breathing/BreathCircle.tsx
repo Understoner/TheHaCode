@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius as radii } from '@/design/tokens';
 import type { TimelineSegment } from '@/features/breathing/timeline';
@@ -20,6 +20,21 @@ import type { TimelineSegment } from '@/features/breathing/timeline';
 const RADIUS_MIN = 0.55;
 const RADIUS_MAX = 1.0;
 const SIZE = 240;
+const RING_WIDTH = 2;
+
+// Die Beschriftung im Kreis ("EIN", darunter "NASE"). Sie wird NICHT
+// mitskaliert - sie soll lesbar bleiben - und muss deshalb in den Ring passen,
+// wenn er am kleinsten ist. Ein Rechteck passt in einen Kreis, wenn seine
+// Diagonale nicht laenger ist als der Durchmesser: bei 104 x 50 sind das rund
+// 115 px, innen hat der kleinste Ring 128 px.
+//
+// Die Hoehe ergibt sich aus den beiden Zeilen unten: 30 (Phase) + 2 + 16 (Weg).
+// Die Breite haelt, weil die Worte kurz sind - "HALTE" und "PAUSE" in 26 px,
+// "LIPPENBREMSE" in 11 px. BreathCircle.test.ts prueft beides, damit ein
+// laengeres Wort in der Uebersetzungsdatei auffaellt und nicht erst am Rand.
+export const INNER_DIAMETER_MIN = SIZE * RADIUS_MIN - 2 * RING_WIDTH;
+export const LABEL_MAX_WIDTH = 104;
+export const LABEL_MAX_HEIGHT = 50;
 
 /** Winkel am Ende der Phase, gemessen ab 6 Uhr im Uhrzeigersinn (0..360). */
 function endAngleFor(seg: TimelineSegment, round: TimelineSegment[]): number {
@@ -85,9 +100,13 @@ type Props = {
   /** Alle Segmente der laufenden Runde - fuer die Winkelaufteilung. */
   round: TimelineSegment[];
   running: boolean;
+  /** Was jetzt dran ist, kurz: "Ein", "Halte". Erscheint in Grossbuchstaben. */
+  label?: string | null;
+  /** Wodurch die Luft geht: "Nase", "Mund". Fehlt beim Halten. */
+  sublabel?: string | null;
 };
 
-export function BreathCircle({ segment, round, running }: Props) {
+export function BreathCircle({ segment, round, running, label, sublabel }: Props) {
   // useState statt useRef: die Animated.Values sollen genau einmal entstehen,
   // aber ein ref darf waehrend des Renderns nicht gelesen werden.
   const [scale] = useState(() => new Animated.Value(RADIUS_MIN));
@@ -177,6 +196,15 @@ export function BreathCircle({ segment, round, running }: Props) {
         ? colors.sage500
         : colors.ocean500;
 
+  // Dieselbe Farbfamilie wie der Ring, aber der 700er-Ton: 500er sind fuer
+  // Text zu kontrastarm (CLAUDE.md).
+  const textOfPhase =
+    segment?.kind === 'rest'
+      ? colors.ink700
+      : segment?.kind === 'exhale' || segment?.kind === 'hold_out'
+        ? colors.sage700
+        : colors.ocean700;
+
   return (
     <View style={styles.box}>
       {/* Ruhige Bahn, auf der die Marke laeuft */}
@@ -198,6 +226,21 @@ export function BreathCircle({ segment, round, running }: Props) {
           ]}
         />
       </Animated.View>
+
+      {label ? (
+        <View style={styles.label} pointerEvents="none">
+          {/* numberOfLines: sollte ein Wort doch zu breit sein, wird es
+              gekuerzt statt ueber den Ring zu laufen. */}
+          <Text testID="breath-label" numberOfLines={1} style={[styles.phase, { color: textOfPhase }]}>
+            {label}
+          </Text>
+          {sublabel ? (
+            <Text testID="breath-sublabel" numberOfLines={1} style={styles.route}>
+              {sublabel}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -221,7 +264,31 @@ const styles = StyleSheet.create({
     width: SIZE,
     height: SIZE,
     borderRadius: radii.full,
-    borderWidth: 2,
+    borderWidth: RING_WIDTH,
+  },
+  label: {
+    position: 'absolute',
+    maxWidth: LABEL_MAX_WIDTH,
+    maxHeight: LABEL_MAX_HEIGHT,
+    alignItems: 'center',
+    gap: 2,
+  },
+  phase: {
+    fontSize: 26,
+    lineHeight: 30,
+    fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+  },
+  route: {
+    fontSize: 11,
+    lineHeight: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    color: colors.ink700,
   },
   markerWrap: {
     position: 'absolute',
