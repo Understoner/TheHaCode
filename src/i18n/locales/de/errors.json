@@ -41,6 +41,8 @@
   "buchung.unauthorized": "Die Buchung ließ sich nicht starten. Lade die Seite neu und versuch es noch einmal — oder schreib uns an office@thehacode.com.",
   "buchung.unknown": "Die Buchung hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
   "plus.checkout": "Die Bezahlseite ließ sich nicht öffnen. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
+  "plus.zugang.title": "Dein Zugang ließ sich gerade nicht prüfen",
+  "plus.zugang.body": "An deinem Abo ändert das nichts. Versuch es bitte noch einmal — hilft das nicht, lad die Seite neu oder schreib uns an office@thehacode.com.",
   "konto.aboUnbekannt": "Dein Abo lässt sich gerade nicht abrufen. Lad die Seite bitte neu; an deinem Vertrag ändert das nichts.",
   "konto.consent": "Das ließ sich nicht speichern. Versuch es bitte noch einmal.",
   "konto.export": "Der Download hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",

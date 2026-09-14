@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { SkeletonList } from '@/components/SkeletonList';
+import { StateMessage } from '@/components/StateMessage';
 import { colors, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
@@ -39,7 +40,24 @@ export function PlusGate({ children }: { children: ReactNode }) {
   // Ein Fehler beim Abfragen ist kein Freibrief: ohne verlaessliche Auskunft
   // bleibt der Editor zu. Aufmachen waere die falsche Richtung - der Nutzer
   // baute eine Sequenz und liefe beim Speichern in die Wand.
-  if (access.isError || access.data !== true) {
+  //
+  // Er ist aber auch kein "kein Plus" (14.09.2026). Bis dahin stand hier
+  // dieselbe Bezahlschranke wie bei fehlendem Abo - ein zahlender Nutzer las
+  // "Dafuer brauchst du Plus", und von aussen war nicht zu unterscheiden, ob
+  // die Datenbank nein sagte oder gar nicht antwortete. Jetzt: Fehlermeldung
+  // mit Handlungsoption, wie CLAUDE.md es fuer jeden Fehlerzustand verlangt.
+  if (access.isError) {
+    return (
+      <StateMessage
+        title={t('errors:plus.zugang.title')}
+        body={t('errors:plus.zugang.body')}
+        actionLabel={t('errors:retry')}
+        onAction={() => void access.refetch()}
+      />
+    );
+  }
+
+  if (access.data !== true) {
     return (
       <Hinweis titel={t('sequenz.gate.plusTitel')} text={t('sequenz.gate.plusText')}>
         <Text style={styles.small}>{t('sequenz.gate.plusHinweis')}</Text>
