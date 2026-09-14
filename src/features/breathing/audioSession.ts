@@ -56,15 +56,18 @@
 // ausschliesslich Safari. Kein anderes System schaltet Web Audio per
 // Hardwareschalter stumm, und auf Android wuerde ein spielendes Element die
 // Musik des Nutzers ohne jeden Gegenwert anhalten.
-
+//
 // ---------------------------------------------------------------------------
-// DIE DATA-ADRESSE BRAUCHT media-src data: (14.09.2026)
+// STAND 14.09.2026: DIESE WACHHALTUNG IST ABSICHTLICH WIRKUNGSLOS
 // ---------------------------------------------------------------------------
-// Bis zu diesem Tag erlaubte die Content Security Policy nur media-src 'self',
-// und 'self' deckt data: nicht ab. Der Browser verweigerte die Wiedergabe,
-// play() wurde abgelehnt, und das catch unten schluckte es - die Wachhaltung
-// lief also nie. Die Regel steht in src/lib/contentSecurityPolicy.ts; wer den
-// Ton hier auf blob: oder eine Datei umstellt, muss sie dort mitziehen.
+// Die Content Security Policy (src/lib/contentSecurityPolicy.ts) laesst
+// media-src data: nicht zu, und damit wird der Ton unten gar nicht erst
+// abgespielt - play() wird abgelehnt, das catch schluckt es. Fuer einen
+// Nachmittag war data: erlaubt (PR #75): der Ton war dann bei lautlos
+// hoerbar, aber die Musik aus der eigenen App des Nutzers brach ab - genau der
+// Preis, der oben beschrieben ist. Der Nutzer hat sich fuer die ungestoerte
+// Musik entschieden, PR #75 ist zurueckgenommen. Der Code bleibt stehen, damit
+// die Abwaegung jederzeit neu gefuehrt werden kann.
 
 /** Ein halbe Sekunde langer, unhoerbarer Ton als data-Adresse. */
 function keepAliveUri(): string {

@@ -55,17 +55,16 @@ export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
     // Hintergrundmusik liegt unter public/musik/ und damit auf der eigenen
     // Domain.
     //
-    // data: seit dem 14.09.2026: audioSession.ts haelt auf dem iPhone die
-    // Audiositzung mit einem erzeugten, unhoerbaren Ton wach, und der kommt
-    // als data:audio/wav-Adresse - bewusst ohne Datei und ohne Netzverkehr.
-    // 'self' deckt data: NICHT ab. Der Browser verweigerte die Wiedergabe,
-    // audioSession.ts fing das still ab, und Ton und Ansage blieben am
-    // stummgeschalteten iPhone weiter stumm. Im Browser nachgemessen:
-    // "Loading media from 'data:...' violates media-src", play() abgelehnt.
-    //
-    // Nur data:, kein blob: und kein fremder Host. Ein Medienelement fuehrt
-    // keinen Code aus, und eine data-Adresse kann nichts nach aussen senden.
-    "media-src 'self' data:",
+    // BEWUSST OHNE data: (Entscheidung vom 14.09.2026, PR #75 zurueckgenommen)
+    // Mit data: spielt der unhoerbare Wachhalte-Ton aus audioSession.ts
+    // wirklich. Dann haelt iOS die Audiositzung offen - und unterbricht dafuer
+    // die Musik, die der Nutzer in seiner eigenen App laufen hat. Am iPhone so
+    // bestaetigt. Ohne data: blockiert diese Regel den Ton: Musik aus fremden
+    // Apps laeuft ungestoert weiter, dafuer bleiben Phasenton und Ansage bei
+    // Klingelschalter auf lautlos stumm, solange keine eigene Hintergrundmusik
+    // der App spielt. Der Nutzer hat sich fuer die fremde Musik entschieden.
+    // Nicht wieder "reparieren", ohne diese Abwaegung neu zu fuehren.
+    "media-src 'self'",
     liste('img-src', "'self'", 'data:', 'blob:', http),
     liste('connect-src', "'self'", http, ws),
     'upgrade-insecure-requests',

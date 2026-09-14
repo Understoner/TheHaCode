@@ -38,13 +38,14 @@ describe('contentSecurityPolicy', () => {
     expect(direktive(csp, 'connect-src')).toHaveLength(3);
   });
 
-  // Der Wachhalte-Ton fuer das iPhone (audioSession.ts) ist eine
-  // data:audio/wav-Adresse. Unter media-src 'self' wurde er blockiert, und Ton
-  // und Ansage blieben bei stummgeschaltetem iPhone weiter stumm.
-  it('erlaubt Audio als data-Adresse, aber keine fremde Quelle', () => {
+  // Entscheidung vom 14.09.2026: mit data: spielt der Wachhalte-Ton aus
+  // audioSession.ts, und iOS unterbricht dafuer die Musik aus der App des
+  // Nutzers. Dieser Test faellt auf, wenn jemand data: wieder zulaesst - dann
+  // bitte die Abwaegung im Kommentar an media-src neu fuehren.
+  it('laesst Audio als data-Adresse bewusst NICHT zu', () => {
     const csp = contentSecurityPolicy('https://abc.supabase.co');
 
-    expect(direktive(csp, 'media-src')).toEqual(["'self'", 'data:']);
+    expect(direktive(csp, 'media-src')).toEqual(["'self'"]);
   });
 
   it('bleibt ohne gueltige Adresse bei der eigenen Domain', () => {
