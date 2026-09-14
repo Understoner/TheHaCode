@@ -57,6 +57,15 @@
 // Hardwareschalter stumm, und auf Android wuerde ein spielendes Element die
 // Musik des Nutzers ohne jeden Gegenwert anhalten.
 
+// ---------------------------------------------------------------------------
+// DIE DATA-ADRESSE BRAUCHT media-src data: (14.09.2026)
+// ---------------------------------------------------------------------------
+// Bis zu diesem Tag erlaubte die Content Security Policy nur media-src 'self',
+// und 'self' deckt data: nicht ab. Der Browser verweigerte die Wiedergabe,
+// play() wurde abgelehnt, und das catch unten schluckte es - die Wachhaltung
+// lief also nie. Die Regel steht in src/lib/contentSecurityPolicy.ts; wer den
+// Ton hier auf blob: oder eine Datei umstellt, muss sie dort mitziehen.
+
 /** Ein halbe Sekunde langer, unhoerbarer Ton als data-Adresse. */
 function keepAliveUri(): string {
   const rate = 8000;
