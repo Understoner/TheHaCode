@@ -16,12 +16,12 @@ insert into auth.users (id, email) values
   ('f0000000-0000-0000-0000-000000000002', 'fremde@example.at');
 
 -- ---------- 1. Die Vorgabe ----------
--- Aus, nicht an: eine Ansage bei jedem Phasenwechsel ist eine Entscheidung,
--- keine Grundeinstellung. Der Ton bleibt dagegen an.
+-- Urspruenglich aus. Seit Migration 0018 an, wie beim Ton - die Begruendung
+-- steht dort, die genauere Pruefung in 018.
 select is(
   (select voice_enabled from public.profiles where id = 'f0000000-0000-0000-0000-000000000001'),
-  false,
-  'Die Stimme ist bei einem neuen Konto aus');
+  true,
+  'Die Stimme ist bei einem neuen Konto an (seit 0018)');
 
 select is(
   (select sound_enabled from public.profiles where id = 'f0000000-0000-0000-0000-000000000001'),
@@ -32,14 +32,16 @@ select is(
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'f0000000-0000-0000-0000-000000000001', true);
 
+-- Umgelegt wird auf false: seit 0018 ist true die Vorgabe, ein "true steht
+-- da" bewiese nichts.
 select lives_ok(
-  $$ update public.profiles set voice_enabled = true
+  $$ update public.profiles set voice_enabled = false
       where id = 'f0000000-0000-0000-0000-000000000001' $$,
   'Den eigenen Stimmschalter darf jeder umlegen');
 
 select is(
   (select voice_enabled from public.profiles where id = 'f0000000-0000-0000-0000-000000000001'),
-  true,
+  false,
   'Und der Wert steht danach da');
 
 -- ---------- Missbrauch ----------
@@ -55,9 +57,10 @@ select throws_ok(
 
 -- Und sie darf keinen Weg auf fremde Zeilen oeffnen. RLS laesst das UPDATE
 -- nicht scheitern, es trifft schlicht keine Zeile - deshalb wird der Wert
--- geprueft und nicht die Ausnahme.
+-- geprueft und nicht die Ausnahme. Versucht wird false, weil true seit 0018
+-- die Vorgabe ist - ein Angriff auf true bliebe unsichtbar.
 select lives_ok(
-  $$ update public.profiles set voice_enabled = true
+  $$ update public.profiles set voice_enabled = false
       where id = 'f0000000-0000-0000-0000-000000000002' $$,
   'Ein UPDATE auf ein fremdes Profil laeuft ins Leere, statt zu scheitern');
 
@@ -65,7 +68,7 @@ reset role;
 
 select is(
   (select voice_enabled from public.profiles where id = 'f0000000-0000-0000-0000-000000000002'),
-  false,
+  true,
   'Und hat den fremden Schalter nicht angefasst');
 
 -- ---------- 3. Der Atemweg ----------
