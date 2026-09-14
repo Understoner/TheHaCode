@@ -43,13 +43,23 @@ export const VOICE_FILES: Partial<Record<PhaseKind, string>> = {
   hold_out: '/stimme/halten-2.wav',
 };
 
+/**
+ * Die Schlussansage am Ende der Session (14.09.2026). Teilnehmer haben das Ende
+ * nicht immer erkannt: nach dem letzten Phasenwechsel wird es einfach still.
+ * Mit rund vier Sekunden ist sie die laengste Aufnahme - aber sie kommt genau
+ * einmal, nicht dutzendfach.
+ */
+export const END_VOICE_FILE = '/stimme/abschluss.wav';
+
 /** Kurze Rampe statt Sprung - ein Sprung im Verstaerkungswert knackt. */
 const RAMP_S = 0.02;
 
 export type VoicePlayer = {
   /** Sagt die Phase an. Ohne geladene Aufnahme bleibt es still. */
   speak: (kind: PhaseKind) => void;
-  /** Holt und dekodiert alle vier Aufnahmen. Mehrfach aufrufbar. */
+  /** Die Schlussansage, auf Wunsch um `delaySeconds` verzoegert. */
+  speakEnd: (delaySeconds?: number) => void;
+  /** Holt und dekodiert alle Aufnahmen samt Schlussansage. Mehrfach aufrufbar. */
   preload: () => void;
   /** Wirkt sofort, auch auf eine laufende Ansage. 0 bis 1. */
   setVolume: (value: number) => void;
@@ -121,38 +131,46 @@ export function createVoicePlayer(ctx: AudioContext, volume = 0.7): VoicePlayer 
     current = null;
   };
 
+  /** Spielt eine geladene Aufnahme. Ohne Puffer: nachladen, aber nicht verspaetet abspielen. */
+  const play = (url: string, delaySeconds: number) => {
+    const buffer = buffers.get(url);
+    if (!buffer) {
+      // Eine Ansage, die eine Sekunde zu spaet kommt, sagt das Falsche an.
+      load(url);
+      return;
+    }
+
+    stopCurrent();
+
+    // Nach silence() steht der Verstaerker auf Null. Die naechste Ansage
+    // holt ihn zurueck - sonst bliebe der Player nach dem Zurueckkommen
+    // stumm.
+    const t = ctx.currentTime;
+    master.gain.cancelScheduledValues(t);
+    master.gain.setValueAtTime(level, t);
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(master);
+    source.start(t + Math.max(0, delaySeconds));
+    current = source;
+  };
+
   return {
     preload: () => {
       for (const url of Object.values(VOICE_FILES)) load(url);
+      load(END_VOICE_FILE);
     },
 
     speak: (kind: PhaseKind) => {
       const url = VOICE_FILES[kind];
-      if (!url) return;
-
-      const buffer = buffers.get(url);
-      if (!buffer) {
-        // Noch nicht da: nachladen, aber nicht verspaetet abspielen. Eine
-        // Ansage, die eine Sekunde zu spaet kommt, sagt das Falsche an.
-        load(url);
-        return;
-      }
-
-      stopCurrent();
-
-      // Nach silence() steht der Verstaerker auf Null. Die naechste Ansage
-      // holt ihn zurueck - sonst bliebe der Player nach dem Zurueckkommen
-      // stumm.
-      const t = ctx.currentTime;
-      master.gain.cancelScheduledValues(t);
-      master.gain.setValueAtTime(level, t);
-
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(master);
-      source.start(t);
-      current = source;
+      if (url) play(url, 0);
     },
+
+    // Eine verzoegerte Ansage ist "current" ab dem Aufruf, nicht erst ab dem
+    // Einsatz: silence() und die erste Ansage einer neuen Session brechen sie
+    // auch dann ab, wenn sie noch gar nicht angefangen hat.
+    speakEnd: (delaySeconds = 0) => play(END_VOICE_FILE, delaySeconds),
 
     setVolume: (value: number) => {
       level = clamp01(value);

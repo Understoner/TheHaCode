@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createToneBus } from './tones';
+import { createToneBus, END_CUE } from './tones';
 
 // Wie ein Ton KLINGT, kann kein Test beurteilen. Was er pruefen kann, ist der
 // Klanggraph dahinter - und genau der traegt die Eigenschaften, die eine
@@ -297,5 +297,52 @@ describe('createToneBus', () => {
     const { auf } = anschlag('free_breathing');
 
     expect(auf.oszillatoren).toHaveLength(0);
+  });
+});
+
+describe('createToneBus - Schlusston', () => {
+  const schlusston = () => {
+    const { ctx, auf } = stubContext();
+    createToneBus(ctx, 1).strikeEnd();
+    return { auf };
+  };
+
+  // Das Ende muss sich vom Phasenwechsel unterscheiden, sonst ist nichts
+  // gewonnen: der letzte Phasenton klang bisher wie jeder andere.
+  it('schlaegt drei Felder an statt einem', () => {
+    const { auf } = schlusston();
+    // Je Anschlag genau ein Anschlagsgeraeusch - daran laesst sich zaehlen.
+    expect(auf.rauschen).toBe(3);
+  });
+
+  it('steigt ab und endet auf dem Grundton D3, unter dem Phasenton', () => {
+    const tonhoehen = END_CUE.map(([hz]) => hz);
+
+    expect([...tonhoehen].sort((a, b) => b - a)).toEqual(tonhoehen);
+    expect(tonhoehen.at(-1)).toBeCloseTo(146.83, 1);
+    expect(tonhoehen.at(-1)).toBeLessThan(A3);
+
+    const { auf } = schlusston();
+    const frequenzen = auf.oszillatoren.map((o) => o.ziel);
+    // Das Modenpaar des Grundtons liegt um D3, nicht um A3 wie beim Phasenton.
+    expect(frequenzen.some((f) => Math.abs(f - 146.83) < 1)).toBe(true);
+  });
+
+  // "Nochmal" direkt nach dem Ende: der zweite und dritte Anschlag liegen noch
+  // in der Zukunft und duerfen nicht in die neue Session klingen.
+  it('schneidet den Schlusston ab, sobald wieder ein Phasenton anschlaegt', () => {
+    const { ctx, auf } = stubContext();
+    const bus = createToneBus(ctx, 1);
+
+    bus.strikeEnd();
+    const vorher = auf.huellkurven.length;
+    bus.strike('inhale', 6000);
+
+    // Ein Zwischenweg, der auf null gefahren wird, ohne auszuklingen - das ist
+    // weder eine Huellkurve noch der Summenverstaerker.
+    const abgeschnitten = auf.huellkurven
+      .slice(0, vorher)
+      .filter((h) => !h.klingtAus && h.spitzen.at(-1) === 0);
+    expect(abgeschnitten.length).toBeGreaterThanOrEqual(1);
   });
 });
