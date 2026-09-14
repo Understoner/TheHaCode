@@ -53,9 +53,19 @@ export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' data:",
     // Hintergrundmusik liegt unter public/musik/ und damit auf der eigenen
-    // Domain. Ausdruecklich genannt, damit die Regel beim Lesen sichtbar ist -
-    // ueber default-src waere sie ohnehin erlaubt.
-    "media-src 'self'",
+    // Domain.
+    //
+    // data: seit dem 14.09.2026: audioSession.ts haelt auf dem iPhone die
+    // Audiositzung mit einem erzeugten, unhoerbaren Ton wach, und der kommt
+    // als data:audio/wav-Adresse - bewusst ohne Datei und ohne Netzverkehr.
+    // 'self' deckt data: NICHT ab. Der Browser verweigerte die Wiedergabe,
+    // audioSession.ts fing das still ab, und Ton und Ansage blieben am
+    // stummgeschalteten iPhone weiter stumm. Im Browser nachgemessen:
+    // "Loading media from 'data:...' violates media-src", play() abgelehnt.
+    //
+    // Nur data:, kein blob: und kein fremder Host. Ein Medienelement fuehrt
+    // keinen Code aus, und eine data-Adresse kann nichts nach aussen senden.
+    "media-src 'self' data:",
     liste('img-src', "'self'", 'data:', 'blob:', http),
     liste('connect-src', "'self'", http, ws),
     'upgrade-insecure-requests',
