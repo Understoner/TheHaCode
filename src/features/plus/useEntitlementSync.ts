@@ -48,11 +48,28 @@ export function useEntitlementSync(): void {
           void queryClient.invalidateQueries({ queryKey: ['plus-access'] });
           void queryClient.invalidateQueries({ queryKey: ['my-subscription'] });
         },
-      )
-      .subscribe();
+      );
+
+    // DIESER HOOK DARF DIE APP NIE MITREISSEN (14.09.2026)
+    // ----------------------------------------------------
+    // Er laeuft in _layout.tsx, also fuer jede Seite, sobald jemand angemeldet
+    // ist. Kann der Websocket nicht aufgebaut werden, wirft realtime-js
+    // synchron ("WebSocket not available") - so geschehen in Safari, als die
+    // Content Security Policy wss:// nicht erlaubte. Ohne Fehlergrenze raeumte
+    // React daraufhin die ganze App ab: auf dem iPhone blieb nach dem Anmelden
+    // der Bildschirm leer.
+    //
+    // Ohne Kanal fehlt nur die Bequemlichkeit, nach dem Bezahlen ohne
+    // Neuladen freigeschaltet zu werden. Der Zugriff selbst haengt weiterhin an
+    // has_plus_access(), das jede Seite beim Oeffnen frisch fragt.
+    try {
+      channel.subscribe();
+    } catch (error) {
+      console.warn('Abo-Abgleich in Echtzeit nicht verfuegbar', error);
+    }
 
     return () => {
-      void supabase.removeChannel(channel);
+      void supabase.removeChannel(channel).catch(() => undefined);
     };
   }, [userId, queryClient]);
 }

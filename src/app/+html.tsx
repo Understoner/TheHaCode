@@ -3,6 +3,7 @@ import type { PropsWithChildren } from 'react';
 
 import { responsiveCss } from '@/design/responsive';
 import { colors } from '@/design/tokens';
+import { contentSecurityPolicy } from '@/lib/contentSecurityPolicy';
 
 // Die HTML-Huelle des statischen Exports, ausschliesslich zur Bauzeit
 // gerendert (SAD §2.5). Hier steht, was fuer das gesamte Dokument gilt und
@@ -14,45 +15,10 @@ import { colors } from '@/design/tokens';
 // verwaltetes <title data-rh="true"> an den Anfang des <head>, und der Browser
 // nimmt immer das erste - ein zweiter Titel an dieser Stelle bliebe wirkungslos.
 
-// Ohne Header-Zugriff (statischer Export, kein eigener Serverprozess) ist das
-// <meta>-CSP der einzige Weg, eine Content Security Policy auszuliefern.
-// Bewusste Einschraenkungen dieses Wegs:
-//   - 'unsafe-inline' bei script-src ist unvermeidbar: Expo legt den
-//     Hydrations-Bootstrap als Inline-Modul ab, dessen Hash zur Bauzeit hier
-//     nicht bekannt ist.
-//   - frame-ancestors wirkt in <meta> nicht (nur als echter Header) und steht
-//     deshalb nicht drin - es gehoert in die Hostinger-Konfiguration,
-//     zusammen mit X-Content-Type-Options (docs/DEPLOYMENT.md §2).
-// Wertvoll bleibt vor allem der enge connect-src/img-src: selbst bei einem
-// eingeschleusten Skript gibt es kein Ziel, an das sich Daten abfliessen
-// liessen, ausser der eigenen Domain und Supabase.
-function supabaseOrigin(): string {
-  try {
-    return new URL(process.env.EXPO_PUBLIC_SUPABASE_URL ?? '').origin;
-  } catch {
-    return '';
-  }
-}
-
-function contentSecurityPolicy(): string {
-  const supabase = supabaseOrigin();
-  return [
-    "default-src 'self'",
-    "base-uri 'self'",
-    "object-src 'none'",
-    "form-action 'self'",
-    "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
-    "font-src 'self' data:",
-    // Hintergrundmusik liegt unter public/musik/ und damit auf der eigenen
-    // Domain. Ausdruecklich genannt, damit die Regel beim Lesen sichtbar ist -
-    // ueber default-src waere sie ohnehin erlaubt.
-    "media-src 'self'",
-    `img-src 'self' data: blob: ${supabase}`.trim(),
-    `connect-src 'self' ${supabase}`.trim(),
-    'upgrade-insecure-requests',
-  ].join('; ');
-}
+// Die Content Security Policy steht mit Begruendung und Test in
+// src/lib/contentSecurityPolicy.ts. Die Adresse wird HIER ausgelesen, und zwar
+// als woertliches process.env.EXPO_PUBLIC_SUPABASE_URL: nur so setzt Expo den
+// Wert zur Bauzeit ein.
 
 export default function Root({ children }: PropsWithChildren) {
   return (
@@ -67,7 +33,10 @@ export default function Root({ children }: PropsWithChildren) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
-        <meta httpEquiv="Content-Security-Policy" content={contentSecurityPolicy()} />
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content={contentSecurityPolicy(process.env.EXPO_PUBLIC_SUPABASE_URL)}
+        />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
         <meta name="color-scheme" content="light" />
 
