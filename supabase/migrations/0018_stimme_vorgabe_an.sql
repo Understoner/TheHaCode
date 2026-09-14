@@ -11,17 +11,33 @@
 -- nur beim Umschalten und liest es mit eigener Rueckfallvorgabe - sie laeuft
 -- unveraendert weiter.
 --
--- BESTEHENDE ZEILEN BLEIBEN WIE SIE SIND
--- --------------------------------------
--- Eine geaenderte Vorgabe wirkt nur auf neue Zeilen. Jedes bestehende Profil
--- traegt schon false, und zwar ununterscheidbar: ob jemand die Stimme bewusst
--- abgeschaltet hat oder nur nie angefasst, steht nirgends. Ein update auf
--- true wuerde bewusste Abschaltungen stillschweigend rueckgaengig machen.
--- Sollen bestehende Konten doch umgestellt werden, ist das eine eigene,
--- ausdrueckliche Migration.
 alter table public.profiles
   alter column voice_enabled set default true;
 
+-- AUCH BESTEHENDE PROFILE WERDEN EINMALIG UMGESTELLT
+-- --------------------------------------------------
+-- Eine geaenderte Vorgabe wirkt nur auf neue Zeilen. Jedes bestehende Profil
+-- traegt false, und zwar ununterscheidbar: ob jemand die Stimme bewusst
+-- abgeschaltet hat oder sie nur nie angefasst, steht nirgends.
+--
+-- Entschieden am 14.09.2026: alle auf an. Die Stimme gibt es erst seit dem
+-- 06.09.2026, der Schalter lag bis heute offen im Player - die allermeisten
+-- false stammen aus der alten Vorgabe, nicht aus einer Entscheidung. Wer die
+-- Stimme in dieser Woche bewusst abgeschaltet hat, hoert sie einmal wieder
+-- und schaltet sie unter "Einstellungen" erneut ab; von da an bleibt es aus.
+--
+-- Laeuft genau einmal, als Migration - nicht bei jedem Start. Spaetere
+-- Abschaltungen beruehrt es nicht.
+--
+-- Nebenwirkungen, beide geprueft:
+--   * trg_profiles_protect_entitlement sperrt nur has_active_subscription und
+--     plus_until; voice_enabled laeuft durch.
+--   * trg_profiles_updated setzt updated_at der umgestellten Profile auf den
+--     Zeitpunkt der Migration. Kein Ablauf liest updated_at von profiles.
+update public.profiles
+   set voice_enabled = true
+ where voice_enabled = false;
+
 comment on column public.profiles.voice_enabled is
   'Gesprochene Phasen- und Schlussansagen. Vorgabe an seit Migration 0018 '
-  '(vorher aus); bestehende Profile wurden dabei nicht umgestellt.';
+  '(vorher aus); bestehende Profile wurden dabei einmalig auf an gestellt.';

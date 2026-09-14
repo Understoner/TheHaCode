@@ -1,8 +1,12 @@
 -- supabase/tests/018_stimme_vorgabe_an.test.sql
 --
--- Migration 0018 dreht nur eine Vorgabe um. Geprueft wird, dass sie dort
--- ankommt, wo sie wirkt - beim Anlegen eines Kontos ueber den Trigger auf
--- auth.users -, und dass eine gespeicherte Abschaltung davon unberuehrt bleibt.
+-- Migration 0018 dreht eine Vorgabe um und stellt bestehende Profile einmalig
+-- um. Geprueft wird, dass die Vorgabe dort ankommt, wo sie wirkt - beim
+-- Anlegen eines Kontos ueber den Trigger auf auth.users -, und dass eine
+-- spaeter gespeicherte Abschaltung bestehen bleibt.
+--
+-- Das einmalige Umstellen selbst laesst sich hier nicht pruefen: die Tests
+-- laufen gegen eine frische Datenbank, in der es vor 0018 keine Profile gab.
 -- Die Zugriffsregeln auf voice_enabled prueft weiterhin 016.
 begin;
 select plan(4);
