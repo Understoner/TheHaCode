@@ -63,6 +63,17 @@ import type { PhaseKind } from '@/types/breathing';
 //
 // Musik bringt der Nutzer weiterhin in seiner eigenen App mit; deshalb keine
 // durchgehende Wiedergabe, die wuerde auf dem Handy den Audiofokus greifen.
+//
+// ---------------------------------------------------------------------------
+// DER SCHLUSSTON (14.09.2026)
+// ---------------------------------------------------------------------------
+// Teilnehmer haben das Ende einer Session nicht immer erkannt: der letzte
+// Phasenton klingt wie jeder andere, danach ist es einfach still. Der
+// Schlusston muss sich deshalb vom Phasenton unterscheiden, ohne aus dem
+// Instrument zu fallen - dasselbe Blech, aber drei Felder statt einem und
+// abwaerts bis zum Grundton: D4, A3, D3. Ein Abstieg auf den Grundton ist die
+// Kadenz, die ueberall als "fertig" gehoert wird, und D3 ist das tiefe
+// Mittelfeld ("Ding") der D-Kurd-Stimmung.
 
 /**
  * A3 - der Ton, der bisher auf das Ausatmen folgte, jetzt der einzige.
@@ -124,6 +135,25 @@ const NORM = PEAK / MODES.reduce((sum, [, gain]) => sum + gain, 0);
 const REVERB_SEND = 0.24;
 const REVERB_SECONDS = 1.7;
 
+/**
+ * Der Schlusston: [Tonhoehe Hz, Einsatz s, Lautstaerke].
+ *
+ * Unter eins, weil sich die drei Anschlaege ueberlagern - der Grundton des
+ * ersten klingt noch, wenn der dritte kommt. Bei voller Staerke je Anschlag
+ * uebersteuerte die Summe den Ausgang (siehe PEAK). Abgeschaetzt fuer den
+ * Einsatz von D3 nach 0,84 s: der erste Anschlag ist dann auf rund 0,07
+ * abgeklungen, der zweite auf rund 0,17, der dritte steht bei 0,50 - in der
+ * Summe rund 0,75, mit Luft fuer den Nachhall.
+ */
+export const END_CUE: [hz: number, delay: number, level: number][] = [
+  [293.66, 0, 0.5], // D4
+  [220, 0.42, 0.55], // A3 - der Phasenton, jetzt mitten in der Kadenz
+  [146.83, 0.84, 0.7], // D3 - der Grundton, am lautesten und am laengsten
+];
+
+/** Wie lange ein Anschlag des Schlusstons hoechstens klingen darf. */
+const END_CUE_MS = 8000;
+
 // Phasen unter dieser Laenge bleiben stumm, sonst stolpern die Toene
 // uebereinander (SAD §7.5).
 const MIN_PHASE_MS = 1200;
@@ -168,6 +198,8 @@ export function createAudioContext(): AudioContext | null {
 export type ToneBus = {
   /** Ein Anschlag. Stumm bei zu kurzen Phasen und bei freier Atmung. */
   strike: (kind: PhaseKind, phaseDurationMs: number) => void;
+  /** Der Schlusston am Ende der Session. Unterscheidet sich hoerbar vom Phasenton. */
+  strikeEnd: () => void;
   /** Wirkt sofort, auch auf einen gerade klingenden Ton. 0 bis 1. */
   setVolume: (value: number) => void;
   /** Bricht ab, was gerade klingt - beim Verlassen des Players. */
@@ -227,7 +259,13 @@ function impulseResponse(ctx: BaseAudioContext): AudioBuffer {
 }
 
 /** Kurzes Rauschen fuer den Finger-Anschlag - erzeugt, nicht geladen. */
-function strikeNoise(ctx: BaseAudioContext, target: AudioNode, t: number, level: number): void {
+function strikeNoise(
+  ctx: BaseAudioContext,
+  target: AudioNode,
+  t: number,
+  level: number,
+  noteHz: number,
+): void {
   const len = Math.floor(ctx.sampleRate * 0.05);
   const buffer = ctx.createBuffer(1, len, ctx.sampleRate);
   const data = buffer.getChannelData(0);
@@ -243,7 +281,7 @@ function strikeNoise(ctx: BaseAudioContext, target: AudioNode, t: number, level:
   // Zischen, nicht nach Finger auf Blech.
   const bp = ctx.createBiquadFilter();
   bp.type = 'bandpass';
-  bp.frequency.value = NOTE_HZ * 6;
+  bp.frequency.value = noteHz * 6;
   bp.Q.value = 1.6;
 
   const g = ctx.createGain();
@@ -319,31 +357,77 @@ export function createToneBus(ctx: BaseAudioContext, volume = 0.5): ToneBus {
     master.gain.linearRampToValueAtTime(value, t + RAMP_S);
   };
 
+  // Der Schlusston laeuft ueber einen eigenen Zwischenweg, trocken und in den
+  // Nachhall. Seine Anschlaege liegen bis fast eine Sekunde in der Zukunft,
+  // und wer gleich "Nochmal" tippt, soll keinen Schlusston in die neue Session
+  // hineinklingen hoeren - der Summenverstaerker allein reicht dafuer nicht,
+  // der erste neue Phasenton dreht ihn wieder auf.
+  let endTail: GainNode[] = [];
+
+  const cutEndTail = () => {
+    const t = ctx.currentTime;
+    for (const node of endTail) {
+      node.gain.cancelScheduledValues(t);
+      node.gain.setValueAtTime(node.gain.value, t);
+      node.gain.linearRampToValueAtTime(0, t + RAMP_S);
+    }
+    endTail = [];
+  };
+
+  /** Nach silence() steht der Verstaerker auf Null - ein neuer Ton holt ihn zurueck. */
+  const reopen = () => {
+    const t = ctx.currentTime;
+    master.gain.cancelScheduledValues(t);
+    master.gain.setValueAtTime(level, t);
+  };
+
   return {
     setVolume: (value: number) => {
       level = clamp01(value);
       rampTo(level);
     },
 
-    silence: () => rampTo(0),
+    silence: () => {
+      cutEndTail();
+      rampTo(0);
+    },
 
     strike: (kind: PhaseKind, phaseDurationMs: number) => {
       if (phaseDurationMs < MIN_PHASE_MS) return;
       // Freie Atmung hat keinen Phasenwechsel, den man anzeigen muesste.
       if (kind === 'free_breathing') return;
 
-      const t = ctx.currentTime;
-
-      // Nach silence() steht der Verstaerker auf Null. Der naechste Anschlag
-      // holt ihn zurueck - sonst bliebe der Player nach dem Zurueckkommen
-      // stumm.
-      master.gain.cancelScheduledValues(t);
-      master.gain.setValueAtTime(level, t);
+      cutEndTail();
+      // Sonst bliebe der Player nach dem Zurueckkommen stumm.
+      reopen();
 
       playCue(ctx, master, send, phaseDurationMs);
     },
+
+    strikeEnd: () => {
+      cutEndTail();
+      reopen();
+
+      const dry = ctx.createGain();
+      dry.gain.value = 1;
+      dry.connect(master);
+      let wet: GainNode | null = null;
+      if (send) {
+        wet = ctx.createGain();
+        wet.gain.value = 1;
+        wet.connect(send);
+      }
+      endTail = wet ? [dry, wet] : [dry];
+
+      for (const [hz, delay, gain] of END_CUE) {
+        playCue(ctx, dry, wet, END_CUE_MS, { hz, delay, level: gain });
+      }
+    },
   };
 }
+
+/** Welches Feld, wann und wie stark. Ohne Angabe: der Phasenton, sofort, voll. */
+export type CueNote = { hz?: number; delay?: number; level?: number };
 
 /**
  * Der Anschlag selbst. Getrennt von createToneBus, damit sich der Klanggraph
@@ -354,8 +438,11 @@ export function playCue(
   master: AudioNode,
   send: AudioNode | null,
   phaseDurationMs: number,
+  note: CueNote = {},
 ): void {
-  const t = ctx.currentTime;
+  const noteHz = note.hz ?? NOTE_HZ;
+  const scale = note.level ?? 1;
+  const t = ctx.currentTime + (note.delay ?? 0);
 
   // Der Ton soll nie laenger klingen als die Phase dauert, sonst ueberlagern
   // sich zwei Anschlaege.
@@ -367,8 +454,8 @@ export function playCue(
   const filter = ctx.createBiquadFilter();
   filter.type = 'lowpass';
   filter.Q.value = 0.5;
-  filter.frequency.setValueAtTime(Math.min(NOTE_HZ * 18, 16000), t);
-  filter.frequency.exponentialRampToValueAtTime(NOTE_HZ * 3.2, t + Math.min(2.4, maxDecay));
+  filter.frequency.setValueAtTime(Math.min(noteHz * 18, 16000), t);
+  filter.frequency.exponentialRampToValueAtTime(noteHz * 3.2, t + Math.min(2.4, maxDecay));
 
   filter.connect(master);
   if (send) filter.connect(send);
@@ -400,8 +487,8 @@ export function playCue(
 
     for (const [index, offset] of spread.entries()) {
       voice(ctx, spread.length > 1 ? (index === 0 ? left : right) : filter, t, {
-        freq: NOTE_HZ * ratio + offset,
-        level: (gain * NORM) / spread.length,
+        freq: noteHz * ratio + offset,
+        level: (gain * NORM * scale) / spread.length,
         attack,
         decay: stop,
         glide: ratio <= 4,
@@ -415,8 +502,8 @@ export function playCue(
   if (sympatheticStop > SYMPATHETIC_ATTACK_S) {
     for (const [index, [ratio, gain]] of SYMPATHETIC.entries()) {
       voice(ctx, index === 0 ? right : left, t, {
-        freq: NOTE_HZ * ratio,
-        level: gain * NORM,
+        freq: noteHz * ratio,
+        level: gain * NORM * scale,
         attack: SYMPATHETIC_ATTACK_S,
         decay: sympatheticStop,
         glide: false,
@@ -429,12 +516,12 @@ export function playCue(
   if (bodyStop > 0.012) {
     voice(ctx, filter, t, {
       freq: BODY_HZ,
-      level: 0.1 * NORM,
+      level: 0.1 * NORM * scale,
       attack: 0.012,
       decay: bodyStop,
       glide: false,
     });
   }
 
-  strikeNoise(ctx, filter, t, 0.05 * NORM);
+  strikeNoise(ctx, filter, t, 0.05 * NORM * scale, noteHz);
 }

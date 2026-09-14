@@ -28,6 +28,16 @@ import { useSoundPreference } from '@/features/settings/useSoundPreference';
 import { useVoicePreference } from '@/features/settings/useVoicePreference';
 import { useWakeLock } from '@/features/breathing/useWakeLock';
 
+// Am Ende der Session: erst der Schlusston, dann die Schlussansage. Die Ansage
+// setzt ein, wenn der dritte Anschlag (D3, nach 0,84 s) steht - sie spricht
+// in den ausklingenden Grundton hinein statt ueber die Kadenz.
+const END_VOICE_AFTER_TONE_S = 1.2;
+
+// So lange bleibt die Audiositzung nach dem Ende offen: Schlusston rund 7,5 s,
+// Ansage 1,2 + 4,1 s. Danach darf die Musik pausieren und die iPhone-
+// Wachhaltung gehen. Nicht zeitkritisch - deshalb reicht ein setTimeout.
+const END_AUDIO_MS = 8000;
+
 function mmss(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
@@ -53,6 +63,7 @@ function Player({ session }: { session: PlayableExercise }) {
   const [segIndex, setSegIndex] = useState(-1);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [endAudioDone, setEndAudioDone] = useState(false);
   // Der Tonschalter lebt in profiles.sound_enabled, nicht nur in diesem Screen
   // (Backlog T10) - abgeschaltet bleibt abgeschaltet, auch auf dem naechsten
   // Geraet.
@@ -74,6 +85,7 @@ function Player({ session }: { session: PlayableExercise }) {
   const busRef = useRef<ToneBus | null>(null);
   const voiceRef = useRef<VoicePlayer | null>(null);
   const lastCuedRef = useRef(-1);
+  const endCuedRef = useRef(false);
   const musicRef = useRef<ReturnType<typeof createMusicPlayer> | null>(null);
   const keepAliveRef = useRef<SessionKeepAlive | null>(null);
 
@@ -127,6 +139,30 @@ function Player({ session }: { session: PlayableExercise }) {
     if (voiceOn) voiceRef.current?.speak(segment.kind);
   }, [segIndex, segment, soundOn, voiceOn]);
 
+  // Das Ende hoerbar machen. Nach dem letzten Phasenwechsel wurde es bisher
+  // einfach still, und Teilnehmer haben nicht immer erkannt, dass die Session
+  // vorbei ist. Genau einmal je Durchgang (endCuedRef) - ein Umschalten von
+  // Ton oder Stimme auf dem Schlussbildschirm spielt nichts nach.
+  useEffect(() => {
+    if (!finished || endCuedRef.current) return;
+    endCuedRef.current = true;
+
+    if (soundOn) busRef.current?.strikeEnd();
+    if (voiceOn) voiceRef.current?.speakEnd(soundOn ? END_VOICE_AFTER_TONE_S : 0);
+  }, [finished, soundOn, voiceOn]);
+
+  useEffect(() => {
+    if (!finished) return;
+    const timer = setTimeout(() => setEndAudioDone(true), END_AUDIO_MS);
+    return () => clearTimeout(timer);
+  }, [finished]);
+
+  // Solange der Abschluss klingt, zaehlt die Session fuer Musik und
+  // Wachhaltung noch als laufend. Die Uhr steht zu diesem Zeitpunkt schon -
+  // haengen beide nur an ihr, verstummt auf dem stummgeschalteten iPhone
+  // genau der Abschluss (siehe audioSession.ts).
+  const endAudible = finished && !endAudioDone && (soundOn || voiceOn);
+
   // Die Lautstaerken haengen an je einem Summenverstaerker, nicht am einzelnen
   // Ton: deshalb wirken die Regler sofort und nicht erst beim naechsten
   // Anschlag.
@@ -152,9 +188,9 @@ function Player({ session }: { session: PlayableExercise }) {
     if (!keepAliveRef.current) keepAliveRef.current = createSessionKeepAlive();
     const keepAlive = keepAliveRef.current;
 
-    if (!musicTrack && clock.isRunning) keepAlive.start(audioRef.current);
+    if (!musicTrack && (clock.isRunning || endAudible)) keepAlive.start(audioRef.current);
     else keepAlive.stop();
-  }, [musicTrack, clock.isRunning]);
+  }, [musicTrack, clock.isRunning, endAudible]);
 
   // Musik folgt zwei Dingen: der Auswahl und dem Laufzustand. Pausiert die
   // Uebung, pausiert auch die Musik - sonst laeuft sie weiter, waehrend
@@ -170,9 +206,11 @@ function Player({ session }: { session: PlayableExercise }) {
       return;
     }
     music.setVolume(musicVolume);
-    if (clock.isRunning) music.play(musicTrack);
+    // Die Musik traegt den Abschluss noch mit - auf dem iPhone haelt sie dabei
+    // die Audiositzung offen, sonst bliebe er dort bei Lautlos stumm.
+    if (clock.isRunning || endAudible) music.play(musicTrack);
     else music.pause();
-  }, [musicTrack, clock.isRunning, musicVolume]);
+  }, [musicTrack, clock.isRunning, musicVolume, endAudible]);
 
   // Beim Ausbauen verstummt die Musik - ein Stueck, das nach dem Zurueckgehen
   // weiterlaeuft, waere das Aergerlichste an der Funktion. Und erst hier wird
@@ -245,12 +283,14 @@ function Player({ session }: { session: PlayableExercise }) {
     if (voiceOn) voiceRef.current?.preload();
     void ctx?.resume?.();
     setFinished(false);
+    setEndAudioDone(false);
     clock.start();
   }, [clock, toneVolume, voiceVolume, voiceOn]);
 
   const restart = useCallback(() => {
     clock.reset();
     lastCuedRef.current = -1;
+    endCuedRef.current = false;
     setSegIndex(-1);
     setElapsedMs(0);
     setFinished(false);

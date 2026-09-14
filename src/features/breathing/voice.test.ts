@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createVoicePlayer, VOICE_FILES } from './voice';
+import { createVoicePlayer, END_VOICE_FILE, VOICE_FILES } from './voice';
 
 // jsdom hat weder Web Audio noch fetch mit echten Dateien. Der Stub zeichnet
 // auf, statt zu klingen: welche Aufnahme geholt wurde, welche abgespielt wird,
@@ -13,12 +13,13 @@ import { createVoicePlayer, VOICE_FILES } from './voice';
 type Aufzeichnung = {
   geholt: string[];
   gespielt: string[];
+  einsatz: number[];
   gestoppt: number;
   pegel: number[];
 };
 
 function stubContext() {
-  const auf: Aufzeichnung = { geholt: [], gespielt: [], gestoppt: 0, pegel: [] };
+  const auf: Aufzeichnung = { geholt: [], gespielt: [], einsatz: [], gestoppt: 0, pegel: [] };
 
   const knoten = () => ({ connect: (z: unknown) => z, disconnect: () => undefined });
 
@@ -44,7 +45,10 @@ function stubContext() {
         set buffer(b: { url: string } | null) {
           quelle = b?.url ?? '';
         },
-        start: () => auf.gespielt.push(quelle),
+        start: (wann: number) => {
+          auf.gespielt.push(quelle);
+          auf.einsatz.push(wann);
+        },
         stop: () => {
           auf.gestoppt += 1;
         },
@@ -95,13 +99,42 @@ describe('createVoicePlayer', () => {
 
   // Beim Einschalten holen, nicht beim ersten Wechsel: sonst schwiege die
   // erste Phase, waehrend die Datei noch laedt.
-  it('holt beim Vorladen alle vier Aufnahmen, jede nur einmal', async () => {
+  // Die Schlussansage gehoert dazu: am Ende der Session ist keine Zeit mehr,
+  // sie erst zu holen.
+  it('holt beim Vorladen alle vier Aufnahmen und die Schlussansage, jede nur einmal', async () => {
     const stimme = createVoicePlayer(ctx);
     stimme.preload();
     stimme.preload();
     await abwarten();
 
-    expect(auf.geholt.sort()).toEqual(Object.values(VOICE_FILES).sort());
+    expect(auf.geholt.sort()).toEqual([...Object.values(VOICE_FILES), END_VOICE_FILE].sort());
+  });
+
+  it('sagt am Ende die Schlussansage an, auf Wunsch verzoegert', async () => {
+    const stimme = createVoicePlayer(ctx);
+    stimme.preload();
+    await abwarten();
+
+    stimme.speakEnd();
+    expect(auf.gespielt).toEqual(['/stimme/abschluss.wav']);
+    expect(auf.einsatz.at(-1)).toBe(0);
+
+    stimme.speakEnd(1.2);
+    expect(auf.einsatz.at(-1)).toBeCloseTo(1.2, 5);
+  });
+
+  // Wer auf dem Schlussbildschirm sofort "Nochmal" tippt, soll die Ansage
+  // nicht in die neue Session hineinsprechen hoeren - auch dann nicht, wenn
+  // sie noch gar nicht eingesetzt hat.
+  it('bricht eine verzoegerte Schlussansage ab, bevor sie einsetzt', async () => {
+    const stimme = createVoicePlayer(ctx);
+    stimme.preload();
+    await abwarten();
+
+    stimme.speakEnd(1.2);
+    stimme.speak('inhale');
+
+    expect(auf.gestoppt).toBe(1);
   });
 
   it('spielt zur Phase die Aufnahme, die zu ihr gehoert', async () => {
