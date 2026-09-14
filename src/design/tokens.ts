@@ -46,6 +46,10 @@ export const colors = {
   // Halbtransparente Flaeche fuer Kategorie-Pills ueber Cover-Bildern
   // (ui/references/05_news_mobile.svg, 06_news_desktop.svg).
   overlaySurface: 'rgba(255,255,255,0.9)',
+  // Abgedunkelter Hintergrund hinter einer Ueberblendung (InfoButton): ink900
+  // mit 45 Prozent. Dunkel genug, dass die Karte davor klar steht - hell
+  // genug, dass man die Seite darunter noch erkennt.
+  scrim: 'rgba(22,36,43,0.45)',
   // Destruktive Aktionen (z. B. "Block loeschen" im Konfigurator, spaeter).
   danger: '#B45A5A',
 } as const;

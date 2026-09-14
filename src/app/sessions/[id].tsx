@@ -20,6 +20,7 @@ import {
 } from '@/features/breathing/timeline';
 import { useBreathClock } from '@/features/breathing/useBreathClock';
 import { effectColors } from '@/features/sessions/effects';
+import { PlayerHilfe } from '@/features/sessions/PlayerHilfe';
 import { PlaylistLinks } from '@/features/sessions/PlaylistLinks';
 import { useSession } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
@@ -314,6 +315,9 @@ function Player({ session }: { session: PlayableExercise }) {
           <Text style={styles.clock}>
             {mmss(elapsedMs)} / {mmss(totalMs)}
           </Text>
+          {/* Die Bedienungshilfe als Ueberblendung: der Player bleibt dabei
+              stehen, auch eine laufende Session. */}
+          <PlayerHilfe />
           {/* Der Stern steht auch hier und nicht nur in der Liste: gemerkt
               wird eine Sequenz meist NACH dem Atmen, nicht davor. */}
           <FavoriteStar exerciseId={session.id} />
