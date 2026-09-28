@@ -1,6 +1,6 @@
 -- Wird bei jedem `npm run db:reset` nach den Migrationen eingespielt.
 --
--- Zehn fertige Atemsequenzen als ARBEITSVORLAGE. Sie stehen hier und nicht in
+-- Elf fertige Atemsequenzen als ARBEITSVORLAGE. Sie stehen hier und nicht in
 -- einer Migration, weil redaktionelle Inhalte ueber Supabase Studio gepflegt
 -- werden (CLAUDE.md) - eine Migration wuerde sie ungefragt auch nach Staging
 -- und Production schreiben.
@@ -31,14 +31,14 @@
 -- Nullphase waere in der Animation ein Sprung.
 --
 -- ---------------------------------------------------------------------------
--- WAS DIESE ZEHN SEQUENZEN INHALTLICH LEITET
+-- WAS DIESE ELF SEQUENZEN INHALTLICH LEITET
 -- ---------------------------------------------------------------------------
 -- Funktionale Atmung und die Prinzipien der Restorative Breathing®:
 --
 --   * NASE VOR MUND. Eingeatmet wird durchgehend durch die Nase - sie filtert,
 --     befeuchtet und erzeugt den Widerstand, der das Zwerchfell ueberhaupt
 --     erst arbeiten laesst. Durch den Mund wird nur dort ausgeatmet, wo der
---     Reiz gewollt ist (Sequenz 1 und 10, Stufe 1).
+--     Reiz gewollt ist (Sequenz 1, 10 Stufe 1 und 11).
 --   * WEICHER KEHLKOPF. Keine Ujjayi-Enge, kein hoerbares Reiben. Wo ein
 --     Widerstand gewollt ist, kommt er von den Lippen (Lippenbremse), nicht
 --     von der Glottis.
@@ -561,3 +561,111 @@ from s2, (values
   (3, 'exhale',   4, 'nose', 'Gleichmäßig ausatmen'),
   (4, 'hold_out', 4, null,   'Leer halten, ohne Anspannung')
 ) as v(pos, kind, dur, route, cue);
+
+
+-- ---------------------------------------------------------------------------
+-- 11) Atem Espresso - drei Runden zu je 15 Atemzuegen 2-1 und 10 s Leerhalten
+--     = 3 x (15 x 3 s + 10 s) = 165 s
+--
+--     Die Runde ist selbst schon eine Wiederholung (15 Atemzuege), und das
+--     Modell kennt keine Wiederholung in der Wiederholung. Deshalb zwei Bloecke
+--     je Runde, sechs insgesamt: "Atmen" mit repeat_count 15, "Halten" mit 1.
+--     Die Haltephase folgt damit genau einmal auf das letzte Ausatmen - und
+--     nicht nach jedem Atemzug, was ein einziger Block mit drei Phasen hiesse.
+-- ---------------------------------------------------------------------------
+with e as (
+  insert into public.exercises (
+    slug, category_id, type, playback_mode, visibility, title, subtitle,
+    description_md, benefits_md, effects, contraindications_md,
+    default_round_count, difficulty, estimated_seconds, sort_order, is_published
+  ) values (
+    'atem-espresso',
+    (select id from public.exercise_categories where slug = 'aktivieren'),
+    'paced', 'timer', 'free',
+    'Atem Espresso', 'Drei Minuten, hellwach',
+    'Im Sitzen: fünfzehnmal zügig durch die Nase einatmen (2 Sekunden) und locker durch den Mund ausatmen (1 Sekunde). Nach dem letzten Ausatmen zehn Sekunden leer halten, dann beginnt die nächste Runde. Drei Runden.',
+    'Der schnelle Takt hebt die Aktivierung spürbar an, das kurze Leerhalten danach fängt sie wieder ein: der CO₂-Wert steigt, der Atemreiz meldet sich, und die nächste Runde beginnt aus der Ruhe statt aus dem Rausch. Das ergibt Wachheit ohne Aufgedrehtsein - wie ein Espresso, nur ohne Zittern danach.',
+    '{aktivierend}',
+    'Nur im Sitzen oder Liegen üben. Wird dir schwindlig oder kribbeln Hände oder Lippen, langsamer und ruhig durch die Nase weiteratmen. Nicht bei Neigung zu Hyperventilation, Panikattacken oder Migräne mit Aura. Bei Schwangerschaft, Epilepsie, Bluthochdruck oder Herz-Kreislauf-Erkrankungen vorher ärztlich abklären. Nie im Wasser oder beim Autofahren üben.',
+    15, 2, 165, 11, true
+  )
+  returning id
+),
+-- Runde 1: 15 x 2-1 = 45 s, dann 10 s leer
+s1 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 1, 'Runde 1 · Atmen', 15, 0 from e
+  returning id
+),
+p1 as (
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select s1.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+  from s1, (values
+    (1, 'inhale', 2, 'nose',  'Zügig einatmen, Bauch und Flanken weiten sich'),
+    (2, 'exhale', 1, 'mouth', 'Locker loslassen, nicht pressen')
+  ) as v(pos, kind, dur, route, cue)
+  returning step_id
+),
+h1 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 2, 'Runde 1 · Halten', 1, 0 from e
+  returning id
+),
+q1 as (
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select h1.id, 1, 'hold_out'::phase_kind, 10, null::breath_route,
+         'Leer halten, Schultern sinken - ohne Anspannung'
+  from h1
+  returning step_id
+),
+-- Runde 2
+s2 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 3, 'Runde 2 · Atmen', 15, 0 from e
+  returning id
+),
+p2 as (
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select s2.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+  from s2, (values
+    (1, 'inhale', 2, 'nose',  'Zügig einatmen, Bauch und Flanken weiten sich'),
+    (2, 'exhale', 1, 'mouth', 'Locker loslassen, nicht pressen')
+  ) as v(pos, kind, dur, route, cue)
+  returning step_id
+),
+h2 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 4, 'Runde 2 · Halten', 1, 0 from e
+  returning id
+),
+q2 as (
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select h2.id, 1, 'hold_out'::phase_kind, 10, null::breath_route,
+         'Leer halten, Schultern sinken - ohne Anspannung'
+  from h2
+  returning step_id
+),
+-- Runde 3
+s3 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 5, 'Runde 3 · Atmen', 15, 0 from e
+  returning id
+),
+p3 as (
+  insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+  select s3.id, v.pos, v.kind::phase_kind, v.dur, v.route::breath_route, v.cue
+  from s3, (values
+    (1, 'inhale', 2, 'nose',  'Zügig einatmen, Bauch und Flanken weiten sich'),
+    (2, 'exhale', 1, 'mouth', 'Locker loslassen, nicht pressen')
+  ) as v(pos, kind, dur, route, cue)
+  returning step_id
+),
+h3 as (
+  insert into public.exercise_steps (exercise_id, position, label, repeat_count, rest_seconds)
+  select id, 6, 'Runde 3 · Halten', 1, 0 from e
+  returning id
+)
+insert into public.exercise_phases (step_id, position, kind, duration_seconds, route, cue_text)
+select h3.id, 1, 'hold_out'::phase_kind, 10, null::breath_route,
+       'Leer halten und nachspüren'
+from h3;

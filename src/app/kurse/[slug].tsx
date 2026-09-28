@@ -94,7 +94,7 @@ function CourseDetail({ course }: { course: Course }) {
         <CourseBooking course={course} seatsLeft={seats.data?.get(course.id) ?? null} />
       ) : signupUrl ? (
         <View style={styles.signup}>
-          <Button label={t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
+          <Button label={course.signup_label ?? t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
         </View>
       ) : null}
 

@@ -9,8 +9,8 @@ import { parseMarkdown, type Block, type Inline } from '@/features/news/markdown
 // Stellt dar, was markdown.ts gelesen hat. Die Trennung ist Absicht: das Lesen
 // ist reine Logik und laesst sich ohne DOM testen, das Zeichnen braucht React.
 
-// mailto und tel gehen absichtlich NICHT durch safeExternalUrl - die Funktion
-// laesst nur http(s) durch, und das zu Recht (dort landen Redaktionsfelder aus
+// tel geht absichtlich NICHT durch safeExternalUrl - die Funktion laesst nur
+// http(s) und ein eng gefasstes mailto durch (dort landen Redaktionsfelder aus
 // dem Studio). Hier ist die Pruefung stattdessen eng: eine Adresse ohne
 // Leerzeichen und ohne Anfuehrungszeichen, sonst passiert nichts.
 const MAIL_OR_PHONE = /^(mailto:[^\s"'<>]+|tel:\+?[\d\s-]+)$/;

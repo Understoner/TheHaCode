@@ -60,16 +60,56 @@ describe('CoursesList', () => {
     rpcMock.mockResolvedValue({ data: [], error: null });
   });
 
-  it('fragt die Kurse nach Termin aufsteigend ab, Kurse ohne Termin zuletzt', async () => {
+  it('fragt angeheftete Kurse zuerst ab, dann nach Termin, Kurse ohne Termin zuletzt', async () => {
     // Vorher entschied allein sort_order - dann bestimmt die Reihenfolge, wer
-    // zuletzt eine Zahl vergeben hat, und nicht der Kalender.
+    // zuletzt eine Zahl vergeben hat, und nicht der Kalender. is_pinned steht
+    // davor, weil ein angehefteter Kurs meist KEINEN Termin hat und sonst
+    // genau deshalb ans Ende rutschte.
     const order = mockCoursesQuery({ data: [], error: null });
 
     renderWithClient(<CoursesList />);
 
     await waitFor(() => expect(order).toHaveBeenCalled());
-    expect(order.mock.calls[0]).toEqual(['starts_at', { ascending: true, nullsFirst: false }]);
-    expect(order.mock.calls[1]).toEqual(['sort_order', { ascending: true }]);
+    expect(order.mock.calls[0]).toEqual(['is_pinned', { ascending: false }]);
+    expect(order.mock.calls[1]).toEqual(['starts_at', { ascending: true, nullsFirst: false }]);
+    expect(order.mock.calls[2]).toEqual(['sort_order', { ascending: true }]);
+  });
+
+  it('beschriftet den Knopf mit signup_label, sonst mit "Anmelden"', async () => {
+    mockCoursesQuery({
+      data: [
+        {
+          id: '1',
+          slug: 'atmung-nach-mass',
+          title: 'Atmung nach Maß',
+          description: 'Dein individuelles Angebot',
+          location: null,
+          price_info: null,
+          signup_url: 'mailto:office@thehacode.com?subject=Anfrage',
+          signup_label: 'Jetzt individuelles Angebot anfragen',
+          is_pinned: true,
+          starts_at: null,
+        },
+        {
+          id: '2',
+          slug: 'mit-termin',
+          title: 'Kurs mit Termin',
+          description: 'Beschreibung',
+          location: null,
+          price_info: null,
+          signup_url: 'https://example.at/anmeldung',
+          signup_label: null,
+          is_pinned: false,
+          starts_at: '2099-03-01T18:00:00Z',
+        },
+      ],
+      error: null,
+    });
+
+    renderWithClient(<CoursesList />);
+
+    expect(await screen.findByText('Jetzt individuelles Angebot anfragen')).toBeTruthy();
+    expect(screen.getByText('Anmelden')).toBeTruthy();
   });
 
   it('blendet vergangene Termine aus, kuenftige bleiben', async () => {
