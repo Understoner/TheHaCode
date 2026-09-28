@@ -141,10 +141,12 @@ export type Database = {
           deposit_cents: number | null
           description: string
           id: string
+          is_pinned: boolean
           location: string | null
           price_cents: number | null
           price_info: string | null
           published_at: string | null
+          signup_label: string | null
           signup_url: string | null
           slug: string
           sort_order: number
@@ -161,10 +163,12 @@ export type Database = {
           deposit_cents?: number | null
           description: string
           id?: string
+          is_pinned?: boolean
           location?: string | null
           price_cents?: number | null
           price_info?: string | null
           published_at?: string | null
+          signup_label?: string | null
           signup_url?: string | null
           slug: string
           sort_order?: number
@@ -181,10 +185,12 @@ export type Database = {
           deposit_cents?: number | null
           description?: string
           id?: string
+          is_pinned?: boolean
           location?: string | null
           price_cents?: number | null
           price_info?: string | null
           published_at?: string | null
+          signup_label?: string | null
           signup_url?: string | null
           slug?: string
           sort_order?: number

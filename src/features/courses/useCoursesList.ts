@@ -28,6 +28,11 @@ export function useCoursesList() {
         // sort_order bleibt als zweites Kriterium: zwei Kurse zur selben
         // Stunde sollen eine feste Reihenfolge haben und nicht bei jedem
         // Abruf eine andere.
+        //
+        // Davor steht is_pinned (Migration 0019): ein angehefteter Kurs wie
+        // das Anfrage-Angebot "Atmung nach Maß" hat keinen Termin und stuende
+        // sonst genau deshalb ganz hinten.
+        .order('is_pinned', { ascending: false })
         .order('starts_at', { ascending: true, nullsFirst: false })
         .order('sort_order', { ascending: true });
 

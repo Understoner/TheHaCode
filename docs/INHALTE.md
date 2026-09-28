@@ -559,3 +559,53 @@ Die Termine stehen im Fließtext mit Datum, aber **ohne Uhrzeit je Termin** —
 alle beginnen um 19:00 Uhr, und das steht einmal darüber. Ändert sich ein
 Termin, ändert er sich am Kurs; der Beitrag verweist für die verbindliche Liste
 auf `/kurse`.
+
+---
+
+## Kurs: Atmung nach Maß (individuelles Angebot)
+
+Ein Anfrage-Angebot ohne Termin, ohne Preis und ohne Buchung in der App. Es
+steht auf `/kurse` **immer als erstes** (`is_pinned`, Migration 0019), und der
+Knopf heißt „Jetzt individuelles Angebot anfragen" statt „Anmelden"
+(`signup_label`, ebenfalls 0019).
+
+**Erst nach dem Ausrollen von Migration 0019**, in Staging und Live je einmal:
+**Studio → SQL Editor →** `docs/inhalte/atmung-nach-mass.sql` einfügen und
+ausführen. Mehrfach ausführbar; ein zweiter Lauf aktualisiert die Texte, holt
+einen zurückgezogenen Kurs aber nicht ungefragt zurück.
+
+### Was dabei bewusst so ist
+
+- **Anfrage per E-Mail, nicht per Formular.** Die Vorlage nannte „das
+  Formular" — ein Kontaktformular gibt es nicht. Der Knopf öffnet eine E-Mail an
+  `office@thehacode.com` mit Betreff und den Fragen aus „Das hilft mir bei
+  deiner Anfrage" als Lückentext. Schritt 1 unter „So läuft es ab" sagt
+  deshalb „per E-Mail".
+- **Die beiden 👉-Zeilen sind der Knopf.** Auf der Übersicht und am Ende der
+  Detailseite; im Text stehen sie nicht noch einmal.
+- **Die Kachel zeigt den ganzen Anriss.** Andere Kurse brechen nach drei Zeilen
+  ab; ein angehefteter nicht — ohne Termin und Preis ist sein Text die einzige
+  Auskunft auf der Kachel.
+- **Kein Titelbild.** Die Kachel zeigt den Platzhalter. Ein Bild kommt wie
+  gewohnt nach `public-assets/courses/` und in `cover_image_path`.
+
+Zurückziehen: `update public.courses set published_at = null where slug = 'atmung-nach-mass';`
+Nicht mehr anheften: `... set is_pinned = false ...`
+
+---
+
+## Sequenz: Atem Espresso
+
+Steht als **Block 11** in `supabase/seed.sql`. Im Sitzen 15 × (2 s durch die
+Nase ein, 1 s durch den Mund aus), nach dem letzten Ausatmen 10 s leer halten,
+drei Runden — 165 s.
+
+Im Modell sind das **sechs Blöcke** (je Runde „Atmen" × 15 und „Halten" × 1):
+eine Wiederholung in der Wiederholung kennt das Schema nicht, und ein einziger
+Block mit drei Phasen hielte nach **jedem** Atemzug die Luft an.
+
+**Für Staging und Live nur diesen Block kopieren, nicht die ganze Datei:**
+`seed.sql` beginnt mit einem DELETE auf alle redaktionellen Sequenzen — auf
+Live löschte das per Kaskade auch alle Favoriten-Sterne der
+Nutzer. Der Block allein ist sicher: läuft er ein zweites Mal, scheitert er am
+eindeutigen `slug` und ändert nichts.

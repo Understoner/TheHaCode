@@ -58,8 +58,12 @@ export function CoursesList() {
                           </Link>
                           {/* Drei Zeilen reichen als Koeder. Der ganze Text
                               steht auf der Detailseite, und gleich hohe Karten
-                              lesen sich ruhiger als eine Treppe. */}
-                          <Text style={styles.description} numberOfLines={3}>
+                              lesen sich ruhiger als eine Treppe.
+                              Ausnahme: ein angehefteter Kurs. Er hat weder
+                              Termin noch Preis, sein Text IST die Werbung -
+                              abgeschnitten nach drei Zeilen fehlte genau der
+                              Satz, der sagt, was man anfragen kann. */}
+                          <Text style={styles.description} numberOfLines={course.is_pinned ? undefined : 3}>
                             {course.description}
                           </Text>
                           <View style={styles.metaRow}>
@@ -75,7 +79,7 @@ export function CoursesList() {
                           {course.booking_enabled ? (
                             <CourseBooking course={course} seatsLeft={seatsLeft(course.id)} />
                           ) : signupUrl ? (
-                            <Button label={t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
+                            <Button label={course.signup_label ?? t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
                           ) : null}
                         </View>
                       </View>
@@ -116,7 +120,7 @@ export function CoursesList() {
                           ) : null}
                         </View>
                         {!course.booking_enabled && signupUrl ? (
-                          <Button label={t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
+                          <Button label={course.signup_label ?? t('kurse.signup')} onPress={() => openExternalUrl(signupUrl)} />
                         ) : null}
                       </View>
                     );

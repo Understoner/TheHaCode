@@ -9,8 +9,16 @@ import { Linking } from 'react-native';
 // vorhanden (der Button erscheint dann gar nicht erst).
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 
+// Dazu mailto, seit "Atmung nach Maß" keine Anmeldeseite hat, sondern eine
+// Anfrage per E-Mail. mailto fuehrt keinen Code aus, es oeffnet nur das
+// Mailprogramm. Trotzdem eng gefasst wie im Markdown-Leser: kein Leerzeichen,
+// keine Anfuehrungszeichen, keine spitzen Klammern - Betreff und Text muessen
+// kodiert (%20) drinstehen.
+const MAILTO = /^mailto:[^\s"'<>]+$/;
+
 export function safeExternalUrl(value: string | null | undefined): string | null {
   if (!value) return null;
+  if (MAILTO.test(value)) return value;
   try {
     // Ohne Basis-URL: relative Angaben sind hier ohnehin keine gueltigen Ziele
     // und werfen - der catch-Zweig faengt sie mit ab.
