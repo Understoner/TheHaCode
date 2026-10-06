@@ -10,8 +10,8 @@ import type { PhaseKind } from '@/types/breathing';
 // Vorher hatte jede Phase ihre eigene Tonhoehe. Das klang nach Melodie, und
 // eine Melodie zieht die Aufmerksamkeit auf sich - genau das, was eine
 // Atemuebung nicht will. Jetzt schlaegt bei jedem Phasenwechsel derselbe Ton
-// an: A3, der Ton, der bisher auf das Ausatmen folgte. Der Wechsel wird
-// markiert, mehr nicht.
+// an: anfangs A3, der Ton, der bisher auf das Ausatmen folgte, seit dem
+// 06.10.2026 Fis3 (siehe unten). Der Wechsel wird markiert, mehr nicht.
 //
 // ---------------------------------------------------------------------------
 // Was eine Handpan klanglich ausmacht - und wie es hier nachgebaut ist
@@ -32,8 +32,8 @@ import type { PhaseKind } from '@/types/breathing';
 //    nicht nach Handpan. Auf einem echten Instrument liegen sieben weitere
 //    Tonfelder auf derselben Kuppel. Schlaegt man eines an, klingen die
 //    verwandten leise mit, verzoegert und ohne eigenen Anschlag. Dieser Hof
-//    ist das Erkennungsmerkmal des Instruments. Hier sind es zwei Felder der
-//    D-Kurd-Stimmung ueber dem gespielten A3.
+//    ist das Erkennungsmerkmal des Instruments. Welche Felder es sind und wie
+//    laut, steht seit dem 06.10.2026 nach Messung einer Aufnahme fest (unten).
 //
 // 4. ANSCHLAG. Der Finger erzeugt ein kurzes, unharmonisches Geraeusch, das
 //    nach wenigen Hundertstel weg ist. Ohne das beginnt der Ton aus dem
@@ -53,7 +53,8 @@ import type { PhaseKind } from '@/types/breathing';
 //    Abklingzeit statt einer gemeinsamen Huellkurve.
 //
 // 8. TONHOEHENABFALL. Metall wird beim Anschlag kurz ueberdehnt und faellt
-//    innerhalb von Millisekunden auf die Ruhetonhoehe zurueck.
+//    innerhalb von Millisekunden auf die Ruhetonhoehe zurueck. In der
+//    Fis-Aufnahme ist das kaum messbar - deshalb nur noch ein Hauch.
 //
 // 9. RAUM. Niemand hoert eine Handpan trocken; sie steht in einem Zimmer.
 //    Der Nachhall kommt aus einer erzeugten Impulsantwort - gefiltertes
@@ -65,26 +66,47 @@ import type { PhaseKind } from '@/types/breathing';
 // durchgehende Wiedergabe, die wuerde auf dem Handy den Audiofokus greifen.
 //
 // ---------------------------------------------------------------------------
-// DER SCHLUSSTON (14.09.2026)
+// FIS STATT A, KURZ STATT LANG (06.10.2026)
+// ---------------------------------------------------------------------------
+// Der A3-Ton wurde von Teilnehmern als stoerend empfunden. Vorlage fuer den
+// neuen war eine Handpan-Aufnahme ("handpan-shot-vessel_F#.wav", 1,45 s), die
+// das Team ausgesucht hat. Die Aufnahme selbst liegt NICHT im Repo - sie ist
+// nur ausgemessen, und die Zahlen unten stammen aus dieser Messung:
+//
+//   - Grundton 185,3 Hz, also Fis3. Kaum Tonhoehenabfall beim Anschlag
+//     (unter zwei Cent), deshalb ist der Glide unten fast weg.
+//   - Klingt nach rund 2,5 s aus statt nach 6,5 s. Das ist vermutlich der
+//     groesste Teil dessen, was am alten Ton gestoert hat: er stand noch im
+//     Raum, wenn die naechste Phase laengst lief.
+//   - Oktave und Duodezime sind leise (rund -20 dB). Die Oktave bluet erst
+//     nach etwa 0,3 s auf, statt mit dem Anschlag da zu sein - daher die
+//     lange Einschwingzeit bei 2f.
+//   - Der zweitlauteste Anteil ist kein Teilton des Grundtons, sondern A4
+//     (440 Hz, eine kleine Dezime darueber, -9 dB) mit eigener Oktave und
+//     Duodezime. Das ist das Feld, das auf der Kuppel am staerksten mitgeht.
+//   - Leise Nachbarfelder D3, E3 und Gis3, ohne Verzoegerung, von Anfang an.
+//   - Korpusresonanz bei rund 73 Hz, nach knapp einer Sekunde weg.
+//
+// Wer den Klang erneut nachmessen will: die Teiltoene per FFT ueber die
+// ersten 0,7 s, die Abklingzeiten per Goertzel in 150-ms-Fenstern.
+//
+// ---------------------------------------------------------------------------
+// DER SCHLUSSTON (14.09.2026, auf Fis umgestellt am 06.10.2026)
 // ---------------------------------------------------------------------------
 // Teilnehmer haben das Ende einer Session nicht immer erkannt: der letzte
 // Phasenton klingt wie jeder andere, danach ist es einfach still. Der
 // Schlusston muss sich deshalb vom Phasenton unterscheiden, ohne aus dem
 // Instrument zu fallen - dasselbe Blech, aber drei Felder statt einem und
-// abwaerts bis zum Grundton: D4, A3, D3. Ein Abstieg auf den Grundton ist die
-// Kadenz, die ueberall als "fertig" gehoert wird, und D3 ist das tiefe
-// Mittelfeld ("Ding") der D-Kurd-Stimmung.
+// abwaerts bis zum Grundton: Fis4, Cis4, Fis3 (Oktave, Quinte, Grundton). Ein
+// Abstieg auf den Grundton ist die Kadenz, die ueberall als "fertig" gehoert
+// wird. Bis zum 06.10. war es dieselbe Figur in D (D4, A3, D3).
 
-/**
- * A3 - der Ton, der bisher auf das Ausatmen folgte, jetzt der einzige.
- * Er gehoert zur D-Kurd-Stimmung, der mit Abstand haeufigsten bei Handpans,
- * und liegt in der Lage, in der ein reales Instrument klingt.
- */
-const NOTE_HZ = 220;
+/** Fis3 - der einzige Phasenton, seit dem 06.10.2026 (vorher A3). */
+const NOTE_HZ = 185;
 
 // Modenpaare: [Verhaeltnis, Lautstaerke, Abklingzeit s, Schwebung Hz, Einschwingzeit s].
-// Schwebung 0 = einzelner Oszillator (bei den kurzen Anschlagsanteilen waere
-// eine Schwebung ohnehin nicht hoerbar).
+// Schwebung 0 = einzelner Oszillator (bei den leisen Anteilen waere eine
+// Schwebung ohnehin nicht hoerbar).
 const MODES: [
   ratio: number,
   gain: number,
@@ -92,32 +114,37 @@ const MODES: [
   beat: number,
   attack: number,
 ][] = [
-  [1.0, 1.0, 6.5, 0.55, 0.014], // Grundton - traegt am laengsten
-  [2.0, 0.44, 4.2, 0.9, 0.007], // Oktave - gestimmt
-  [3.0, 0.21, 2.8, 1.35, 0.005], // Duodezime - gestimmt
-  [4.0, 0.08, 1.5, 1.9, 0.004], // zweite Oktave
-  [5.37, 0.032, 0.4, 0, 0.002], // unharmonisch, faerbt den Anschlag
-  [6.83, 0.018, 0.26, 0, 0.002], // unharmonisch
-  [8.24, 0.009, 0.16, 0, 0.002], // unharmonisch
+  [1.0, 1.0, 2.5, 0.32, 0.004], // Grundton Fis3
+  [2.0, 0.09, 3.0, 0.35, 0.25], // Oktave - leise, bluet spaet auf
+  [3.0, 0.08, 2.6, 1.1, 0.006], // Duodezime - leise
+  [4.0, 0.02, 1.5, 0, 0.004], // zweite Oktave, kaum mehr als ein Hauch
+  [2.378, 0.36, 2.0, 0.35, 0.004], // A4 - das Kuppelfeld, das stark mitgeht
+  [4.757, 0.03, 2.5, 0, 0.2], // dessen Oktave, bluet ebenfalls spaet
+  [7.135, 0.04, 2.5, 0, 0.004], // dessen Duodezime
 ];
 
 /**
- * Die Nachbarfelder, die leise mitschwingen: [Verhaeltnis, Lautstaerke].
- * 1,335 ist D4, 1,587 ist F4 - beide Teil der D-Kurd-Stimmung, in der A3
- * liegt. Sie bekommen weiter unten eine deutlich spaetere Einschwingzeit:
- * ein Nachbarfeld wird nicht angeschlagen, es wird angeregt.
+ * Die Nachbarfelder, die leise mitschwingen: [Verhaeltnis, Lautstaerke,
+ * Abklingzeit s]. 0,794 ist D3, 0,891 ist E3, 1,122 ist Gis3. In der Aufnahme
+ * sind sie vom Anschlag an da - keine Verzoegerung, anders als im Entwurf
+ * davor.
  */
-const SYMPATHETIC: [ratio: number, gain: number][] = [
-  [1.335, 0.05],
-  [1.587, 0.033],
+const SYMPATHETIC: [ratio: number, gain: number, decay: number][] = [
+  [0.794, 0.06, 2.0],
+  [0.891, 0.045, 2.2],
+  [1.122, 0.1, 2.3],
 ];
 
-const SYMPATHETIC_ATTACK_S = 0.085;
-const SYMPATHETIC_DECAY_S = 3.4;
+const SYMPATHETIC_ATTACK_S = 0.02;
 
 // Helmholtz-Resonanz des Korpus. Feste Frequenz, weil sie am Instrument
 // haengt und nicht an der Note.
-const BODY_HZ = 96;
+const BODY_HZ = 73;
+const BODY_GAIN = 0.12;
+const BODY_DECAY_S = 1.0;
+
+/** Laenger klingt kein Anteil - die Oktave mit ihrem spaeten Aufbluehen. */
+const MAX_DECAY_S = 3.0;
 
 /**
  * Damit die Summe aller Teiltoene den Ausgang nicht uebersteuert.
@@ -127,9 +154,16 @@ const BODY_HZ = 96;
  * Web-Audio-Ausgang kappt bei eins hart. Ab etwa 70 Prozent Reglerstellung
  * wurde es nicht mehr lauter, sondern nur noch verzerrt - der Regler sah aus,
  * als haette er keine Wirkung.
+ *
+ * Seit dem Fis-Ton zaehlen Nachbarfelder und Korpus mit: sie sind in der
+ * Aufnahme zu laut, um sie als Rundungsfehler zu uebergehen.
  */
 const PEAK = 0.72;
-const NORM = PEAK / MODES.reduce((sum, [, gain]) => sum + gain, 0);
+const NORM =
+  PEAK /
+  (MODES.reduce((sum, [, gain]) => sum + gain, 0) +
+    SYMPATHETIC.reduce((sum, [, gain]) => sum + gain, 0) +
+    BODY_GAIN);
 
 /** Wie viel vom Ton in den Nachhall geht. */
 const REVERB_SEND = 0.24;
@@ -140,15 +174,14 @@ const REVERB_SECONDS = 1.7;
  *
  * Unter eins, weil sich die drei Anschlaege ueberlagern - der Grundton des
  * ersten klingt noch, wenn der dritte kommt. Bei voller Staerke je Anschlag
- * uebersteuerte die Summe den Ausgang (siehe PEAK). Abgeschaetzt fuer den
- * Einsatz von D3 nach 0,84 s: der erste Anschlag ist dann auf rund 0,07
- * abgeklungen, der zweite auf rund 0,17, der dritte steht bei 0,50 - in der
- * Summe rund 0,75, mit Luft fuer den Nachhall.
+ * uebersteuerte die Summe den Ausgang (siehe PEAK). Mit dem kuerzeren
+ * Fis-Ton ist reichlich Luft: beim Einsatz von Fis3 nach 0,84 s ist der erste
+ * Anschlag schon um rund 28 dB abgeklungen, der zweite um rund 14 dB.
  */
 export const END_CUE: [hz: number, delay: number, level: number][] = [
-  [293.66, 0, 0.5], // D4
-  [220, 0.42, 0.55], // A3 - der Phasenton, jetzt mitten in der Kadenz
-  [146.83, 0.84, 0.7], // D3 - der Grundton, am lautesten und am laengsten
+  [369.99, 0, 0.5], // Fis4
+  [277.18, 0.42, 0.55], // Cis4 - die Quinte
+  [185, 0.84, 0.7], // Fis3 - der Grundton und Phasenton, am lautesten
 ];
 
 /** Wie lange ein Anschlag des Schlusstons hoechstens klingen darf. */
@@ -308,7 +341,7 @@ function voice(
   osc.type = 'sine';
   if (options.glide) {
     // Tonhoehenabfall beim Anschlag: kurz ueberdehnt, dann auf Ruhelage.
-    osc.frequency.setValueAtTime(options.freq * 1.008, t);
+    osc.frequency.setValueAtTime(options.freq * 1.002, t);
     osc.frequency.exponentialRampToValueAtTime(options.freq, t + 0.05);
   } else {
     osc.frequency.setValueAtTime(options.freq, t);
@@ -446,7 +479,7 @@ export function playCue(
 
   // Der Ton soll nie laenger klingen als die Phase dauert, sonst ueberlagern
   // sich zwei Anschlaege.
-  const maxDecay = Math.min(6.5, phaseDurationMs / 1000 - 0.15);
+  const maxDecay = Math.min(MAX_DECAY_S, phaseDurationMs / 1000 - 0.15);
   if (maxDecay <= 0.02) return;
 
   // Tiefpass, der mitfaellt: beim Anschlag offen, danach dunkler. Ohne das
@@ -455,7 +488,8 @@ export function playCue(
   filter.type = 'lowpass';
   filter.Q.value = 0.5;
   filter.frequency.setValueAtTime(Math.min(noteHz * 18, 16000), t);
-  filter.frequency.exponentialRampToValueAtTime(noteHz * 3.2, t + Math.min(2.4, maxDecay));
+  // Endet ueber dem Kuppelfeld (2,4f), sonst schnitte der Filter es weg.
+  filter.frequency.exponentialRampToValueAtTime(noteHz * 5, t + Math.min(2.4, maxDecay));
 
   filter.connect(master);
   if (send) filter.connect(send);
@@ -491,32 +525,31 @@ export function playCue(
         level: (gain * NORM * scale) / spread.length,
         attack,
         decay: stop,
-        glide: ratio <= 4,
+        glide: ratio <= 4 && ratio === Math.round(ratio),
       });
     }
   }
 
-  // Die Nachbarfelder. Sie kommen spaeter und leiser - angeregt, nicht
-  // angeschlagen - und sitzen dem Modenpaar gegenueber im Bild.
-  const sympatheticStop = Math.min(SYMPATHETIC_DECAY_S, maxDecay);
-  if (sympatheticStop > SYMPATHETIC_ATTACK_S) {
-    for (const [index, [ratio, gain]] of SYMPATHETIC.entries()) {
-      voice(ctx, index === 0 ? right : left, t, {
-        freq: noteHz * ratio,
-        level: gain * NORM * scale,
-        attack: SYMPATHETIC_ATTACK_S,
-        decay: sympatheticStop,
-        glide: false,
-      });
-    }
+  // Die Nachbarfelder: leise, ohne eigenen Glide, abwechselnd links und
+  // rechts im Bild.
+  for (const [index, [ratio, gain, decay]] of SYMPATHETIC.entries()) {
+    const stop = Math.min(decay, maxDecay);
+    if (stop <= SYMPATHETIC_ATTACK_S) continue;
+    voice(ctx, index % 2 === 0 ? right : left, t, {
+      freq: noteHz * ratio,
+      level: gain * NORM * scale,
+      attack: SYMPATHETIC_ATTACK_S,
+      decay: stop,
+      glide: false,
+    });
   }
 
   // Korpusresonanz: gibt dem Anschlag Fundament, ohne die Tonhoehe zu stoeren.
-  const bodyStop = Math.min(0.9, maxDecay);
+  const bodyStop = Math.min(BODY_DECAY_S, maxDecay);
   if (bodyStop > 0.012) {
     voice(ctx, filter, t, {
       freq: BODY_HZ,
-      level: 0.1 * NORM * scale,
+      level: BODY_GAIN * NORM * scale,
       attack: 0.012,
       decay: bodyStop,
       glide: false,

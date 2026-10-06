@@ -6,7 +6,7 @@ import { createToneBus, END_CUE } from './tones';
 // Klanggraph dahinter - und genau der traegt die Eigenschaften, die eine
 // Handpan ausmachen: gestimmte Teiltoene auf Oktave und Duodezime, je Teilton
 // ein Modenpaar mit leichter Verstimmung (die Schwebung, ohne die es
-// synthetisch klingt), leise mitschwingende Nachbarfelder, ein
+// synthetisch klingt), mitschwingende Nachbarfelder, ein
 // Anschlagsgeraeusch, ein mitfallender Tiefpass und ein Nachhall.
 //
 // Der Stub zeichnet auf, statt zu klingen. jsdom hat keine Web Audio API.
@@ -157,25 +157,29 @@ function teiltoene(frequenzen: number[], grundton: number) {
   return gruppen;
 }
 
-const A3 = 220; // der einzige Ton, seit dem 06.09.2026
+const FIS3 = 185; // der einzige Ton, seit dem 06.10.2026 (vorher A3)
 
 describe('createToneBus', () => {
   it('nimmt fuer jeden Phasenwechsel denselben Ton', () => {
     const grundtoene = (['inhale', 'hold_in', 'exhale', 'hold_out'] as const).map((kind) => {
       const { auf } = anschlag(kind);
-      return Math.min(...auf.oszillatoren.map((o) => o.ziel).filter((f) => f > 100));
+      return auf.oszillatoren.map((o) => o.ziel).join(',');
     });
 
-    // Vier Phasen, eine Tonhoehe: der Wechsel wird markiert, nicht vertont.
+    // Vier Phasen, ein Klang: der Wechsel wird markiert, nicht vertont.
     expect(new Set(grundtoene).size).toBe(1);
-    expect(grundtoene[0]).toBeCloseTo(A3, 0);
+
+    // Der Grundton ist Fis3 - als Modenpaar knapp darunter und darueber.
+    const { auf } = anschlag('inhale');
+    const umFis3 = auf.oszillatoren.map((o) => o.ziel).filter((f) => Math.abs(f - FIS3) < 1);
+    expect(umFis3).toHaveLength(2);
   });
 
   it('stimmt Oktave und Duodezime - darauf ist eine Handpan gestimmt', () => {
     const { auf } = anschlag('inhale');
     const gruppen = teiltoene(
-      auf.oszillatoren.map((o) => o.ziel).filter((f) => f > A3 * 0.7),
-      A3,
+      auf.oszillatoren.map((o) => o.ziel).filter((f) => f > FIS3 * 0.7),
+      FIS3,
     );
 
     expect([...gruppen.keys()]).toEqual(expect.arrayContaining([1, 2, 3]));
@@ -184,8 +188,8 @@ describe('createToneBus', () => {
   it('gibt jedem gestimmten Teilton ein Modenpaar - das erzeugt die Schwebung', () => {
     const { auf } = anschlag('inhale');
     const gruppen = teiltoene(
-      auf.oszillatoren.map((o) => o.ziel).filter((f) => f > A3 * 0.7),
-      A3,
+      auf.oszillatoren.map((o) => o.ziel).filter((f) => f > FIS3 * 0.7),
+      FIS3,
     );
 
     for (const verhaeltnis of [1, 2, 3]) {
@@ -200,17 +204,31 @@ describe('createToneBus', () => {
     }
   });
 
-  it('laesst zwei Nachbarfelder leise mitschwingen', () => {
+  it('laesst die Nachbarfelder D3, E3 und Gis3 mitschwingen', () => {
     const { auf } = anschlag('inhale');
 
-    // Nachbarfelder liegen zwischen Grundton und Oktave und stehen in keinem
+    // Nachbarfelder liegen um den Grundton herum und stehen in keinem
     // ganzzahligen Verhaeltnis - sie sind eigene Toene der Stimmung, keine
-    // Teiltoene des angeschlagenen Feldes.
+    // Teiltoene des angeschlagenen Feldes. Ausgenommen sind das Modenpaar des
+    // Grundtons selbst und die Korpusresonanz darunter.
     const nachbarn = auf.oszillatoren
       .map((o) => o.ziel)
-      .filter((f) => f > A3 * 1.05 && f < A3 * 1.95);
+      .filter((f) => f > FIS3 * 0.75 && f < FIS3 * 1.95 && Math.abs(f - FIS3) > 2)
+      .sort((a, b) => a - b);
 
-    expect(nachbarn).toHaveLength(2);
+    expect(nachbarn).toHaveLength(3);
+    const [d3, e3, gis3] = nachbarn;
+    expect(d3).toBeCloseTo(146.83, -1);
+    expect(e3).toBeCloseTo(164.81, -1);
+    expect(gis3).toBeCloseTo(207.65, -1);
+  });
+
+  // Der zweitlauteste Anteil der Vorlage: A4, eine kleine Dezime ueber Fis3.
+  it('laesst das Kuppelfeld A4 als Modenpaar mitgehen', () => {
+    const { auf } = anschlag('inhale');
+    const a4 = auf.oszillatoren.map((o) => o.ziel).filter((f) => Math.abs(f - 440) < 2);
+
+    expect(a4).toHaveLength(2);
   });
 
   it('schlaegt mit gefiltertem Rauschen an, wird dunkler und steht in einem Raum', () => {
@@ -315,17 +333,19 @@ describe('createToneBus - Schlusston', () => {
     expect(auf.rauschen).toBe(3);
   });
 
-  it('steigt ab und endet auf dem Grundton D3, unter dem Phasenton', () => {
+  it('steigt ueber Oktave und Quinte ab und endet auf Fis3', () => {
     const tonhoehen = END_CUE.map(([hz]) => hz);
 
     expect([...tonhoehen].sort((a, b) => b - a)).toEqual(tonhoehen);
-    expect(tonhoehen.at(-1)).toBeCloseTo(146.83, 1);
-    expect(tonhoehen.at(-1)).toBeLessThan(A3);
+    expect(tonhoehen[0]).toBeCloseTo(FIS3 * 2, 0);
+    expect(tonhoehen.at(-1)).toBeCloseTo(FIS3, 1);
 
+    // Alle drei Felder werden tatsaechlich angeschlagen.
     const { auf } = schlusston();
     const frequenzen = auf.oszillatoren.map((o) => o.ziel);
-    // Das Modenpaar des Grundtons liegt um D3, nicht um A3 wie beim Phasenton.
-    expect(frequenzen.some((f) => Math.abs(f - 146.83) < 1)).toBe(true);
+    for (const hz of tonhoehen) {
+      expect(frequenzen.some((f) => Math.abs(f - hz) < 1), `${hz} Hz`).toBe(true);
+    }
   });
 
   // "Nochmal" direkt nach dem Ende: der zweite und dritte Anschlag liegen noch
