@@ -17,15 +17,30 @@
 //      Score darf also ins Minus, aber nie weiter, als das positive Maximum
 //      reicht (Entscheidung 25.10.2026).
 //
+// NUR AKTIVE KATEGORIEN (Entscheidung 25.10.2026, zweite Runde)
+// -------------------------------------------------------------
+// Es gibt sieben Kategorien, aber kaum jemand fuehrt alle. In Score und
+// Maximum zaehlen deshalb nur Kategorien, die im MONAT des Zeitraums aktiv
+// verwendet wurden - ein Habit aus ihr war gewaehlt oder es gibt einen
+// Eintrag (activeCategoriesByMonth). Tag und Woche richten sich nach dem
+// Monat ihres Ankertags.
+//
+// DAS JAHR
+// --------
+// Je Kategorie die Summe ihrer gedeckelten Monate von Jaenner bis zum Monat
+// des Ankers; ihr Maximum ist das Monatslimit mal die Zahl der Monate, in
+// denen sie aktiv war. Ein eigenes Jahreslimit gibt es nicht - es ergibt
+// sich aus den Monaten.
+//
 // Gerechnet wird mit Betraegen und erst am Ende mit Vorzeichen: so gilt
 // dieselbe Deckelung fuer Gewinn und Abzug, ohne zwei Codepfade.
 //
 // Selbst pruefen (CLAUDE.md §Aufgabenteilung): ein Fehler hier faellt nicht
 // auf, er verfaelscht still den Score.
 
-import { monthDays, weekDays, type IsoDate } from '@/features/habits/dates';
+import { monthDays, monthKey, weekDays, type IsoDate } from '@/features/habits/dates';
 
-export type ScorePeriod = 'day' | 'week' | 'month';
+export type ScorePeriod = 'day' | 'week' | 'month' | 'year';
 
 export type ScoreCategory = {
   id: string;
@@ -59,16 +74,60 @@ export type PeriodScore = {
   maxTotal: number;
 };
 
-function limitFor(category: ScoreCategory, period: ScorePeriod): number {
+/** Welche Kategorien in einem Monat (YYYY-MM) aktiv verwendet wurden. */
+export type ActiveCategories = (month: string) => ReadonlySet<string>;
+
+/** Ein gewaehltes Habit, soweit es fuer "aktiv" zaehlt. */
+export type ActiveHabit = {
+  categoryId: string;
+  startedOn: IsoDate;
+  /** Tag des Herausnehmens, null = noch gewaehlt. */
+  archivedOn: IsoDate | null;
+};
+
+/**
+ * Aktiv in einem Monat ist eine Kategorie, wenn in diesem Monat ein Habit aus
+ * ihr gewaehlt war (auch nur an einem Tag) oder es einen Eintrag in ihr gibt.
+ * Der Eintrag zaehlt mit, damit ein spaeter herausgenommenes Habit seinen
+ * Monat nicht nachtraeglich aus der Rechnung nimmt.
+ */
+export function activeCategoriesByMonth(habits: ActiveHabit[], entries: ScoreEntry[]): ActiveCategories {
+  const byMonth = new Map<string, Set<string>>();
+  for (const entry of entries) {
+    const month = monthKey(entry.date);
+    if (!byMonth.has(month)) byMonth.set(month, new Set());
+    byMonth.get(month)!.add(entry.categoryId);
+  }
+
+  return (month: string) => {
+    const set = new Set(byMonth.get(month) ?? []);
+    const first = `${month}-01`;
+    const last = monthDays(first).at(-1)!;
+    for (const habit of habits) {
+      const chosenBeforeEnd = habit.startedOn <= last;
+      const stillChosenAtStart = habit.archivedOn === null || habit.archivedOn >= first;
+      if (chosenBeforeEnd && stillChosenAtStart) set.add(habit.categoryId);
+    }
+    return set;
+  };
+}
+
+function limitFor(category: ScoreCategory, period: Exclude<ScorePeriod, 'year'>): number {
   if (period === 'day') return category.maxPerDay;
   if (period === 'week') return category.maxPerWeek;
   return category.maxPerMonth;
 }
 
-function daysOf(period: ScorePeriod, anchor: IsoDate): IsoDate[] {
+function daysOf(period: Exclude<ScorePeriod, 'year'>, anchor: IsoDate): IsoDate[] {
   if (period === 'day') return [anchor];
   if (period === 'week') return weekDays(anchor);
   return monthDays(anchor);
+}
+
+/** Erste Tage der Monate von Jaenner bis zum Monat des Ankers. */
+function monthsUpTo(anchor: IsoDate): IsoDate[] {
+  const [year, month] = anchor.split('-');
+  return Array.from({ length: Number(month) }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}-01`);
 }
 
 /**
@@ -104,34 +163,62 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+function signed(category: ScoreCategory, amount: number): number {
+  // `|| 0` faengt die -0 ab, die bei einer leeren negativen Kategorie
+  // entstuende - in Tests und in der Anzeige ein unnoetiges Raetsel.
+  return (category.isNegative ? -amount : amount) || 0;
+}
+
+/**
+ * Der Score eines Zeitraums. Ohne `active` zaehlen alle Kategorien - so
+ * rechnen die Tests der einzelnen Stufen; die Oberflaeche reicht immer
+ * activeCategoriesByMonth() herein.
+ */
 export function scoreFor(
   period: ScorePeriod,
   anchor: IsoDate,
   categories: ScoreCategory[],
   entries: ScoreEntry[],
+  active?: ActiveCategories,
 ): PeriodScore {
+  const isActive = (month: string): ((categoryId: string) => boolean) => {
+    if (!active) return () => true;
+    const set = active(month);
+    return (categoryId) => set.has(categoryId);
+  };
   const byId = new Map(categories.map((c) => [c.id, c]));
   const daily = cappedDailyAmounts(entries, byId);
-  const days = daysOf(period, anchor);
+  const sumDays = (categoryId: string, days: IsoDate[]) =>
+    days.reduce((acc, day) => acc + (daily.get(`${categoryId}|${day}`) ?? 0), 0);
 
-  const result: CategoryScore[] = categories.map((category) => {
-    const sum = days.reduce((acc, day) => acc + (daily.get(`${category.id}|${day}`) ?? 0), 0);
-    const max = limitFor(category, period);
-    const amount = Math.min(sum, max);
-    return {
-      categoryId: category.id,
-      // `|| 0` faengt die -0 ab, die bei einer leeren negativen Kategorie
-      // entstuende - in Tests und in der Anzeige ein unnoetiges Raetsel.
-      value: (category.isNegative ? -amount : amount) || 0,
-      max,
-      isNegative: category.isNegative,
-    };
-  });
+  let result: CategoryScore[];
 
-  const maxTotal = categories
-    .filter((c) => !c.isNegative)
-    .reduce((acc, c) => acc + limitFor(c, period), 0);
+  if (period === 'year') {
+    const months = monthsUpTo(anchor);
+    const activeIn = months.map((m) => isActive(monthKey(m)));
+    result = categories.flatMap((category) => {
+      const activeMonths = months.filter((_, i) => activeIn[i](category.id));
+      if (activeMonths.length === 0) return [];
+      const amount = activeMonths.reduce(
+        (acc, m) => acc + Math.min(sumDays(category.id, monthDays(m)), category.maxPerMonth),
+        0,
+      );
+      const max = activeMonths.length * category.maxPerMonth;
+      return [{ categoryId: category.id, value: signed(category, Math.min(amount, max)), max, isNegative: category.isNegative }];
+    });
+  } else {
+    const activeNow = isActive(monthKey(anchor));
+    const days = daysOf(period, anchor);
+    result = categories
+      .filter((category) => activeNow(category.id))
+      .map((category) => {
+        const max = limitFor(category, period);
+        const amount = Math.min(sumDays(category.id, days), max);
+        return { categoryId: category.id, value: signed(category, amount), max, isNegative: category.isNegative };
+      });
+  }
 
+  const maxTotal = result.filter((c) => !c.isNegative).reduce((acc, c) => acc + c.max, 0);
   const sum = result.reduce((acc, c) => acc + c.value, 0);
 
   return {

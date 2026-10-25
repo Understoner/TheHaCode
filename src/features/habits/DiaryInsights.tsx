@@ -8,7 +8,14 @@ import { colors, radius, spacing } from '@/design/tokens';
 import { TrendChart, WeekBars } from './charts';
 import { shiftMonth, toIsoDate, weekdayIndex, type IsoDate } from './dates';
 import { formatDay, formatMonth } from './format';
-import { scoreFor, type PeriodScore, type ScoreCategory, type ScoreEntry } from './score';
+import {
+  activeCategoriesByMonth,
+  scoreFor,
+  type ActiveHabit,
+  type PeriodScore,
+  type ScoreCategory,
+  type ScoreEntry,
+} from './score';
 import {
   daysDoneThisWeek,
   minutesPerWeek,
@@ -80,6 +87,16 @@ export function DiaryInsights({
       ];
     });
 
+    // Nur Kategorien, die im jeweiligen Monat aktiv verwendet wurden, zaehlen
+    // in Score und Maximum (score.ts). Auch herausgenommene Habits gehoeren
+    // dazu - fuer die Monate, in denen sie gewaehlt waren.
+    const activeHabits: ActiveHabit[] = habits.map((h) => ({
+      categoryId: h.habit_templates.category_id,
+      startedOn: h.started_on,
+      archivedOn: h.is_active ? null : h.archived_at ? toIsoDate(new Date(h.archived_at)) : h.started_on,
+    }));
+    const active = activeCategoriesByMonth(activeHabits, entries);
+
     return {
       week: daysDoneThisWeek(doneDays, today),
       streak: streakWithGrace(doneDays, today),
@@ -87,9 +104,10 @@ export function DiaryInsights({
       trends,
       minutes: minutesPerWeek(sessions, today, (ts) => toIsoDate(new Date(ts))),
       scores: [
-        scoreFor('day', today, scoreCategories, entries),
-        scoreFor('week', today, scoreCategories, entries),
-        scoreFor('month', today, scoreCategories, entries),
+        scoreFor('day', today, scoreCategories, entries, active),
+        scoreFor('week', today, scoreCategories, entries, active),
+        scoreFor('month', today, scoreCategories, entries, active),
+        scoreFor('year', today, scoreCategories, entries, active),
       ],
     };
   }, [logs, habits, sessions, categories, today, month, activeCount]);
@@ -211,6 +229,7 @@ function ScorePanel({ scores, categories }: { scores: PeriodScore[]; categories:
     day: t('diary.score.day'),
     week: t('diary.score.week'),
     month: t('diary.score.month'),
+    year: t('diary.score.year'),
   } as const;
 
   return (

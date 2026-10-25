@@ -379,12 +379,15 @@ export type OwnHabitInput = {
   unit: string | null;
   minValue: number | null;
   maxValue: number | null;
+  /** 0 bis 10 je Erledigung (0026). */
+  points: number;
 };
 
 /**
- * Ein eigenes Habit anlegen (ohne id) oder aendern (mit id). Punkte,
- * Vorschau und Slug setzt die Datenbank (0024) - der Client kann sie gar
- * nicht nennen. Die Art des Eintrags ist nach dem Anlegen fest.
+ * Ein eigenes Habit anlegen (ohne id) oder aendern (mit id). Vorschau und
+ * Slug setzt die Datenbank (0024); Punkte waehlt die Person, 0 bis 10, die
+ * Datenbank prueft die Grenze (0026). Die Art des Eintrags ist nach dem
+ * Anlegen fest.
  */
 export function useSaveOwnHabit() {
   const { session } = useAuth();
@@ -402,6 +405,7 @@ export function useSaveOwnHabit() {
         min_value: input.trackingType === 'number' ? input.minValue : null,
         max_value: input.trackingType === 'number' ? input.maxValue : null,
         step_value: input.trackingType === 'number' ? 1 : null,
+        points: input.points,
       };
 
       if (id) {

@@ -65,20 +65,21 @@ select results_eq(
   $$ select points, is_preview, is_published, title, slug
        from public.habit_templates where id = 'a2400000-eeee-0000-0000-000000000001' $$,
   $$ values (0, false, true, 'Kalt duschen', 'eigen-a2400000-eeee-0000-0000-000000000001') $$,
-  'Null Punkte, keine Vorschau, veroeffentlicht, Titel getrimmt, Slug vom Server');
+  'Ohne Angabe 0 Punkte, keine Vorschau, veroeffentlicht, Titel getrimmt, Slug vom Server');
 
+-- Seit 0026 darf der Client Punkte nennen - aber nur 0 bis 10.
 select throws_ok(
   $$ insert into public.habit_templates (owner_id, category_id, title, tracking_type, points)
      values ('a2400000-0000-0000-0000-000000000002', 'a2400000-cccc-0000-0000-000000000001',
              'Punkte', 'done', 100) $$,
-  '42501', null,
-  'Punkte kann der Client gar nicht erst nennen');
+  '23514', null,
+  'Mehr als 10 Punkte gibt es fuer ein eigenes Habit nicht');
 
 select throws_ok(
   $$ update public.habit_templates set points = 100
       where id = 'a2400000-eeee-0000-0000-000000000001' $$,
-  '42501', null,
-  'und auch nicht nachtraeglich setzen');
+  '23514', null,
+  'auch nicht nachtraeglich');
 
 select throws_ok(
   $$ insert into public.habit_templates (owner_id, category_id, title, tracking_type)
