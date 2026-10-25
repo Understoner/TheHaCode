@@ -1,0 +1,458 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { Button } from '@/components/Button';
+import { PressableRing } from '@/components/PressableRing';
+import { QueryBoundary } from '@/components/QueryBoundary';
+import { SkeletonList } from '@/components/SkeletonList';
+import { StateMessage } from '@/components/StateMessage';
+import { TextField } from '@/components/TextField';
+import { colors, radius, spacing } from '@/design/tokens';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { usePlusAccess } from '@/features/configurator/useSequences';
+import { ownHabitErrorKey } from '@/features/habits/diaryErrors';
+import { ownHabitSchema, toOwnHabitInput, type OwnHabitValues } from '@/features/habits/ownHabitForm';
+import {
+  useDeleteOwnHabit,
+  useHabitCatalog,
+  useSaveOwnHabit,
+  type HabitCategory,
+  type HabitTemplate,
+} from '@/features/habits/useHabits';
+
+/**
+ * Ein eigenes Habit anlegen (ohne ?id) oder bearbeiten (?id=...).
+ *
+ * Anlegen und Bearbeiten sind Plus, Loeschen nicht (Migration 0024). Punkte
+ * gibt es fuer eigene Habits vorerst keine - wie sie zaehlen sollen, ist noch
+ * nicht entschieden; das Formular sagt es deshalb dazu.
+ */
+export default function OwnHabitScreen() {
+  const { t } = useTranslation();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { session, loading } = useAuth();
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Link href="/tagebuch/habits" style={styles.back}>
+        {t('habits.own.back')}
+      </Link>
+      <Text style={styles.title}>{t(id ? 'habits.own.editTitle' : 'habits.own.createTitle')}</Text>
+
+      {loading ? (
+        <SkeletonList />
+      ) : session ? (
+        <OwnHabitLoader id={id ?? null} />
+      ) : (
+        <StateMessage title={t('diary.login.title')} body={t('diary.login.text')} />
+      )}
+    </ScrollView>
+  );
+}
+
+function OwnHabitLoader({ id }: { id: string | null }) {
+  const { t } = useTranslation();
+  const catalog = useHabitCatalog();
+  const plus = usePlusAccess();
+
+  return (
+    <QueryBoundary query={plus}>
+      {(plusAccess) => (
+        <QueryBoundary query={catalog}>
+          {({ categories, templates }) => {
+            const existing = id ? templates.find((tpl) => tpl.id === id && tpl.owner_id !== null) : null;
+            if (id && !existing) {
+              return <StateMessage title={t('habits.own.missingTitle')} body={t('habits.own.missingHint')} />;
+            }
+            if (!existing && !plusAccess) {
+              return <StateMessage title={t('habits.own.title')} body={t('habits.own.plusOnly')} />;
+            }
+            return (
+              <OwnHabitForm
+                categories={categories.filter((c) => !c.is_negative)}
+                existing={existing ?? null}
+                canEdit={plusAccess}
+              />
+            );
+          }}
+        </QueryBoundary>
+      )}
+    </QueryBoundary>
+  );
+}
+
+function OwnHabitForm({
+  categories,
+  existing,
+  canEdit,
+}: {
+  categories: HabitCategory[];
+  existing: HabitTemplate | null;
+  canEdit: boolean;
+}) {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const save = useSaveOwnHabit();
+  const remove = useDeleteOwnHabit();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const { control, handleSubmit } = useForm<OwnHabitValues>({
+    resolver: zodResolver(ownHabitSchema),
+    defaultValues: {
+      title: existing?.title ?? '',
+      description: existing?.description_md ?? '',
+      categoryId: existing?.category_id ?? (categories.length === 1 ? categories[0].id : ''),
+      trackingType: existing?.tracking_type === 'number' ? 'number' : 'done',
+      unit: existing?.unit ?? '',
+      minValue: existing?.min_value?.toString() ?? '',
+      maxValue: existing?.max_value?.toString() ?? '',
+    },
+    mode: 'onTouched',
+  });
+  const trackingType = useWatch({ control, name: 'trackingType' });
+
+  const onSubmit = (values: OwnHabitValues) => {
+    save.mutate(
+      { id: existing?.id, input: toOwnHabitInput(values) },
+      { onSuccess: () => router.replace('/tagebuch/habits') },
+    );
+  };
+
+  return (
+    <View style={styles.stack}>
+      {!canEdit ? <Text style={styles.notice}>{t('habits.own.readOnly')}</Text> : null}
+
+      <Controller
+        control={control}
+        name="title"
+        render={({ field, fieldState }) => (
+          <TextField
+            label={t('habits.own.fieldTitle')}
+            value={field.value}
+            onChangeText={field.onChange}
+            onBlur={field.onBlur}
+            placeholder={t('habits.own.fieldTitlePlaceholder')}
+            error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="categoryId"
+        render={({ field, fieldState }) => (
+          <View style={styles.field}>
+            <Text style={styles.label}>{t('habits.own.fieldCategory')}</Text>
+            <View style={styles.chips} role="radiogroup" aria-label={t('habits.own.fieldCategory')}>
+              {categories.map((category) => (
+                <Choice
+                  key={category.id}
+                  label={category.title}
+                  active={field.value === category.id}
+                  onPress={() => field.onChange(category.id)}
+                />
+              ))}
+            </View>
+            {fieldState.error ? (
+              <Text role="alert" style={styles.error}>
+                {t(fieldState.error.message ?? '')}
+              </Text>
+            ) : null}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="trackingType"
+        render={({ field }) => (
+          <View style={styles.field}>
+            <Text style={styles.label}>{t('habits.own.fieldType')}</Text>
+            <View style={styles.chips} role="radiogroup" aria-label={t('habits.own.fieldType')}>
+              {(['done', 'number'] as const).map((type) => (
+                <Choice
+                  key={type}
+                  label={t(`habits.own.type.${type}`)}
+                  active={field.value === type}
+                  // Nach dem Anlegen fest: vorhandene Eintraege passen sonst
+                  // nicht mehr zur Art (die Datenbank lehnt es ebenfalls ab).
+                  disabled={existing !== null}
+                  onPress={() => field.onChange(type)}
+                />
+              ))}
+            </View>
+            {existing ? <Text style={styles.hint}>{t('habits.own.typeFixed')}</Text> : null}
+          </View>
+        )}
+      />
+
+      {trackingType === 'number' ? (
+        <View style={styles.stack}>
+          <Controller
+            control={control}
+            name="unit"
+            render={({ field, fieldState }) => (
+              <TextField
+                label={t('habits.own.fieldUnit')}
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                placeholder={t('habits.own.fieldUnitPlaceholder')}
+                error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
+              />
+            )}
+          />
+          <View style={styles.range}>
+            <View style={styles.rangeField}>
+              <Controller
+                control={control}
+                name="minValue"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    label={t('habits.own.fieldMin')}
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    inputMode="decimal"
+                    error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
+                  />
+                )}
+              />
+            </View>
+            <View style={styles.rangeField}>
+              <Controller
+                control={control}
+                name="maxValue"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    label={t('habits.own.fieldMax')}
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    inputMode="decimal"
+                    error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
+                  />
+                )}
+              />
+            </View>
+          </View>
+        </View>
+      ) : null}
+
+      <Controller
+        control={control}
+        name="description"
+        render={({ field, fieldState }) => (
+          <TextField
+            label={t('habits.own.fieldDescription')}
+            value={field.value}
+            onChangeText={field.onChange}
+            onBlur={field.onBlur}
+            error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
+          />
+        )}
+      />
+
+      <Text style={styles.hint}>{t('habits.own.noPoints')}</Text>
+
+      {save.error ? (
+        <Text role="alert" style={styles.error}>
+          {t(ownHabitErrorKey(save.error))}
+        </Text>
+      ) : null}
+
+      {canEdit ? (
+        <Button
+          label={t(existing ? 'habits.own.save' : 'habits.own.create')}
+          disabled={save.isPending}
+          onPress={handleSubmit(onSubmit)}
+        />
+      ) : null}
+
+      {existing ? (
+        <View style={styles.deleteBox}>
+          {remove.error ? (
+            <Text role="alert" style={styles.error}>
+              {t(ownHabitErrorKey(remove.error))}
+            </Text>
+          ) : null}
+          {confirmDelete ? (
+            <View style={styles.stack}>
+              <Text style={styles.text}>{t('habits.own.deleteConfirm')}</Text>
+              <View style={styles.chips}>
+                <PressableRing
+                  onPress={() =>
+                    remove.mutate(existing.id, { onSuccess: () => router.replace('/tagebuch/habits') })
+                  }
+                  disabled={remove.isPending}
+                  style={styles.danger}
+                >
+                  <Text style={styles.dangerText}>{t('habits.own.deleteYes')}</Text>
+                </PressableRing>
+                <PressableRing onPress={() => setConfirmDelete(false)} style={styles.secondary}>
+                  <Text style={styles.secondaryText}>{t('habits.own.deleteNo')}</Text>
+                </PressableRing>
+              </View>
+            </View>
+          ) : (
+            <PressableRing onPress={() => setConfirmDelete(true)} style={styles.secondary}>
+              <Text style={styles.secondaryText}>{t('habits.own.delete')}</Text>
+            </PressableRing>
+          )}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function Choice({
+  label,
+  active,
+  disabled,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <PressableRing
+      role="radio"
+      aria-checked={active}
+      disabled={disabled}
+      onPress={onPress}
+      style={[styles.chip, active && styles.chipActive, disabled && !active && styles.chipDisabled]}
+    >
+      <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+    </PressableRing>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.md,
+    gap: spacing.md,
+    backgroundColor: colors.background,
+    width: '100%',
+    maxWidth: 620,
+    alignSelf: 'center',
+  },
+  back: {
+    fontSize: 14,
+    color: colors.ink700,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '600',
+    color: colors.ink900,
+  },
+  stack: {
+    gap: spacing.md,
+  },
+  field: {
+    gap: spacing.sm,
+  },
+  // Wie die Beschriftung in TextField, damit alle Felder gleich aussehen.
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.ink700,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  chip: {
+    paddingVertical: 7,
+    paddingHorizontal: 16,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  },
+  chipActive: {
+    backgroundColor: colors.ocean700,
+    borderColor: colors.ocean700,
+  },
+  chipDisabled: {
+    backgroundColor: colors.background,
+  },
+  chipText: {
+    fontSize: 13,
+    color: colors.ink700,
+  },
+  chipTextActive: {
+    color: colors.surface,
+    fontWeight: '600',
+  },
+  range: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  rangeField: {
+    flex: 1,
+  },
+  text: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.ink700,
+  },
+  hint: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.ink700,
+  },
+  notice: {
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surfaceSubtle,
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.ink700,
+  },
+  error: {
+    fontSize: 13,
+    color: colors.danger,
+  },
+  deleteBox: {
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    gap: spacing.sm,
+  },
+  secondary: {
+    alignSelf: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  },
+  secondaryText: {
+    fontSize: 14,
+    color: colors.ink700,
+  },
+  danger: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: radius.full,
+    backgroundColor: colors.danger,
+  },
+  dangerText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.surface,
+  },
+});

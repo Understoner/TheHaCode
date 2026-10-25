@@ -26,7 +26,20 @@ export const EXPORT_TABLES = [
   'user_habits',
   'habit_logs',
   'exercise_sessions',
+  // Eigene Habits und Habit-Favoriten (0024).
+  'habit_templates',
+  'habit_favorites',
 ] as const;
+
+/**
+ * Tabellen, in denen RLS auch Zeilen anderer zeigt - redaktionelle Sequenzen
+ * und Habit-Vorlagen sind fuer alle lesbar. In die Auskunft gehoeren davon nur
+ * die eigenen, also wird hier zusaetzlich auf den Eigentuemer gefiltert.
+ */
+export const EXPORT_OWNER_COLUMN: Partial<Record<(typeof EXPORT_TABLES)[number], string>> = {
+  exercises: 'owner_id',
+  habit_templates: 'owner_id',
+};
 
 export type ExportTable = (typeof EXPORT_TABLES)[number];
 

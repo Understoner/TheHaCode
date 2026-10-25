@@ -597,6 +597,44 @@ export type Database = {
         }
         Relationships: []
       }
+      habit_favorites: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          template_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          template_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_favorites_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "habit_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       habit_logs: {
         Row: {
           client_id: string | null
@@ -650,8 +688,10 @@ export type Database = {
       habit_templates: {
         Row: {
           category_id: string
+          client_id: string | null
           created_at: string
           default_target: number | null
+          deleted_at: string | null
           description_md: string | null
           exercise_id: string | null
           higher_is_better: boolean
@@ -661,6 +701,7 @@ export type Database = {
           is_published: boolean
           max_value: number | null
           min_value: number | null
+          owner_id: string | null
           points: number
           slug: string
           sort_order: number
@@ -672,8 +713,10 @@ export type Database = {
         }
         Insert: {
           category_id: string
+          client_id?: string | null
           created_at?: string
           default_target?: number | null
+          deleted_at?: string | null
           description_md?: string | null
           exercise_id?: string | null
           higher_is_better?: boolean
@@ -683,8 +726,9 @@ export type Database = {
           is_published?: boolean
           max_value?: number | null
           min_value?: number | null
+          owner_id?: string | null
           points?: number
-          slug: string
+          slug?: string
           sort_order?: number
           step_value?: number | null
           title: string
@@ -694,8 +738,10 @@ export type Database = {
         }
         Update: {
           category_id?: string
+          client_id?: string | null
           created_at?: string
           default_target?: number | null
+          deleted_at?: string | null
           description_md?: string | null
           exercise_id?: string | null
           higher_is_better?: boolean
@@ -705,6 +751,7 @@ export type Database = {
           is_published?: boolean
           max_value?: number | null
           min_value?: number | null
+          owner_id?: string | null
           points?: number
           slug?: string
           sort_order?: number

@@ -1298,6 +1298,27 @@ genutzt wird (Daylio, Streaks, Bearable, Breathwrk, Apple Health):
 Nicht gebaut: Ranglisten, Vergleiche mit anderen, Normwerte, Erinnerungen
 (§11.6).
 
+#### Habit-Auswahl, eigene Habits, Favoriten (Migration 0024)
+
+Die Auswahl hat eine eigene Seite (`/tagebuch/habits`), erreichbar über
+„Habits auswählen“ direkt neben dem Score-Schalter. Filter: Herkunft (alle,
+vorgeschlagen, selbst erstellt, Favoriten), Kategorie, Freitext. Favoriten
+stehen in ihrer Kategorie oben.
+
+* **Eigene Habits** liegen in `habit_templates` mit `owner_id` (Muster
+  `exercises`, §3.4): null = Redaktion. Anlegen und Bearbeiten sind Plus,
+  Löschen (weich, `deleted_at`) immer. Ein gelöschtes eigenes Habit verlässt
+  das Tagebuch, seine Einträge bleiben in den Auswertungen.
+* `can_use_habit_template()` prüft seit 0024 auch den Eigentümer — die
+  Funktion ist `security definer` und sähe sonst fremde eigene Habits.
+* **Punkte:** eigene Habits bringen **0 Punkte**, vom Trigger festgehalten.
+  Wie sie im Score zählen sollen, ist offen (Entscheidung vertagt am
+  25.10.2026); eine Änderung betrifft `guard_own_habit_template()`.
+* Eigene Habits sind „erledigt“ oder „Zahl“, höchstens 100 je Konto, die Art
+  ist nach dem Anlegen fest.
+* `habit_favorites`: ein Stern je Person und Vorlage; auch gesperrte
+  Plus-Habits lassen sich merken.
+
 ---
 
 ## 4. Auth & Payment Flow

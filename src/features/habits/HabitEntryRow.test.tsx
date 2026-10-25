@@ -70,6 +70,9 @@ function habit(tracking: 'done' | 'number', overrides: Partial<MyHabit['habit_te
       is_published: true,
       created_at: DATUM,
       updated_at: DATUM,
+      owner_id: null,
+      deleted_at: null,
+      client_id: null,
       ...overrides,
     },
   };
