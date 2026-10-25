@@ -157,7 +157,7 @@ export function HabitCatalog({
                     ) : null}
                     {own ? (
                       <Link
-                        href={{ pathname: '/tagebuch/eigenes-habit', params: { id: template.id } }}
+                        href={{ pathname: '/habit-tracker/eigenes-habit', params: { id: template.id } }}
                         style={styles.editLink}
                       >
                         {t('habits.edit')}

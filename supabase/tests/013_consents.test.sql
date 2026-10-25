@@ -21,8 +21,8 @@ insert into auth.users (id, email) values
 -- ---------- Was die Migration mitbringt ----------
 select is(
   (select count(*)::int from public.consent_definitions where published_at is not null),
-  4,
-  'Vier veroeffentlichte Fassungen: AGB, Datenschutz v1 und v2 (0022), Tagebuch (0023)');
+  6,
+  'Sechs veroeffentlichte Fassungen: AGB, Datenschutz v1-v3 (0022, 0025), Habit Tracker v1-v2 (0023, 0025)');
 
 -- Der Kern des Neuschnitts (SAD §5): ohne veroeffentlichte Definition keine
 -- Einwilligung, ohne Einwilligung keine Gesundheitsdaten. health_data v1 kam
