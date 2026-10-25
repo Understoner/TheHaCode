@@ -133,6 +133,7 @@
         "Buchen Sie einen Workshop, Kurs oder ein Event über die Website, speichern wir den gebuchten Kurs, den Preis, eine allfällige Anzahlung und deren Fälligkeit, den Status der Buchung und der Zahlung, die Zeitpunkte von Reservierung, Bestätigung oder Stornierung sowie den Zeitpunkt, zu dem Sie den AGB zugestimmt haben.",
         "Mit Konto wird die Buchung Ihrem Konto zugeordnet. Ohne Konto speichern wir Ihre E-Mail-Adresse und, falls Sie ihn angeben, Ihren Namen für die Teilnehmerliste. An diese Adresse gehen der Zahlungsbeleg und Rückfragen zur Buchung.",
         "Während des Bezahlvorgangs halten wir Ihren Platz für kurze Zeit frei. Wird die Zahlung nicht abgeschlossen, verfällt die Reservierung.",
+        "Damit niemand einen Kurs mit erfundenen Gastbuchungen blockieren kann, zählen wir Buchungsversuche ohne Konto je Absender. Dazu bilden wir aus Ihrer IP-Adresse mit einem geheimen Schlüssel eine Kennung, aus der sich die Adresse nicht zurückrechnen lässt. Die IP-Adresse selbst speichern wir nicht. Die Kennung wird nach 24 Stunden gelöscht. Rechtsgrundlage ist unser berechtigtes Interesse an einer fairen Platzvergabe und am Schutz vor Missbrauch (Art. 6 Abs. 1 lit. f DSGVO).",
         "Zweck ist die Abwicklung und Durchführung der gebuchten Leistung. Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie die Erfüllung steuer- und unternehmensrechtlicher Aufbewahrungspflichten (Art. 6 Abs. 1 lit. c DSGVO)."
       ]
     },
@@ -171,7 +172,7 @@
         "Kontodaten, eigene Sequenzen, Favoriten, Playlist-Links, Tagebucheinträge und das Übungsprotokoll speichern wir, solange Ihr Konto besteht.",
         "Löschen Sie Ihr Konto, werden Ihre Kontodaten, Ihre Sequenzen, Favoriten, Ihre Tagebucheinträge, Ihr Übungsprotokoll und die Aufzeichnung Ihrer Einwilligungen unmittelbar und vollständig entfernt. Die Löschung ist jederzeit in der Anwendung möglich und wird nicht durch uns verzögert.",
         "Einzelne Tagebucheinträge können Sie jederzeit selbst entfernen; sie werden dabei sofort gelöscht.",
-        "Buchungsdaten bewahren wir auf, solange die Buchung abgewickelt wird, und danach für die Dauer der gesetzlichen Aufbewahrungspflicht (siehe nächster Absatz).",
+        "Buchungsdaten bewahren wir auf, solange die Buchung abgewickelt wird, und danach für die Dauer der gesetzlichen Aufbewahrungspflicht (siehe nächster Absatz). Löschen Sie Ihr Konto, bleibt eine Buchung deshalb als Zahlungsaufzeichnung erhalten — ohne Verbindung zu Ihrem Konto, ohne Name und ohne E-Mail-Adresse. Eine noch nicht bezahlte Reservierung verfällt dabei.",
         "Ausgenommen sind Belege und Aufzeichnungen zu Zahlungen: diese unterliegen der siebenjährigen Aufbewahrungspflicht nach § 132 BAO und werden bis zu deren Ablauf aufbewahrt.",
         "Die Server-Protokolle unseres Hosters werden nach sieben Tagen automatisch gelöscht.",
         "E-Mails ohne Vertragsbezug löschen wir nach zwölf Monaten. Nachrichten mit Vertragsbezug unterliegen als Geschäftsbriefe der siebenjährigen Aufbewahrungspflicht nach § 132 BAO."

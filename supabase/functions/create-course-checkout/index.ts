@@ -44,6 +44,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import Stripe from 'npm:stripe@18';
 
+import { guestKey, clientIp } from '../_shared/guest-limit.ts';
 import { json, preflight } from '../_shared/http.ts';
 
 type CourseCheckoutRequest = {
@@ -88,7 +89,13 @@ const RESERVATION_ERRORS: Record<string, { error: string; status: number }> = {
   PT003: { error: 'already_booked', status: 409 },
   PT004: { error: 'agb_required', status: 400 },
   PT005: { error: 'guest_email_required', status: 400 },
+  PT006: { error: 'guest_holds_full', status: 409 },
 };
+
+/** Gastreservierungen je Absender und Stunde (Migration 0022). Eine echte
+ *  Person bucht einen, vielleicht zwei Kurse; fuenf laesst Raum fuer
+ *  Tippfehler und einen geteilten Anschluss. */
+const GUEST_ATTEMPTS_PER_HOUR = 5;
 
 Deno.serve(async (request) => {
   const origin = request.headers.get('Origin');
@@ -172,6 +179,30 @@ Deno.serve(async (request) => {
 
   if (!course || !course.booking_enabled) {
     return json({ error: 'not_bookable' }, 409, origin);
+  }
+
+  // ---------- 1b. Gaeste bremsen ----------
+  // Eine Gastbuchung kostet nur eine erfundene Adresse. Ohne diese Bremse
+  // koennte ein Skript einen Kurs mit Reservierungen fuellen (Migration 0022).
+  // Der Schluessel fuer die Kennung ist der service_role-Schluessel: er ist
+  // ohnehin da, ist geheim und verlaesst diese Funktion nicht.
+  if (buyer.kind === 'guest') {
+    const ip = clientIp(request.headers);
+    if (ip) {
+      const { data: allowed, error: limitError } = await adminClient.rpc('take_guest_booking_slot', {
+        p_key_hash: await guestKey(serviceRoleKey, ip),
+        p_limit: GUEST_ATTEMPTS_PER_HOUR,
+      });
+      if (limitError) {
+        // Lieber buchen lassen als eine echte Buchung an einem Zaehler
+        // scheitern lassen - die Grenze pro Kurs steht trotzdem.
+        console.error('Gastbegrenzung nicht pruefbar', limitError.code, limitError.message);
+      } else if (allowed === false) {
+        return json({ error: 'rate_limited' }, 429, origin);
+      }
+    } else {
+      console.warn('Gastbuchung ohne erkennbare Absenderadresse');
+    }
   }
 
   // ---------- 2. Den Platz halten ----------

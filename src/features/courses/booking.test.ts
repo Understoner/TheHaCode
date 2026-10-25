@@ -7,6 +7,8 @@ describe('bookingErrorCode', () => {
     expect(bookingErrorCode({ error: 'sold_out' })).toBe('sold_out');
     expect(bookingErrorCode({ error: 'already_booked' })).toBe('already_booked');
     expect(bookingErrorCode({ error: 'agb_required' })).toBe('agb_required');
+    expect(bookingErrorCode({ error: 'guest_holds_full' })).toBe('guest_holds_full');
+    expect(bookingErrorCode({ error: 'rate_limited' })).toBe('rate_limited');
   });
 
   // supabase-js verpackt den Antwortkoerper bei Fehlerstatus nicht - dann steht

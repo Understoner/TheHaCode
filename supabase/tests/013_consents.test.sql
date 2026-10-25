@@ -21,8 +21,8 @@ insert into auth.users (id, email) values
 -- ---------- Was die Migration mitbringt ----------
 select is(
   (select count(*)::int from public.consent_definitions where published_at is not null),
-  2,
-  'Zwei veroeffentlichte Fassungen: AGB und Datenschutz');
+  3,
+  'Drei veroeffentlichte Fassungen: AGB, Datenschutz v1 und v2 (0022)');
 
 -- Der Kern des Neuschnitts (SAD §5): ohne veroeffentlichte Definition keine
 -- Einwilligung, ohne Einwilligung keine Gesundheitsdaten. Seit 0021 steht
@@ -49,15 +49,19 @@ select isnt(
   'Auch die Datenschutzfassung hat eine Pruefsumme');
 
 -- Und sie zieht mit, wenn der Text sich aendert - sonst wuerde eine
--- nachtraegliche Textaenderung den alten Nachweis behalten.
+-- nachtraegliche Textaenderung den alten Nachweis behalten. Seit 0022 geht
+-- das nur noch an einem Entwurf: eine veroeffentlichte Fassung ist fest.
+insert into public.consent_definitions (kind, version, locale, title, body_md)
+values ('privacy', 99, 'de', 'Entwurf', 'Erster Wortlaut');
 update public.consent_definitions
    set body_md = 'Ein anderer Wortlaut'
- where kind = 'privacy' and version = 1;
+ where kind = 'privacy' and version = 99;
 
 select is(
-  (select body_sha256 from public.consent_definitions where kind = 'privacy' and version = 1),
+  (select body_sha256 from public.consent_definitions where kind = 'privacy' and version = 99),
   encode(extensions.digest('Ein anderer Wortlaut', 'sha256'), 'hex'),
   'Aendert sich der Text, aendert sich die Pruefsumme mit');
+delete from public.consent_definitions where kind = 'privacy' and version = 99;
 
 -- ---------- Der Normalfall ----------
 set local role authenticated;

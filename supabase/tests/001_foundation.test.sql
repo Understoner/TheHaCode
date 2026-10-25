@@ -2,7 +2,7 @@
 -- UNION-Liste aller Nutzertabellen (CLAUDE.md) — kuenftige Nutzertabellen
 -- tragen sich unten beim Loeschkaskade-Test per UNION ALL nach.
 begin;
-select plan(6);
+select plan(7);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 't@example.at');
@@ -59,8 +59,11 @@ set local role service_role;
 insert into public.subscriptions (user_id, plan, status, current_period_end)
 values ('11111111-1111-1111-1111-111111111111', 'yearly', 'active', now() + interval '1 year');
 
--- course_bookings (0011) haengt ebenso per cascade an auth.users. Auch hier
--- service_role: der Client hat auf dieser Tabelle keinerlei Schreibrecht.
+-- course_bookings (0011) haengt seit 0022 NICHT mehr per cascade, sondern per
+-- set null an auth.users: die Buchung bleibt als Zahlungsaufzeichnung
+-- (§ 132 BAO), aber ohne Bezug zur Person - siehe den Test nach der Kaskade.
+-- Auch hier service_role: der Client hat auf dieser Tabelle keinerlei
+-- Schreibrecht.
 insert into public.courses
   (id, slug, title, description, published_at,
    booking_enabled, price_cents, capacity, starts_at)
@@ -131,6 +134,13 @@ select is((
     union all
     select user_id from public.exercise_sessions where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
+
+select is(
+  (select count(*) from public.course_bookings
+    where course_id = '11111111-2222-3333-4444-555555555555'
+      and user_id is null and guest_email is null and anonymized_at is not null),
+  1::bigint,
+  'Die Buchung bleibt anonymisiert als Zahlungsaufzeichnung stehen (0022)');
 
 select * from finish();
 rollback;

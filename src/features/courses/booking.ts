@@ -10,6 +10,8 @@ export type BookingErrorCode =
   | 'not_bookable'
   | 'agb_required'
   | 'guest_email_required'
+  | 'guest_holds_full'
+  | 'rate_limited'
   | 'unauthorized'
   | 'unknown';
 
@@ -28,6 +30,8 @@ export function bookingErrorCode(error: unknown): BookingErrorCode {
     'not_bookable',
     'agb_required',
     'guest_email_required',
+    'guest_holds_full',
+    'rate_limited',
     'unauthorized',
   ];
 
