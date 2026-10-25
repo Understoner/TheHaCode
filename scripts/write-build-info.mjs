@@ -46,7 +46,7 @@ const robotsTxt =
 writeFileSync(join(distDir, 'robots.txt'), robotsTxt);
 console.log(`[thehacode] dist/robots.txt geschrieben (env: ${buildInfo.env})`);
 
-// .htaccess — die zwei Schutzmassnahmen, die per <meta> nicht gehen.
+// .htaccess — die Schutzmassnahmen, die per <meta> nicht gehen.
 //
 // Die CSP der App steht als <meta http-equiv> in src/app/+html.tsx. Zwei
 // Dinge lassen sich dort grundsaetzlich nicht ausdruecken, weil Browser sie
@@ -87,6 +87,21 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "DENY"
   Header always set Content-Security-Policy "frame-ancestors 'none'"
+
+  # Ergaenzt am 25.10.2026 nach der Sicherheitsmeldung von Hostinger. Die
+  # Referrer-Regel steht zwar schon als <meta> in +html.tsx, Scanner sehen
+  # aber nur Header - und als Header gilt sie auch fuer Nicht-HTML-Dateien.
+  #
+  # HSTS ohne includeSubDomains: was unter anderen Subdomains der Domain
+  # laeuft, entscheidet nicht diese App. http:// leitet Hostinger ohnehin
+  # schon auf https:// um; HSTS sorgt dafuer, dass der Browser den
+  # ungeschuetzten ersten Aufruf gar nicht erst versucht.
+  #
+  # Permissions-Policy: die App braucht weder Kamera, Mikrofon noch Standort.
+  # Toene kommen aus dem Oszillator (Web Audio), das faellt nicht darunter.
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), usb=(), interest-cohort=()"
 
   # HTML NIE zwischenspeichern, die Dateien mit Inhaltspruefsumme dagegen lange.
   #
