@@ -57,14 +57,14 @@
     }
   ],
   "datenschutz.title": "Datenschutzerklärung",
-  "datenschutz.stand": "Fassung vom 23. August 2026",
+  "datenschutz.stand": "Fassung vom 25. Oktober 2026",
   "datenschutz.sections": [
     {
       "title": "Worum es hier geht",
       "lines": [
         "Diese Erklärung beschreibt, welche personenbezogenen Daten wir beim Besuch dieser Website und bei der Nutzung eines Nutzerkontos verarbeiten, zu welchem Zweck und auf welcher Rechtsgrundlage.",
         "Wir verarbeiten so wenig wie möglich. Es gibt keine Analyse- oder Marketing-Werkzeuge, keine Werbenetzwerke, keine Profilbildung und keine automatisierte Entscheidungsfindung im Sinne des Art. 22 DSGVO.",
-        "Gesundheitsdaten im Sinne des Art. 9 DSGVO werden nicht verarbeitet. Die Anwendung führt kein Tagebuch, erhebt keine Messwerte und speichert keine Angaben zu Ihrem Befinden."
+        "Gesundheitsdaten im Sinne des Art. 9 DSGVO verarbeiten wir ausschließlich im Atem-Tagebuch und nur, wenn Sie dort ausdrücklich eingewilligt haben. Ohne diese Einwilligung bleibt das Tagebuch leer; alle übrigen Funktionen stehen Ihnen unverändert zur Verfügung. Einzelheiten stehen im Abschnitt „Atem-Tagebuch“."
       ]
     },
     {
@@ -100,8 +100,29 @@
       "title": "Von Ihnen erstellte Inhalte",
       "lines": [
         "Legen Sie eigene Atemsequenzen an, speichern wir deren Bezeichnung und Aufbau — also Phasen, Dauern, Rundenzahlen und Pausen — verknüpft mit Ihrem Konto.",
-        "Diese Angaben beschreiben eine Übung, nicht Sie. Sie enthalten keine Angaben zu Ihrer Gesundheit, Ihrer Leistung oder Ihrer Nutzung.",
+        "Diese Angaben beschreiben eine Übung, nicht Sie. Sie enthalten keine Angaben zu Ihrer Gesundheit.",
         "Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO)."
+      ]
+    },
+    {
+      "title": "Atem-Tagebuch",
+      "lines": [
+        "Im Atem-Tagebuch halten Sie fest, welche Atemgewohnheiten Sie pflegen. Dazu speichern wir, verknüpft mit Ihrem Konto: welche Gewohnheiten Sie ausgewählt haben und seit wann, einen von Ihnen gesetzten Zielwert sowie je Kalendertag Ihre Einträge — etwa, dass Sie eine Übung erledigt haben, oder einen gemessenen Wert wie die Sekunden der BOLT-Messung.",
+        "Solche Einträge lassen Rückschlüsse auf Ihre körperliche Verfassung und Ihre Gewohnheiten zu, etwa auf Ihre Atmung oder Ihren Schlaf. Wir behandeln sie deshalb als Gesundheitsdaten im Sinne des Art. 9 DSGVO.",
+        "Rechtsgrundlage ist Ihre ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a in Verbindung mit Art. 6 Abs. 1 lit. a DSGVO), die Sie vor dem ersten Eintrag gesondert erteilen. Die Einwilligung ist freiwillig. Sie ist weder Voraussetzung für die Nutzung der Anwendung noch für ein Abonnement.",
+        "Zweck ist allein, Ihnen Ihre eigenen Einträge und Auswertungen anzuzeigen: Kalender, Serien, Verläufe, Übungsminuten und — falls Sie ihn einschalten — den Habit Score. Diese Auswertungen werden in Ihrer Anwendung aus Ihren Einträgen berechnet. Punkte gibt es für das Durchführen einer Gewohnheit, nicht für die Höhe eines Messwerts.",
+        "Die Auswertungen sind keine medizinische Beurteilung. Wir ordnen Ihre Werte nicht ein, ziehen keine Schlüsse auf Ihre Gesundheit und treffen keine Entscheidungen auf ihrer Grundlage.",
+        "Wir nutzen Ihre Tagebucheinträge nicht für Werbung, Profilbildung, Forschung oder Statistiken über unsere Nutzer:innen und geben sie nicht an Dritte weiter. Einsehen können sie nur Sie selbst: Die Datenbank gibt jeden Eintrag ausschließlich an das Konto heraus, dem er gehört. Die Übertragung erfolgt verschlüsselt, gespeichert wird auf Servern in der Europäischen Union.",
+        "Ihre Einwilligung können Sie jederzeit und ohne Angabe von Gründen unter „Konto“ widerrufen. Ab dem Widerruf sind keine neuen Einträge mehr möglich; die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung bleibt unberührt. Bereits gespeicherte Einträge können Sie danach weiterhin ansehen, exportieren und löschen.",
+        "Damit wir nachweisen können, dass Sie eingewilligt haben (Art. 7 Abs. 1 DSGVO), speichern wir, welcher Fassung des Einwilligungstexts Sie wann zugestimmt und wann Sie widerrufen haben. Rechtsgrundlage dafür ist unsere rechtliche Verpflichtung zu diesem Nachweis (Art. 6 Abs. 1 lit. c DSGVO)."
+      ]
+    },
+    {
+      "title": "Übungsprotokoll",
+      "lines": [
+        "Sind Sie angemeldet und starten eine Atemsequenz, speichern wir, welche Sequenz Sie wann begonnen haben, und beim Abschluss die Dauer. Daraus zeigt Ihnen das Tagebuch Ihre Übungsminuten pro Woche.",
+        "Haben Sie im Tagebuch eine Gewohnheit gewählt, die zu dieser Sequenz gehört, und eingewilligt, wird sie nach dem Abschluss automatisch für den Tag eingetragen.",
+        "Rechtsgrundlage für das Protokoll ist die Erfüllung des Nutzungsvertrags (Art. 6 Abs. 1 lit. b DSGVO). Auch diese Angaben sind nur Ihrem Konto zugänglich und werden nicht für andere Zwecke verwendet."
       ]
     },
     {
@@ -126,7 +147,7 @@
       "title": "Empfänger und Auftragsverarbeiter",
       "lines": [
         "Hostinger — Betrieb der Website. Auftragsverarbeiter gemäß Art. 28 DSGVO.",
-        "Supabase — Datenbank, Kontoverwaltung und Versand der Kontomails. Auftragsverarbeiter gemäß Art. 28 DSGVO.",
+        "Supabase — Datenbank einschließlich der Tagebucheinträge, Kontoverwaltung und Versand der Kontomails. Die Daten liegen in einem Rechenzentrum in Frankfurt am Main. Auftragsverarbeiter gemäß Art. 28 DSGVO.",
         "Stripe — Zahlungsabwicklung. Stripe ist hinsichtlich der Zahlungsdaten eigenverantwortlich tätig.",
         "Eine Übermittlung in Drittländer kann bei diesen Dienstleistern nicht ausgeschlossen werden. Sie ist durch die Standardvertragsklauseln der Europäischen Kommission und ergänzende Maßnahmen abgesichert.",
         "Darüber hinaus geben wir Ihre Daten nicht weiter — insbesondere nicht zu Werbezwecken und nicht an Dritte zur eigenen Nutzung."
@@ -135,8 +156,9 @@
     {
       "title": "Speicherdauer",
       "lines": [
-        "Kontodaten und eigene Sequenzen speichern wir, solange Ihr Konto besteht.",
-        "Löschen Sie Ihr Konto, werden Ihre Kontodaten und Ihre Sequenzen unmittelbar und vollständig entfernt. Die Löschung ist jederzeit in der Anwendung möglich und wird nicht durch uns verzögert.",
+        "Kontodaten, eigene Sequenzen, Tagebucheinträge und das Übungsprotokoll speichern wir, solange Ihr Konto besteht.",
+        "Löschen Sie Ihr Konto, werden Ihre Kontodaten, Ihre Sequenzen, Ihre Tagebucheinträge, Ihr Übungsprotokoll und die Aufzeichnung Ihrer Einwilligungen unmittelbar und vollständig entfernt. Die Löschung ist jederzeit in der Anwendung möglich und wird nicht durch uns verzögert.",
+        "Einzelne Tagebucheinträge können Sie jederzeit selbst entfernen; sie werden dabei sofort gelöscht.",
         "Ausgenommen sind Belege und Aufzeichnungen zu Zahlungen: diese unterliegen der siebenjährigen Aufbewahrungspflicht nach § 132 BAO und werden bis zu deren Ablauf aufbewahrt.",
         "Die Server-Protokolle unseres Hosters werden nach sieben Tagen automatisch gelöscht.",
         "E-Mails ohne Vertragsbezug löschen wir nach zwölf Monaten. Nachrichten mit Vertragsbezug unterliegen als Geschäftsbriefe der siebenjährigen Aufbewahrungspflicht nach § 132 BAO."
@@ -146,6 +168,7 @@
       "title": "Ihre Rechte",
       "lines": [
         "Sie haben das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie das Recht, einer Verarbeitung auf Grundlage berechtigter Interessen zu widersprechen (Art. 21 DSGVO).",
+        "Eine erteilte Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen (Art. 7 Abs. 3 DSGVO), für das Atem-Tagebuch direkt unter „Konto“. Dort können Sie außerdem alle Ihre Daten, einschließlich der Tagebucheinträge, in einem maschinenlesbaren Format herunterladen.",
         "Eine Anfrage genügt formlos per E-Mail an die oben genannte Adresse. Wir antworten innerhalb eines Monats.",
         "Ihnen steht außerdem ein Beschwerderecht bei der Aufsichtsbehörde zu: Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Wien, dsb@dsb.gv.at"
       ]
