@@ -21,19 +21,20 @@ insert into auth.users (id, email) values
 -- ---------- Was die Migration mitbringt ----------
 select is(
   (select count(*)::int from public.consent_definitions where published_at is not null),
-  3,
-  'Drei veroeffentlichte Fassungen: AGB, Datenschutz v1 und v2 (0022)');
+  4,
+  'Vier veroeffentlichte Fassungen: AGB, Datenschutz v1 und v2 (0022), Tagebuch (0023)');
 
 -- Der Kern des Neuschnitts (SAD §5): ohne veroeffentlichte Definition keine
--- Einwilligung, ohne Einwilligung keine Gesundheitsdaten. Seit 0021 steht
--- health_data als ENTWURF in der Tabelle - veroeffentlicht wird sie von Hand,
--- nach Pruefung des Wortlauts. Faellt dieser Test, ist sie ohne diese
--- Pruefung live gegangen.
+-- Einwilligung, ohne Einwilligung keine Gesundheitsdaten. health_data v1 kam
+-- in 0021 als Entwurf und wurde nach Pruefung des Wortlauts in 0023
+-- veroeffentlicht. Die Pruefsumme haelt GENAU diesen freigegebenen Wortlaut
+-- fest: faellt dieser Test, ist ein anderer Text live gegangen als der, den
+-- das Team am 25.10.2026 gelesen hat.
 select is(
-  (select count(*)::int from public.consent_definitions
-    where kind = 'health_data' and published_at is not null),
-  0,
-  'health_data ist nur als Entwurf angelegt - veroeffentlicht wird von Hand');
+  (select body_sha256 from public.consent_definitions
+    where kind = 'health_data' and version = 1 and published_at is not null),
+  'e801fcd55b895a86bc3d03f00180181c431cb9bd69fc0f23afeef94c91fae5d6',
+  'health_data v1 ist veroeffentlicht, und zwar im freigegebenen Wortlaut');
 
 -- Die Pruefsumme kommt aus dem Trigger, nicht aus der Eingabe.
 select is(

@@ -28,10 +28,8 @@ update public.profiles set has_active_subscription = true
  where id in ('d0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000003');
 reset role;
 
--- Die Einwilligung ist nach 0021 nur ein Entwurf. Fuer den Test wird sie
--- veroeffentlicht - in den echten Umgebungen geschieht das von Hand.
-update public.consent_definitions set published_at = now()
- where kind = 'health_data' and version = 1;
+-- Die Einwilligung ist seit 0023 veroeffentlicht; der Test braucht dafuer
+-- nichts mehr zu tun (und duerfte es auch nicht - 0022 haelt sie fest).
 
 insert into public.habit_categories (id, slug, title, max_per_day, max_per_week, max_per_month, is_published)
 values ('d0000000-cccc-0000-0000-000000000001', 'test-atmung', 'Atmung', 30, 150, 500, true);

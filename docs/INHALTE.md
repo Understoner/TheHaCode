@@ -632,17 +632,10 @@ Kategorie und Habits werden aktualisiert.
 
 ### Bevor jemand eintragen kann
 
-Die Einwilligung `health_data` liegt nach der Migration als **Entwurf** in
-`consent_definitions` (unveröffentlicht). Solange das so ist, zeigt die
-Tagebuchseite „Das Tagebuch öffnet in Kürze“ — niemand kann einwilligen,
-also entstehen keine Gesundheitsdaten. Erst wenn Wortlaut,
-Datenschutzerklärung (seit 25.10.2026 angepasst, Fassung `privacy` v2 aus
-Migration 0022) und Verarbeitungsverzeichnis angepasst sind:
-
-```sql
-update public.consent_definitions set published_at = now()
- where kind = 'health_data' and version = 1;
-```
+Die Einwilligung `health_data` v1 kam mit Migration 0021 als Entwurf und ist
+seit Migration 0023 veröffentlicht (Wortlaut am 25.10.2026 freigegeben,
+zusammen mit der Datenschutzerklärung `privacy` v2). Kein Handgriff im Studio
+nötig. Offen bleibt vor dem Livegang nur das Verarbeitungsverzeichnis.
 
 Danach lässt sich der Wortlaut **nicht mehr ändern**: seit Migration 0022
 lehnt die Datenbank jede Änderung und jedes Löschen einer veröffentlichten
