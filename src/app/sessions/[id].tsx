@@ -22,6 +22,7 @@ import { useBreathClock } from '@/features/breathing/useBreathClock';
 import { effectColors } from '@/features/sessions/effects';
 import { PlayerHilfe } from '@/features/sessions/PlayerHilfe';
 import { PlaylistLinks } from '@/features/sessions/PlaylistLinks';
+import { useSessionProtocol } from '@/features/habits/useSessionProtocol';
 import { useSession } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
 import { PressableRing } from '@/components/PressableRing';
@@ -57,6 +58,18 @@ function Player({ session }: { session: PlayableExercise }) {
   const totalMs = useMemo(() => totalDurationMs(timeline), [timeline]);
 
   const clock = useBreathClock();
+
+  // Start und Abschluss gehen ins Session-Protokoll (SAD §3.6). Der Hook
+  // haengt nur an diesen zwei Momenten, nicht an der Uhr.
+  //
+  // Ausgepackt statt als Objekt: das Objekt waere bei jedem Rendern neu, die
+  // drei Funktionen sind ueber useCallback stabil.
+  const {
+    begin: protokollBeginn,
+    abandon: protokollVerwerfen,
+    complete: protokollAbschluss,
+    autoLogged: insTagebuch,
+  } = useSessionProtocol(session.id);
 
   // Ohne das schlaeft der Bildschirm mitten in der Uebung ein - zehn Minuten
   // ohne Beruehrung sind fuer das Betriebssystem Leerlauf (Backlog T09).
@@ -156,6 +169,10 @@ function Player({ session }: { session: PlayableExercise }) {
     if (soundOn) busRef.current?.strikeEnd();
     if (voiceOn) voiceRef.current?.speakEnd(soundOn ? END_VOICE_AFTER_TONE_S : 0);
   }, [finished, soundOn, voiceOn]);
+
+  useEffect(() => {
+    if (finished) protokollAbschluss(totalMs);
+  }, [finished, protokollAbschluss, totalMs]);
 
   useEffect(() => {
     if (!finished) return;
@@ -290,10 +307,14 @@ function Player({ session }: { session: PlayableExercise }) {
     void ctx?.resume?.();
     setFinished(false);
     setEndAudioDone(false);
+    // Beim Fortsetzen nach "Anhalten" ist der Durchgang noch offen - dann
+    // tut begin() nichts.
+    protokollBeginn();
     clock.start();
-  }, [clock, toneVolume, voiceVolume, voiceOn]);
+  }, [clock, toneVolume, voiceVolume, voiceOn, protokollBeginn]);
 
   const restart = useCallback(() => {
+    protokollVerwerfen();
     clock.reset();
     lastCuedRef.current = -1;
     endCuedRef.current = false;
@@ -301,7 +322,7 @@ function Player({ session }: { session: PlayableExercise }) {
     setElapsedMs(0);
     setFinished(false);
     start();
-  }, [clock, start]);
+  }, [clock, start, protokollVerwerfen]);
 
   const stepCount = session.exercise_steps.length;
 
@@ -363,6 +384,9 @@ function Player({ session }: { session: PlayableExercise }) {
                 minutes: Math.max(1, Math.round(totalMs / 60000)),
               })}
             </Text>
+            {insTagebuch ? (
+              <Text style={styles.cue}>{t('player.done.diary')}</Text>
+            ) : null}
           </>
         ) : segment?.kind === 'rest' ? (
           <>

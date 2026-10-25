@@ -20,6 +20,12 @@ export const EXPORT_TABLES = [
   'subscriptions',
   'course_bookings',
   'user_consents',
+  'exercise_favorites',
+  // Atem-Tagebuch (0021). habit_logs sind Gesundheitsdaten nach Art. 9 - die
+  // Auskunft muss sie enthalten, auch nach einem Widerruf (SAD §3.10).
+  'user_habits',
+  'habit_logs',
+  'exercise_sessions',
 ] as const;
 
 export type ExportTable = (typeof EXPORT_TABLES)[number];

@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase';
  * Geraet. Statt neunzig Zeilen zu verdoppeln, steht die Mechanik jetzt einmal
  * hier und die beiden Schalter daneben sind je vier Zeilen.
  *
- * EINE ABFRAGE FUER BEIDE SCHALTER
+ * EINE ABFRAGE FUER ALLE SCHALTER
  * --------------------------------
  * Gelesen wird die ganze Zeile, nicht je Schalter eine Spalte: zwei Hooks im
  * selben Screen ergaeben sonst zwei Anfragen fuer dieselbe Zeile. Der
@@ -38,7 +38,7 @@ import { supabase } from '@/lib/supabase';
  * Wert zurueckgesetzt - der Schaden waere ein falsch gemerkter Schalter, kein
  * verlorener Inhalt.
  */
-export type ProfileFlag = 'sound_enabled' | 'voice_enabled';
+export type ProfileFlag = 'sound_enabled' | 'voice_enabled' | 'habit_score_enabled';
 
 type Flags = Partial<Record<ProfileFlag, boolean | null>>;
 
@@ -49,7 +49,9 @@ type Flags = Partial<Record<ProfileFlag, boolean | null>>;
  * generiert werden (CLAUDE.md).
  */
 function patchFor(flag: ProfileFlag, value: boolean) {
-  return flag === 'sound_enabled' ? { sound_enabled: value } : { voice_enabled: value };
+  if (flag === 'sound_enabled') return { sound_enabled: value };
+  if (flag === 'voice_enabled') return { voice_enabled: value };
+  return { habit_score_enabled: value };
 }
 
 export function useProfileFlag(flag: ProfileFlag, fallback: boolean) {
@@ -67,7 +69,7 @@ export function useProfileFlag(flag: ProfileFlag, fallback: boolean) {
     queryFn: async (): Promise<Flags> => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('sound_enabled, voice_enabled')
+        .select('sound_enabled, voice_enabled, habit_score_enabled')
         .eq('id', userId!)
         .maybeSingle();
 

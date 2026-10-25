@@ -20,9 +20,15 @@ optimale Einzellösungen.
 2. Vorkonfigurierte Box-Sequenzen und Videos — kostenlos, dauerhaft
 3. Der Sequenz-Konfigurator — die bezahlte Funktion
 
-**Nicht in V1:** Atem-Tagebuch, Micro Habits, Session-Protokoll, geführte
-Aufnahmen, Hintergrundmusik, Sprachansagen, Testzeitraum, Lifetime-Tarif,
-native Apps, Offline-Betrieb, In-App-Redaktionsoberfläche (Studio reicht).
+## V1.1 — in Arbeit seit 25.10.2026 (SAD §3.14)
+
+Atem-Tagebuch mit Micro Habits, Habit Score Tracker und Session-Protokoll.
+Gesundheitsdaten nach Art. 9: Schreiben in `habit_logs` nur mit Einwilligung
+`health_data` und über `can_use_habit_template()` (Vorschau oder Plus).
+
+**Nicht in V1/V1.1:** geführte Aufnahmen, Hintergrundmusik, Sprachansagen,
+Testzeitraum, Lifetime-Tarif, native Apps, Offline-Betrieb, Erinnerungen,
+In-App-Redaktionsoberfläche (Studio reicht).
 Wenn eine Aufgabe eines
 dieser Themen berührt: nicht anfangen, sondern melden.
 
@@ -153,7 +159,7 @@ Sind sie grün, wird `develop` nach `main` befördert. Details: `docs/DEPLOYMENT
 
 | Gut geeignet für KI-Unterstützung | Selbst prüfen |
 |---|---|
-| CRUD-Screens, Formulare, Listen | Breathing Engine (`src/features/breathing/`) |
+| CRUD-Screens, Formulare, Listen | Breathing Engine (`src/features/breathing/`) und Score-Rechnung (`src/features/habits/score.ts`) |
 | Migrationen nach vorhandenem Muster | RLS-Policies und Consent-Logik |
 | Tests zu bestehender Logik | Stripe-Webhook und Entitlement |
 | Styling nach Tokens | Alles, was `service_role` berührt |

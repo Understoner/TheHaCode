@@ -609,3 +609,53 @@ Block mit drei Phasen hielte nach **jedem** Atemzug die Luft an.
 Live löschte das per Kaskade auch alle Favoriten-Sterne der
 Nutzer. Der Block allein ist sicher: läuft er ein zweites Mal, scheitert er am
 eindeutigen `slug` und ändert nichts.
+
+---
+
+## Atem-Tagebuch: Sequenz „Sinkflug“ und die ersten zwei Habits
+
+Steht in `docs/inhalte/habit-score-tracker.sql` (lokal läuft die Datei bei
+jedem `npm run db:reset` nach `seed.sql` mit). Sie legt an:
+
+- die Sequenz **Sinkflug** (Kategorie *Beruhigen*, frei für alle): drei Stufen,
+  die den Atem von 6 auf 4 Züge pro Minute verlangsamen, ohne je die Luft
+  anzuhalten, danach drei Minuten freies Atmen ohne Takt — 546 s;
+- die Kategorie **Atmung** mit den Limits 20 / 100 / 400 Punkte je Tag, Woche,
+  Monat;
+- **BOLT-Wert ermitteln** (Vorschau, auch ohne Plus) und **Atmen zum
+  Einschlafen** (Plus, hängt an *Sinkflug*), je 10 Punkte.
+
+**Erst nach dem Ausrollen von Migration 0020/0021**, in Staging und Live je
+einmal: **Studio → SQL Editor →** Datei einfügen und ausführen. Mehrfach
+ausführbar: eine schon vorhandene *Sinkflug*-Sequenz bleibt unangetastet,
+Kategorie und Habits werden aktualisiert.
+
+### Bevor jemand eintragen kann
+
+Die Einwilligung `health_data` liegt nach der Migration als **Entwurf** in
+`consent_definitions` (unveröffentlicht). Solange das so ist, zeigt die
+Tagebuchseite „Das Tagebuch öffnet in Kürze“ — niemand kann einwilligen,
+also entstehen keine Gesundheitsdaten. Erst wenn Wortlaut,
+Datenschutzerklärung (`src/i18n/locales/de/legal.json`, dort steht heute
+noch „führt kein Tagebuch“) und Verarbeitungsverzeichnis angepasst sind:
+
+```sql
+update public.consent_definitions set published_at = now()
+ where kind = 'health_data' and version = 1;
+```
+
+Danach den Wortlaut **nicht mehr ändern** — eine Änderung wird Version 2.
+
+### Plus von Hand vergeben (zum Testen)
+
+Der Table Editor schreibt inzwischen als `postgres` und scheitert am
+Schutztrigger. Im SQL Editor die UUID **direkt** eintragen — unter
+`service_role` ist `auth.users` nicht lesbar:
+
+```sql
+begin;
+set local role service_role;
+insert into public.subscriptions (user_id, provider, plan, status, current_period_end)
+values ('<user-uuid>', 'manual', 'yearly', 'active', now() + interval '10 years');
+commit;
+```
