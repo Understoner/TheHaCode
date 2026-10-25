@@ -136,7 +136,7 @@ function DiaryContent() {
             {`${t('diary.score.toggle')}: ${scoreOn ? t('diary.score.on') : t('diary.score.off')}`}
           </Text>
         </PressableRing>
-        <Link href="/tagebuch/habits" style={[styles.toggle, styles.toggleText]}>
+        <Link href="/habit-tracker/auswahl" style={[styles.toggle, styles.toggleText]}>
           {t('diary.picker.title')}
         </Link>
       </View>

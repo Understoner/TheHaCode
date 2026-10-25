@@ -22,7 +22,7 @@ export default function HabitsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Link href="/tagebuch" style={styles.back}>
+      <Link href="/habit-tracker" style={styles.back}>
         {t('habits.back')}
       </Link>
       <Text style={styles.title}>{t('diary.picker.title')}</Text>
@@ -56,7 +56,7 @@ function HabitsForUser() {
               {plusAccess ? t('habits.own.text') : t('habits.own.plusOnly')}
             </Text>
             {plusAccess ? (
-              <Link href="/tagebuch/eigenes-habit" style={styles.primary}>
+              <Link href="/habit-tracker/eigenes-habit" style={styles.primary}>
                 {t('habits.own.create')}
               </Link>
             ) : (

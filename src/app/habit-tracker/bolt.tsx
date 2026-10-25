@@ -29,7 +29,7 @@ export default function BoltScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Link href="/tagebuch" style={styles.back}>
+      <Link href="/habit-tracker" style={styles.back}>
         {t('bolt.back')}
       </Link>
       <Text style={styles.title}>{t('bolt.title')}</Text>
@@ -94,7 +94,7 @@ function Measure({ habit, date }: { habit: MyHabit; date: string }) {
               onPress={() =>
                 save.mutate(
                   { userHabitId: habit.id, date, valueNumeric: result },
-                  { onSuccess: () => router.replace('/tagebuch') },
+                  { onSuccess: () => router.replace('/habit-tracker') },
                 )
               }
             />

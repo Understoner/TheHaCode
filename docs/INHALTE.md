@@ -612,7 +612,7 @@ eindeutigen `slug` und ändert nichts.
 
 ---
 
-## Atem-Tagebuch: Sequenz „Sinkflug“ und die ersten zwei Habits
+## Habit Tracker (vormals Atem-Tagebuch): Sequenz „Sinkflug“ und die ersten zwei Habits
 
 Steht in `docs/inhalte/habit-score-tracker.sql` (lokal läuft die Datei bei
 jedem `npm run db:reset` nach `seed.sql` mit). Sie legt an:
@@ -645,6 +645,21 @@ Dasselbe gilt für die Datenschutzerklärung: Ändert sich der Text in
 `legal.json` inhaltlich, bekommt er ein neues Datum (`datenschutz.stand`), und
 eine neue Migration legt `privacy` mit der nächsten Version und genau diesem
 Datum an.
+
+### Eigenes Habit auf Anfrage endgültig löschen
+
+Löscht jemand ein eigenes Habit in der App, setzt das nur `deleted_at` — das
+Habit verschwindet aus der Auswahl, bleibt aber mit seinen Einträgen für die
+Auswertungen stehen. So steht es auch in der Datenschutzerklärung, zusammen
+mit der Zusage, es **auf Anfrage vorher vollständig** zu löschen. Dann im SQL
+Editor, mit der ID aus der Anfrage oder dem Datenexport:
+
+```sql
+begin;
+delete from public.user_habits where template_id = '<habit-id>';   -- Einträge per cascade
+delete from public.habit_templates where id = '<habit-id>' and owner_id is not null;
+commit;
+```
 
 ### Anonymisierte Kursbuchungen
 

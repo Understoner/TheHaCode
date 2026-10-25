@@ -143,7 +143,7 @@ export function HabitEntryRow({
 
         {!locked && template.slug === BOLT_SLUG && !log ? (
           <Link
-            href={{ pathname: '/tagebuch/bolt', params: { habit: habit.id, date } }}
+            href={{ pathname: '/habit-tracker/bolt', params: { habit: habit.id, date } }}
             style={styles.link}
           >
             {t('diary.entry.measure')}

@@ -1215,7 +1215,14 @@ Der Ordner-Check in der Insert-Policy ist keine bloße Namenskonvention,
 sondern erzwungen: Ein Admin kann nur in die drei vorgesehenen virtuellen
 Ordner hochladen, `update`/`delete` folgen demselben `is_admin()`-Muster.
 
-### 3.14 Atem-Tagebuch und Habit Score Tracker (V1.1, Stand 25.10.2026)
+### 3.14 Habit Tracker (vormals Atem-Tagebuch) und Habit Score Tracker (V1.1, Stand 25.10.2026)
+
+> **Umbenannt am 25.10.2026:** Aus dem Atem-Tagebuch wird der *Habit Tracker*,
+> weil künftig nicht nur Atem-Gewohnheiten geführt werden. Route `/habit-tracker`,
+> Auswahl `/habit-tracker/auswahl`. Im Code heißen Schlüssel und Ordner weiter
+> `diary`/`habits`. Neue Fassungen: `privacy` v3 und `health_data` v2
+> (Migration 0025); eigene Habits verlangen seit 0025 auch die Einwilligung,
+> weil ihr frei gewählter Titel selbst eine Gesundheitsangabe sein kann.
 
 Gebaut in Migration 0020/0021. Die Skizzen in §3.5, §3.6 und §3.10 gelten,
 mit diesen Entscheidungen des Teams vom 25.10.2026:
@@ -1300,7 +1307,7 @@ Nicht gebaut: Ranglisten, Vergleiche mit anderen, Normwerte, Erinnerungen
 
 #### Habit-Auswahl, eigene Habits, Favoriten (Migration 0024)
 
-Die Auswahl hat eine eigene Seite (`/tagebuch/habits`), erreichbar über
+Die Auswahl hat eine eigene Seite (`/habit-tracker/auswahl`), erreichbar über
 „Habits auswählen“ direkt neben dem Score-Schalter. Filter: Herkunft (alle,
 vorgeschlagen, selbst erstellt, Favoriten), Kategorie, Freitext. Favoriten
 stehen in ihrer Kategorie oben.

@@ -22,9 +22,11 @@ optimale Einzellösungen.
 
 ## V1.1 — in Arbeit seit 25.10.2026 (SAD §3.14)
 
-Atem-Tagebuch mit Micro Habits, Habit Score Tracker und Session-Protokoll.
+Habit Tracker (bis 25.10.2026 „Atem-Tagebuch“) mit Micro Habits, eigenen Habits,
+Habit Score Tracker und Session-Protokoll.
 Gesundheitsdaten nach Art. 9: Schreiben in `habit_logs` nur mit Einwilligung
-`health_data` und über `can_use_habit_template()` (Vorschau oder Plus).
+`health_data` und über `can_use_habit_template()` (Vorschau oder Plus). Eigene
+Habits anlegen: Plus und Einwilligung (Migration 0025).
 
 **Nicht in V1/V1.1:** geführte Aufnahmen, Hintergrundmusik, Sprachansagen,
 Testzeitraum, Lifetime-Tarif, native Apps, Offline-Betrieb, Erinnerungen,

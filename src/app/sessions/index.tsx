@@ -34,7 +34,7 @@ export default function SessionsScreen() {
         <Link href="/sequenzen" style={styles.mine}>
           {t('sessions.meine')}
         </Link>
-        <Link href="/tagebuch" style={styles.mine}>
+        <Link href="/habit-tracker" style={styles.mine}>
           {t('sessions.tagebuch')}
         </Link>
       </View>
