@@ -9,10 +9,14 @@ describe('EXPORT_TABLES', () => {
   it('enthaelt alle Nutzertabellen, die es heute gibt', () => {
     expect([...EXPORT_TABLES].sort()).toEqual([
       'course_bookings',
+      'exercise_favorites',
+      'exercise_sessions',
       'exercises',
+      'habit_logs',
       'profiles',
       'subscriptions',
       'user_consents',
+      'user_habits',
     ]);
   });
 });

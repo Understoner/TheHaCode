@@ -51,5 +51,9 @@
   "konto.portal.portal_not_configured": "Das Kundenportal ist bei Stripe noch nicht eingerichtet. Wir kümmern uns darum — schreib uns an office@thehacode.com, wenn du etwas an deinem Abo ändern möchtest.",
   "konto.portal.unknown": "Das Kundenportal ließ sich nicht öffnen. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",
   "sequenz.spotifyUrl": "Das sieht nicht nach einem Spotify-Link aus. Öffne die Playlist in Spotify, tipp auf „Teilen“ und füg die Adresse hier ein — oder lass das Feld leer.",
-  "sequenz.appleMusicUrl": "Das sieht nicht nach einem Apple-Music-Link aus. Öffne die Playlist in Apple Music, tipp auf „Teilen“ und füg die Adresse hier ein — oder lass das Feld leer."
+  "sequenz.appleMusicUrl": "Das sieht nicht nach einem Apple-Music-Link aus. Öffne die Playlist in Apple Music, tipp auf „Teilen“ und füg die Adresse hier ein — oder lass das Feld leer.",
+  "diary.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal.",
+  "diary.forbidden": "Für diesen Eintrag fehlt die Einwilligung oder – bei Plus-Habits – ein aktives Plus. Schau unter „Konto“ nach.",
+  "diary.range": "Der Wert liegt außerhalb des möglichen Bereichs. Prüf ihn bitte noch einmal.",
+  "diary.future": "Für die Zukunft lässt sich nichts eintragen."
 }

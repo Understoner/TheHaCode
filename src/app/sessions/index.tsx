@@ -27,9 +27,17 @@ export default function SessionsScreen() {
           eigenen Eintrag in der Navigation (so schon in design/navigation.ts
           vorgesehen): auf dem Handy sind fuenf Eintraege in der Tab-Leiste die
           Grenze, und wer eigene Sequenzen sucht, sucht sie bei den Sequenzen. */}
-      <Link href="/sequenzen" style={styles.mine}>
-        {t('sessions.meine')}
-      </Link>
+      {/* Das Tagebuch haengt aus demselben Grund hier: die Tab-Leiste hat
+          auf dem Handy keinen sechsten Platz, und Tagebuch und Sessions
+          gehoeren zusammen - "Atmen zum Einschlafen" startet eine Session. */}
+      <View style={styles.links}>
+        <Link href="/sequenzen" style={styles.mine}>
+          {t('sessions.meine')}
+        </Link>
+        <Link href="/tagebuch" style={styles.mine}>
+          {t('sessions.tagebuch')}
+        </Link>
+      </View>
 
       <SessionsList />
     </ScrollView>
@@ -55,10 +63,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.ink900,
   },
-  mine: {
-    alignSelf: 'flex-start',
+  links: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
+  },
+  mine: {
+    alignSelf: 'flex-start',
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: radius.full,
