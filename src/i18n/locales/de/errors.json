@@ -37,6 +37,8 @@
   "buchung.not_bookable": "Dieser Kurs lässt sich gerade nicht buchen. Melde dich bei office@thehacode.com, dann klären wir das direkt.",
   "buchung.agb_required": "Bitte bestätige die AGB und den Haftungsausschluss, dann geht es weiter.",
   "buchung.guest_email_required": "Bitte gib eine gültige E-Mail-Adresse an — an sie gehen Zahlungsbeleg und Bestätigung.",
+  "buchung.guest_holds_full": "Für diesen Kurs sind gerade viele Buchungen ohne Konto offen. Mit einem Konto kannst du sofort buchen — oder versuch es in einer halben Stunde noch einmal.",
+  "buchung.rate_limited": "Von deinem Anschluss kamen gerade sehr viele Buchungsversuche. Versuch es in einer Stunde noch einmal — oder schreib uns an office@thehacode.com.",
   "buchung.gastNameKurz": "Bitte gib deinen Namen an, damit wir dich auf die Teilnehmerliste setzen können.",
   "buchung.unauthorized": "Die Buchung ließ sich nicht starten. Lade die Seite neu und versuch es noch einmal — oder schreib uns an office@thehacode.com.",
   "buchung.unknown": "Die Buchung hat nicht geklappt. Versuch es bitte noch einmal — oder schreib uns an office@thehacode.com.",

@@ -636,15 +636,36 @@ Die Einwilligung `health_data` liegt nach der Migration als **Entwurf** in
 `consent_definitions` (unveröffentlicht). Solange das so ist, zeigt die
 Tagebuchseite „Das Tagebuch öffnet in Kürze“ — niemand kann einwilligen,
 also entstehen keine Gesundheitsdaten. Erst wenn Wortlaut,
-Datenschutzerklärung (`src/i18n/locales/de/legal.json`, dort steht heute
-noch „führt kein Tagebuch“) und Verarbeitungsverzeichnis angepasst sind:
+Datenschutzerklärung (seit 25.10.2026 angepasst, Fassung `privacy` v2 aus
+Migration 0022) und Verarbeitungsverzeichnis angepasst sind:
 
 ```sql
 update public.consent_definitions set published_at = now()
  where kind = 'health_data' and version = 1;
 ```
 
-Danach den Wortlaut **nicht mehr ändern** — eine Änderung wird Version 2.
+Danach lässt sich der Wortlaut **nicht mehr ändern**: seit Migration 0022
+lehnt die Datenbank jede Änderung und jedes Löschen einer veröffentlichten
+Fassung ab, auch im SQL Editor. Eine Korrektur ist eine neue Version.
+
+Dasselbe gilt für die Datenschutzerklärung: Ändert sich der Text in
+`legal.json` inhaltlich, bekommt er ein neues Datum (`datenschutz.stand`), und
+eine neue Migration legt `privacy` mit der nächsten Version und genau diesem
+Datum an.
+
+### Anonymisierte Kursbuchungen
+
+Seit Migration 0022 verschwindet eine Buchung nicht mehr mit dem Konto. Sie
+bleibt ohne `user_id` mit gesetztem `anonymized_at` stehen, als
+Zahlungsaufzeichnung nach § 132 BAO. Die Frist läuft ab dem Ende des
+Kalenderjahres der Buchung, nicht ab der Kontolöschung. Einmal im Jahr, im
+Jänner, im SQL Editor:
+
+```sql
+delete from public.course_bookings
+ where anonymized_at is not null
+   and created_at < date_trunc('year', now()) - interval '7 years';
+```
 
 ### Plus von Hand vergeben (zum Testen)
 

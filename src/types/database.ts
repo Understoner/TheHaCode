@@ -56,6 +56,7 @@ export type Database = {
           agb_accepted_at: string | null
           amount_paid_cents: number
           amount_total_cents: number
+          anonymized_at: string | null
           balance_due_at: string | null
           balance_paid_at: string | null
           canceled_at: string | null
@@ -79,6 +80,7 @@ export type Database = {
           agb_accepted_at?: string | null
           amount_paid_cents?: number
           amount_total_cents: number
+          anonymized_at?: string | null
           balance_due_at?: string | null
           balance_paid_at?: string | null
           canceled_at?: string | null
@@ -102,6 +104,7 @@ export type Database = {
           agb_accepted_at?: string | null
           amount_paid_cents?: number
           amount_total_cents?: number
+          anonymized_at?: string | null
           balance_due_at?: string | null
           balance_paid_at?: string | null
           canceled_at?: string | null
@@ -527,6 +530,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      guest_booking_attempts: {
+        Row: {
+          created_at: string
+          id: number
+          key_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          key_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          key_hash?: string
+        }
+        Relationships: []
       }
       habit_categories: {
         Row: {
@@ -1116,6 +1137,7 @@ export type Database = {
           agb_accepted_at: string | null
           amount_paid_cents: number
           amount_total_cents: number
+          anonymized_at: string | null
           balance_due_at: string | null
           balance_paid_at: string | null
           canceled_at: string | null
@@ -1156,6 +1178,7 @@ export type Database = {
           agb_accepted_at: string | null
           amount_paid_cents: number
           amount_total_cents: number
+          anonymized_at: string | null
           balance_due_at: string | null
           balance_paid_at: string | null
           canceled_at: string | null
@@ -1195,6 +1218,7 @@ export type Database = {
           agb_accepted_at: string | null
           amount_paid_cents: number
           amount_total_cents: number
+          anonymized_at: string | null
           balance_due_at: string | null
           balance_paid_at: string | null
           canceled_at: string | null
@@ -1242,6 +1266,10 @@ export type Database = {
             }
             Returns: string
           }
+      take_guest_booking_slot: {
+        Args: { p_key_hash: string; p_limit?: number; p_window?: string }
+        Returns: boolean
+      }
     }
     Enums: {
       breath_route: "nose" | "mouth" | "pursed_lips"

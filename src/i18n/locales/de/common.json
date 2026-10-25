@@ -328,7 +328,7 @@
   "diary.soon.title": "Das Tagebuch öffnet in Kürze",
   "diary.soon.text": "Wir bereiten gerade die Einwilligung für deine Tagebuchdaten vor. Schau bald wieder vorbei.",
   "diary.consent.title": "Bevor du einträgst",
-  "diary.consent.text": "Deine Einträge sind Gesundheitsdaten. Wir speichern sie nur mit deiner ausdrücklichen Einwilligung – getrennt von allem anderen, jederzeit widerrufbar unter „Konto“.",
+  "diary.consent.text": "Deine Einträge sind Gesundheitsdaten. Wir speichern sie nur mit deiner ausdrücklichen Einwilligung, nur du kannst sie sehen, und du kannst die Einwilligung jederzeit unter „Konto“ widerrufen.",
   "diary.consent.check": "Ich willige ein",
   "diary.consent.action": "Tagebuch starten",
   "diary.consent.failed": "Die Einwilligung ließ sich nicht speichern. Versuch es bitte noch einmal.",

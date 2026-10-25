@@ -23,6 +23,8 @@
 //
 // Alles Fachliche verschwindet ueber "on delete cascade" auf auth.users mit
 // (Migration 0001, geprueft in supabase/tests/001_foundation.test.sql).
+// Einzige Ausnahme seit 0022: Kursbuchungen bleiben als Zahlungsaufzeichnung
+// stehen, per "on delete set null" ohne Bezug zur Person.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
