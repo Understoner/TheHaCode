@@ -117,81 +117,174 @@ export function HabitCatalog({
         groups.map(({ category, templates: inCategory }) => (
           <View key={category.id} style={styles.group}>
             <Text style={styles.category}>{category.title}</Text>
-            {inCategory.map((template) => {
-              const chosen = active.has(template.id);
-              const own = isOwn(template);
-              const locked = !template.is_preview && !plusAccess;
-              const favorite = favorites.has(template.id);
-
-              return (
-                <View key={template.id} style={styles.row}>
-                  <PressableRing
-                    role="button"
-                    aria-pressed={favorite}
-                    aria-label={t(favorite ? 'habits.favorite.remove' : 'habits.favorite.add', {
-                      title: template.title,
-                    })}
-                    onPress={() => toggleFavorite.mutate({ templateId: template.id, favorite: !favorite })}
-                    style={[styles.star, favorite && styles.starOn]}
-                  >
-                    <Text style={[styles.starGlyph, favorite && styles.starGlyphOn]}>
-                      {favorite ? '★' : '☆'}
-                    </Text>
-                  </PressableRing>
-
-                  <View style={styles.rowText}>
-                    <Text style={styles.title}>{template.title}</Text>
-                    <Text
-                      style={
-                        own ? styles.badgeOwn : template.is_preview ? styles.badgePreview : styles.badgePlus
-                      }
-                    >
-                      {own
-                        ? t('habits.badge.own')
-                        : template.is_preview
-                          ? t('diary.picker.preview')
-                          : t('diary.picker.plus')}
-                    </Text>
-                    {template.description_md ? (
-                      <Text style={styles.description}>{template.description_md}</Text>
-                    ) : null}
-                    {own ? (
-                      <Link
-                        href={{ pathname: '/habit-tracker/eigenes-habit', params: { id: template.id } }}
-                        style={styles.editLink}
-                      >
-                        {t('habits.edit')}
-                      </Link>
-                    ) : null}
-                  </View>
-
-                  {locked && !chosen ? (
-                    <Link href="/plus" style={styles.plusLink}>
-                      {t('diary.picker.toPlus')}
-                    </Link>
-                  ) : (
-                    <PressableRing
-                      onPress={() =>
-                        choose.mutate({
-                          templateId: template.id,
-                          chosen: !chosen,
-                          sortOrder: template.sort_order,
-                        })
-                      }
-                      disabled={choose.isPending}
-                      style={[styles.action, chosen && styles.actionOn]}
-                    >
-                      <Text style={[styles.actionText, chosen && styles.actionTextOn]}>
-                        {chosen ? t('diary.picker.remove') : t('diary.picker.add')}
-                      </Text>
-                    </PressableRing>
-                  )}
-                </View>
-              );
-            })}
+            {inCategory.map((template) => (
+              <HabitRow
+                key={template.id}
+                template={template}
+                category={category}
+                chosen={active.has(template.id)}
+                favorite={favorites.has(template.id)}
+                locked={!template.is_preview && !plusAccess}
+                pending={choose.isPending}
+                onToggleFavorite={(favorite) =>
+                  toggleFavorite.mutate({ templateId: template.id, favorite })
+                }
+                onChoose={(chosen) =>
+                  choose.mutate({ templateId: template.id, chosen, sortOrder: template.sort_order })
+                }
+              />
+            ))}
           </View>
         ))
       )}
+    </View>
+  );
+}
+
+/**
+ * Eine Zeile der Auswahl. Oben das, womit man handelt (Stern, Titel,
+ * Aufnehmen), darunter die Beschreibung ueber die volle Breite, gekuerzt auf
+ * zwei Zeilen. "Details" klappt ein Kaertchen mit dem ganzen Text und den
+ * Eckdaten auf - bei vielen Habits bleibt die Liste so ueberschaubar.
+ */
+function HabitRow({
+  template,
+  category,
+  chosen,
+  favorite,
+  locked,
+  pending,
+  onToggleFavorite,
+  onChoose,
+}: {
+  template: HabitTemplate;
+  category: HabitCategory;
+  chosen: boolean;
+  favorite: boolean;
+  locked: boolean;
+  pending: boolean;
+  onToggleFavorite: (favorite: boolean) => void;
+  onChoose: (chosen: boolean) => void;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const own = isOwn(template);
+
+  const entryKind =
+    template.tracking_type === 'number'
+      ? [
+          template.unit
+            ? t('habits.details.number', { unit: template.unit })
+            : t('habits.details.numberPlain'),
+          template.min_value !== null && template.max_value !== null
+            ? t('habits.details.range', { min: template.min_value, max: template.max_value })
+            : null,
+        ]
+          .filter(Boolean)
+          .join(' ')
+      : t('habits.details.done');
+
+  return (
+    <View style={styles.row}>
+      <View style={styles.rowHead}>
+        <PressableRing
+          role="button"
+          aria-pressed={favorite}
+          aria-label={t(favorite ? 'habits.favorite.remove' : 'habits.favorite.add', {
+            title: template.title,
+          })}
+          onPress={() => onToggleFavorite(!favorite)}
+          style={[styles.star, favorite && styles.starOn]}
+        >
+          <Text style={[styles.starGlyph, favorite && styles.starGlyphOn]}>
+            {favorite ? '★' : '☆'}
+          </Text>
+        </PressableRing>
+
+        <View style={styles.rowTitle}>
+          <Text style={styles.title}>{template.title}</Text>
+          <Text
+            style={own ? styles.badgeOwn : template.is_preview ? styles.badgePreview : styles.badgePlus}
+          >
+            {own
+              ? t('habits.badge.own')
+              : template.is_preview
+                ? t('diary.picker.preview')
+                : t('diary.picker.plus')}
+          </Text>
+        </View>
+
+        {locked && !chosen ? (
+          <Link href="/plus" style={styles.plusLink}>
+            {t('diary.picker.toPlus')}
+          </Link>
+        ) : (
+          <PressableRing
+            onPress={() => onChoose(!chosen)}
+            disabled={pending}
+            style={[styles.action, chosen && styles.actionOn]}
+          >
+            <Text style={[styles.actionText, chosen && styles.actionTextOn]}>
+              {chosen ? t('diary.picker.remove') : t('diary.picker.add')}
+            </Text>
+          </PressableRing>
+        )}
+      </View>
+
+      {template.description_md && !open ? (
+        <Text style={styles.description} numberOfLines={2}>
+          {template.description_md}
+        </Text>
+      ) : null}
+
+      <View style={styles.rowLinks}>
+        <PressableRing
+          // role ausdruecklich: ohne sie macht react-native-web ein <div>
+          // daraus, und aria-expanded haette fuer Screenreader keinen Halt.
+          role="button"
+          onPress={() => setOpen(!open)}
+          aria-expanded={open}
+          aria-label={t(open ? 'habits.details.hide' : 'habits.details.show', { title: template.title })}
+          style={styles.detailsToggle}
+        >
+          <Text style={styles.detailsToggleText}>
+            {open ? t('habits.details.hideShort') : t('habits.details.showShort')}
+          </Text>
+        </PressableRing>
+        {own ? (
+          <Link
+            href={{ pathname: '/habit-tracker/eigenes-habit', params: { id: template.id } }}
+            style={styles.editLink}
+          >
+            {t('habits.edit')}
+          </Link>
+        ) : null}
+      </View>
+
+      {open ? (
+        <View style={styles.details}>
+          {template.description_md ? (
+            <Text style={styles.detailsText}>{template.description_md}</Text>
+          ) : null}
+          <View style={styles.facts}>
+            <Fact label={t('habits.details.category')} value={category.title} />
+            <Fact label={t('habits.details.entry')} value={entryKind} />
+            <Fact
+              label={t('habits.details.points')}
+              value={t('habits.details.pointsValue', { count: template.points })}
+            />
+          </View>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.fact}>
+      <Text style={styles.factLabel}>{label}</Text>
+      <Text style={styles.factValue}>{value}</Text>
     </View>
   );
 }
@@ -268,14 +361,68 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
+    gap: spacing.sm,
     padding: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
+  },
+  rowHead: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+  rowTitle: {
+    flex: 1,
+    gap: 4,
+  },
+  rowLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  detailsToggle: {
+    paddingVertical: 2,
+  },
+  detailsToggleText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.ocean700,
+  },
+  details: {
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surfaceSubtle,
+  },
+  detailsText: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: colors.ink700,
+  },
+  facts: {
+    gap: 6,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+  },
+  fact: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  factLabel: {
+    width: 110,
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.ink700,
+  },
+  factValue: {
+    flex: 1,
+    fontSize: 13,
+    color: colors.ink700,
   },
   star: {
     width: 36,
@@ -298,10 +445,6 @@ const styles = StyleSheet.create({
   },
   starGlyphOn: {
     color: colors.ocean700,
-  },
-  rowText: {
-    flex: 1,
-    gap: 4,
   },
   title: {
     fontSize: 15,
