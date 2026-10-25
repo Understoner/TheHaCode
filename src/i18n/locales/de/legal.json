@@ -100,6 +100,8 @@
       "title": "Von Ihnen erstellte Inhalte",
       "lines": [
         "Legen Sie eigene Atemsequenzen an, speichern wir deren Bezeichnung und Aufbau — also Phasen, Dauern, Rundenzahlen und Pausen — verknüpft mit Ihrem Konto.",
+        "Markieren Sie Sequenzen als Favoriten, speichern wir, welche Sequenzen das sind und seit wann.",
+        "Hinterlegen Sie zu einer eigenen Sequenz einen Link zu einer Playlist bei Spotify oder Apple Music, speichern wir diesen Link. Wir binden diese Dienste nicht in die Seite ein: Erst wenn Sie einen Playlist-Link antippen, öffnet sich der jeweilige Dienst, und ab dann gelten dessen Datenschutzbestimmungen.",
         "Diese Angaben beschreiben eine Übung, nicht Sie. Sie enthalten keine Angaben zu Ihrer Gesundheit.",
         "Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO)."
       ]
@@ -126,11 +128,21 @@
       ]
     },
     {
+      "title": "Kursbuchungen",
+      "lines": [
+        "Buchen Sie einen Workshop, Kurs oder ein Event über die Website, speichern wir den gebuchten Kurs, den Preis, eine allfällige Anzahlung und deren Fälligkeit, den Status der Buchung und der Zahlung, die Zeitpunkte von Reservierung, Bestätigung oder Stornierung sowie den Zeitpunkt, zu dem Sie den AGB zugestimmt haben.",
+        "Mit Konto wird die Buchung Ihrem Konto zugeordnet. Ohne Konto speichern wir Ihre E-Mail-Adresse und, falls Sie ihn angeben, Ihren Namen für die Teilnehmerliste. An diese Adresse gehen der Zahlungsbeleg und Rückfragen zur Buchung.",
+        "Während des Bezahlvorgangs halten wir Ihren Platz für kurze Zeit frei. Wird die Zahlung nicht abgeschlossen, verfällt die Reservierung.",
+        "Zweck ist die Abwicklung und Durchführung der gebuchten Leistung. Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie die Erfüllung steuer- und unternehmensrechtlicher Aufbewahrungspflichten (Art. 6 Abs. 1 lit. c DSGVO)."
+      ]
+    },
+    {
       "title": "Zahlungsabwicklung",
       "lines": [
-        "Kostenpflichtige Abonnements werden über Stripe abgewickelt (Stripe Payments Europe Limited, Irland).",
+        "Kostenpflichtige Abonnements und Kursbuchungen werden über Stripe abgewickelt (Stripe Payments Europe Limited, Irland).",
         "Ihre Zahlungsdaten — Kartennummer, Ablaufdatum, Prüfziffer — geben Sie unmittelbar bei Stripe ein. Diese Daten erreichen uns nicht und werden von uns weder gespeichert noch verarbeitet.",
-        "Von Stripe erhalten wir zurück: eine Kundennummer, eine Abonnementnummer, das gewählte Modell, den Status des Abonnements, das Ende der laufenden Abrechnungsperiode und das Land, in dem der Kauf getätigt wurde. Das Land benötigen wir zur steuerlichen Einordnung des Umsatzes.",
+        "Von Stripe erhalten wir beim Abonnement zurück: eine Kundennummer, eine Abonnementnummer, das gewählte Modell, den Status des Abonnements, das Ende der laufenden Abrechnungsperiode und das Land, in dem der Kauf getätigt wurde. Das Land benötigen wir zur steuerlichen Einordnung des Umsatzes.",
+        "Bei einer Kursbuchung erhalten wir eine Kennung des Bezahlvorgangs und der Zahlung sowie den gezahlten Betrag, damit wir die Zahlung der Buchung zuordnen können.",
         "Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie die Erfüllung steuerrechtlicher Pflichten (Art. 6 Abs. 1 lit. c DSGVO).",
         "Für die Verarbeitung durch Stripe gelten ergänzend deren Datenschutzhinweise: stripe.com/at/privacy"
       ]
@@ -156,9 +168,10 @@
     {
       "title": "Speicherdauer",
       "lines": [
-        "Kontodaten, eigene Sequenzen, Tagebucheinträge und das Übungsprotokoll speichern wir, solange Ihr Konto besteht.",
-        "Löschen Sie Ihr Konto, werden Ihre Kontodaten, Ihre Sequenzen, Ihre Tagebucheinträge, Ihr Übungsprotokoll und die Aufzeichnung Ihrer Einwilligungen unmittelbar und vollständig entfernt. Die Löschung ist jederzeit in der Anwendung möglich und wird nicht durch uns verzögert.",
+        "Kontodaten, eigene Sequenzen, Favoriten, Playlist-Links, Tagebucheinträge und das Übungsprotokoll speichern wir, solange Ihr Konto besteht.",
+        "Löschen Sie Ihr Konto, werden Ihre Kontodaten, Ihre Sequenzen, Favoriten, Ihre Tagebucheinträge, Ihr Übungsprotokoll und die Aufzeichnung Ihrer Einwilligungen unmittelbar und vollständig entfernt. Die Löschung ist jederzeit in der Anwendung möglich und wird nicht durch uns verzögert.",
         "Einzelne Tagebucheinträge können Sie jederzeit selbst entfernen; sie werden dabei sofort gelöscht.",
+        "Buchungsdaten bewahren wir auf, solange die Buchung abgewickelt wird, und danach für die Dauer der gesetzlichen Aufbewahrungspflicht (siehe nächster Absatz).",
         "Ausgenommen sind Belege und Aufzeichnungen zu Zahlungen: diese unterliegen der siebenjährigen Aufbewahrungspflicht nach § 132 BAO und werden bis zu deren Ablauf aufbewahrt.",
         "Die Server-Protokolle unseres Hosters werden nach sieben Tagen automatisch gelöscht.",
         "E-Mails ohne Vertragsbezug löschen wir nach zwölf Monaten. Nachrichten mit Vertragsbezug unterliegen als Geschäftsbriefe der siebenjährigen Aufbewahrungspflicht nach § 132 BAO."
