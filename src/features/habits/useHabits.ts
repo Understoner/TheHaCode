@@ -13,6 +13,7 @@ export type HabitTemplate = Tables['habit_templates']['Row'];
 export type UserHabit = Tables['user_habits']['Row'];
 export type HabitLog = Tables['habit_logs']['Row'];
 export type ExerciseSession = Tables['exercise_sessions']['Row'];
+export type HabitFavorite = Tables['habit_favorites']['Row'];
 
 export type MyHabit = UserHabit & { habit_templates: HabitTemplate };
 
@@ -20,14 +21,29 @@ export type MyHabit = UserHabit & { habit_templates: HabitTemplate };
 // wenn RLS ohnehin nur die eigenen Zeilen herausgibt (CLAUDE.md §Verboten).
 // Zwei Schloesser - faellt eines still aus, haelt das andere.
 
-/** Kategorien und Vorlagen. Welche veroeffentlicht sind, sagt RLS. */
+/**
+ * Kategorien und Vorlagen. Welche veroeffentlicht sind, sagt RLS - und auch,
+ * dass von den eigenen Habits (0024) nur die der angemeldeten Person
+ * mitkommen. Deshalb haengt der Schluessel an der Person: nach einem
+ * Kontowechsel duerfen nicht die eigenen Habits des vorigen Kontos stehen.
+ * Geloeschte eigene Habits fehlen hier; ihre Eintraege findet useMyHabits.
+ */
 export function useHabitCatalog() {
+  const { session, loading } = useAuth();
+  const userId = session?.user.id ?? null;
+
   return useQuery({
-    queryKey: ['habit-catalog'],
+    queryKey: ['habit-catalog', userId],
+    enabled: !loading,
     queryFn: async (): Promise<{ categories: HabitCategory[]; templates: HabitTemplate[] }> => {
       const [categories, templates] = await Promise.all([
         supabase.from('habit_categories').select('*').order('sort_order'),
-        supabase.from('habit_templates').select('*').order('sort_order'),
+        supabase
+          .from('habit_templates')
+          .select('*')
+          .is('deleted_at', null)
+          .order('sort_order')
+          .order('title'),
       ]);
       if (categories.error) throw categories.error;
       if (templates.error) throw templates.error;
@@ -290,4 +306,152 @@ export function useDeleteLog() {
 export function useHabitScoreEnabled() {
   const { value, setValue } = useProfileFlag('habit_score_enabled', false);
   return { scoreOn: value, setScoreOn: setValue };
+}
+
+/** Die Vorlagen, die sich die Person als Favorit gemerkt hat. */
+export function useHabitFavorites() {
+  const { session, loading } = useAuth();
+  const userId = session?.user.id ?? null;
+
+  return useQuery({
+    queryKey: ['habit-favorites', userId],
+    enabled: !loading && userId !== null,
+    queryFn: async (): Promise<Set<string>> => {
+      const { data, error } = await supabase
+        .from('habit_favorites')
+        .select('template_id')
+        .eq('user_id', userId!)
+        .is('deleted_at', null);
+      if (error) throw error;
+      return new Set((data ?? []).map((row) => row.template_id));
+    },
+  });
+}
+
+/** Stern an oder aus. Optimistisch: der Stern reagiert sofort. */
+export function useToggleHabitFavorite() {
+  const { session } = useAuth();
+  const userId = session?.user.id ?? null;
+  const queryClient = useQueryClient();
+  const key = ['habit-favorites', userId];
+
+  return useMutation({
+    mutationFn: async ({ templateId, favorite }: { templateId: string; favorite: boolean }) => {
+      if (!userId) throw new Error('unauthorized');
+      if (favorite) {
+        const { error } = await supabase
+          .from('habit_favorites')
+          .insert({ user_id: userId, template_id: templateId });
+        // 23505: schon Favorit - der gewuenschte Zustand besteht.
+        if (error && error.code !== '23505') throw error;
+        return;
+      }
+      const { error } = await supabase
+        .from('habit_favorites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('template_id', templateId);
+      if (error) throw error;
+    },
+    onMutate: async ({ templateId, favorite }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const before = queryClient.getQueryData<Set<string>>(key);
+      const next = new Set(before ?? []);
+      if (favorite) next.add(templateId);
+      else next.delete(templateId);
+      queryClient.setQueryData(key, next);
+      return { before };
+    },
+    onError: (_error, _input, context) => {
+      queryClient.setQueryData(key, context?.before);
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
+export type OwnHabitInput = {
+  categoryId: string;
+  title: string;
+  description: string | null;
+  trackingType: 'done' | 'number';
+  unit: string | null;
+  minValue: number | null;
+  maxValue: number | null;
+};
+
+/**
+ * Ein eigenes Habit anlegen (ohne id) oder aendern (mit id). Punkte,
+ * Vorschau und Slug setzt die Datenbank (0024) - der Client kann sie gar
+ * nicht nennen. Die Art des Eintrags ist nach dem Anlegen fest.
+ */
+export function useSaveOwnHabit() {
+  const { session } = useAuth();
+  const userId = session?.user.id ?? null;
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, input }: { id?: string; input: OwnHabitInput }): Promise<string> => {
+      if (!userId) throw new Error('unauthorized');
+      const values = {
+        category_id: input.categoryId,
+        title: input.title,
+        description_md: input.description,
+        unit: input.trackingType === 'number' ? input.unit : null,
+        min_value: input.trackingType === 'number' ? input.minValue : null,
+        max_value: input.trackingType === 'number' ? input.maxValue : null,
+        step_value: input.trackingType === 'number' ? 1 : null,
+      };
+
+      if (id) {
+        const { error } = await supabase
+          .from('habit_templates')
+          .update(values)
+          .eq('id', id)
+          .eq('owner_id', userId);
+        if (error) throw error;
+        return id;
+      }
+
+      const { data, error } = await supabase
+        .from('habit_templates')
+        .insert({ ...values, owner_id: userId, tracking_type: input.trackingType })
+        .select('id')
+        .single();
+      if (error) throw error;
+      return data.id;
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: ['habit-catalog'] });
+      void queryClient.invalidateQueries({ queryKey: ['my-habits'] });
+    },
+  });
+}
+
+/**
+ * Ein eigenes Habit loeschen. Geht immer, auch ohne Abo. Die Datenbank nimmt
+ * es dabei aus dem Tagebuch; die Eintraege bleiben in den Auswertungen.
+ */
+export function useDeleteOwnHabit() {
+  const { session } = useAuth();
+  const userId = session?.user.id ?? null;
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!userId) throw new Error('unauthorized');
+      const { error } = await supabase
+        .from('habit_templates')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('owner_id', userId);
+      if (error) throw error;
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: ['habit-catalog'] });
+      void queryClient.invalidateQueries({ queryKey: ['my-habits'] });
+      void queryClient.invalidateQueries({ queryKey: ['habit-favorites'] });
+    },
+  });
 }

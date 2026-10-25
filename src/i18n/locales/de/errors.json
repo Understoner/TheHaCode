@@ -57,5 +57,15 @@
   "diary.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal.",
   "diary.forbidden": "Für diesen Eintrag fehlt die Einwilligung oder – bei Plus-Habits – ein aktives Plus. Schau unter „Konto“ nach.",
   "diary.range": "Der Wert liegt außerhalb des möglichen Bereichs. Prüf ihn bitte noch einmal.",
-  "diary.future": "Für die Zukunft lässt sich nichts eintragen."
+  "diary.future": "Für die Zukunft lässt sich nichts eintragen.",
+  "habits.titleRequired": "Bitte gib dem Habit einen Titel.",
+  "habits.titleLong": "Der Titel darf höchstens 80 Zeichen haben.",
+  "habits.descriptionLong": "Die Beschreibung darf höchstens 500 Zeichen haben.",
+  "habits.categoryRequired": "Bitte wähl eine Kategorie.",
+  "habits.unitLong": "Die Einheit darf höchstens 20 Zeichen haben.",
+  "habits.number": "Bitte gib eine Zahl ein, zum Beispiel 5 oder 2,5.",
+  "habits.range": "Der größte Wert muss mindestens so groß sein wie der kleinste.",
+  "habits.forbidden": "Eigene Habits anlegen und bearbeiten gehört zu Plus. Unter „Plus“ findest du die Möglichkeiten.",
+  "habits.limit": "Du hast schon 100 eigene Habits. Lösch eines, das du nicht mehr brauchst, dann geht es weiter.",
+  "habits.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal."
 }

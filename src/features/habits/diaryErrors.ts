@@ -15,3 +15,13 @@ export function diaryErrorKey(error: unknown): string {
   }
   return 'errors:diary.save';
 }
+
+/** Dasselbe fuer das Anlegen, Aendern und Loeschen eigener Habits (0024). */
+export function ownHabitErrorKey(error: unknown): string {
+  const code = (error as MaybePgError)?.code;
+  const message = (error as MaybePgError)?.message ?? '';
+
+  if (code === '42501') return 'errors:habits.forbidden';
+  if (code === '23514' && message.includes('100')) return 'errors:habits.limit';
+  return 'errors:habits.save';
+}

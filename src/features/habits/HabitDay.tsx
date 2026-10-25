@@ -251,6 +251,9 @@ function EntryControl({
           ? t('diary.entry.textLabel')
           : t('diary.entry.valueLabel', { unit: template.unit ?? '' })
       }
+      // Im schmalen Zahlenfeld passt nur die Einheit; der ganze Satz bleibt
+      // als aria-label fuer Screenreader.
+      placeholder={template.tracking_type === 'text' ? undefined : (template.unit ?? undefined)}
       pending={pending}
       onSave={(raw) => {
         if (template.tracking_type === 'text') onValue(null, raw);
@@ -266,11 +269,13 @@ function EntryControl({
 function ValueInput({
   kind,
   label,
+  placeholder,
   pending,
   onSave,
 }: {
   kind: 'number' | 'text';
   label: string;
+  placeholder?: string;
   pending: boolean;
   onSave: (raw: string) => void;
 }) {
@@ -284,7 +289,7 @@ function ValueInput({
         onChangeText={setRaw}
         inputMode={kind === 'number' ? 'decimal' : 'text'}
         aria-label={label}
-        placeholder={label}
+        placeholder={placeholder ?? label}
         placeholderTextColor={colors.ink500}
         style={[styles.input, kind === 'text' && styles.inputWide]}
       />

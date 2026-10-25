@@ -113,6 +113,16 @@ insert into public.exercise_sessions (user_id, exercise_id)
 select '11111111-1111-1111-1111-111111111111', id
   from public.exercises where owner_id = '11111111-1111-1111-1111-111111111111';
 
+-- Eigene Habits und Habit-Favoriten (0024) haengen ebenfalls per cascade an
+-- auth.users - auch wenn das eigene Habit im Tagebuch gewaehlt ist.
+insert into public.habit_templates (id, owner_id, slug, category_id, title, tracking_type, is_published)
+values ('11111111-aaaa-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111',
+        'x', '11111111-aaaa-0000-0000-000000000001', 'Eigenes', 'done', true);
+insert into public.user_habits (user_id, template_id)
+values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000004');
+insert into public.habit_favorites (user_id, template_id)
+values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000002');
+
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
   select count(*) from (
@@ -133,6 +143,10 @@ select is((
     select user_id from public.habit_logs where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.exercise_sessions where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select owner_id from public.habit_templates where owner_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.habit_favorites where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select is(

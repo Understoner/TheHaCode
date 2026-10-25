@@ -15,7 +15,6 @@ import { addDays, monthDays, today as heute, type IsoDate } from '@/features/hab
 import { DiaryConsent } from '@/features/habits/DiaryConsent';
 import { DiaryInsights } from '@/features/habits/DiaryInsights';
 import { HabitDay } from '@/features/habits/HabitDay';
-import { HabitPicker } from '@/features/habits/HabitPicker';
 import {
   useHabitCatalog,
   useHabitLogs,
@@ -124,19 +123,26 @@ function DiaryContent() {
 
   return (
     <View style={styles.stack}>
-      <PressableRing
-        onPress={() => setScoreOn(!scoreOn)}
-        role="switch"
-        aria-checked={scoreOn}
-        style={[styles.toggle, scoreOn && styles.toggleOn]}
-      >
-        <Text style={[styles.toggleText, scoreOn && styles.toggleTextOn]}>
-          {`${t('diary.score.toggle')}: ${scoreOn ? t('diary.score.on') : t('diary.score.off')}`}
-        </Text>
-      </PressableRing>
+      {/* Die Auswahl hat eine eigene Seite (25.10.2026) und sitzt gleich
+          neben dem Score-Schalter: zwei Einstellungen zum Tagebuch, eine Zeile. */}
+      <View style={styles.controls}>
+        <PressableRing
+          onPress={() => setScoreOn(!scoreOn)}
+          role="switch"
+          aria-checked={scoreOn}
+          style={[styles.toggle, scoreOn && styles.toggleOn]}
+        >
+          <Text style={[styles.toggleText, scoreOn && styles.toggleTextOn]}>
+            {`${t('diary.score.toggle')}: ${scoreOn ? t('diary.score.on') : t('diary.score.off')}`}
+          </Text>
+        </PressableRing>
+        <Link href="/tagebuch/habits" style={[styles.toggle, styles.toggleText]}>
+          {t('diary.picker.title')}
+        </Link>
+      </View>
 
       <QueryBoundary query={catalog}>
-        {({ categories, templates }) => (
+        {({ categories }) => (
           <QueryBoundary query={myHabits}>
             {(habits) => (
               <QueryBoundary query={plus}>
@@ -169,13 +175,6 @@ function DiaryContent() {
                             />
                           )}
                         </QueryBoundary>
-
-                        <HabitPicker
-                          categories={categories}
-                          templates={templates}
-                          myHabits={habits}
-                          plusAccess={plusAccess}
-                        />
                       </View>
                     )}
                   </QueryBoundary>
@@ -234,6 +233,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.ocean700,
+  },
+  controls: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   toggle: {
     alignSelf: 'flex-start',

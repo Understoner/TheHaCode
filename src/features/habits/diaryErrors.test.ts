@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { diaryErrorKey } from './diaryErrors';
+import { diaryErrorKey, ownHabitErrorKey } from './diaryErrors';
 
 describe('diaryErrorKey', () => {
   it('erkennt die Absage der Policy', () => {
@@ -17,5 +17,15 @@ describe('diaryErrorKey', () => {
   it('faellt fuer alles andere auf die allgemeine Meldung zurueck', () => {
     expect(diaryErrorKey(new Error('Netz weg'))).toBe('errors:diary.save');
     expect(diaryErrorKey(null)).toBe('errors:diary.save');
+  });
+});
+
+describe('ownHabitErrorKey', () => {
+  it('erklaert, warum ein eigenes Habit nicht gespeichert wurde', () => {
+    expect(ownHabitErrorKey({ code: '42501' })).toBe('errors:habits.forbidden');
+    expect(ownHabitErrorKey({ code: '23514', message: 'Hoechstens 100 eigene Habits' })).toBe(
+      'errors:habits.limit',
+    );
+    expect(ownHabitErrorKey(new Error('offline'))).toBe('errors:habits.save');
   });
 });

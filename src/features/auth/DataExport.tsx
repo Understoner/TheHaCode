@@ -8,6 +8,7 @@ import {
   buildExport,
   downloadJson,
   exportFileName,
+  EXPORT_OWNER_COLUMN,
   EXPORT_TABLES,
 } from '@/features/auth/dataExport';
 import { supabase } from '@/lib/supabase';
@@ -33,7 +34,11 @@ export function DataExport({ session }: { session: Session }) {
       const daten: Record<string, unknown[]> = {};
 
       for (const table of EXPORT_TABLES) {
-        const { data, error: tableError } = await supabase.from(table).select('*');
+        const ownerColumn = EXPORT_OWNER_COLUMN[table];
+        const query = supabase.from(table).select('*');
+        const { data, error: tableError } = ownerColumn
+          ? await query.eq(ownerColumn, session.user.id)
+          : await query;
         if (tableError) throw tableError;
         daten[table] = data ?? [];
       }
