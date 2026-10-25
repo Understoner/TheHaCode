@@ -1215,6 +1215,89 @@ Der Ordner-Check in der Insert-Policy ist keine bloße Namenskonvention,
 sondern erzwungen: Ein Admin kann nur in die drei vorgesehenen virtuellen
 Ordner hochladen, `update`/`delete` folgen demselben `is_admin()`-Muster.
 
+### 3.14 Atem-Tagebuch und Habit Score Tracker (V1.1, Stand 25.10.2026)
+
+Gebaut in Migration 0020/0021. Die Skizzen in §3.5, §3.6 und §3.10 gelten,
+mit diesen Entscheidungen des Teams vom 25.10.2026:
+
+**Start mit zwei Habits**, beide in der Kategorie *Atmung*
+(`docs/inhalte/habit-score-tracker.sql`):
+
+| Habit | Erfassung | Zugang | Besonderheit |
+|---|---|---|---|
+| BOLT-Wert ermitteln | `number`, Sekunden 0–120 | **Vorschau** (auch ohne Plus) | Messbildschirm mit Stoppuhr aus Zeitstempeln (§7.1), Wert auch von Hand |
+| Atmen zum Einschlafen | `done` (neu in 0020) | Plus | hängt an der Sequenz *Sinkflug*; wer sie zu Ende atmet, bekommt das Habit eingetragen |
+
+**Vorschau statt Sichtbarkeitsstufe.** `habit_templates.visibility` aus der
+Skizze entfällt. Angemeldete sehen alle veröffentlichten Vorlagen, gesperrte
+mit Schloss. Auswählen und Eintragen regelt `can_use_habit_template()`:
+veröffentlicht **und** (`is_preview` **oder** `has_plus_access()`). Plus kommt
+damit weiterhin ausschließlich aus `has_plus_access()` (CLAUDE.md §Zugriff).
+Die Vorlage eines gewählten Habits lässt sich nicht tauschen (Spaltenrechte) —
+sonst würde aus einem Vorschau-Habit per UPDATE ein Plus-Habit.
+
+**Einwilligung für alle Tagebuchnutzer.** Auch die Vorschau schreibt
+Gesundheitsdaten. `health_data` v1 liegt als *unveröffentlichter Entwurf* in
+der Datenbank; veröffentlicht wird von Hand, nachdem Wortlaut und
+Datenschutzerklärung geprüft sind.
+
+**Session-Protokoll** (`exercise_sessions`, §3.6) wird mitgebaut: der Player
+schreibt Start und Abschluss. Nutzungsdaten nach Art. 6, ohne Einwilligung
+und ohne Plus.
+
+#### Habit Score Tracker
+
+Ein Modus, den jede Person unter dem Tagebuch einschaltet
+(`profiles.habit_score_enabled`, Vorgabe aus). Verfügbar für alle, nicht nur
+für Plus — Vorschau-Nutzer sehen so, dass ihr Tageslimit nicht voll wird.
+
+* **Kategorien** (`habit_categories`) sind Longevity-Bereiche. Heute nur
+  *Atmung*; geplant ist der Ausbau zum Longevity-Tagebuch, darunter
+  **negative Kategorien** (`is_negative`, z. B. „Zuckerattacke"), die Punkte
+  abziehen. Neue Kategorien sind Zeilen, keine Schemaänderung.
+* **Punkte gibt es fürs Erledigen, nicht für den Wert.** Ein Eintrag an einem
+  Tag bringt die Punkte der Vorlage (`habit_templates.points`), egal welcher
+  BOLT-Wert herauskommt (§5.7). Mehr als ein Eintrag je Habit und Tag ist
+  durch den Unique-Index ausgeschlossen.
+* **Der Score wird nicht gespeichert**, sondern aus `habit_logs` gerechnet
+  (`src/features/habits/score.ts`, Vitest-Pflicht wie die Streaks).
+
+**Rechenregel** — `P_d`, `P_w`, `P_m` sind die Summen der Limits aller
+*positiven* Kategorien je Tag, Woche, Monat:
+
+1. *Kategorie und Tag:* Summe der Punkte ihrer erledigten Habits, gedeckelt auf
+   `max_per_day`. Bei negativen Kategorien ist das ein Abzug, gedeckelt auf
+   `−max_per_day`.
+2. *Kategorie und Woche/Monat:* Summe der gedeckelten Tageswerte der Kategorie,
+   gedeckelt auf `max_per_week` bzw. `max_per_month` (negativ entsprechend).
+   Woche = ISO-Woche (Montag bis Sonntag), Monat = Kalendermonat. Eine Woche,
+   die über einen Monatswechsel reicht, zählt für beide Monate mit ihren Tagen.
+3. *Gesamt:* Summe über alle Kategorien, begrenzt auf **[−P, +P]** des
+   jeweiligen Zeitraums. Der Score darf also unter 0 fallen, aber nie weiter ins
+   Minus, als das positive Maximum reicht (Entscheidung 25.10.2026).
+
+Start-Limits für *Atmung*: 20 / 100 / 400 bei zwei Habits zu je 10 Punkten —
+fünf volle Tage füllen die Woche, zwei Pausentage kosten nichts.
+
+#### Auswertungen
+
+Bewusst wenige, ausgewählt nach dem, was in Habit- und Atem-Apps tatsächlich
+genutzt wird (Daylio, Streaks, Bearable, Breathwrk, Apple Health):
+
+1. **Heute** — Checkliste der gewählten Habits, ein Tipp zum Erledigen.
+2. **Monatskalender** — jeder Tag ein Feld, Farbstärke nach Anteil erledigter
+   Habits.
+3. **Konstanz statt harter Serie** — „x von 7 Tagen" in dieser Woche und eine
+   Serie mit **Schonfrist**: ein freier Tag je Kalenderwoche bricht sie nicht.
+4. **BOLT-Verlauf** — Messpunkte und gleitender 7-Tage-Schnitt
+   (`react-native-svg`, mit dem Team abgestimmt), persönlicher Bestwert,
+   Veränderung seit der ersten Messung. **Keine Normbereiche** (§5.7).
+5. **Atemminuten** je Woche aus `exercise_sessions`, acht Wochen.
+6. **Score** — Tag, Woche, Monat je Kategorie, sofern der Modus an ist.
+
+Nicht gebaut: Ranglisten, Vergleiche mit anderen, Normwerte, Erinnerungen
+(§11.6).
+
 ---
 
 ## 4. Auth & Payment Flow
@@ -2284,6 +2367,8 @@ Der größte Block und die erste Erweiterung. Alles Nötige steht bereits in die
 **Was mit V1.1 zurückkommt:** die Gesundheitsdatenlast. Die Einwilligung `health_data` wird veröffentlicht, die Tagebuch-Policies werden scharf geschaltet, das Verarbeitungsverzeichnis wird ergänzt. Plant dafür Zeit ein, die keine Zeile Code ist.
 
 Weil die Schemastruktur schon steht, ist V1.1 überwiegend UI-Arbeit — der Teil, der sich mit KI-Unterstützung am besten beschleunigen lässt.
+
+**Begonnen am 25.10.2026** mit zwei Atem-Habits und dem Habit Score Tracker — Zuschnitt und Entscheidungen in §3.14.
 
 ### 11.2 V1.2 — Geführte Aufnahmen
 

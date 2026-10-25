@@ -319,6 +319,66 @@ export type Database = {
           },
         ]
       }
+      exercise_sessions: {
+        Row: {
+          client_id: string | null
+          completed_at: string | null
+          created_at: string
+          deleted_at: string | null
+          duration_seconds: number | null
+          exercise_id: string | null
+          id: string
+          is_completed: boolean
+          rounds_completed: number | null
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          duration_seconds?: number | null
+          exercise_id?: string | null
+          id?: string
+          is_completed?: boolean
+          rounds_completed?: number | null
+          started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          duration_seconds?: number | null
+          exercise_id?: string | null
+          id?: string
+          is_completed?: boolean
+          rounds_completed?: number | null
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_sessions_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercise_sessions_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "v_exercise_duration"
+            referencedColumns: ["exercise_id"]
+          },
+        ]
+      }
       exercise_steps: {
         Row: {
           exercise_id: string
@@ -468,6 +528,195 @@ export type Database = {
           },
         ]
       }
+      habit_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_negative: boolean
+          is_published: boolean
+          max_per_day: number
+          max_per_month: number
+          max_per_week: number
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_negative?: boolean
+          is_published?: boolean
+          max_per_day: number
+          max_per_month: number
+          max_per_week: number
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_negative?: boolean
+          is_published?: boolean
+          max_per_day?: number
+          max_per_month?: number
+          max_per_week?: number
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      habit_logs: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          log_date: string
+          note: string | null
+          updated_at: string
+          user_habit_id: string
+          user_id: string
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          log_date: string
+          note?: string | null
+          updated_at?: string
+          user_habit_id: string
+          user_id: string
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          log_date?: string
+          note?: string | null
+          updated_at?: string
+          user_habit_id?: string
+          user_id?: string
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_logs_user_habit_id_fkey"
+            columns: ["user_habit_id"]
+            isOneToOne: false
+            referencedRelation: "user_habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habit_templates: {
+        Row: {
+          category_id: string
+          created_at: string
+          default_target: number | null
+          description_md: string | null
+          exercise_id: string | null
+          higher_is_better: boolean
+          icon: string | null
+          id: string
+          is_preview: boolean
+          is_published: boolean
+          max_value: number | null
+          min_value: number | null
+          points: number
+          slug: string
+          sort_order: number
+          step_value: number | null
+          title: string
+          tracking_type: Database["public"]["Enums"]["habit_tracking_type"]
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          default_target?: number | null
+          description_md?: string | null
+          exercise_id?: string | null
+          higher_is_better?: boolean
+          icon?: string | null
+          id?: string
+          is_preview?: boolean
+          is_published?: boolean
+          max_value?: number | null
+          min_value?: number | null
+          points?: number
+          slug: string
+          sort_order?: number
+          step_value?: number | null
+          title: string
+          tracking_type: Database["public"]["Enums"]["habit_tracking_type"]
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          default_target?: number | null
+          description_md?: string | null
+          exercise_id?: string | null
+          higher_is_better?: boolean
+          icon?: string | null
+          id?: string
+          is_preview?: boolean
+          is_published?: boolean
+          max_value?: number | null
+          min_value?: number | null
+          points?: number
+          slug?: string
+          sort_order?: number
+          step_value?: number | null
+          title?: string
+          tracking_type?: Database["public"]["Enums"]["habit_tracking_type"]
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_templates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "habit_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habit_templates_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habit_templates_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "v_exercise_duration"
+            referencedColumns: ["exercise_id"]
+          },
+        ]
+      }
       news_posts: {
         Row: {
           body_md: string
@@ -550,6 +799,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          habit_score_enabled: boolean
           has_active_subscription: boolean
           id: string
           locale: string
@@ -565,6 +815,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          habit_score_enabled?: boolean
           has_active_subscription?: boolean
           id: string
           locale?: string
@@ -580,6 +831,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          habit_score_enabled?: boolean
           has_active_subscription?: boolean
           id?: string
           locale?: string
@@ -769,6 +1021,59 @@ export type Database = {
           },
         ]
       }
+      user_habits: {
+        Row: {
+          archived_at: string | null
+          client_id: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_active: boolean
+          sort_order: number
+          started_on: string
+          target_value: number | null
+          template_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          started_on?: string
+          target_value?: number | null
+          template_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          started_on?: string
+          target_value?: number | null
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_habits_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "habit_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       v_exercise_duration: {
@@ -780,6 +1085,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_use_habit_template: {
+        Args: { p_template_id: string }
+        Returns: boolean
+      }
       course_seats: {
         Args: never
         Returns: {
@@ -949,7 +1258,12 @@ export type Database = {
         | "aktivierend"
         | "stressreduktion"
       exercise_type: "paced" | "general"
-      habit_tracking_type: "number" | "smiley_5" | "slider_100" | "text"
+      habit_tracking_type:
+        | "number"
+        | "smiley_5"
+        | "slider_100"
+        | "text"
+        | "done"
       news_category: "praxis" | "blog" | "kurs" | "allgemein"
       phase_kind:
         | "inhale"
@@ -1110,7 +1424,7 @@ export const Constants = {
         "stressreduktion",
       ],
       exercise_type: ["paced", "general"],
-      habit_tracking_type: ["number", "smiley_5", "slider_100", "text"],
+      habit_tracking_type: ["number", "smiley_5", "slider_100", "text", "done"],
       news_category: ["praxis", "blog", "kurs", "allgemein"],
       phase_kind: ["inhale", "hold_in", "exhale", "hold_out", "free_breathing"],
       playback_mode: ["timer", "audio_guided", "audio_only"],

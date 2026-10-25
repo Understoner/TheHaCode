@@ -1,0 +1,15 @@
+-- ---------- Erfassungsart "erledigt" fuer Habits (V1.1) ----------
+-- Rein additiv (CLAUDE.md §Migrationen): ein neuer Enum-Wert, sonst nichts.
+--
+-- Das Enum habit_tracking_type steht seit 0001 und kennt Zahl, 5 Smileys,
+-- Regler 0-100 und Text. Es fehlt das Einfachste: "heute gemacht". Atmen zum
+-- Einschlafen hat keinen Messwert - es hat stattgefunden oder nicht. Eine
+-- Zahl 1 dafuer zu missbrauchen, hiesse, dass Diagramme und Durchschnitte
+-- eine Einheit zeigen, die es nicht gibt.
+--
+-- WARUM EINE EIGENE MIGRATION
+-- ---------------------------
+-- Postgres erlaubt einen neuen Enum-Wert erst nach dem COMMIT der Transaktion,
+-- die ihn anlegt. Die Tabellen und der Validierungs-Trigger in 0021 benutzen
+-- ihn - in derselben Datei waere er dort noch nicht verwendbar.
+alter type public.habit_tracking_type add value if not exists 'done';

@@ -24,13 +24,16 @@ select is(
   2,
   'Zwei veroeffentlichte Fassungen: AGB und Datenschutz');
 
--- Der Kern des Neuschnitts (SAD §5): ohne Definition keine Einwilligung, ohne
--- Einwilligung keine Gesundheitsdaten. Faellt dieser Test, verarbeitet V1
--- moeglicherweise Art.-9-Daten, ohne dass es jemandem auffaellt.
+-- Der Kern des Neuschnitts (SAD §5): ohne veroeffentlichte Definition keine
+-- Einwilligung, ohne Einwilligung keine Gesundheitsdaten. Seit 0021 steht
+-- health_data als ENTWURF in der Tabelle - veroeffentlicht wird sie von Hand,
+-- nach Pruefung des Wortlauts. Faellt dieser Test, ist sie ohne diese
+-- Pruefung live gegangen.
 select is(
-  (select count(*)::int from public.consent_definitions where kind = 'health_data'),
+  (select count(*)::int from public.consent_definitions
+    where kind = 'health_data' and published_at is not null),
   0,
-  'health_data ist in V1 nicht angelegt - Art. 9 bleibt aussen vor');
+  'health_data ist nur als Entwurf angelegt - veroeffentlicht wird von Hand');
 
 -- Die Pruefsumme kommt aus dem Trigger, nicht aus der Eingabe.
 select is(

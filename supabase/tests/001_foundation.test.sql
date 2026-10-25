@@ -92,6 +92,24 @@ select '11111111-1111-1111-1111-111111111111', id
 select set_config('request.jwt.claim.sub', null, true);
 reset role;
 
+-- user_habits, habit_logs und exercise_sessions (0021) haengen ebenfalls per
+-- cascade an auth.users. Als postgres angelegt: der Weg ueber Einwilligung
+-- und Plus ist Sache von 021_habit_score_tracker.test.sql, hier zaehlt nur,
+-- dass nach dem Loeschen nichts uebrig bleibt.
+insert into public.habit_categories (id, slug, title, max_per_day, max_per_week, max_per_month, is_published)
+values ('11111111-aaaa-0000-0000-000000000001', 'kaskade', 'Kaskade', 10, 50, 200, true);
+insert into public.habit_templates (id, slug, category_id, title, tracking_type, points, is_published)
+values ('11111111-aaaa-0000-0000-000000000002', 'kaskade-habit',
+        '11111111-aaaa-0000-0000-000000000001', 'Kaskade', 'done', 5, true);
+insert into public.user_habits (id, user_id, template_id)
+values ('11111111-aaaa-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111',
+        '11111111-aaaa-0000-0000-000000000002');
+insert into public.habit_logs (user_id, user_habit_id, log_date)
+values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000003', current_date);
+insert into public.exercise_sessions (user_id, exercise_id)
+select '11111111-1111-1111-1111-111111111111', id
+  from public.exercises where owner_id = '11111111-1111-1111-1111-111111111111';
+
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
   select count(*) from (
@@ -106,6 +124,12 @@ select is((
     select user_id from public.user_consents where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.exercise_favorites where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.user_habits where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.habit_logs where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.exercise_sessions where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select * from finish();
