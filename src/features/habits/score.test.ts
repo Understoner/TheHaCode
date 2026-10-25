@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { scoreFor, type ScoreCategory, type ScoreEntry } from './score';
+import { activeCategoriesByMonth, scoreFor, type ScoreCategory, type ScoreEntry } from './score';
 
 // Atmung wie im Startbestand (docs/inhalte/habit-score-tracker.sql).
 const atmung: ScoreCategory = {
@@ -136,5 +136,95 @@ describe('scoreFor - Monat', () => {
       done(`2026-10-${d}`),
     ]);
     expect(scoreFor('month', MO, [atmung], entries).total).toBe(140);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Aktive Kategorien und das Jahr (Entscheidung 25.10.2026, zweite Runde)
+// ---------------------------------------------------------------------------
+
+const bewegung: ScoreCategory = { ...atmung, id: 'bewegung' };
+const schlaf: ScoreCategory = { ...atmung, id: 'schlaf' };
+const sieben = [atmung, bewegung, schlaf];
+
+describe('activeCategoriesByMonth', () => {
+  it('zaehlt ein gewaehltes Habit fuer jeden Monat, in dem es gewaehlt war', () => {
+    const active = activeCategoriesByMonth(
+      [{ categoryId: 'atmung', startedOn: '2026-08-15', archivedOn: '2026-10-02' }],
+      [],
+    );
+    expect(active('2026-07').has('atmung')).toBe(false);
+    expect(active('2026-08').has('atmung')).toBe(true);
+    expect(active('2026-10').has('atmung')).toBe(true);
+    expect(active('2026-11').has('atmung')).toBe(false);
+  });
+
+  it('zaehlt auch eine Kategorie, in der nur eingetragen wurde', () => {
+    const active = activeCategoriesByMonth([], [done('2026-10-05', 10, 'schlaf')]);
+    expect([...active('2026-10')]).toEqual(['schlaf']);
+    expect(active('2026-09').size).toBe(0);
+  });
+});
+
+describe('scoreFor - nur aktive Kategorien', () => {
+  it('rechnet das Maximum nur aus den aktiven Kategorien', () => {
+    const active = activeCategoriesByMonth(
+      [{ categoryId: 'atmung', startedOn: '2026-10-01', archivedOn: null }],
+      [],
+    );
+    const day = scoreFor('day', MO, sieben, [done(MO)], active);
+    expect(day.maxTotal).toBe(20);
+    expect(day.categories.map((c) => c.categoryId)).toEqual(['atmung']);
+  });
+
+  // Wer Bewegung waehlt und nie eintraegt, soll sich das Maximum nicht
+  // schoenrechnen: die Kategorie zaehlt mit, auch mit 0 Punkten.
+  it('zaehlt eine gewaehlte Kategorie ohne Eintrag ins Maximum', () => {
+    const active = activeCategoriesByMonth(
+      [
+        { categoryId: 'atmung', startedOn: '2026-10-01', archivedOn: null },
+        { categoryId: 'bewegung', startedOn: '2026-10-01', archivedOn: null },
+      ],
+      [],
+    );
+    const month = scoreFor('month', MO, sieben, [done(MO)], active);
+    expect(month.maxTotal).toBe(800);
+    expect(month.total).toBe(10);
+  });
+});
+
+describe('scoreFor - Jahr', () => {
+  const ganzesJahr = activeCategoriesByMonth(
+    [{ categoryId: 'atmung', startedOn: '2026-01-01', archivedOn: null }],
+    [],
+  );
+
+  it('summiert die Monate von Jaenner bis zum Ankermonat, jeden gedeckelt', () => {
+    // Maerz: 31 Tage zu je 20 Punkten = 620, gedeckelt auf 400.
+    const maerz = Array.from({ length: 31 }, (_, i) =>
+      done(`2026-03-${String(i + 1).padStart(2, '0')}`, 20),
+    );
+    const year = scoreFor('year', '2026-10-25', [atmung], [...maerz, done('2026-10-20', 10)], ganzesJahr);
+    expect(year.categories[0].value).toBe(410);
+    expect(year.categories[0].max).toBe(10 * 400);
+    expect(year.maxTotal).toBe(4000);
+  });
+
+  it('zaehlt im Maximum nur die Monate, in denen die Kategorie aktiv war', () => {
+    const abOktober = activeCategoriesByMonth(
+      [
+        { categoryId: 'atmung', startedOn: '2026-01-01', archivedOn: null },
+        { categoryId: 'schlaf', startedOn: '2026-10-01', archivedOn: null },
+      ],
+      [],
+    );
+    const year = scoreFor('year', '2026-10-25', sieben, [], abOktober);
+    expect(year.maxTotal).toBe(10 * 400 + 1 * 400);
+    expect(year.categories.map((c) => c.categoryId)).toEqual(['atmung', 'schlaf']);
+  });
+
+  it('zaehlt das Vorjahr nicht mit', () => {
+    const year = scoreFor('year', '2026-02-10', [atmung], [done('2025-12-31', 20)], ganzesJahr);
+    expect(year.total).toBe(0);
   });
 });

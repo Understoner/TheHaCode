@@ -10,6 +10,7 @@ const basis: OwnHabitValues = {
   unit: 'Minuten',
   minValue: '0',
   maxValue: '30',
+  points: 5,
 };
 
 describe('ownHabitSchema', () => {
@@ -33,6 +34,17 @@ describe('ownHabitSchema', () => {
   it('versteht das Komma als Dezimalzeichen', () => {
     expect(ownHabitSchema.safeParse({ ...basis, minValue: '0,5', maxValue: '2,5' }).success).toBe(true);
     expect(ownHabitSchema.safeParse({ ...basis, minValue: 'abc' }).success).toBe(false);
+  });
+});
+
+describe('ownHabitSchema - Punkte', () => {
+  it('nimmt 0 bis 10 Punkte an, nicht mehr und nicht weniger', () => {
+    expect(ownHabitSchema.safeParse({ ...basis, points: 0 }).success).toBe(true);
+    expect(ownHabitSchema.safeParse({ ...basis, points: 10 }).success).toBe(true);
+    expect(ownHabitSchema.safeParse({ ...basis, points: 11 }).error?.issues[0]?.message).toBe(
+      'errors:habits.points',
+    );
+    expect(ownHabitSchema.safeParse({ ...basis, points: -1 }).success).toBe(false);
   });
 });
 

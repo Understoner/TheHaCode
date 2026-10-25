@@ -26,6 +26,7 @@ export const ownHabitSchema = z
     unit: z.string().trim().max(20, { error: 'errors:habits.unitLong' }),
     minValue: optionalNumber,
     maxValue: optionalNumber,
+    points: z.number().int().min(0, { error: 'errors:habits.points' }).max(10, { error: 'errors:habits.points' }),
   })
   .refine(
     (v) =>
@@ -54,5 +55,6 @@ export function toOwnHabitInput(values: OwnHabitValues): OwnHabitInput {
     unit: number ? values.unit.trim() || null : null,
     minValue: number ? toNumber(values.minValue) : null,
     maxValue: number ? toNumber(values.maxValue) : null,
+    points: values.points,
   };
 }

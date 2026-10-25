@@ -1305,6 +1305,24 @@ genutzt wird (Daylio, Streaks, Bearable, Breathwrk, Apple Health):
 Nicht gebaut: Ranglisten, Vergleiche mit anderen, Normwerte, Erinnerungen
 (§11.6).
 
+#### Kategorien und aktive Kategorien im Score (Migration 0026)
+
+Sieben Kategorien mit denselben Limits wie Atmung (20/100/400 je Tag, Woche,
+Monat): Atmung, Ernährung, Fasten, Bewegung, Muskeltraining, Schlaf,
+Stressmanagement. Vorgeschlagene Habits gibt es vorerst nur in Atmung; eigene
+Habits können jede Kategorie nutzen.
+
+**Nur aktive Kategorien zählen** (Entscheidung 25.10.2026): In Score und
+Maximum geht eine Kategorie nur ein, wenn sie im Monat des Zeitraums aktiv
+verwendet wurde — ein Habit aus ihr war gewählt oder es gibt einen Eintrag.
+Tag und Woche richten sich nach dem Monat ihres Ankertags. Eine gewählte
+Kategorie ohne Eintrag zählt mit 0 Punkten ins Maximum, damit Weglassen den
+Wert nicht schönt.
+
+**Jahr:** je Kategorie die Summe der gedeckelten Monate von Jänner bis zum
+laufenden Monat; Maximum = Monatslimit × Zahl der aktiven Monate. Ein eigenes
+Jahreslimit gibt es nicht. Rechnung: `src/features/habits/score.ts`.
+
 #### Habit-Auswahl, eigene Habits, Favoriten (Migration 0024)
 
 Die Auswahl hat eine eigene Seite (`/habit-tracker/auswahl`), erreichbar über
@@ -1318,9 +1336,9 @@ stehen in ihrer Kategorie oben.
   das Tagebuch, seine Einträge bleiben in den Auswertungen.
 * `can_use_habit_template()` prüft seit 0024 auch den Eigentümer — die
   Funktion ist `security definer` und sähe sonst fremde eigene Habits.
-* **Punkte:** eigene Habits bringen **0 Punkte**, vom Trigger festgehalten.
-  Wie sie im Score zählen sollen, ist offen (Entscheidung vertagt am
-  25.10.2026); eine Änderung betrifft `guard_own_habit_template()`.
+* **Punkte:** eigene Habits bringen **0 bis 10 Punkte** je Erledigung, von
+  der Person gewählt (Entscheidung 25.10.2026, Migration 0026; vorher fest 0).
+  Gedeckelt wird wie bei allen Habits je Kategorie und Zeitraum.
 * Eigene Habits sind „erledigt“ oder „Zahl“, höchstens 100 je Konto, die Art
   ist nach dem Anlegen fest.
 * `habit_favorites`: ein Stern je Person und Vorlage; auch gesperrte

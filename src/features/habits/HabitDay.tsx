@@ -450,8 +450,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
+  // 92 statt 72: "Sekunden" als Platzhalter passt sonst nicht hinein.
   input: {
-    width: 72,
+    width: 92,
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: radius.sm,

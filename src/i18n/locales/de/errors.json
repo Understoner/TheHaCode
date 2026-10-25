@@ -67,5 +67,6 @@
   "habits.range": "Der größte Wert muss mindestens so groß sein wie der kleinste.",
   "habits.forbidden": "Eigene Habits anlegen und bearbeiten gehört zu Plus und braucht deine Einwilligung zum Habit Tracker. Beides findest du unter „Konto“.",
   "habits.limit": "Du hast schon 100 eigene Habits. Lösch eines, das du nicht mehr brauchst, dann geht es weiter.",
+  "habits.points": "Wähl zwischen 0 und 10 Punkten.",
   "habits.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal."
 }

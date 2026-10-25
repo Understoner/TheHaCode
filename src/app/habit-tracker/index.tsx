@@ -112,7 +112,9 @@ function DiaryContent() {
   const { scoreOn, setScoreOn } = useHabitScoreEnabled();
 
   const monthRange = monthDays(month);
-  const from = [monthRange[0], addDays(today, -LOOKBACK_DAYS), date].sort()[0];
+  // Ab dem 1. Jaenner, weil der Score auch das Jahr zeigt (score.ts).
+  const yearStart = `${today.slice(0, 4)}-01-01`;
+  const from = [monthRange[0], addDays(today, -LOOKBACK_DAYS), date, yearStart].sort()[0];
   const to = [monthRange[monthRange.length - 1], today].sort()[1];
 
   const catalog = useHabitCatalog();

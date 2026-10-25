@@ -1,33 +1,29 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Button } from "@/components/Button";
-import { PressableRing } from "@/components/PressableRing";
-import { QueryBoundary } from "@/components/QueryBoundary";
-import { SkeletonList } from "@/components/SkeletonList";
-import { StateMessage } from "@/components/StateMessage";
-import { TextField } from "@/components/TextField";
-import { colors, radius, spacing } from "@/design/tokens";
-import { useAuth } from "@/features/auth/AuthProvider";
-import { usePlusAccess } from "@/features/configurator/useSequences";
-import { useConsents } from "@/features/consents/useConsents";
-import { ownHabitErrorKey } from "@/features/habits/diaryErrors";
-import {
-  ownHabitSchema,
-  toOwnHabitInput,
-  type OwnHabitValues,
-} from "@/features/habits/ownHabitForm";
+import { Button } from '@/components/Button';
+import { PressableRing } from '@/components/PressableRing';
+import { QueryBoundary } from '@/components/QueryBoundary';
+import { SkeletonList } from '@/components/SkeletonList';
+import { StateMessage } from '@/components/StateMessage';
+import { TextField } from '@/components/TextField';
+import { colors, radius, spacing } from '@/design/tokens';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { usePlusAccess } from '@/features/configurator/useSequences';
+import { useConsents } from '@/features/consents/useConsents';
+import { ownHabitErrorKey } from '@/features/habits/diaryErrors';
+import { ownHabitSchema, toOwnHabitInput, type OwnHabitValues } from '@/features/habits/ownHabitForm';
 import {
   useDeleteOwnHabit,
   useHabitCatalog,
   useSaveOwnHabit,
   type HabitCategory,
   type HabitTemplate,
-} from "@/features/habits/useHabits";
+} from '@/features/habits/useHabits';
 
 /**
  * Ein eigenes Habit anlegen (ohne ?id) oder bearbeiten (?id=...).
@@ -44,21 +40,16 @@ export default function OwnHabitScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Link href="/habit-tracker/auswahl" style={styles.back}>
-        {t("habits.own.back")}
+        {t('habits.own.back')}
       </Link>
-      <Text style={styles.title}>
-        {t(id ? "habits.own.editTitle" : "habits.own.createTitle")}
-      </Text>
+      <Text style={styles.title}>{t(id ? 'habits.own.editTitle' : 'habits.own.createTitle')}</Text>
 
       {loading ? (
         <SkeletonList />
       ) : session ? (
         <OwnHabitLoader id={id ?? null} />
       ) : (
-        <StateMessage
-          title={t("diary.login.title")}
-          body={t("diary.login.text")}
-        />
+        <StateMessage title={t('diary.login.title')} body={t('diary.login.text')} />
       )}
     </ScrollView>
   );
@@ -74,55 +65,44 @@ function OwnHabitLoader({ id }: { id: string | null }) {
     <QueryBoundary query={plus}>
       {(plusAccess) => (
         <QueryBoundary query={consents}>
-          {(consentList) => {
-            // Ein eigenes Habit ist selbst eine Gesundheitsangabe (0025):
-            // anlegen und aendern nur mit Einwilligung, loeschen immer.
-            const consented = consentList.some(
-              (c) => c.definition.kind === "health_data" && c.granted,
-            );
-            return (
-              <QueryBoundary query={catalog}>
-                {({ categories, templates }) => {
-                  const existing = id
-                    ? templates.find(
-                        (tpl) => tpl.id === id && tpl.owner_id !== null,
-                      )
-                    : null;
-                  if (id && !existing) {
-                    return (
-                      <StateMessage
-                        title={t("habits.own.missingTitle")}
-                        body={t("habits.own.missingHint")}
-                      />
-                    );
-                  }
-                  if (!existing && !plusAccess) {
-                    return (
-                      <StateMessage
-                        title={t("habits.own.title")}
-                        body={t("habits.own.plusOnly")}
-                      />
-                    );
-                  }
-                  if (!existing && !consented) {
-                    return (
-                      <StateMessage
-                        title={t("habits.own.title")}
-                        body={t("habits.own.consentNeeded")}
-                      />
-                    );
-                  }
+          {(consentList) => (
+            <QueryBoundary query={catalog}>
+              {({ categories, templates }) => {
+                // Ein eigenes Habit ist selbst eine Gesundheitsangabe (0025):
+                // anlegen und aendern nur mit Einwilligung, loeschen immer.
+                const consented = consentList.some(
+                  (c) => c.definition.kind === 'health_data' && c.granted,
+                );
+                const existing = id
+                  ? templates.find((tpl) => tpl.id === id && tpl.owner_id !== null)
+                  : null;
+
+                if (id && !existing) {
                   return (
-                    <OwnHabitForm
-                      categories={categories.filter((c) => !c.is_negative)}
-                      existing={existing ?? null}
-                      canEdit={plusAccess && consented}
+                    <StateMessage
+                      title={t('habits.own.missingTitle')}
+                      body={t('habits.own.missingHint')}
                     />
                   );
-                }}
-              </QueryBoundary>
-            );
-          }}
+                }
+                if (!existing && !plusAccess) {
+                  return <StateMessage title={t('habits.own.title')} body={t('habits.own.plusOnly')} />;
+                }
+                if (!existing && !consented) {
+                  return (
+                    <StateMessage title={t('habits.own.title')} body={t('habits.own.consentNeeded')} />
+                  );
+                }
+                return (
+                  <OwnHabitForm
+                    categories={categories.filter((c) => !c.is_negative)}
+                    existing={existing ?? null}
+                    canEdit={plusAccess && consented}
+                  />
+                );
+              }}
+            </QueryBoundary>
+          )}
         </QueryBoundary>
       )}
     </QueryBoundary>
@@ -147,46 +127,41 @@ function OwnHabitForm({
   const { control, handleSubmit } = useForm<OwnHabitValues>({
     resolver: zodResolver(ownHabitSchema),
     defaultValues: {
-      title: existing?.title ?? "",
-      description: existing?.description_md ?? "",
-      categoryId:
-        existing?.category_id ??
-        (categories.length === 1 ? categories[0].id : ""),
-      trackingType: existing?.tracking_type === "number" ? "number" : "done",
-      unit: existing?.unit ?? "",
-      minValue: existing?.min_value?.toString() ?? "",
-      maxValue: existing?.max_value?.toString() ?? "",
+      title: existing?.title ?? '',
+      description: existing?.description_md ?? '',
+      categoryId: existing?.category_id ?? (categories.length === 1 ? categories[0].id : ''),
+      trackingType: existing?.tracking_type === 'number' ? 'number' : 'done',
+      unit: existing?.unit ?? '',
+      minValue: existing?.min_value?.toString() ?? '',
+      maxValue: existing?.max_value?.toString() ?? '',
+      points: existing?.points ?? 5,
     },
-    mode: "onTouched",
+    mode: 'onTouched',
   });
-  const trackingType = useWatch({ control, name: "trackingType" });
+  const trackingType = useWatch({ control, name: 'trackingType' });
 
   const onSubmit = (values: OwnHabitValues) => {
     save.mutate(
       { id: existing?.id, input: toOwnHabitInput(values) },
-      { onSuccess: () => router.replace("/habit-tracker/auswahl") },
+      { onSuccess: () => router.replace('/habit-tracker/auswahl') },
     );
   };
 
   return (
     <View style={styles.stack}>
-      {!canEdit ? (
-        <Text style={styles.notice}>{t("habits.own.readOnly")}</Text>
-      ) : null}
+      {!canEdit ? <Text style={styles.notice}>{t('habits.own.readOnly')}</Text> : null}
 
       <Controller
         control={control}
         name="title"
         render={({ field, fieldState }) => (
           <TextField
-            label={t("habits.own.fieldTitle")}
+            label={t('habits.own.fieldTitle')}
             value={field.value}
             onChangeText={field.onChange}
             onBlur={field.onBlur}
-            placeholder={t("habits.own.fieldTitlePlaceholder")}
-            error={
-              fieldState.error ? t(fieldState.error.message ?? "") : undefined
-            }
+            placeholder={t('habits.own.fieldTitlePlaceholder')}
+            error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
           />
         )}
       />
@@ -196,12 +171,8 @@ function OwnHabitForm({
         name="categoryId"
         render={({ field, fieldState }) => (
           <View style={styles.field}>
-            <Text style={styles.label}>{t("habits.own.fieldCategory")}</Text>
-            <View
-              style={styles.chips}
-              role="radiogroup"
-              aria-label={t("habits.own.fieldCategory")}
-            >
+            <Text style={styles.label}>{t('habits.own.fieldCategory')}</Text>
+            <View style={styles.chips} role="radiogroup" aria-label={t('habits.own.fieldCategory')}>
               {categories.map((category) => (
                 <Choice
                   key={category.id}
@@ -213,7 +184,7 @@ function OwnHabitForm({
             </View>
             {fieldState.error ? (
               <Text role="alert" style={styles.error}>
-                {t(fieldState.error.message ?? "")}
+                {t(fieldState.error.message ?? '')}
               </Text>
             ) : null}
           </View>
@@ -225,13 +196,9 @@ function OwnHabitForm({
         name="trackingType"
         render={({ field }) => (
           <View style={styles.field}>
-            <Text style={styles.label}>{t("habits.own.fieldType")}</Text>
-            <View
-              style={styles.chips}
-              role="radiogroup"
-              aria-label={t("habits.own.fieldType")}
-            >
-              {(["done", "number"] as const).map((type) => (
+            <Text style={styles.label}>{t('habits.own.fieldType')}</Text>
+            <View style={styles.chips} role="radiogroup" aria-label={t('habits.own.fieldType')}>
+              {(['done', 'number'] as const).map((type) => (
                 <Choice
                   key={type}
                   label={t(`habits.own.type.${type}`)}
@@ -243,30 +210,24 @@ function OwnHabitForm({
                 />
               ))}
             </View>
-            {existing ? (
-              <Text style={styles.hint}>{t("habits.own.typeFixed")}</Text>
-            ) : null}
+            {existing ? <Text style={styles.hint}>{t('habits.own.typeFixed')}</Text> : null}
           </View>
         )}
       />
 
-      {trackingType === "number" ? (
+      {trackingType === 'number' ? (
         <View style={styles.stack}>
           <Controller
             control={control}
             name="unit"
             render={({ field, fieldState }) => (
               <TextField
-                label={t("habits.own.fieldUnit")}
+                label={t('habits.own.fieldUnit')}
                 value={field.value}
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
-                placeholder={t("habits.own.fieldUnitPlaceholder")}
-                error={
-                  fieldState.error
-                    ? t(fieldState.error.message ?? "")
-                    : undefined
-                }
+                placeholder={t('habits.own.fieldUnitPlaceholder')}
+                error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
               />
             )}
           />
@@ -277,16 +238,12 @@ function OwnHabitForm({
                 name="minValue"
                 render={({ field, fieldState }) => (
                   <TextField
-                    label={t("habits.own.fieldMin")}
+                    label={t('habits.own.fieldMin')}
                     value={field.value}
                     onChangeText={field.onChange}
                     onBlur={field.onBlur}
                     inputMode="decimal"
-                    error={
-                      fieldState.error
-                        ? t(fieldState.error.message ?? "")
-                        : undefined
-                    }
+                    error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
                   />
                 )}
               />
@@ -297,16 +254,12 @@ function OwnHabitForm({
                 name="maxValue"
                 render={({ field, fieldState }) => (
                   <TextField
-                    label={t("habits.own.fieldMax")}
+                    label={t('habits.own.fieldMax')}
                     value={field.value}
                     onChangeText={field.onChange}
                     onBlur={field.onBlur}
                     inputMode="decimal"
-                    error={
-                      fieldState.error
-                        ? t(fieldState.error.message ?? "")
-                        : undefined
-                    }
+                    error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
                   />
                 )}
               />
@@ -320,18 +273,35 @@ function OwnHabitForm({
         name="description"
         render={({ field, fieldState }) => (
           <TextField
-            label={t("habits.own.fieldDescription")}
+            label={t('habits.own.fieldDescription')}
             value={field.value}
             onChangeText={field.onChange}
             onBlur={field.onBlur}
-            error={
-              fieldState.error ? t(fieldState.error.message ?? "") : undefined
-            }
+            error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
           />
         )}
       />
 
-      <Text style={styles.hint}>{t("habits.own.noPoints")}</Text>
+      <Controller
+        control={control}
+        name="points"
+        render={({ field }) => (
+          <View style={styles.field}>
+            <Text style={styles.label}>{t('habits.own.fieldPoints')}</Text>
+            <View style={styles.chips} role="radiogroup" aria-label={t('habits.own.fieldPoints')}>
+              {Array.from({ length: 11 }, (_, points) => (
+                <Choice
+                  key={points}
+                  label={String(points)}
+                  active={field.value === points}
+                  onPress={() => field.onChange(points)}
+                />
+              ))}
+            </View>
+            <Text style={styles.hint}>{t('habits.own.pointsHint')}</Text>
+          </View>
+        )}
+      />
 
       {save.error ? (
         <Text role="alert" style={styles.error}>
@@ -341,7 +311,7 @@ function OwnHabitForm({
 
       {canEdit ? (
         <Button
-          label={t(existing ? "habits.own.save" : "habits.own.create")}
+          label={t(existing ? 'habits.own.save' : 'habits.own.create')}
           disabled={save.isPending}
           onPress={handleSubmit(onSubmit)}
         />
@@ -356,37 +326,25 @@ function OwnHabitForm({
           ) : null}
           {confirmDelete ? (
             <View style={styles.stack}>
-              <Text style={styles.text}>{t("habits.own.deleteConfirm")}</Text>
+              <Text style={styles.text}>{t('habits.own.deleteConfirm')}</Text>
               <View style={styles.chips}>
                 <PressableRing
                   onPress={() =>
-                    remove.mutate(existing.id, {
-                      onSuccess: () => router.replace("/habit-tracker/auswahl"),
-                    })
+                    remove.mutate(existing.id, { onSuccess: () => router.replace('/habit-tracker/auswahl') })
                   }
                   disabled={remove.isPending}
                   style={styles.danger}
                 >
-                  <Text style={styles.dangerText}>
-                    {t("habits.own.deleteYes")}
-                  </Text>
+                  <Text style={styles.dangerText}>{t('habits.own.deleteYes')}</Text>
                 </PressableRing>
-                <PressableRing
-                  onPress={() => setConfirmDelete(false)}
-                  style={styles.secondary}
-                >
-                  <Text style={styles.secondaryText}>
-                    {t("habits.own.deleteNo")}
-                  </Text>
+                <PressableRing onPress={() => setConfirmDelete(false)} style={styles.secondary}>
+                  <Text style={styles.secondaryText}>{t('habits.own.deleteNo')}</Text>
                 </PressableRing>
               </View>
             </View>
           ) : (
-            <PressableRing
-              onPress={() => setConfirmDelete(true)}
-              style={styles.secondary}
-            >
-              <Text style={styles.secondaryText}>{t("habits.own.delete")}</Text>
+            <PressableRing onPress={() => setConfirmDelete(true)} style={styles.secondary}>
+              <Text style={styles.secondaryText}>{t('habits.own.delete')}</Text>
             </PressableRing>
           )}
         </View>
@@ -412,15 +370,9 @@ function Choice({
       aria-checked={active}
       disabled={disabled}
       onPress={onPress}
-      style={[
-        styles.chip,
-        active && styles.chipActive,
-        disabled && !active && styles.chipDisabled,
-      ]}
+      style={[styles.chip, active && styles.chipActive, disabled && !active && styles.chipDisabled]}
     >
-      <Text style={[styles.chipText, active && styles.chipTextActive]}>
-        {label}
-      </Text>
+      <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
     </PressableRing>
   );
 }
@@ -431,9 +383,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     gap: spacing.md,
     backgroundColor: colors.background,
-    width: "100%",
+    width: '100%',
     maxWidth: 620,
-    alignSelf: "center",
+    alignSelf: 'center',
   },
   back: {
     fontSize: 14,
@@ -441,7 +393,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.ink900,
   },
   stack: {
@@ -453,14 +405,14 @@ const styles = StyleSheet.create({
   // Wie die Beschriftung in TextField, damit alle Felder gleich aussehen.
   label: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.ink700,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
   },
   chip: {
@@ -484,10 +436,10 @@ const styles = StyleSheet.create({
   },
   chipTextActive: {
     color: colors.surface,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   range: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: spacing.md,
   },
   rangeField: {
@@ -524,7 +476,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   secondary: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: radius.full,
@@ -544,7 +496,7 @@ const styles = StyleSheet.create({
   },
   dangerText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.surface,
   },
 });
