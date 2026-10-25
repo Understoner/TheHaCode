@@ -140,6 +140,9 @@ test('Schutz-Header, die per <meta> nicht gehen, sind gesetzt', async ({ request
     `${headers['x-frame-options'] ?? ''} ${headers['content-security-policy'] ?? ''}`,
     'weder X-Frame-Options noch frame-ancestors gesetzt'
   ).toMatch(/DENY|frame-ancestors/i);
+  expect(headers['strict-transport-security'], 'HSTS fehlt').toMatch(/max-age=\d+/);
+  expect(headers['referrer-policy'], 'Referrer-Policy fehlt').toBeTruthy();
+  expect(headers['permissions-policy'], 'Permissions-Policy fehlt').toMatch(/camera=\(\)/);
 });
 
 test('build-info.json ist erreichbar', async ({ request }) => {
