@@ -190,3 +190,21 @@ on conflict (slug) do update
       exercise_id      = excluded.exercise_id,
       icon             = excluded.icon,
       sort_order       = excluded.sort_order;
+
+-- ---------------------------------------------------------------------------
+-- 4) Verknuepfungen aus Migration 0030 nachtragen
+--
+--    0030 legt die Session "Bewusste Atempause" an und haengt "Fokus" an
+--    "Classical SEAL Balance". In Staging und Live gibt es Kategorie und
+--    Session da schon. Lokal laufen die Migrationen aber VOR seed.sql - dort
+--    fehlten beide noch. Mehrfach ausfuehrbar, ueberschreibt nichts, was
+--    schon gesetzt ist.
+-- ---------------------------------------------------------------------------
+update public.exercises
+   set category_id = (select id from public.exercise_categories where slug = 'beruhigen')
+ where slug = 'bewusste-atempause' and category_id is null;
+
+update public.habit_templates
+   set exercise_id = (select id from public.exercises
+                       where slug = 'classical-seal-balance' and owner_id is null)
+ where slug = 'fokus' and owner_id is null and exercise_id is null;

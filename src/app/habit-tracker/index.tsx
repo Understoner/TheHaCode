@@ -7,6 +7,7 @@ import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
+import { responsive } from '@/design/responsive';
 import { colors, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
@@ -57,9 +58,9 @@ function DiaryTeaser() {
       </View>
       <QueryBoundary query={catalog}>
         {({ templates }) => (
-          <View style={styles.stack}>
+          <View {...responsive('habits-grid')} style={styles.grid}>
             {templates.map((tpl) => (
-              <View key={tpl.id} style={styles.card}>
+              <View key={tpl.id} style={[styles.card, styles.gridCard]}>
                 <Text style={styles.cardTitle}>{tpl.title}</Text>
                 {tpl.description_md ? <Text style={styles.text}>{tpl.description_md}</Text> : null}
               </View>
@@ -196,9 +197,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     gap: spacing.md,
     backgroundColor: colors.background,
+    // Volle Breite wie die Sessions (26.10.2026) - die Karten darunter
+    // verteilen sich ueber habits-grid auf mehrere Spalten.
     width: '100%',
-    maxWidth: 720,
-    alignSelf: 'center',
   },
   title: {
     fontSize: 28,
@@ -206,12 +207,23 @@ const styles = StyleSheet.create({
     color: colors.ink900,
   },
   intro: {
+    // Fliesstext bleibt lesbar schmal, auch wenn die Seite breit ist.
+    maxWidth: 720,
     fontSize: 15,
     lineHeight: 22,
     color: colors.ink700,
   },
   stack: {
     gap: spacing.lg,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
+  // Mobil eine Karte je Reihe, breiter mehrere (habits-grid).
+  gridCard: {
+    flexBasis: '100%',
   },
   card: {
     gap: spacing.sm,

@@ -7,6 +7,19 @@ Atemmuskeltraining (IMST). Sie bleiben unten zur Nachvollziehbarkeit stehen und
 sind mit ~~Durchstreichung~~ markiert. Die Texte in der App sind für Nutzer
 umformuliert; maßgeblich ist die Migration bzw. danach das Studio.
 
+> **Überarbeitet mit Migration 0030 (26.10.2026, Vorgabe des Teams).** Diese
+> Datei beschreibt den Stand von 0029; was sich seither geändert hat:
+> Atmung nur noch BOLT, Atmen zum Einschlafen, Bewusste Atempause (jetzt mit
+> eigener Session) sowie neu „Fokus“ (+8, Box-Atmung) und „Autopilot“ (−6).
+> Ernährung komplett neu und ohne Zählen (ohne Zucker, Gemüse zu jeder
+> Mahlzeit, nur Wasser/Tee/Kaffee, selbst gekocht, in Ruhe gegessen, Fast Food
+> −6), „Alkohol getrunken“ bleibt. Fasten: 3 Stunden vor dem Schlafen 5 statt
+> 8 Punkte, neu 16 Stunden (+8) und 3-Tage-Fasten (+10 je Fastentag, mit
+> Kontraindikationen, 3–4× im Jahr); die beiden Protein-Habits entfallen. Muskeltraining: „Beine und Hüfte schwer“
+> heißt jetzt „Morgentraining“, „Viel Alkohol nach dem Training“ entfällt.
+> Schlaf: neu „Schlafqualität von Smartwatch oder Ring“ (Messwert 0–100).
+> Wegfallende Habits sind zurückgezogen, nicht gelöscht.
+
 ## Wie bewertet wurde
 
 **Blickwinkel:** Peter Attia (*Outlive*, „Medicine 3.0“). Er ist der

@@ -66,6 +66,7 @@ function habit(tracking: 'done' | 'number', overrides: Partial<MyHabit['habit_te
       is_negative: false,
       is_preview: false,
       exercise_id: null,
+      link_url: null,
       icon: null,
       sort_order: 0,
       is_published: true,

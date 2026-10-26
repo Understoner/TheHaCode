@@ -23,5 +23,6 @@ export function ownHabitErrorKey(error: unknown): string {
 
   if (code === '42501') return 'errors:habits.forbidden';
   if (code === '23514' && message.includes('100')) return 'errors:habits.limit';
+  if (code === '23514' && message.includes('Link')) return 'errors:habits.link';
   return 'errors:habits.save';
 }

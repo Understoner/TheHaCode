@@ -5,11 +5,13 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { PressableRing } from '@/components/PressableRing';
 import { StateMessage } from '@/components/StateMessage';
+import { responsive } from '@/design/responsive';
 import { colors, radius, spacing } from '@/design/tokens';
 
 import { addDays, type IsoDate } from './dates';
 import { diaryErrorKey } from './diaryErrors';
 import { formatDay } from './format';
+import { HabitLinkButton } from './HabitLinkButton';
 import {
   useDeleteLog,
   useSaveLog,
@@ -79,17 +81,19 @@ export function HabitDay({
       {habits.length === 0 ? (
         <StateMessage title={t('diary.day.empty.title')} body={t('diary.day.empty.hint')} />
       ) : (
-        habits.map((habit) => (
-          <HabitEntryRow
-            key={habit.id}
-            habit={habit}
-            date={date}
-            log={logs.find((l) => l.user_habit_id === habit.id && l.log_date === date) ?? null}
-            category={categories.find((c) => c.id === habit.habit_templates.category_id) ?? null}
-            locked={!habit.habit_templates.is_preview && !plusAccess}
-            scoreOn={scoreOn}
-          />
-        ))
+        <View {...responsive('habits-grid')} style={styles.grid}>
+          {habits.map((habit) => (
+            <HabitEntryRow
+              key={habit.id}
+              habit={habit}
+              date={date}
+              log={logs.find((l) => l.user_habit_id === habit.id && l.log_date === date) ?? null}
+              category={categories.find((c) => c.id === habit.habit_templates.category_id) ?? null}
+              locked={!habit.habit_templates.is_preview && !plusAccess}
+              scoreOn={scoreOn}
+            />
+          ))}
+        </View>
       )}
     </View>
   );
@@ -126,7 +130,13 @@ export function HabitEntryRow({
   return (
     <View style={styles.row}>
       <View style={styles.rowText}>
+        {category ? <Text style={styles.category}>{category.title}</Text> : null}
         <Text style={styles.title}>{template.title}</Text>
+        {template.description_md ? (
+          <Text style={styles.description} numberOfLines={3}>
+            {template.description_md}
+          </Text>
+        ) : null}
 
         {scoreOn && category && template.points > 0 ? (
           <Text style={negative ? styles.pointsNegative : styles.points}>
@@ -142,6 +152,14 @@ export function HabitEntryRow({
           <Link href={`/sessions/${template.exercise_id}`} style={styles.link}>
             {t('diary.entry.start')}
           </Link>
+        ) : null}
+
+        {!locked && !template.exercise_id && !log ? (
+          <HabitLinkButton
+            url={template.link_url}
+            sessionLabel={t('diary.entry.start')}
+            linkLabel={t('diary.entry.openLink')}
+          />
         ) : null}
 
         {!locked && template.slug === BOLT_SLUG && !log ? (
@@ -340,8 +358,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.ink900,
   },
-  row: {
+  grid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
+  // Mobil eine Karte je Reihe, ab dem Breakpoint mehrere (habits-grid in
+  // responsive.ts). flexWrap: ein Zahlenfeld rutscht in einer schmalen Karte
+  // unter den Text, statt ihn zusammenzudruecken.
+  row: {
+    flexGrow: 0,
+    flexBasis: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: spacing.md,
     padding: spacing.md,
@@ -352,7 +381,20 @@ const styles = StyleSheet.create({
   },
   rowText: {
     flex: 1,
+    minWidth: 180,
     gap: 4,
+  },
+  category: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.ink700,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  description: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.ink700,
   },
   title: {
     fontSize: 16,

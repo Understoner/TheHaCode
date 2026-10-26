@@ -21,7 +21,7 @@ import { MOBILE_NAV_BREAKPOINT, MOBILE_TAB_BAR_SAFE_HEIGHT } from '@/design/navi
 // Ausweg ist dataSet - daraus wird ein data-Attribut, das die Regeln unten
 // ansprechen koennen. (NativeWind, das laut Stack-Tabelle spaeter kommt,
 // brauecht diesen Umweg nicht mehr; bis dahin ist das hier der Ersatz und
-// bewusst auf eine Datei und sechs Namen begrenzt.)
+// bewusst auf eine Datei und wenige Namen begrenzt.)
 
 export type ResponsiveTarget =
   // Die beiden Navigationsfassungen stehen jetzt beide im HTML, CSS blendet
@@ -37,6 +37,9 @@ export type ResponsiveTarget =
   | 'courses-grid'
   | 'team-grid'
   | 'sessions-grid'
+  // Tagebuch und Habit-Auswahl (26.10.2026): dieselbe Kartenlogik wie die
+  // Sessions, statt einer schmalen Spalte in der Mitte der Seite.
+  | 'habits-grid'
   // Die Kontoseite: Abo, Einwilligungen, Daten und Loeschen stehen mobil
   // untereinander, ab dem Breakpoint zu zweit nebeneinander. Ohne das haengen
   // vier Bereiche in einer 420px-Spalte, waehrend rechts daneben die halbe
@@ -47,11 +50,17 @@ export type ResponsiveTarget =
 // Umbau auf die News-Anatomie (Bild oben ueber die volle Breite) dieselbe
 // Struktur wie News und Kurse und deshalb auch dieselbe Mindestbreite -
 // schmaler gestellt wuerde das quadratische Portrait unnoetig klein.
-const GRID_MIN_WIDTH: Record<'news-grid' | 'courses-grid' | 'team-grid' | 'sessions-grid', number> = {
+// Habit-Karten tragen Knoepfe und Eingabefelder und brauchen deshalb etwas
+// mehr Breite als eine Session-Karte.
+const GRID_MIN_WIDTH: Record<
+  'news-grid' | 'courses-grid' | 'team-grid' | 'sessions-grid' | 'habits-grid',
+  number
+> = {
   'news-grid': 280,
   'courses-grid': 280,
   'team-grid': 280,
   'sessions-grid': 260,
+  'habits-grid': 300,
 };
 
 // Die Kontoseite hat ihre eigene Regel: zwei Spalten statt drei. Die Bereiche

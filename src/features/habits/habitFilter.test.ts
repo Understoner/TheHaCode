@@ -41,6 +41,7 @@ function template(id: string, overrides: Partial<HabitTemplate> = {}): HabitTemp
     is_negative: false,
     is_preview: false,
     exercise_id: null,
+    link_url: null,
     icon: null,
     sort_order: 0,
     is_published: true,
