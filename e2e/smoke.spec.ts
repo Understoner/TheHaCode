@@ -44,6 +44,25 @@ test('Mobile: alle Eintraege der Tab-Leiste stehen gleich aufgebaut da', async (
   }
 });
 
+// Seit dem Tagebuch hat die Tab-Leiste sechs Eintraege. Auf dem schmalsten
+// Geraet (320 px) darf trotzdem keine Beschriftung abgeschnitten werden -
+// numberOfLines={1} wuerde das stillschweigend mit overflow: hidden tun.
+// Geprueft auf /habit-tracker: dort ist "Tagebuch", die laengste
+// Beschriftung, der aktive Eintrag - fett gesetzt passte sie nicht mehr.
+test('Mobile: sechs Eintraege, keine Beschriftung abgeschnitten', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto('/habit-tracker');
+
+  const items = page.getByRole('navigation').locator(':scope > *');
+  await expect(items).toHaveCount(6);
+
+  for (let i = 0; i < 6; i += 1) {
+    const label = items.nth(i).locator(':scope > *').last();
+    const fits = await label.evaluate((el) => el.scrollWidth <= el.clientWidth);
+    expect(fits, `Beschriftung "${await label.innerText()}" passt`).toBe(true);
+  }
+});
+
 // Der Fussbereich muss auf dem Handy EINE Zeile bleiben. Vorher brach er um,
 // und die zweite Zeile kostete Platz direkt ueber der Tab-Leiste - dort, wo es
 // am engsten ist. Behoben ueber kuerzere Beschriftungen UND einen waagrecht
@@ -101,6 +120,7 @@ test('Mobile: die Pflichtlinks stehen auf einer Zeile', async ({ page }) => {
 const ROUTEN = [
   '/',
   '/sessions',
+  '/habit-tracker',
   '/sequenzen',
   '/kurse',
   '/team',

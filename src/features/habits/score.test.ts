@@ -228,3 +228,59 @@ describe('scoreFor - Jahr', () => {
     expect(year.total).toBe(0);
   });
 });
+
+// Seit 26.10.2026 (0028) haengt das Vorzeichen am Habit: dieselbe Kategorie
+// bringt Punkte und zieht ab. Gewinn und Abzug werden je fuer sich gedeckelt.
+function bad(date: string, points = 6, categoryId = 'atmung'): ScoreEntry {
+  return { categoryId, points, date, isNegative: true };
+}
+
+describe('scoreFor - negative Habits in einer normalen Kategorie', () => {
+  it('zieht ab, und die Kategorie kann ins Minus gehen', () => {
+    const score = scoreFor('day', MO, [atmung], [done(MO, 4), bad(MO, 10)]);
+    expect(score.categories[0].value).toBe(-6);
+    expect(score.total).toBe(-6);
+    // Das Maximum bleibt das der Kategorie - ein Abzug-Habit aendert P nicht.
+    expect(score.maxTotal).toBe(20);
+  });
+
+  it('deckelt den Abzug getrennt auf das Tageslimit', () => {
+    const score = scoreFor('day', MO, [atmung], [bad(MO, 10), bad(MO, 10), bad(MO, 10)]);
+    expect(score.categories[0].value).toBe(-20);
+  });
+
+  // Der Kern der Regel: ein Ueberschuss ueber dem Limit verschluckt den
+  // Abzug nicht. 30 gesammelt, gedeckelt 20, minus 10 = 10 - nicht 20.
+  it('verrechnet erst nach dem Deckeln, damit kein Abzug im Ueberschuss verschwindet', () => {
+    const score = scoreFor('day', MO, [atmung], [done(MO), done(MO), done(MO), bad(MO, 10)]);
+    expect(score.categories[0].value).toBe(10);
+  });
+
+  it('deckelt in der Woche Gewinn und Abzug je fuer sich', () => {
+    // Fuenf Tage voller Abzug (je 20) = 100, Wochenlimit 100; dazu 20 Gewinn.
+    const days = ['2026-10-19', '2026-10-20', '2026-10-21', '2026-10-22', '2026-10-23', '2026-10-24'];
+    const entries = [...days.flatMap((d) => [bad(d, 10), bad(d, 10)]), done(MO, 20)];
+    const week = scoreFor('week', MO, [atmung], entries);
+    expect(week.categories[0].value).toBe(20 - 100);
+  });
+
+  it('rechnet im Jahr Monat fuer Monat, Gewinn und Abzug getrennt', () => {
+    const ganzesJahr = activeCategoriesByMonth(
+      [{ categoryId: 'atmung', startedOn: '2026-01-01', archivedOn: null }],
+      [],
+    );
+    const year = scoreFor('year', '2026-02-10', [atmung], [done('2026-01-05', 20), bad('2026-02-03', 6)], ganzesJahr);
+    expect(year.categories[0].value).toBe(14);
+  });
+
+  it('eine Abzugs-Kategorie (Altbestand) bleibt Abzug, auch ohne Kennzeichen am Habit', () => {
+    const score = scoreFor('day', MO, [atmung, zucker], [done(MO, 10, 'zucker')]);
+    expect(score.categories.find((c) => c.categoryId === 'zucker')?.value).toBe(-10);
+  });
+
+  it('liefert 0 statt -0, wenn sich Gewinn und Abzug aufheben', () => {
+    const score = scoreFor('day', MO, [atmung], [done(MO, 6), bad(MO, 6)]);
+    expect(Object.is(score.categories[0].value, 0)).toBe(true);
+    expect(Object.is(score.total, 0)).toBe(true);
+  });
+});

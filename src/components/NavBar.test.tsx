@@ -37,7 +37,7 @@ describe('NavBar', () => {
     render(<NavBar />);
 
     const { desktop, mobile } = variants();
-    for (const label of ['News', 'Kurse', 'Team', 'Sessions', 'Konto']) {
+    for (const label of ['News', 'Kurse', 'Sessions', 'Tagebuch', 'Team', 'Konto']) {
       expect(within(desktop).getByText(label, { exact: false })).toBeTruthy();
       expect(within(mobile).getByText(label)).toBeTruthy();
     }
@@ -67,6 +67,9 @@ describe('NavBar', () => {
 
     for (const found of screen.getAllByText('Konto', { exact: false })) {
       expect(found.closest('a')?.getAttribute('href')).toBe('/konto');
+    }
+    for (const found of screen.getAllByText('Tagebuch', { exact: false })) {
+      expect(found.closest('a')?.getAttribute('href')).toBe('/habit-tracker');
     }
   });
 });

@@ -32,6 +32,19 @@ function NavGlyph({ icon, color }: { icon: NavIcon; color: string }) {
           <View style={[styles.sessionsRing, { borderColor: color }]} />
         </View>
       );
+    case 'tagebuch':
+      // Ein Heft: Umschlag mit Ruecken links und zwei Zeilen auf der Seite.
+      return (
+        <View style={styles.glyphBox}>
+          <View style={[styles.tagebuchCover, { borderColor: color }]}>
+            <View style={[styles.tagebuchSpine, { backgroundColor: color }]} />
+            <View style={styles.tagebuchLines}>
+              <View style={[styles.tagebuchLine, { backgroundColor: color, width: 7 }]} />
+              <View style={[styles.tagebuchLine, { backgroundColor: color, width: 5 }]} />
+            </View>
+          </View>
+        </View>
+      );
     case 'team':
       return (
         <View style={[styles.glyphBox, styles.teamGlyph]}>
@@ -49,6 +62,13 @@ function NavGlyph({ icon, color }: { icon: NavIcon; color: string }) {
         </View>
       );
   }
+}
+
+// Unterseiten zaehlen zum Eintrag: auf /habit-tracker/auswahl soll
+// "Tagebuch" markiert bleiben, auf /kurse/<slug> "Kurse". Die Startseite "/"
+// ist davon ausgenommen, sonst waere "News" ueberall aktiv.
+function isActive(href: string, pathname: string) {
+  return pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
 }
 
 // Beide Fassungen stehen immer im HTML, sichtbar ist je nach Fensterbreite
@@ -76,7 +96,7 @@ export function NavBar() {
                 </Text>
               );
             }
-            const active = item.href === pathname;
+            const active = isActive(String(item.href), pathname);
             return (
               <Link key={item.key} href={item.href} aria-current={active ? 'page' : undefined}>
                 <View style={[styles.pill, active && styles.pillActive]}>
@@ -90,7 +110,7 @@ export function NavBar() {
 
       <View {...responsive('nav-mobile')} role="navigation" style={styles.mobileTabBar}>
         {navItems.map((item) => {
-          const active = item.kind === 'link' && item.href === pathname;
+          const active = item.kind === 'link' && isActive(String(item.href), pathname);
           const labelColor = active ? colors.ocean700 : colors.ink700;
           // Noch nicht gebaute Eintraege sind auf dem Handy sonst von echten
           // nicht zu unterscheiden - man tippt, und nichts passiert. Nur das
@@ -102,7 +122,7 @@ export function NavBar() {
             <>
               <NavGlyph icon={item.icon} color={glyphColor} />
               <Text
-                style={[styles.tabLabel, { color: labelColor }, active && styles.tabLabelActive]}
+                style={[styles.tabLabel, { color: labelColor }]}
                 numberOfLines={1}
               >
                 {t(item.labelKey)}
@@ -124,7 +144,7 @@ export function NavBar() {
             <Link
               key={item.key}
               href={item.href}
-              style={styles.tabItem}
+              style={StyleSheet.flatten([styles.tabItem, active && styles.tabItemActive])}
               aria-current={active ? 'page' : undefined}
             >
               {content}
@@ -196,8 +216,8 @@ const styles = StyleSheet.create({
     borderTopColor: colors.line,
     zIndex: 10,
   },
-  // flex: 1 verteilt beliebig viele Eintraege gleichmaessig - aktuell 5
-  // (News, Kurse, Sessions, Team, Konto), minWidth 0 verhindert, dass ein
+  // flex: 1 verteilt beliebig viele Eintraege gleichmaessig - aktuell 6
+  // (News, Kurse, Sessions, Tagebuch, Team, Konto), minWidth 0 verhindert, dass ein
   // langes Label den Nachbarn Platz wegnimmt.
   //
   // display/flexDirection stehen hier ausdruecklich, obwohl das fuer eine View
@@ -216,6 +236,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
+    // Die Leiste fuer den aktiven Eintrag liegt bei allen bereit (in der
+    // Farbe der Leiste selbst, also unsichtbar),
+    // damit Symbol und Beschriftung beim Wechsel nicht um 2 px springen.
+    borderTopWidth: 2,
+    borderTopColor: colors.surface,
+  },
+  // Aktiv heisst Farbe plus Leiste oben, nicht fett: seit sechs Eintraegen hat
+  // jeder auf 320 px nur gut 53 px, und ein fettes "Tagebuch" wurde zu
+  // "Tagebu..." abgeschnitten.
+  tabItemActive: {
+    borderTopColor: colors.ocean700,
   },
   // lineHeight muss ausdruecklich gesetzt sein: numberOfLines={1} bringt in
   // react-native-web ein overflow: hidden mit, und mit dem Standard
@@ -228,10 +259,6 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     textAlign: 'center',
   },
-  tabLabelActive: {
-    fontWeight: '600',
-  },
-
   glyphBox: {
     width: 22,
     height: 22,
@@ -262,6 +289,27 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: radius.full,
     borderWidth: 1.8,
+  },
+  tagebuchCover: {
+    width: 15,
+    height: 18,
+    borderRadius: 2,
+    borderWidth: 1.6,
+    flexDirection: 'row',
+  },
+  tagebuchSpine: {
+    width: 1.6,
+    marginLeft: 2,
+  },
+  tagebuchLines: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2.5,
+  },
+  tagebuchLine: {
+    height: 1.6,
+    borderRadius: 1,
   },
   teamGlyph: {
     justifyContent: 'flex-start',

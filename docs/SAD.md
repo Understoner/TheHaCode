@@ -1258,10 +1258,15 @@ Ein Modus, den jede Person unter dem Tagebuch einschaltet
 (`profiles.habit_score_enabled`, Vorgabe aus). Verfügbar für alle, nicht nur
 für Plus — Vorschau-Nutzer sehen so, dass ihr Tageslimit nicht voll wird.
 
-* **Kategorien** (`habit_categories`) sind Longevity-Bereiche. Heute nur
-  *Atmung*; geplant ist der Ausbau zum Longevity-Tagebuch, darunter
-  **negative Kategorien** (`is_negative`, z. B. „Zuckerattacke"), die Punkte
-  abziehen. Neue Kategorien sind Zeilen, keine Schemaänderung.
+* **Kategorien** (`habit_categories`) sind Longevity-Bereiche: Atmung,
+  Ernährung, Fasten, Bewegung, Muskeltraining, Schlaf, Stressmanagement (0026).
+  Neue Kategorien sind Zeilen, keine Schemaänderung.
+* **Das Vorzeichen hängt am Habit** (`habit_templates.is_negative`, seit 0028,
+  Entscheidung 26.10.2026): „Koffein am Abend“ zieht unter *Schlaf* ab,
+  „Feste Schlafenszeit“ bringt Punkte in derselben Kategorie. Die Punkte
+  bleiben ein Betrag (`points >= 0`). `habit_categories.is_negative` gibt es
+  weiter für Altbestand: dort zieht jedes Habit ab, und die Kategorie zählt
+  nicht zu P.
 * **Punkte gibt es fürs Erledigen, nicht für den Wert.** Ein Eintrag an einem
   Tag bringt die Punkte der Vorlage (`habit_templates.points`), egal welcher
   BOLT-Wert herauskommt (§5.7). Mehr als ein Eintrag je Habit und Tag ist
@@ -1272,11 +1277,14 @@ für Plus — Vorschau-Nutzer sehen so, dass ihr Tageslimit nicht voll wird.
 **Rechenregel** — `P_d`, `P_w`, `P_m` sind die Summen der Limits aller
 *positiven* Kategorien je Tag, Woche, Monat:
 
-1. *Kategorie und Tag:* Summe der Punkte ihrer erledigten Habits, gedeckelt auf
-   `max_per_day`. Bei negativen Kategorien ist das ein Abzug, gedeckelt auf
-   `−max_per_day`.
-2. *Kategorie und Woche/Monat:* Summe der gedeckelten Tageswerte der Kategorie,
-   gedeckelt auf `max_per_week` bzw. `max_per_month` (negativ entsprechend).
+1. *Kategorie und Tag:* Gewinn = Summe der Punkte ihrer erledigten positiven
+   Habits, gedeckelt auf `max_per_day`. Abzug = Summe der negativen Habits,
+   **getrennt** ebenfalls auf `max_per_day` gedeckelt. Der Tageswert ist
+   Gewinn minus Abzug. Getrennt, damit ein Überschuss über dem Limit keinen
+   Abzug verschluckt: 30 gesammelt und 10 verloren ergibt 20 − 10 = 10.
+2. *Kategorie und Woche/Monat:* Gewinn und Abzug je für sich als Summe der
+   gedeckelten Tage, gedeckelt auf `max_per_week` bzw. `max_per_month`; der
+   Wert ist wieder Gewinn minus Abzug.
    Woche = ISO-Woche (Montag bis Sonntag), Monat = Kalendermonat. Eine Woche,
    die über einen Monatswechsel reicht, zählt für beide Monate mit ihren Tagen.
 3. *Gesamt:* Summe über alle Kategorien, begrenzt auf **[−P, +P]** des

@@ -10,7 +10,13 @@ import type { DimensionValue } from 'react-native';
 // spaeter ueber die Sessions erreichbar sein. "Konto" ist seit der Anbindung
 // von Supabase Auth eine echte Route; die comingSoon-Variante bleibt im Typ,
 // weil der Konfigurator sie wieder brauchen wird.
-export type NavIcon = 'news' | 'kurse' | 'sessions' | 'team' | 'konto';
+//
+// Das Tagebuch (Route /habit-tracker) hing bis 26.10.2026 nur an den
+// Sessions und ist seither der sechste Eintrag: zu wichtig, um es hinter einer
+// anderen Seite zu verstecken. Sechs Eintraege passen auch auf 320 px - jeder
+// bekommt gut 53 px, die laengste Beschriftung ("Tagebuch", "Sessions") braucht
+// bei 10 px Schrift rund 40 px.
+export type NavIcon = 'news' | 'kurse' | 'sessions' | 'tagebuch' | 'team' | 'konto';
 
 export type NavItem =
   | { key: string; labelKey: string; icon: NavIcon; kind: 'link'; href: Href }
@@ -43,6 +49,7 @@ export const navItems: NavItem[] = [
   { key: 'news', labelKey: 'nav.news', icon: 'news', kind: 'link', href: '/' },
   { key: 'kurse', labelKey: 'nav.kurse', icon: 'kurse', kind: 'link', href: '/kurse' },
   { key: 'sessions', labelKey: 'nav.sessions', icon: 'sessions', kind: 'link', href: '/sessions' },
+  { key: 'tagebuch', labelKey: 'nav.tagebuch', icon: 'tagebuch', kind: 'link', href: '/habit-tracker' },
   { key: 'team', labelKey: 'nav.team', icon: 'team', kind: 'link', href: '/team' },
   { key: 'konto', labelKey: 'nav.konto', icon: 'konto', kind: 'link', href: '/konto' },
 ];

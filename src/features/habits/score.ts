@@ -8,14 +8,28 @@
 // DIE REGEL IN DREI STUFEN
 // ------------------------
 //   1. Kategorie und Tag: Punkte der erledigten Habits, gedeckelt auf das
-//      Tageslimit der Kategorie. Negative Kategorien ziehen ab, ebenso
-//      gedeckelt.
+//      Tageslimit der Kategorie. Negative Habits ziehen ab - ihre Summe wird
+//      GETRENNT auf dasselbe Tageslimit gedeckelt (Entscheidung 26.10.2026).
 //   2. Kategorie und Woche/Monat: Summe der gedeckelten Tage, gedeckelt auf
-//      das Wochen- bzw. Monatslimit.
+//      das Wochen- bzw. Monatslimit - wieder Gewinn und Abzug je fuer sich.
+//      Der Wert der Kategorie ist Gewinn minus Abzug, liegt also zwischen
+//      -Limit und +Limit.
 //   3. Gesamt: Summe aller Kategorien, begrenzt auf [-P, +P]. P ist die
 //      Summe der Limits aller POSITIVEN Kategorien im selben Zeitraum. Der
 //      Score darf also ins Minus, aber nie weiter, als das positive Maximum
 //      reicht (Entscheidung 25.10.2026).
+//
+// DAS VORZEICHEN HAENGT AM HABIT (seit 26.10.2026, Migration 0028)
+// ----------------------------------------------------------------
+// Vorher hing es an der Kategorie (0021), und ein Abzug brauchte eine eigene
+// Kategorie. Jetzt traegt jede Kategorie Gewinn und Abzug zugleich: "Feste
+// Schlafenszeit" und "Koffein am Abend" stehen beide unter Schlaf. Eine
+// Kategorie mit is_negative gibt es weiter (alte Daten); dort zaehlt jedes
+// Habit als Abzug, und sie traegt nichts zum Maximum P bei.
+//
+// Getrennt gedeckelt, nicht verrechnet: wer an einem Tag 30 Punkte sammelt
+// und 10 verliert, soll nicht 20 behalten, nur weil das Limit 20 ist - der
+// Abzug wuerde sonst im Ueberschuss verschwinden. So zaehlen 20 - 10 = 10.
 //
 // NUR AKTIVE KATEGORIEN (Entscheidung 25.10.2026, zweite Runde)
 // -------------------------------------------------------------
@@ -54,6 +68,8 @@ export type ScoreCategory = {
 export type ScoreEntry = {
   categoryId: string;
   points: number;
+  /** Das Habit zieht ab statt zu bringen (habit_templates.is_negative). */
+  isNegative?: boolean;
   date: IsoDate;
 };
 
@@ -63,6 +79,7 @@ export type CategoryScore = {
   value: number;
   /** Das Limit dieses Zeitraums, immer positiv. */
   max: number;
+  /** Die ganze Kategorie zieht ab (Altbestand) - nicht: der Wert ist negativ. */
   isNegative: boolean;
 };
 
@@ -130,31 +147,40 @@ function monthsUpTo(anchor: IsoDate): IsoDate[] {
   return Array.from({ length: Number(month) }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}-01`);
 }
 
+type Amounts = { gain: number; loss: number };
+
 /**
- * Punkte je Kategorie und Tag als Betrag, schon auf das Tageslimit gedeckelt.
- * Schluessel: `${categoryId}|${date}`.
+ * Punkte je Kategorie und Tag als Betraege, Gewinn und Abzug je fuer sich
+ * schon auf das Tageslimit gedeckelt. Schluessel: `${categoryId}|${date}`.
  */
 function cappedDailyAmounts(
   entries: ScoreEntry[],
   byId: Map<string, ScoreCategory>,
-): Map<string, number> {
-  const raw = new Map<string, number>();
+): Map<string, Amounts> {
+  const raw = new Map<string, Amounts>();
   for (const entry of entries) {
     // Eintraege einer unbekannten Kategorie (zurueckgezogen, nicht
     // veroeffentlicht) zaehlen nicht - sonst stuende ein Betrag ohne Limit da.
-    if (!byId.has(entry.categoryId)) continue;
-    // Punkte sind laut Datenbank nie negativ (0021, check points >= 0). Wer
-    // hier trotzdem etwas Negatives hineinreicht, soll keinen Abzug in einer
-    // positiven Kategorie erzeugen.
+    const category = byId.get(entry.categoryId);
+    if (!category) continue;
+    // Punkte sind laut Datenbank nie negativ (0021, check points >= 0), das
+    // Vorzeichen steht daneben. Wer hier trotzdem etwas Negatives
+    // hineinreicht, soll damit nicht die Richtung umdrehen.
     const points = Math.max(0, entry.points);
     const key = `${entry.categoryId}|${entry.date}`;
-    raw.set(key, (raw.get(key) ?? 0) + points);
+    const sums = raw.get(key) ?? { gain: 0, loss: 0 };
+    if (entry.isNegative || category.isNegative) sums.loss += points;
+    else sums.gain += points;
+    raw.set(key, sums);
   }
 
-  const capped = new Map<string, number>();
-  for (const [key, sum] of raw) {
+  const capped = new Map<string, Amounts>();
+  for (const [key, sums] of raw) {
     const category = byId.get(key.split('|')[0])!;
-    capped.set(key, Math.min(sum, category.maxPerDay));
+    capped.set(key, {
+      gain: Math.min(sums.gain, category.maxPerDay),
+      loss: Math.min(sums.loss, category.maxPerDay),
+    });
   }
   return capped;
 }
@@ -163,11 +189,20 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function signed(category: ScoreCategory, amount: number): number {
-  // `|| 0` faengt die -0 ab, die bei einer leeren negativen Kategorie
-  // entstuende - in Tests und in der Anzeige ein unnoetiges Raetsel.
-  return (category.isNegative ? -amount : amount) || 0;
+function net(amounts: Amounts): number {
+  return amounts.gain - amounts.loss;
 }
+
+/** Gewinn und Abzug je fuer sich auf `limit` gedeckelt. */
+function cap(amounts: Amounts, limit: number): Amounts {
+  return { gain: Math.min(amounts.gain, limit), loss: Math.min(amounts.loss, limit) };
+}
+
+function add(a: Amounts, b: Amounts): Amounts {
+  return { gain: a.gain + b.gain, loss: a.loss + b.loss };
+}
+
+const ZERO: Amounts = { gain: 0, loss: 0 };
 
 /**
  * Der Score eines Zeitraums. Ohne `active` zaehlen alle Kategorien - so
@@ -189,7 +224,7 @@ export function scoreFor(
   const byId = new Map(categories.map((c) => [c.id, c]));
   const daily = cappedDailyAmounts(entries, byId);
   const sumDays = (categoryId: string, days: IsoDate[]) =>
-    days.reduce((acc, day) => acc + (daily.get(`${categoryId}|${day}`) ?? 0), 0);
+    days.reduce((acc, day) => add(acc, daily.get(`${categoryId}|${day}`) ?? ZERO), ZERO);
 
   let result: CategoryScore[];
 
@@ -199,12 +234,12 @@ export function scoreFor(
     result = categories.flatMap((category) => {
       const activeMonths = months.filter((_, i) => activeIn[i](category.id));
       if (activeMonths.length === 0) return [];
-      const amount = activeMonths.reduce(
-        (acc, m) => acc + Math.min(sumDays(category.id, monthDays(m)), category.maxPerMonth),
-        0,
+      const amounts = activeMonths.reduce(
+        (acc, m) => add(acc, cap(sumDays(category.id, monthDays(m)), category.maxPerMonth)),
+        ZERO,
       );
       const max = activeMonths.length * category.maxPerMonth;
-      return [{ categoryId: category.id, value: signed(category, Math.min(amount, max)), max, isNegative: category.isNegative }];
+      return [{ categoryId: category.id, value: net(cap(amounts, max)), max, isNegative: category.isNegative }];
     });
   } else {
     const activeNow = isActive(monthKey(anchor));
@@ -213,8 +248,8 @@ export function scoreFor(
       .filter((category) => activeNow(category.id))
       .map((category) => {
         const max = limitFor(category, period);
-        const amount = Math.min(sumDays(category.id, days), max);
-        return { categoryId: category.id, value: signed(category, amount), max, isNegative: category.isNegative };
+        const amounts = cap(sumDays(category.id, days), max);
+        return { categoryId: category.id, value: net(amounts), max, isNegative: category.isNegative };
       });
   }
 

@@ -115,6 +115,9 @@ export function HabitEntryRow({
   const remove = useDeleteLog();
   const template = habit.habit_templates;
   const error = save.error ?? remove.error;
+  // Abzug, wenn das Habit selbst abzieht (0028) oder - Altbestand - seine
+  // ganze Kategorie; dieselbe Regel wie in score.ts.
+  const negative = template.is_negative || (category?.is_negative ?? false);
 
   const markDone = () =>
     save.mutate({ userHabitId: habit.id, date, valueNumeric: 1 });
@@ -126,8 +129,8 @@ export function HabitEntryRow({
         <Text style={styles.title}>{template.title}</Text>
 
         {scoreOn && category && template.points > 0 ? (
-          <Text style={category.is_negative ? styles.pointsNegative : styles.points}>
-            {t(category.is_negative ? 'diary.entry.pointsNegative' : 'diary.entry.points', {
+          <Text style={negative ? styles.pointsNegative : styles.points}>
+            {t(negative ? 'diary.entry.pointsNegative' : 'diary.entry.points', {
               points: template.points,
             })}
           </Text>

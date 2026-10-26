@@ -25,17 +25,12 @@ export default function SessionsScreen() {
 
       {/* Der Konfigurator haengt bewusst an den Sessions und bekommt keinen
           eigenen Eintrag in der Navigation (so schon in design/navigation.ts
-          vorgesehen): auf dem Handy sind fuenf Eintraege in der Tab-Leiste die
-          Grenze, und wer eigene Sequenzen sucht, sucht sie bei den Sequenzen. */}
-      {/* Das Tagebuch haengt aus demselben Grund hier: die Tab-Leiste hat
-          auf dem Handy keinen sechsten Platz, und Tagebuch und Sessions
-          gehoeren zusammen - "Atmen zum Einschlafen" startet eine Session. */}
+          vorgesehen): die Tab-Leiste ist mit sechs Eintraegen voll, und wer
+          eigene Sequenzen sucht, sucht sie bei den Sequenzen. Das Tagebuch hing
+          bis 26.10.2026 ebenfalls hier und hat jetzt einen eigenen Eintrag. */}
       <View style={styles.links}>
         <Link href="/sequenzen" style={styles.mine}>
           {t('sessions.meine')}
-        </Link>
-        <Link href="/habit-tracker" style={styles.mine}>
-          {t('sessions.tagebuch')}
         </Link>
       </View>
 
