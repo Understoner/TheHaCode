@@ -38,6 +38,7 @@ function template(id: string, overrides: Partial<HabitTemplate> = {}): HabitTemp
     default_target: null,
     higher_is_better: true,
     points: 10,
+    is_negative: false,
     is_preview: false,
     exercise_id: null,
     icon: null,

@@ -82,6 +82,7 @@ export function DiaryInsights({
         {
           categoryId: habit.habit_templates.category_id,
           points: habit.habit_templates.points,
+          isNegative: habit.habit_templates.is_negative,
           date: l.log_date,
         },
       ];
@@ -253,7 +254,9 @@ function ScorePanel({ scores, categories }: { scores: PeriodScore[]; categories:
                   <View
                     style={[
                       styles.barFill,
-                      c.isNegative && styles.barFillNegative,
+                      // Seit 0028 kann jede Kategorie ins Minus gehen - die
+                      // Farbe folgt dem Wert, nicht der Kategorie.
+                      c.value < 0 && styles.barFillNegative,
                       { width: `${share * 100}%` },
                     ]}
                   />

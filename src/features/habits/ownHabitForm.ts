@@ -27,6 +27,7 @@ export const ownHabitSchema = z
     minValue: optionalNumber,
     maxValue: optionalNumber,
     points: z.number().int().min(0, { error: 'errors:habits.points' }).max(10, { error: 'errors:habits.points' }),
+    isNegative: z.boolean(),
   })
   .refine(
     (v) =>
@@ -56,5 +57,6 @@ export function toOwnHabitInput(values: OwnHabitValues): OwnHabitInput {
     minValue: number ? toNumber(values.minValue) : null,
     maxValue: number ? toNumber(values.maxValue) : null,
     points: values.points,
+    isNegative: values.isNegative,
   };
 }

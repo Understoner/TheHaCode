@@ -381,6 +381,8 @@ export type OwnHabitInput = {
   maxValue: number | null;
   /** 0 bis 10 je Erledigung (0026). */
   points: number;
+  /** Zieht die Punkte ab, statt sie zu bringen (0028). */
+  isNegative: boolean;
 };
 
 /**
@@ -406,6 +408,7 @@ export function useSaveOwnHabit() {
         max_value: input.trackingType === 'number' ? input.maxValue : null,
         step_value: input.trackingType === 'number' ? 1 : null,
         points: input.points,
+        is_negative: input.isNegative,
       };
 
       if (id) {

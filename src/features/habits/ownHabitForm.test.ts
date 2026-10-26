@@ -11,6 +11,7 @@ const basis: OwnHabitValues = {
   minValue: '0',
   maxValue: '30',
   points: 5,
+  isNegative: false,
 };
 
 describe('ownHabitSchema', () => {
@@ -57,5 +58,10 @@ describe('toOwnHabitInput', () => {
       maxValue: null,
       description: null,
     });
+  });
+
+  it('reicht die Wirkung unveraendert weiter', () => {
+    expect(toOwnHabitInput(basis).isNegative).toBe(false);
+    expect(toOwnHabitInput({ ...basis, isNegative: true }).isNegative).toBe(true);
   });
 });

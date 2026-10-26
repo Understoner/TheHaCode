@@ -271,7 +271,12 @@ function HabitRow({
             <Fact label={t('habits.details.entry')} value={entryKind} />
             <Fact
               label={t('habits.details.points')}
-              value={t('habits.details.pointsValue', { count: template.points })}
+              value={t(
+                template.is_negative || category.is_negative
+                  ? 'habits.details.pointsValueNegative'
+                  : 'habits.details.pointsValue',
+                { count: template.points },
+              )}
             />
           </View>
         </View>

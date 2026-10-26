@@ -697,6 +697,7 @@ export type Database = {
           higher_is_better: boolean
           icon: string | null
           id: string
+          is_negative: boolean
           is_preview: boolean
           is_published: boolean
           max_value: number | null
@@ -722,6 +723,7 @@ export type Database = {
           higher_is_better?: boolean
           icon?: string | null
           id?: string
+          is_negative?: boolean
           is_preview?: boolean
           is_published?: boolean
           max_value?: number | null
@@ -747,6 +749,7 @@ export type Database = {
           higher_is_better?: boolean
           icon?: string | null
           id?: string
+          is_negative?: boolean
           is_preview?: boolean
           is_published?: boolean
           max_value?: number | null

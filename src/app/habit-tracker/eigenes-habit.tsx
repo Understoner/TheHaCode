@@ -29,8 +29,8 @@ import {
  * Ein eigenes Habit anlegen (ohne ?id) oder bearbeiten (?id=...).
  *
  * Anlegen und Bearbeiten sind Plus, Loeschen nicht (Migration 0024). Punkte
- * gibt es fuer eigene Habits vorerst keine - wie sie zaehlen sollen, ist noch
- * nicht entschieden; das Formular sagt es deshalb dazu.
+ * waehlt die Person, 0 bis 10 (0026), und ob das Habit sie bringt oder
+ * abzieht (0028).
  */
 export default function OwnHabitScreen() {
   const { t } = useTranslation();
@@ -135,6 +135,7 @@ function OwnHabitForm({
       minValue: existing?.min_value?.toString() ?? '',
       maxValue: existing?.max_value?.toString() ?? '',
       points: existing?.points ?? 5,
+      isNegative: existing?.is_negative ?? false,
     },
     mode: 'onTouched',
   });
@@ -279,6 +280,27 @@ function OwnHabitForm({
             onBlur={field.onBlur}
             error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
           />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="isNegative"
+        render={({ field }) => (
+          <View style={styles.field}>
+            <Text style={styles.label}>{t('habits.own.fieldEffect')}</Text>
+            <View style={styles.chips} role="radiogroup" aria-label={t('habits.own.fieldEffect')}>
+              {([false, true] as const).map((negative) => (
+                <Choice
+                  key={String(negative)}
+                  label={t(negative ? 'habits.own.effect.negative' : 'habits.own.effect.positive')}
+                  active={field.value === negative}
+                  onPress={() => field.onChange(negative)}
+                />
+              ))}
+            </View>
+            {field.value ? <Text style={styles.hint}>{t('habits.own.effectHint')}</Text> : null}
+          </View>
         )}
       />
 

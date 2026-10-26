@@ -63,6 +63,7 @@ function habit(tracking: 'done' | 'number', overrides: Partial<MyHabit['habit_te
       default_target: null,
       higher_is_better: true,
       points: 10,
+      is_negative: false,
       is_preview: false,
       exercise_id: null,
       icon: null,
@@ -173,5 +174,30 @@ describe('HabitEntryRow', () => {
 
     zeige({ habit: habit('done'), category: kategorie, scoreOn: true });
     expect(screen.getByText('+10 Punkte')).toBeTruthy();
+  });
+
+  // Seit 0028 haengt das Vorzeichen am Habit: dieselbe positive Kategorie
+  // kann ein Habit tragen, das abzieht.
+  it('zeigt ein negatives Habit in einer positiven Kategorie als Abzug', () => {
+    const kategorie = {
+      id: 'cat-1',
+      slug: 'schlaf',
+      title: 'Schlaf',
+      description: null,
+      icon: null,
+      is_negative: false,
+      max_per_day: 20,
+      max_per_week: 100,
+      max_per_month: 400,
+      sort_order: 6,
+      is_published: true,
+      created_at: DATUM,
+      updated_at: DATUM,
+    };
+    const negativ = habit('done');
+    negativ.habit_templates = { ...negativ.habit_templates, is_negative: true, points: 6 };
+    zeige({ habit: negativ, category: kategorie, scoreOn: true });
+    expect(screen.getByText('−6 Punkte')).toBeTruthy();
+    expect(screen.queryByText('+6 Punkte')).toBeNull();
   });
 });
