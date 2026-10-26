@@ -151,7 +151,7 @@ describe('HabitEntryRow', () => {
     expect(screen.getByText('32 Sekunden')).toBeTruthy();
   });
 
-  it('nennt die Punkte nur, wenn der Habit Score Tracker an ist', () => {
+  it('nennt die Punkte nur, wenn der Tagebuch-Score an ist', () => {
     const kategorie = {
       id: 'cat-1',
       slug: 'atmung',

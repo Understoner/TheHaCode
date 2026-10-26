@@ -302,7 +302,7 @@ export function useDeleteLog() {
   });
 }
 
-/** Der Habit Score Tracker an oder aus - in profiles, geraeteuebergreifend. */
+/** Der Tagebuch-Score an oder aus - in profiles, geraeteuebergreifend. */
 export function useHabitScoreEnabled() {
   const { value, setValue } = useProfileFlag('habit_score_enabled', false);
   return { scoreOn: value, setScoreOn: setValue };
