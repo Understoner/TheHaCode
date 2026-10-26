@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { PressableRing } from '@/components/PressableRing';
+import { responsive } from '@/design/responsive';
 import { colors, radius, spacing } from '@/design/tokens';
 
 import { TrendChart, WeekBars } from './charts';
@@ -121,104 +122,110 @@ export function DiaryInsights({
     <View style={styles.section}>
       <Text style={styles.heading}>{t('diary.insights.title')}</Text>
 
-      {scoreOn ? <ScorePanel scores={derived.scores} categories={categories} /> : null}
+      {/* Jede Auswertung ist eine Karte im Raster (26.10.2026): breit
+          nebeneinander, mobil untereinander wie bisher. */}
+      <View {...responsive('habits-grid')} style={styles.cards}>
+        {scoreOn ? <ScorePanel scores={derived.scores} categories={categories} /> : null}
 
-      <View style={styles.card}>
-        <Text style={styles.big}>{t('diary.insights.week', { count: derived.week })}</Text>
-        <Text style={styles.text}>
-          {t('diary.insights.streak', { count: derived.streak.days })}
-        </Text>
-        <Text style={styles.meta}>
-          {derived.streak.graceUsedThisWeek
-            ? t('diary.insights.graceUsed')
-            : t('diary.insights.graceOpen')}
-        </Text>
-      </View>
-
-      <View style={styles.card}>
-        <View style={styles.monthNav}>
-          <PressableRing
-            onPress={() => onChangeMonth(shiftMonth(month, -1))}
-            accessibilityLabel={t('diary.insights.prevMonth')}
-            style={styles.navButton}
-          >
-            <Text style={styles.navText}>‹</Text>
-          </PressableRing>
-          <Text style={styles.cardTitle}>{formatMonth(month)}</Text>
-          <PressableRing
-            onPress={() => onChangeMonth(shiftMonth(month, 1))}
-            disabled={month.slice(0, 7) >= today.slice(0, 7)}
-            accessibilityLabel={t('diary.insights.nextMonth')}
-            style={styles.navButton}
-          >
-            <Text style={styles.navText}>›</Text>
-          </PressableRing>
+        <View style={styles.card}>
+          <Text style={styles.big}>{t('diary.insights.week', { count: derived.week })}</Text>
+          <Text style={styles.text}>
+            {t('diary.insights.streak', { count: derived.streak.days })}
+          </Text>
+          <Text style={styles.meta}>
+            {derived.streak.graceUsedThisWeek
+              ? t('diary.insights.graceUsed')
+              : t('diary.insights.graceOpen')}
+          </Text>
         </View>
-        <View style={styles.grid}>
-          {weekdays.map((d) => (
-            <Text key={d} style={styles.weekday}>
-              {d}
-            </Text>
-          ))}
-          {Array.from({ length: leading }, (_, i) => (
-            <View key={`leer-${i}`} style={styles.cell} />
-          ))}
-          {derived.heat.map((day) => (
-            <View
-              key={day.date}
-              accessibilityLabel={t('diary.insights.heatLabel', {
-                date: formatDay(day.date),
-                count: day.done,
-              })}
-              style={[
-                styles.cell,
-                styles.dayCell,
-                heatStyles[day.level],
-                day.date === today && styles.todayCell,
-                day.isFuture && styles.futureCell,
-              ]}
-            />
-          ))}
-        </View>
-      </View>
 
-      {derived.trends.map(({ habit, trend, summary }) => {
-        const unit = habit.habit_templates.unit ?? '';
-        return (
-          <View key={habit.id} style={styles.card}>
-            <Text style={styles.cardTitle}>
-              {t('diary.insights.trend', { title: habit.habit_templates.title })}
-            </Text>
-            {summary.best === null ? (
-              <Text style={styles.text}>{t('diary.insights.trendEmpty')}</Text>
-            ) : (
-              <>
-                <TrendChart points={trend} today={today} title={habit.habit_templates.title} />
-                <Text style={styles.text}>
-                  {t('diary.insights.best', { value: summary.best, unit })}
-                </Text>
-                {summary.change !== null && trend.length > 1 ? (
-                  <Text style={styles.text}>
-                    {t('diary.insights.change', {
-                      sign: summary.change > 0 ? '+' : summary.change < 0 ? '−' : '±',
-                      value: Math.abs(summary.change),
-                      unit,
-                    })}
-                  </Text>
-                ) : null}
-                <Text style={styles.meta}>{t('diary.insights.average')}</Text>
-              </>
-            )}
+        <View style={styles.card}>
+          <View style={styles.monthNav}>
+            <PressableRing
+              onPress={() => onChangeMonth(shiftMonth(month, -1))}
+              accessibilityLabel={t('diary.insights.prevMonth')}
+              style={styles.navButton}
+            >
+              <Text style={styles.navText}>‹</Text>
+            </PressableRing>
+            <Text style={styles.cardTitle}>{formatMonth(month)}</Text>
+            <PressableRing
+              onPress={() => onChangeMonth(shiftMonth(month, 1))}
+              disabled={month.slice(0, 7) >= today.slice(0, 7)}
+              accessibilityLabel={t('diary.insights.nextMonth')}
+              style={styles.navButton}
+            >
+              <Text style={styles.navText}>›</Text>
+            </PressableRing>
           </View>
-        );
-      })}
+          <View style={styles.grid}>
+            {weekdays.map((d) => (
+              <Text key={d} style={styles.weekday}>
+                {d}
+              </Text>
+            ))}
+            {Array.from({ length: leading }, (_, i) => (
+              <View key={`leer-${i}`} style={styles.cell} />
+            ))}
+            {derived.heat.map((day) => (
+              <View
+                key={day.date}
+                accessibilityLabel={t('diary.insights.heatLabel', {
+                  date: formatDay(day.date),
+                  count: day.done,
+                })}
+                style={[
+                  styles.cell,
+                  styles.dayCell,
+                  heatStyles[day.level],
+                  day.date === today && styles.todayCell,
+                  day.isFuture && styles.futureCell,
+                ]}
+              />
+            ))}
+          </View>
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t('diary.insights.minutes')}</Text>
-        <WeekBars weeks={derived.minutes} title={t('diary.insights.minutes')} />
-        <Text style={styles.meta}>
-          {t('diary.insights.minutesTotal', { minutes: totalMinutes })}
-        </Text>
+        {derived.trends.map(({ habit, trend, summary }) => {
+          const unit = habit.habit_templates.unit ?? '';
+          return (
+            <View key={habit.id} style={styles.card}>
+              <Text style={styles.cardTitle}>
+                {t('diary.insights.trend', {
+                  title: habit.habit_templates.title,
+                })}
+              </Text>
+              {summary.best === null ? (
+                <Text style={styles.text}>{t('diary.insights.trendEmpty')}</Text>
+              ) : (
+                <>
+                  <TrendChart points={trend} today={today} title={habit.habit_templates.title} />
+                  <Text style={styles.text}>
+                    {t('diary.insights.best', { value: summary.best, unit })}
+                  </Text>
+                  {summary.change !== null && trend.length > 1 ? (
+                    <Text style={styles.text}>
+                      {t('diary.insights.change', {
+                        sign: summary.change > 0 ? '+' : summary.change < 0 ? '−' : '±',
+                        value: Math.abs(summary.change),
+                        unit,
+                      })}
+                    </Text>
+                  ) : null}
+                  <Text style={styles.meta}>{t('diary.insights.average')}</Text>
+                </>
+              )}
+            </View>
+          );
+        })}
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t('diary.insights.minutes')}</Text>
+          <WeekBars weeks={derived.minutes} title={t('diary.insights.minutes')} />
+          <Text style={styles.meta}>
+            {t('diary.insights.minutesTotal', { minutes: totalMinutes })}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -290,7 +297,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.ink900,
   },
+  cards: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
   card: {
+    flexBasis: '100%',
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: radius.md,

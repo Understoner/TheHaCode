@@ -700,6 +700,7 @@ export type Database = {
           is_negative: boolean
           is_preview: boolean
           is_published: boolean
+          link_url: string | null
           max_value: number | null
           min_value: number | null
           owner_id: string | null
@@ -726,6 +727,7 @@ export type Database = {
           is_negative?: boolean
           is_preview?: boolean
           is_published?: boolean
+          link_url?: string | null
           max_value?: number | null
           min_value?: number | null
           owner_id?: string | null
@@ -752,6 +754,7 @@ export type Database = {
           is_negative?: boolean
           is_preview?: boolean
           is_published?: boolean
+          link_url?: string | null
           max_value?: number | null
           min_value?: number | null
           owner_id?: string | null

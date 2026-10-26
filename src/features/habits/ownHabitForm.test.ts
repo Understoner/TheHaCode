@@ -12,6 +12,7 @@ const basis: OwnHabitValues = {
   maxValue: '30',
   points: 5,
   isNegative: false,
+  link: '',
 };
 
 describe('ownHabitSchema', () => {
@@ -63,5 +64,22 @@ describe('toOwnHabitInput', () => {
   it('reicht die Wirkung unveraendert weiter', () => {
     expect(toOwnHabitInput(basis).isNegative).toBe(false);
     expect(toOwnHabitInput({ ...basis, isNegative: true }).isNegative).toBe(true);
+  });
+});
+
+describe('Link', () => {
+  it('nimmt einen Session-Pfad an und lehnt javascript: ab', () => {
+    expect(ownHabitSchema.safeParse({ ...basis, link: '/sessions/abc' }).success).toBe(true);
+    const result = ownHabitSchema.safeParse({ ...basis, link: 'javascript:alert(1)' });
+    expect(result.error?.issues[0]?.message).toBe('errors:habits.link');
+  });
+
+  it('macht aus der kopierten Adresse dieser App einen Pfad', () => {
+    const input = toOwnHabitInput(
+      { ...basis, link: 'https://app.example.at/sessions/abc' },
+      'https://app.example.at',
+    );
+    expect(input.link).toBe('/sessions/abc');
+    expect(toOwnHabitInput(basis, null).link).toBeNull();
   });
 });

@@ -5,9 +5,11 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { PressableRing } from '@/components/PressableRing';
 import { StateMessage } from '@/components/StateMessage';
+import { responsive } from '@/design/responsive';
 import { colors, radius, spacing } from '@/design/tokens';
 
 import { diaryErrorKey } from './diaryErrors';
+import { HabitLinkButton } from './HabitLinkButton';
 import {
   filterTemplates,
   groupByCategory,
@@ -117,23 +119,28 @@ export function HabitCatalog({
         groups.map(({ category, templates: inCategory }) => (
           <View key={category.id} style={styles.group}>
             <Text style={styles.category}>{category.title}</Text>
-            {inCategory.map((template) => (
-              <HabitRow
-                key={template.id}
-                template={template}
-                category={category}
-                chosen={active.has(template.id)}
-                favorite={favorites.has(template.id)}
-                locked={!template.is_preview && !plusAccess}
-                pending={choose.isPending}
-                onToggleFavorite={(favorite) =>
-                  toggleFavorite.mutate({ templateId: template.id, favorite })
-                }
-                onChoose={(chosen) =>
-                  choose.mutate({ templateId: template.id, chosen, sortOrder: template.sort_order })
-                }
-              />
-            ))}
+            {category.description ? (
+              <Text style={styles.categoryText}>{category.description}</Text>
+            ) : null}
+            <View {...responsive('habits-grid')} style={styles.grid}>
+              {inCategory.map((template) => (
+                <HabitRow
+                  key={template.id}
+                  template={template}
+                  category={category}
+                  chosen={active.has(template.id)}
+                  favorite={favorites.has(template.id)}
+                  locked={!template.is_preview && !plusAccess}
+                  pending={choose.isPending}
+                  onToggleFavorite={(favorite) =>
+                    toggleFavorite.mutate({ templateId: template.id, favorite })
+                  }
+                  onChoose={(chosen) =>
+                    choose.mutate({ templateId: template.id, chosen, sortOrder: template.sort_order })
+                  }
+                />
+              ))}
+            </View>
           </View>
         ))
       )}
@@ -142,10 +149,11 @@ export function HabitCatalog({
 }
 
 /**
- * Eine Zeile der Auswahl. Oben das, womit man handelt (Stern, Titel,
- * Aufnehmen), darunter die Beschreibung ueber die volle Breite, gekuerzt auf
- * zwei Zeilen. "Details" klappt ein Kaertchen mit dem ganzen Text und den
- * Eckdaten auf - bei vielen Habits bleibt die Liste so ueberschaubar.
+ * Eine Karte der Auswahl, angelegt wie die Session-Karten (26.10.2026): oben
+ * die Eckdaten, dann Titel und Herkunft, darunter die Beschreibung auf bis zu
+ * fuenf Zeilen. "Details" zeigt den ganzen Text und die Eckdaten ausfuehrlich.
+ * Aufnehmen sitzt unten, damit es in einer Reihe ungleich hoher Karten immer
+ * an derselben Stelle steht.
  */
 function HabitRow({
   template,
@@ -169,6 +177,7 @@ function HabitRow({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const own = isOwn(template);
+  const negative = template.is_negative || category.is_negative;
 
   const entryKind =
     template.tracking_type === 'number'
@@ -183,24 +192,19 @@ function HabitRow({
           .filter(Boolean)
           .join(' ')
       : t('habits.details.done');
+  const pointsText = t(
+    negative ? 'habits.details.pointsValueNegative' : 'habits.details.pointsValue',
+    { count: template.points },
+  );
 
   return (
     <View style={styles.row}>
-      <View style={styles.rowHead}>
-        <PressableRing
-          role="button"
-          aria-pressed={favorite}
-          aria-label={t(favorite ? 'habits.favorite.remove' : 'habits.favorite.add', {
-            title: template.title,
-          })}
-          onPress={() => onToggleFavorite(!favorite)}
-          style={[styles.star, favorite && styles.starOn]}
-        >
-          <Text style={[styles.starGlyph, favorite && styles.starGlyphOn]}>
-            {favorite ? '★' : '☆'}
-          </Text>
-        </PressableRing>
+      <View style={styles.metaRow}>
+        <Text style={negative ? styles.metaNegative : styles.metaPositive}>{pointsText}</Text>
+        <Text style={styles.meta}>{entryKind}</Text>
+      </View>
 
+      <View style={styles.rowHead}>
         <View style={styles.rowTitle}>
           <Text style={styles.title}>{template.title}</Text>
           <Text
@@ -214,27 +218,33 @@ function HabitRow({
           </Text>
         </View>
 
-        {locked && !chosen ? (
-          <Link href="/plus" style={styles.plusLink}>
-            {t('diary.picker.toPlus')}
-          </Link>
-        ) : (
-          <PressableRing
-            onPress={() => onChoose(!chosen)}
-            disabled={pending}
-            style={[styles.action, chosen && styles.actionOn]}
-          >
-            <Text style={[styles.actionText, chosen && styles.actionTextOn]}>
-              {chosen ? t('diary.picker.remove') : t('diary.picker.add')}
-            </Text>
-          </PressableRing>
-        )}
+        <PressableRing
+          role="button"
+          aria-pressed={favorite}
+          aria-label={t(favorite ? 'habits.favorite.remove' : 'habits.favorite.add', {
+            title: template.title,
+          })}
+          onPress={() => onToggleFavorite(!favorite)}
+          style={[styles.star, favorite && styles.starOn]}
+        >
+          <Text style={[styles.starGlyph, favorite && styles.starGlyphOn]}>
+            {favorite ? '★' : '☆'}
+          </Text>
+        </PressableRing>
       </View>
 
-      {template.description_md && !open ? (
-        <Text style={styles.description} numberOfLines={2}>
+      {template.description_md ? (
+        <Text style={styles.description} numberOfLines={open ? undefined : 5}>
           {template.description_md}
         </Text>
+      ) : null}
+
+      {open ? (
+        <View style={styles.facts}>
+          <Fact label={t('habits.details.category')} value={category.title} />
+          <Fact label={t('habits.details.entry')} value={entryKind} />
+          <Fact label={t('habits.details.points')} value={pointsText} />
+        </View>
       ) : null}
 
       <View style={styles.rowLinks}>
@@ -251,9 +261,24 @@ function HabitRow({
             {open ? t('habits.details.hideShort') : t('habits.details.showShort')}
           </Text>
         </PressableRing>
+        {template.exercise_id ? (
+          <Link href={`/sessions/${template.exercise_id}`} style={styles.editLink}>
+            {t('habits.details.session')}
+          </Link>
+        ) : (
+          <HabitLinkButton
+            url={template.link_url}
+            sessionLabel={t('habits.details.session')}
+            linkLabel={t('habits.details.link')}
+            style={styles.editLink}
+          />
+        )}
         {own ? (
           <Link
-            href={{ pathname: '/habit-tracker/eigenes-habit', params: { id: template.id } }}
+            href={{
+              pathname: '/habit-tracker/eigenes-habit',
+              params: { id: template.id },
+            }}
             style={styles.editLink}
           >
             {t('habits.edit')}
@@ -261,26 +286,23 @@ function HabitRow({
         ) : null}
       </View>
 
-      {open ? (
-        <View style={styles.details}>
-          {template.description_md ? (
-            <Text style={styles.detailsText}>{template.description_md}</Text>
-          ) : null}
-          <View style={styles.facts}>
-            <Fact label={t('habits.details.category')} value={category.title} />
-            <Fact label={t('habits.details.entry')} value={entryKind} />
-            <Fact
-              label={t('habits.details.points')}
-              value={t(
-                template.is_negative || category.is_negative
-                  ? 'habits.details.pointsValueNegative'
-                  : 'habits.details.pointsValue',
-                { count: template.points },
-              )}
-            />
-          </View>
-        </View>
-      ) : null}
+      <View style={styles.rowFoot}>
+        {locked && !chosen ? (
+          <Link href="/plus" style={styles.plusLink}>
+            {t('diary.picker.toPlus')}
+          </Link>
+        ) : (
+          <PressableRing
+            onPress={() => onChoose(!chosen)}
+            disabled={pending}
+            style={[styles.action, chosen && styles.actionOn]}
+          >
+            <Text style={[styles.actionText, chosen && styles.actionTextOn]}>
+              {chosen ? t('diary.picker.remove') : t('diary.picker.add')}
+            </Text>
+          </PressableRing>
+        )}
+      </View>
     </View>
   );
 }
@@ -358,6 +380,11 @@ const styles = StyleSheet.create({
   group: {
     gap: spacing.sm,
   },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
   category: {
     fontSize: 12,
     fontWeight: '600',
@@ -365,13 +392,46 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
+  categoryText: {
+    fontSize: 13,
+    color: colors.ink700,
+  },
+  // Mobil eine Karte je Reihe; ab dem Breakpoint setzt responsive.ts die
+  // Breite (habits-grid).
   row: {
+    flexGrow: 0,
+    flexBasis: '100%',
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  meta: {
+    fontSize: 11,
+    color: colors.ink700,
+  },
+  metaPositive: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.sage700,
+  },
+  metaNegative: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.danger,
+  },
+  rowFoot: {
+    // Unten in der Karte, auch wenn die Nachbarkarte laenger ist.
+    marginTop: 'auto',
+    flexDirection: 'row',
+    paddingTop: 4,
   },
   rowHead: {
     flexDirection: 'row',
@@ -384,6 +444,7 @@ const styles = StyleSheet.create({
   },
   rowLinks: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: spacing.md,
   },
@@ -395,22 +456,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.ocean700,
   },
-  details: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surfaceSubtle,
-  },
-  detailsText: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: colors.ink700,
-  },
   facts: {
     gap: 6,
-    paddingTop: spacing.sm,
+    paddingVertical: spacing.sm,
     borderTopWidth: 1,
     borderTopColor: colors.line,
   },

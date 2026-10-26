@@ -383,6 +383,8 @@ export type OwnHabitInput = {
   points: number;
   /** Zieht die Punkte ab, statt sie zu bringen (0028). */
   isNegative: boolean;
+  /** App-Pfad oder http(s), zum Beispiel eine Session (0030). */
+  link: string | null;
 };
 
 /**
@@ -409,6 +411,7 @@ export function useSaveOwnHabit() {
         step_value: input.trackingType === 'number' ? 1 : null,
         points: input.points,
         is_negative: input.isNegative,
+        link_url: input.link,
       };
 
       if (id) {

@@ -68,5 +68,7 @@
   "habits.forbidden": "Eigene Habits anlegen und bearbeiten gehört zu Plus und braucht deine Einwilligung zum Tagebuch. Beides findest du unter „Konto“.",
   "habits.limit": "Du hast schon 100 eigene Habits. Lösch eines, das du nicht mehr brauchst, dann geht es weiter.",
   "habits.points": "Wähl zwischen 0 und 10 Punkten.",
+  "habits.link": "Der Link muss mit https:// beginnen oder ein Pfad dieser App sein, etwa /sessions/… – am einfachsten kopierst du die Adresse der Session aus der Adresszeile.",
+  "habits.linkLong": "Der Link darf höchstens 500 Zeichen haben.",
   "habits.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal."
 }

@@ -4,6 +4,7 @@
 
 import { z } from 'zod';
 
+import { currentOrigin, isValidHabitLink, normalizeHabitLink } from './habitLink';
 import type { OwnHabitInput } from './useHabits';
 
 const optionalNumber = z
@@ -28,6 +29,13 @@ export const ownHabitSchema = z
     maxValue: optionalNumber,
     points: z.number().int().min(0, { error: 'errors:habits.points' }).max(10, { error: 'errors:habits.points' }),
     isNegative: z.boolean(),
+    link: z
+      .string()
+      .trim()
+      .max(500, { error: 'errors:habits.linkLong' })
+      .refine((value) => value === '' || isValidHabitLink(value), {
+        error: 'errors:habits.link',
+      }),
   })
   .refine(
     (v) =>
@@ -46,7 +54,10 @@ function toNumber(value: string): number | null {
 }
 
 /** Formularwerte in das, was useSaveOwnHabit schreibt. */
-export function toOwnHabitInput(values: OwnHabitValues): OwnHabitInput {
+export function toOwnHabitInput(
+  values: OwnHabitValues,
+  appOrigin: string | null = currentOrigin(),
+): OwnHabitInput {
   const number = values.trackingType === 'number';
   return {
     categoryId: values.categoryId,
@@ -58,5 +69,6 @@ export function toOwnHabitInput(values: OwnHabitValues): OwnHabitInput {
     maxValue: number ? toNumber(values.maxValue) : null,
     points: values.points,
     isNegative: values.isNegative,
+    link: normalizeHabitLink(values.link, appOrigin),
   };
 }

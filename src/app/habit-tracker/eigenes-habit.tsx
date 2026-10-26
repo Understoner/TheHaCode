@@ -136,6 +136,7 @@ function OwnHabitForm({
       maxValue: existing?.max_value?.toString() ?? '',
       points: existing?.points ?? 5,
       isNegative: existing?.is_negative ?? false,
+      link: existing?.link_url ?? '',
     },
     mode: 'onTouched',
   });
@@ -280,6 +281,30 @@ function OwnHabitForm({
             onBlur={field.onBlur}
             error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
           />
+        )}
+      />
+
+      {/* Verknuepfung mit einer Session (0030): der Redaktion oder einer
+          eigenen aus dem Konfigurator. Die Adresse kommt aus der Adresszeile;
+          eine Adresse dieser App wird beim Speichern zum Pfad. */}
+      <Controller
+        control={control}
+        name="link"
+        render={({ field, fieldState }) => (
+          <View style={styles.field}>
+            <TextField
+              label={t('habits.own.fieldLink')}
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              inputMode="url"
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder={t('habits.own.fieldLinkPlaceholder')}
+              error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
+            />
+            <Text style={styles.hint}>{t('habits.own.linkHint')}</Text>
+          </View>
         )}
       />
 

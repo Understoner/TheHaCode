@@ -50,7 +50,7 @@ function HabitsForUser() {
     <QueryBoundary query={plus}>
       {(plusAccess) => (
         <View style={styles.stack}>
-          <View style={styles.card}>
+          <View style={[styles.card, styles.ownCard]}>
             <Text style={styles.cardTitle}>{t('habits.own.title')}</Text>
             <Text style={styles.text}>
               {plusAccess ? t('habits.own.text') : t('habits.own.plusOnly')}
@@ -97,9 +97,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     gap: spacing.md,
     backgroundColor: colors.background,
+    // Volle Breite wie die Sessions (26.10.2026) - die Karten darunter
+    // verteilen sich ueber habits-grid auf mehrere Spalten.
     width: '100%',
-    maxWidth: 720,
-    alignSelf: 'center',
   },
   back: {
     fontSize: 14,
@@ -111,6 +111,8 @@ const styles = StyleSheet.create({
     color: colors.ink900,
   },
   intro: {
+    // Fliesstext bleibt lesbar schmal, auch wenn die Seite breit ist.
+    maxWidth: 720,
     fontSize: 15,
     lineHeight: 22,
     color: colors.ink700,
@@ -125,6 +127,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
+  },
+  ownCard: {
+    maxWidth: 720,
   },
   cardTitle: {
     fontSize: 16,
