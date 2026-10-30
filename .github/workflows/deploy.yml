@@ -56,6 +56,10 @@ jobs:
     timeout-minutes: 25
     outputs:
       smoke: ${{ steps.smoke.outcome }}
+      # Fuer den Security-Scan: STAGING_URL ist eine Environment-Variable und
+      # nur in Jobs mit environment: staging lesbar. So braucht der Scan das
+      # Environment (und dessen Secrets) nicht.
+      url: ${{ vars.STAGING_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -79,7 +83,7 @@ jobs:
           # Hochziehen ist eine bewusste Handlung: Version hier aendern,
           # "supabase db reset && supabase test db" oertlich mit genau dieser
           # Version laufen lassen, erst dann committen. Dieselbe Zahl steht in
-          # deploy.yml an zwei Stellen - alle drei gehoeren gemeinsam bewegt.
+          # deploy.yml an drei Stellen - alle vier gehoeren gemeinsam bewegt.
           version: 2.116.0
 
       - name: Migrationen nach Staging
@@ -119,11 +123,69 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+  # ------------------------------------------------------------- SECURITY
+  # Der Security-Scan (scripts/security/scan.mjs, Entscheidung 30.10.2026)
+  # laeuft vor jeder Befoerderung nach Live. Er BERICHTET nur - der Bericht
+  # steht in der Zusammenfassung dieses Laufs und als Artifact. Ausgewertet
+  # wird er auf Zuruf, umgesetzt nach Absprache. Fuer eine harte Sperre:
+  # --strict an den Scan-Aufruf haengen.
+  #
+  # Bewusst OHNE Secrets und nur mit Leserechten: Die Werkzeuge kommen von
+  # aussen. Selbst wenn eines kompromittiert waere (wie Trivy im Maerz 2026),
+  # gaebe es hier nichts zu stehlen.
+  security:
+    if: github.ref == 'refs/heads/develop'
+    name: Security-Scan (Bericht)
+    needs: staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Ganze Historie: Gitleaks prueft alle Commits, GuardDog und der
+          # Abhaengigkeitsvergleich brauchen origin/main als Basis.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          # Dieselbe Version wie in ci.yml (siehe Begruendung dort).
+          version: 2.116.0
+
+      # Nur fuer Splinter: die Datenbank aus den Migrationen, lokal im Runner.
+      - name: Lokale Supabase-Instanz starten
+        run: supabase start
+
+      - name: Security-Scan
+        env:
+          ZAP_TARGET: ${{ needs.staging.outputs.url }}
+        run: npm run security:scan -- --zap "$ZAP_TARGET" --base origin/main --out security-reports/ci
+
+      - name: Bericht in die Zusammenfassung
+        if: always()
+        run: cat security-reports/ci/BERICHT.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report
+          path: security-reports/ci/
+          retention-days: 30
+
   # ------------------------------------------------------------- BEFOERDERUNG
   promote:
     if: github.ref == 'refs/heads/develop'
     name: Nach main befoerdern
-    needs: staging
+    # Auch auf den Security-Scan: Ohne Bericht keine Auslieferung nach Live.
+    needs: [staging, security]
     runs-on: ubuntu-latest
     # Eigene Gruppe: hier wird gewartet, und Warten darf nichts blockieren.
     concurrency:
@@ -191,7 +253,7 @@ jobs:
           # Hochziehen ist eine bewusste Handlung: Version hier aendern,
           # "supabase db reset && supabase test db" oertlich mit genau dieser
           # Version laufen lassen, erst dann committen. Dieselbe Zahl steht in
-          # deploy.yml an zwei Stellen - alle drei gehoeren gemeinsam bewegt.
+          # deploy.yml an drei Stellen - alle vier gehoeren gemeinsam bewegt.
           version: 2.116.0
 
       - name: Migrationen nach Production

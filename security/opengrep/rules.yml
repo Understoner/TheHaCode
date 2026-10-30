@@ -1,0 +1,117 @@
+# Projektregeln aus CLAUDE.md als Opengrep-Regeln (30.10.2026).
+#
+# Schweregrade: ERROR = waere im strengen Modus ein Blocker, WARNING = im
+# Bericht zu besprechen, INFO = Hinweis. Jede Regel nennt die Stelle in
+# CLAUDE.md, aus der sie stammt.
+
+rules:
+  - id: thc-service-role-im-client
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Bezug auf den service_role-Schluessel im App-Code. Er lebt ausschliesslich
+      in Supabase Function Secrets (CLAUDE.md §Verboten).
+    paths:
+      include: [src/, app/]
+    pattern-either:
+      - patterns:
+          - pattern: process.env.$NAME
+          - metavariable-regex:
+              metavariable: $NAME
+              regex: (?i).*(service_role|secret).*
+      - patterns:
+          - pattern: '"$STR"'
+          - metavariable-regex:
+              metavariable: $STR
+              regex: (?i).*(service_role|sb_secret_).*
+
+  - id: thc-rolle-aus-user-metadata
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Rollen oder Berechtigungen aus user_metadata - das kann der Client selbst
+      setzen. Rollen stehen in app_metadata (CLAUDE.md §Nutzerverwaltung).
+    pattern-regex: user_metadata\??\.(role|roles|is_admin|admin|plan|plus|subscription)
+
+  - id: thc-eval
+    languages: [typescript]
+    severity: ERROR
+    message: Code aus Zeichenketten ausfuehren (eval / new Function) - nicht erlaubt.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  - id: thc-dangerously-set-inner-html
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      dangerouslySetInnerHTML umgeht den Schutz vor eingeschleustem HTML. Nur fuer
+      feste, selbst erzeugte Inhalte - pruefen, woher der Inhalt kommt.
+    paths:
+      exclude: [src/app/+html.tsx]
+    pattern-regex: dangerouslySetInnerHTML
+
+  - id: thc-localstorage-fachliche-daten
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      Schreiben in localStorage/sessionStorage. Fuer fachliche Daten verboten
+      (CLAUDE.md §Verboten) - pruefen, ob es nur eine Komfort-Einstellung ist.
+    pattern-either:
+      - pattern: localStorage.setItem(...)
+      - pattern: window.localStorage.setItem(...)
+      - pattern: sessionStorage.setItem(...)
+      - pattern: window.sessionStorage.setItem(...)
+
+  - id: thc-setinterval-zeitkritisch
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      setInterval in zeitkritischem Code - Timer driften kumulativ (CLAUDE.md
+      §Verboten, SAD §7.1).
+    paths:
+      include: [src/features/breathing/, src/features/sessions/]
+    pattern: setInterval(...)
+
+  - id: thc-unverschluesselte-adresse
+    languages: [typescript]
+    severity: WARNING
+    message: Feste http://-Adresse im App-Code - im Browser gemischte Inhalte, ohne Transportverschluesselung.
+    paths:
+      include: [src/, supabase/functions/]
+    patterns:
+      - pattern: '"$URL"'
+      - metavariable-regex:
+          metavariable: $URL
+          regex: ^http://(?!localhost|127\.0\.0\.1).+
+
+  - id: thc-cors-wildcard
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      Access-Control-Allow-Origin "*" in einer Edge Function - jede fremde Seite
+      darf sie aus dem Browser aufrufen. Pruefen, ob das gewollt ist.
+    paths:
+      include: [supabase/functions/]
+    pattern-regex: (?i)access-control-allow-origin['"]?\s*[:,]\s*['"]\*['"]
+
+  - id: thc-rls-using-true
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      RLS-Policy mit using (true) oder with check (true) - verboten (CLAUDE.md
+      §Verboten). Jede Policy braucht einen echten Bezug, meist auf auth.uid().
+    paths:
+      include: ['supabase/migrations/*.sql']
+    pattern-regex: (?i)(using|with\s+check)\s*\(\s*true\s*\)
+
+  - id: thc-security-definer
+    languages: [generic]
+    severity: INFO
+    message: >-
+      security definer - die Funktion laeuft mit den Rechten ihres Eigentuemers.
+      Braucht set search_path und eine eigene Pruefung, wer sie aufrufen darf
+      (selbst pruefen laut CLAUDE.md §Aufgabenteilung).
+    paths:
+      include: ['supabase/migrations/*.sql']
+    pattern-regex: (?i)security\s+definer

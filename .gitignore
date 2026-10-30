@@ -31,3 +31,6 @@ test-results/
 *:Zone.Identifier
 .vscode/
 .idea/
+
+# Security-Scan (npm run security:scan) - Berichte bleiben lokal bzw. im CI-Artifact.
+security-reports/

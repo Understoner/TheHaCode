@@ -48,7 +48,7 @@ jobs:
           # Hochziehen ist eine bewusste Handlung: Version hier aendern,
           # "supabase db reset && supabase test db" oertlich mit genau dieser
           # Version laufen lassen, erst dann committen. Dieselbe Zahl steht in
-          # deploy.yml an zwei Stellen - alle drei gehoeren gemeinsam bewegt.
+          # deploy.yml an drei Stellen - alle vier gehoeren gemeinsam bewegt.
           version: 2.116.0
 
       - name: Lokale Supabase-Instanz starten

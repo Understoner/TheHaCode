@@ -1,0 +1,39 @@
+# Gitleaks fuer TheHaCode: die Standardregeln plus die Schluessel, um die es
+# hier wirklich geht (CLAUDE.md §Verboten: der service_role-Key lebt
+# ausschliesslich in Supabase Function Secrets).
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "supabase-secret-key"
+description = "Supabase Secret Key (sb_secret_...) - hat service_role-Rechte"
+regex = '''sb_secret_[A-Za-z0-9_-]{20,}'''
+keywords = ["sb_secret_"]
+
+[[rules]]
+id = "supabase-service-role-jwt"
+description = "Supabase JWT mit role service_role"
+# "service_role" base64-kodiert, in allen drei moeglichen Verschiebungen
+# innerhalb des JWT-Payloads.
+regex = '''eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*(c2VydmljZV9yb2xl|NlcnZpY2Vfcm9sZ|zZXJ2aWNlX3JvbG)[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+'''
+keywords = ["eyj"]
+
+[[rules]]
+id = "stripe-webhook-secret"
+description = "Stripe Webhook Signing Secret"
+regex = '''whsec_[A-Za-z0-9]{24,}'''
+keywords = ["whsec_"]
+
+# Die oeffentlich dokumentierten Demo-Schluessel der LOKALEN Supabase-Instanz
+# (supabase start). Sie funktionieren nur gegen 127.0.0.1 und stehen in der
+# Supabase-Dokumentation - ein Fund waere ein Fehlalarm.
+[[allowlists]]
+description = "Lokale Supabase-Demo-Schluessel (supabase-demo)"
+regexTarget = "match"
+regexes = [
+  '''eyJ[A-Za-z0-9_-]+\.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIi[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+''',
+  # Bewusst als Muster mit Zeichenklassen statt woertlich: der Schluessel
+  # soll auch hier nicht im Klartext stehen (GitHubs Push-Schutz schlug an).
+  '''sb_secret_N7UND0UgjKTVK[-]Uodkm0Hg[_]xSvEMPvz''',
+]
