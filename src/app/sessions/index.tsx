@@ -1,40 +1,67 @@
-import { Link } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/design/tokens';
+import { ActiveFilter } from '@/components/FilterControls';
+import {
+  FilterGlyph,
+  HEADER_ICON_GAP,
+  HEADER_ICON_SIZE,
+  HeaderIconLink,
+  ListGlyph,
+} from '@/components/HeaderIcon';
+import { colors, spacing } from '@/design/tokens';
+import { parseSessionFilter } from '@/features/sessions/effects';
 import { PlayerHilfe } from '@/features/sessions/PlayerHilfe';
 import { SessionsList } from '@/features/sessions/SessionsList';
 
 export default function SessionsScreen() {
   const { t } = useTranslation();
+  // Der Filter steht in der Adresse (?filter=), gesetzt von /sessions/filter.
+  const filter = parseSessionFilter(useLocalSearchParams<{ filter?: string }>().filter);
+  const filtered = filter !== 'all';
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Kein Untertitel mehr (06.09.2026): was eine Session ist, erklaert
-          sich an der ersten Karte besser als an einem Satz darueber - und die
-          Karten sind das, wofuer der Platz da sein soll.
+          sich an der ersten Karte besser als an einem Satz darueber.
 
-          Dieselbe Hilfe wie im Player (14.09.2026): wer die Liste sieht, will
-          oft zuerst wissen, wie eine Session ablaeuft - und dass das Handy
-          dafuer nicht auf lautlos stehen darf. */}
+          Neben der Ueberschrift seit 30.10.2026 drei Symbole statt Filterleiste
+          und Link darunter - die Sessions stehen so gleich unter dem Titel:
+          Filter (eigene Seite), die eigenen Sequenzen (Konfigurator, bewusst
+          ohne eigenen Eintrag in der Tab-Leiste) und dieselbe Hilfe wie im
+          Player. */}
       <View style={styles.titleRow}>
-        <Text style={styles.title}>{t('sessions.title')}</Text>
-        <PlayerHilfe />
+        <Text role="heading" style={styles.title}>
+          {t('sessions.title')}
+        </Text>
+        <View style={styles.icons}>
+          <HeaderIconLink
+            href={{ pathname: '/sessions/filter', params: { filter } }}
+            label={t('sessions.filter.open')}
+            active={filtered}
+          >
+            <FilterGlyph active={filtered} />
+          </HeaderIconLink>
+          <HeaderIconLink href="/sequenzen" label={t('sessions.meine')}>
+            <ListGlyph />
+          </HeaderIconLink>
+          <PlayerHilfe kompakt />
+        </View>
       </View>
 
-      {/* Der Konfigurator haengt bewusst an den Sessions und bekommt keinen
-          eigenen Eintrag in der Navigation (so schon in design/navigation.ts
-          vorgesehen): die Tab-Leiste ist mit sechs Eintraegen voll, und wer
-          eigene Sequenzen sucht, sucht sie bei den Sequenzen. Das Tagebuch hing
-          bis 26.10.2026 ebenfalls hier und hat jetzt einen eigenen Eintrag. */}
-      <View style={styles.links}>
-        <Link href="/sequenzen" style={styles.mine}>
-          {t('sessions.meine')}
-        </Link>
-      </View>
+      {filtered ? (
+        <View style={styles.inset}>
+          <ActiveFilter
+            summary={
+              filter === 'favoriten' ? t('favoriten.filter') : t(`sessions.effects.${filter}`)
+            }
+            resetHref="/sessions"
+          />
+        </View>
+      ) : null}
 
-      <SessionsList />
+      <SessionsList filter={filter} />
     </ScrollView>
   );
 }
@@ -48,32 +75,21 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
   },
   title: {
-    flexShrink: 1,
-    fontSize: 28,
+    flex: 1,
+    fontSize: HEADER_ICON_SIZE,
     fontWeight: '600',
     color: colors.ink900,
   },
-  links: {
+  icons: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
+    alignItems: 'center',
+    gap: HEADER_ICON_GAP,
   },
-  mine: {
-    alignSelf: 'flex-start',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.ocean700,
-    color: colors.ocean700,
-    fontSize: 14,
-    fontWeight: '600',
+  inset: {
+    paddingHorizontal: spacing.md,
   },
 });

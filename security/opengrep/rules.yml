@@ -103,6 +103,10 @@ rules:
       §Verboten). Jede Policy braucht einen echten Bezug, meist auf auth.uid().
     paths:
       include: ['supabase/migrations/*.sql']
+      # 0007 gab exercise_categories mit using (true) frei; 0031 hat die
+      # Policy ersetzt (is_published). Der Text der alten Migration bleibt,
+      # wie er eingespielt wurde - sie wird nicht mehr angefasst.
+      exclude: ['supabase/migrations/0007_exercises.sql']
     # Zeilen, die mit -- beginnen, sind Kommentare (0017 erklaert dort gerade,
     # warum es KEIN using (true) gibt).
     pattern-regex: (?im)^(?![ \t]*--).*\b(using|with\s+check)\s*\(\s*true\s*\)

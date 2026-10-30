@@ -1,15 +1,31 @@
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { ActiveFilter } from '@/components/FilterControls';
+import { FilterGlyph, HEADER_ICON_SIZE, HeaderIconLink } from '@/components/HeaderIcon';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
-import { colors, radius, spacing } from '@/design/tokens';
+import { colors, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
 import { HabitCatalog } from '@/features/habits/HabitCatalog';
-import { useHabitCatalog, useHabitFavorites, useMyHabits } from '@/features/habits/useHabits';
+import {
+  habitFilterFromParams,
+  habitFilterToParams,
+  isFiltered,
+  type HabitFilter,
+} from '@/features/habits/habitFilter';
+import { enabledCategoryIds } from '@/features/habits/habitAreas';
+import {
+  useHabitAreas,
+  useHabitCatalog,
+  useHabitFavorites,
+  useMyHabits,
+  type HabitCategory,
+} from '@/features/habits/useHabits';
 
 /**
  * Eigene Seite fuer die Habit-Auswahl (seit 25.10.2026). Im Tagebuch selbst
@@ -19,19 +35,34 @@ import { useHabitCatalog, useHabitFavorites, useMyHabits } from '@/features/habi
 export default function HabitsScreen() {
   const { t } = useTranslation();
   const { session, loading } = useAuth();
+  const filter =
+    habitFilterFromParams(useLocalSearchParams<{ quelle?: string; kategorie?: string; suche?: string }>());
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Link href="/habit-tracker/einstellungen" style={styles.back}>
         {t('habits.back')}
       </Link>
-      <Text style={styles.title}>{t('diary.picker.title')}</Text>
+      {/* Der Trichter neben der Ueberschrift oeffnet die Filterseite
+          (30.10.2026); die Chips und die Suche standen bis dahin hier. */}
+      <View style={styles.titleRow}>
+        <Text role="heading" style={styles.title}>
+          {t('diary.picker.title')}
+        </Text>
+        <HeaderIconLink
+          href={{ pathname: '/habit-tracker/auswahl-filter', params: habitFilterToParams(filter) }}
+          label={t('habits.filter.open')}
+          active={isFiltered(filter)}
+        >
+          <FilterGlyph active={isFiltered(filter)} />
+        </HeaderIconLink>
+      </View>
       <Text style={styles.intro}>{t('habits.intro')}</Text>
 
       {loading ? (
         <SkeletonList />
       ) : session ? (
-        <HabitsForUser />
+        <HabitsForUser filter={filter} />
       ) : (
         <StateMessage title={t('diary.login.title')} body={t('diary.login.text')} />
       )}
@@ -39,46 +70,48 @@ export default function HabitsScreen() {
   );
 }
 
-function HabitsForUser() {
+function HabitsForUser({ filter }: { filter: HabitFilter }) {
   const { t } = useTranslation();
   const catalog = useHabitCatalog();
   const myHabits = useMyHabits();
   const favorites = useHabitFavorites();
   const plus = usePlusAccess();
+  const areas = useHabitAreas();
 
   return (
     <QueryBoundary query={plus}>
       {(plusAccess) => (
         <View style={styles.stack}>
-          <View style={[styles.card, styles.ownCard]}>
-            <Text style={styles.cardTitle}>{t('habits.own.title')}</Text>
-            <Text style={styles.text}>
-              {plusAccess ? t('habits.own.text') : t('habits.own.plusOnly')}
-            </Text>
-            {plusAccess ? (
-              <Link href="/habit-tracker/eigenes-habit" style={styles.primary}>
-                {t('habits.own.create')}
-              </Link>
-            ) : (
-              <Link href="/plus" style={styles.link}>
-                {t('diary.picker.toPlus')}
-              </Link>
-            )}
-          </View>
-
           <QueryBoundary query={catalog}>
             {({ categories, templates }) => (
               <QueryBoundary query={myHabits}>
                 {(habits) => (
                   <QueryBoundary query={favorites}>
                     {(favoriteIds) => (
-                      <HabitCatalog
-                        categories={categories}
-                        templates={templates}
-                        myHabits={habits}
-                        favorites={favoriteIds}
-                        plusAccess={plusAccess}
-                      />
+                      <QueryBoundary query={areas.query}>
+                        {(enabledAreas) => {
+                          // Nur eingeschaltete Bereiche (Einstellungen, 0032).
+                          const shown = enabledCategoryIds(categories, enabledAreas);
+                          return (
+                            <View style={styles.stack}>
+                              {isFiltered(filter) ? (
+                                <ActiveFilter
+                                  summary={filterSummary(filter, categories, t)}
+                                  resetHref="/habit-tracker/auswahl"
+                                />
+                              ) : null}
+                              <HabitCatalog
+                                categories={categories.filter((c) => shown.has(c.id))}
+                                templates={templates.filter((tpl) => shown.has(tpl.category_id))}
+                                myHabits={habits}
+                                favorites={favoriteIds}
+                                plusAccess={plusAccess}
+                                filter={filter}
+                              />
+                            </View>
+                          );
+                        }}
+                      </QueryBoundary>
                     )}
                   </QueryBoundary>
                 )}
@@ -89,6 +122,17 @@ function HabitsForUser() {
       )}
     </QueryBoundary>
   );
+}
+
+/** "Selbst erstellt · Atmung · „kalt“" - was gerade gefiltert ist. */
+function filterSummary(filter: HabitFilter, categories: HabitCategory[], t: TFunction): string {
+  return [
+    filter.source !== 'all' ? t(`habits.filter.${filter.source}`) : null,
+    filter.categoryId ? (categories.find((c) => c.id === filter.categoryId)?.title ?? null) : null,
+    filter.query.trim() ? `„${filter.query.trim()}“` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 const styles = StyleSheet.create({
@@ -105,8 +149,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.ink700,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   title: {
-    fontSize: 28,
+    flex: 1,
+    fontSize: HEADER_ICON_SIZE,
     fontWeight: '600',
     color: colors.ink900,
   },
@@ -119,41 +169,5 @@ const styles = StyleSheet.create({
   },
   stack: {
     gap: spacing.lg,
-  },
-  card: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-  },
-  ownCard: {
-    maxWidth: 720,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.ink900,
-  },
-  text: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.ink700,
-  },
-  link: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.ocean700,
-  },
-  primary: {
-    alignSelf: 'flex-start',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: radius.full,
-    backgroundColor: colors.ocean700,
-    color: colors.surface,
-    fontSize: 14,
-    fontWeight: '600',
   },
 });

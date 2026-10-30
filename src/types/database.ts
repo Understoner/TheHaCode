@@ -876,6 +876,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          habit_categories: string[] | null
           habit_score_enabled: boolean
           has_active_subscription: boolean
           id: string
@@ -892,6 +893,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          habit_categories?: string[] | null
           habit_score_enabled?: boolean
           has_active_subscription?: boolean
           id: string
@@ -908,6 +910,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          habit_categories?: string[] | null
           habit_score_enabled?: boolean
           has_active_subscription?: boolean
           id?: string

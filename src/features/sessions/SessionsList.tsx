@@ -1,5 +1,4 @@
 import { Link } from 'expo-router';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -10,21 +9,10 @@ import { StateMessage } from '@/components/StateMessage';
 import { colors, radius, spacing } from '@/design/tokens';
 import { responsive } from '@/design/responsive';
 import { buildTimeline, totalDurationMs } from '@/features/breathing/timeline';
-import {
-  EXERCISE_EFFECTS,
-  effectColors,
-  type ExerciseEffect,
-} from '@/features/sessions/effects';
+import { effectColors, type SessionFilter } from '@/features/sessions/effects';
 import { useFavorites } from '@/features/sessions/useFavorites';
 import { useSessionsList } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
-import { PressableRing } from '@/components/PressableRing';
-
-// "favoriten" steht in derselben Reihe wie die Wirkeffekte und nicht als
-// zweiter Schalter daneben: beide beantworten dieselbe Frage ("welche
-// Sequenzen sehe ich gerade?"), und zwei unabhaengige Filter uebereinander
-// waeren bei fuenf Chips mehr Bedienung als Nutzen.
-type Filter = ExerciseEffect | 'all' | 'favoriten';
 
 /** "4-4-4-4" aus den Phasen der ersten Runde - die Kurzform, die jeder kennt. */
 function rhythmOf(exercise: PlayableExercise): string | null {
@@ -43,9 +31,9 @@ function rhythmOf(exercise: PlayableExercise): string | null {
     .join('-');
 }
 
-export function SessionsList() {
+/** filter kommt aus der Adresse (?filter=), gesetzt auf /sessions/filter. */
+export function SessionsList({ filter = 'all' }: { filter?: SessionFilter }) {
   const { t } = useTranslation();
-  const [filter, setFilter] = useState<Filter>('all');
   // Der Favoritenfilter ist kein Wirkeffekt - die Abfrage bekommt in dem Fall
   // also keinen Effekt mit und liefert alles, was sichtbar ist. Gefiltert wird
   // danach hier, gegen die Sternliste.
@@ -53,46 +41,8 @@ export function SessionsList() {
   const query = useSessionsList(effekt);
   const favoriten = useFavorites();
 
-  const filters: Filter[] = ['all', 'favoriten', ...EXERCISE_EFFECTS];
-
   return (
     <View style={styles.container}>
-      <View style={styles.filterRow}>
-        {filters.map((value) => {
-          const active = value === filter;
-          // "Alle" und "Favoriten" tragen keine Effektfarbe - sie gehoeren zu
-          // keinem Effekt.
-          const tone = value === 'all' || value === 'favoriten' ? null : effectColors(value);
-          return (
-            <PressableRing
-              key={value}
-              onPress={() => setFilter(value)}
-              style={[
-                styles.filterChip,
-                active &&
-                  (tone
-                    ? { backgroundColor: tone.tint, borderColor: tone.text }
-                    : styles.filterChipActiveAll),
-              ]}
-            >
-              <Text
-                style={[
-                  styles.filterChipText,
-                  active &&
-                    (tone ? { color: tone.text, fontWeight: '600' } : styles.filterChipTextActiveAll),
-                ]}
-              >
-                {value === 'all'
-                  ? t('sessions.filter.all')
-                  : value === 'favoriten'
-                    ? t('favoriten.filter')
-                    : t(`sessions.effects.${value}`)}
-              </Text>
-            </PressableRing>
-          );
-        })}
-      </View>
-
       <QueryBoundary
         query={query}
         empty={{ title: t('sessions.empty.title'), hint: t('sessions.empty.hint') }}
@@ -209,32 +159,6 @@ export function SessionsList() {
 const styles = StyleSheet.create({
   container: {
     gap: spacing.lg,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  filterChip: {
-    paddingVertical: 7,
-    paddingHorizontal: 16,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-  },
-  filterChipActiveAll: {
-    backgroundColor: colors.ocean700,
-    borderColor: colors.ocean700,
-  },
-  filterChipText: {
-    fontSize: 13,
-    color: colors.ink700,
-  },
-  filterChipTextActiveAll: {
-    color: colors.surface,
-    fontWeight: '600',
   },
   grid: {
     flexDirection: 'row',

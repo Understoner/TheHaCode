@@ -31,3 +31,19 @@ export function effectColors(effect: ExerciseEffect): { text: string; tint: stri
     ? { text: colors.ocean700, tint: colors.oceanTint }
     : { text: colors.sage700, tint: colors.sageTint };
 }
+
+// ---------------------------------------------------------------------------
+// Der Filter der Sessions-Liste (seit 30.10.2026 auf /sessions/filter, in der
+// Adresse als ?filter=). "favoriten" steht in derselben Reihe wie die
+// Wirkeffekte: beide beantworten dieselbe Frage ("welche Sequenzen sehe ich
+// gerade?").
+// ---------------------------------------------------------------------------
+
+export type SessionFilter = ExerciseEffect | 'all' | 'favoriten';
+
+export const SESSION_FILTERS: SessionFilter[] = ['all', 'favoriten', ...EXERCISE_EFFECTS];
+
+export function parseSessionFilter(raw: string | string[] | undefined): SessionFilter {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return (SESSION_FILTERS as string[]).includes(value ?? '') ? (value as SessionFilter) : 'all';
+}

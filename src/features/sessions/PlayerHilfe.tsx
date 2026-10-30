@@ -11,7 +11,7 @@ export const PLAYER_ABSCHNITTE = 6;
  * (Abschnitt 4) - die Wachhaltung, die das umginge, ist bewusst abgeschaltet
  * (src/lib/contentSecurityPolicy.ts).
  */
-export function PlayerHilfe() {
+export function PlayerHilfe({ kompakt = false }: { kompakt?: boolean }) {
   const { t } = useTranslation();
 
   const abschnitte = Array.from({ length: PLAYER_ABSCHNITTE }, (_, i) => ({
@@ -24,6 +24,7 @@ export function PlayerHilfe() {
       label={t('hilfe.player.oeffnen')}
       titel={t('hilfe.player.titel')}
       abschnitte={abschnitte}
+      kompakt={kompakt}
     />
   );
 }
