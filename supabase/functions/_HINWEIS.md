@@ -248,3 +248,12 @@ select id, has_active_subscription, plus_until from public.profiles;
 Die dritte Abfrage ist die eigentliche: `has_active_subscription` schreibt kein
 Code, sondern der Trigger aus Migration 0010. Steht dort nichts, hat der
 Webhook zwar geantwortet, aber nichts bewirkt.
+
+## Paketversionen
+
+Seit 30.10.2026 exakt gepinnt: `jsr:@supabase/supabase-js@2.118.0`,
+`npm:stripe@18.5.0` (vorher `@2` und `@18`: jeder Deploy hätte eine neue,
+ungeprüfte Version laden können). Hochziehen heißt: in allen Funktionen
+gemeinsam ändern, nur Versionen ab 7 Tagen Alter, danach
+`npm run security:scan` — der Schritt `edge-functions` prüft die gepinnten
+Versionen gegen OSV.

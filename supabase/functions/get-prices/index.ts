@@ -20,7 +20,7 @@
 // Faellt sie aus, zeigt die Preisseite keine Betraege und sagt das auch - der
 // Kaufweg selbst haengt nicht an ihr.
 
-import Stripe from 'npm:stripe@18';
+import Stripe from 'npm:stripe@18.5.0';
 
 import { json, preflight } from '../_shared/http.ts';
 

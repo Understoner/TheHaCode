@@ -20,8 +20,8 @@
 // dort im Webhook zurueck. Das ist die einzige Bruecke zwischen Zahlung und
 // Konto (SAD §4.3 Punkt 5) - eine E-Mail-Adresse wird nirgends dafuer benutzt.
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import Stripe from 'npm:stripe@18';
+import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
+import Stripe from 'npm:stripe@18.5.0';
 
 import { hasActiveSubscription, type SubRow } from '../_shared/entitlement.ts';
 import { json, preflight } from '../_shared/http.ts';
