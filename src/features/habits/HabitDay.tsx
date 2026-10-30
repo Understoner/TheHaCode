@@ -91,6 +91,7 @@ export function HabitDay({
               category={categories.find((c) => c.id === habit.habit_templates.category_id) ?? null}
               locked={!habit.habit_templates.is_preview && !plusAccess}
               scoreOn={scoreOn}
+              past={date < today}
             />
           ))}
         </View>
@@ -106,6 +107,7 @@ export function HabitEntryRow({
   category,
   locked,
   scoreOn,
+  past = false,
 }: {
   habit: MyHabit;
   date: IsoDate;
@@ -113,6 +115,8 @@ export function HabitEntryRow({
   category: HabitCategory | null;
   locked: boolean;
   scoreOn: boolean;
+  /** Ein vergangener Tag: dort nur abhaken, keine Session starten. */
+  past?: boolean;
 }) {
   const { t } = useTranslation();
   const save = useSaveLog();
@@ -148,13 +152,16 @@ export function HabitEntryRow({
 
         {locked ? <Text style={styles.meta}>{t('diary.entry.locked')}</Text> : null}
 
-        {!locked && template.exercise_id && !log ? (
+        {/* Eine Session traegt sich fuer HEUTE ein (exercise_id), nicht fuer
+            den angezeigten Tag - an einem vergangenen Tag waere der Link
+            deshalb irrefuehrend (30.10.2026). Messen nimmt das Datum mit. */}
+        {!locked && !past && template.exercise_id && !log ? (
           <Link href={`/sessions/${template.exercise_id}`} style={styles.link}>
             {t('diary.entry.start')}
           </Link>
         ) : null}
 
-        {!locked && !template.exercise_id && !log ? (
+        {!locked && !past && !template.exercise_id && !log ? (
           <HabitLinkButton
             url={template.link_url}
             sessionLabel={t('diary.entry.start')}

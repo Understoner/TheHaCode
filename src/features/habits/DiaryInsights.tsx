@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
@@ -50,6 +51,7 @@ export function DiaryInsights({
   scoreOn,
 }: Props) {
   const { t } = useTranslation();
+  const router = useRouter();
   const activeCount = habits.filter((h) => h.is_active).length;
 
   const derived = useMemo(() => {
@@ -167,22 +169,45 @@ export function DiaryInsights({
             {Array.from({ length: leading }, (_, i) => (
               <View key={`leer-${i}`} style={styles.cell} />
             ))}
-            {derived.heat.map((day) => (
-              <View
-                key={day.date}
-                accessibilityLabel={t('diary.insights.heatLabel', {
-                  date: formatDay(day.date),
-                  count: day.done,
-                })}
-                style={[
-                  styles.cell,
-                  styles.dayCell,
-                  heatStyles[day.level],
-                  day.date === today && styles.todayCell,
-                  day.isFuture && styles.futureCell,
-                ]}
-              />
-            ))}
+            {derived.heat.map((day) => {
+              const cellStyle = [
+                styles.cell,
+                styles.dayCell,
+                heatStyles[day.level],
+                day.date === today && styles.todayCell,
+                day.isFuture && styles.futureCell,
+              ];
+              // Zukunft bleibt ein stilles Feld, eintragen geht dort nicht.
+              if (day.isFuture) {
+                return (
+                  <View
+                    key={day.date}
+                    accessibilityLabel={t('diary.insights.heatLabel', {
+                      date: formatDay(day.date),
+                      count: day.done,
+                    })}
+                    style={cellStyle}
+                  />
+                );
+              }
+              // Ein Klick oeffnet den Tag zum Ansehen und Nachtragen
+              // (30.10.2026). Heute geht auch - sonst waere genau ein Feld
+              // ohne Reaktion.
+              return (
+                <PressableRing
+                  key={day.date}
+                  onPress={() =>
+                    router.push({ pathname: '/habit-tracker/tag', params: { datum: day.date } })
+                  }
+                  role="link"
+                  accessibilityLabel={t('diary.insights.openDay', {
+                    date: formatDay(day.date),
+                    count: day.done,
+                  })}
+                  style={cellStyle}
+                />
+              );
+            })}
           </View>
         </View>
 
