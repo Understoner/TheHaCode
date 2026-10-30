@@ -340,6 +340,7 @@
   "diary.title": "Tagebuch",
   "diary.intro": "Kleine Gewohnheiten, jeden Tag. Trag ein, was du gemacht hast – die Auswertung zeigt dir, wie es sich entwickelt.",
   "diary.back": "‹ Zum Tagebuch",
+  "diary.header.picker": "Habits auswählen",
   "diary.header.insights": "Auswertung öffnen",
   "diary.header.settings": "Einstellungen öffnen",
   "diary.header.info": "Was ist das Tagebuch?",

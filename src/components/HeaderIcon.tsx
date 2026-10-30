@@ -89,6 +89,25 @@ export function FilterGlyph({ active = false }: { active?: boolean }) {
   );
 }
 
+/** Eine Checkliste: Haken, darunter zwei Zeilen - die Habit-Auswahl. */
+export function ChecklistGlyph() {
+  return (
+    <Svg width={GLYPH} height={GLYPH} viewBox="0 0 16 16">
+      <Path
+        d="M2 4.5l1.8 1.8L7 3"
+        fill="none"
+        stroke={colors.ink700}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Line x1={9} y1={4.5} x2={14} y2={4.5} stroke={colors.ink700} strokeWidth={2} strokeLinecap="round" />
+      <Line x1={3} y1={9} x2={14} y2={9} stroke={colors.ink700} strokeWidth={2} strokeLinecap="round" />
+      <Line x1={3} y1={13} x2={14} y2={13} stroke={colors.ink700} strokeWidth={2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 /** Eine Liste mit Punkten - die eigenen Sequenzen. */
 export function ListGlyph() {
   return (

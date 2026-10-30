@@ -54,7 +54,11 @@ export type ResponsiveTarget =
   | 'habit-info'
   | 'habit-desc'
   | 'habit-text'
-  | 'habit-control';
+  | 'habit-control'
+  // Die Symbolreihe neben einer Seitenueberschrift (HeaderIcon.tsx). Mit vier
+  // Symbolen (Tagebuch) ragte sie bei 320 px ueber den Rand; unter 360 px
+  // ruecken die Symbole deshalb enger zusammen (30.10.2026).
+  | 'header-icons';
 
 // Nur die Mindestbreiten unterscheiden sich. Teamkarten tragen seit dem
 // Umbau auf die News-Anatomie (Bild oben ueber die volle Breite) dieselbe
@@ -104,6 +108,9 @@ export function responsiveCss(): string {
   [data-thc="habit-desc"] { display: none !important; }
   [data-thc="habit-text"] { padding-right: 28px !important; }
   [data-thc="habit-control"] { margin-top: 28px !important; }
+}
+@media (max-width: 359px) {
+  [data-thc="header-icons"] { gap: 8px !important; }
 }
 @media (min-width: ${MOBILE_NAV_BREAKPOINT}px) {
   [data-thc="nav-mobile"] { display: none !important; }
