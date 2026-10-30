@@ -111,6 +111,11 @@
       "alert": "CSP: style-src unsafe-inline",
       "until": "2027-04-30",
       "reason": "react-native-web setzt Stile als style-Attribute (rund 670 je Export) und fuegt zur Laufzeit <style>-Elemente ein. Ohne unsafe-inline gaebe es kein Layout. script-src ist seit 30.10.2026 ohne unsafe-inline."
+    },
+    {
+      "alert": "Cross-Domain Misconfiguration",
+      "until": "2027-04-30",
+      "reason": "Hostingers CDN setzt Access-Control-Allow-Origin \"*\" auf statische Dateien (Icons, Bilder) nach der .htaccess - das unset dort greift nicht. Die Dateien sind oeffentlich und werden ohne Zugangsdaten geladen; es gibt nichts, was eine fremde Seite darueber lesen koennte. Entscheidung des Users am 30.10.2026."
     }
   ],
   "_acceptedSplinter": "Splinter-Befunde, die bewusst so sind - nach cache_key, mit Begruendung und Ablaufdatum. Nur nach Absprache eintragen.",

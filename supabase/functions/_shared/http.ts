@@ -1,16 +1,22 @@
 // CORS und Antworten - einmal fuer alle Edge Functions.
 //
-// Die Ueberlegung zur Herkunftsliste stammt aus delete-account/index.ts und
-// gilt hier unveraendert: was diese Funktionen schuetzt, ist nicht die Herkunft
-// der Anfrage, sondern der Zugangstoken. Eine fremde Seite kommt an den gar
-// nicht heran, er liegt im Speicher unserer eigenen Domain. Ohne Token gibt es
-// 401, und mehr wuerde eine Herkunftsliste auch nicht verhindern - sie laesst
-// sich ueber ALLOWED_ORIGINS trotzdem enger ziehen.
+// HERKUNFT: NUR DIE EIGENE DOMAIN (30.10.2026, Security-Scan)
+// ------------------------------------------------------------
+// Bis dahin stand hier ohne gesetzte Liste "*", mit der Begruendung, dass der
+// Zugangstoken schuetzt und nicht die Herkunft. Das stimmt weiterhin - aber
+// "*" erlaubt jeder fremden Seite, die Funktionen aus dem Browser ueberhaupt
+// anzusprechen, und es gibt keinen Grund, das zuzulassen. Jetzt gilt:
 //
-// delete-account bleibt bewusst bei seiner eigenen Kopie: die Funktion ist in
-// Betrieb, hat keinen Test, und ein Umbau braechte hier kein Verhalten in
-// Ordnung, das kaputt waere. Wer sie das naechste Mal ohnehin anfasst, kann
-// sie mitnehmen.
+//   * ALLOWED_ORIGINS (Function Secret, durch Komma getrennt), falls gesetzt,
+//   * dazu immer die Herkunft aus APP_URL - die Secret steht auf Staging und
+//     Live ohnehin, der Checkout braucht sie - samt www-Variante,
+//   * ist beides leer (lokal mit "supabase functions serve"), nur localhost.
+//
+// "*" gibt es nicht mehr. Ist die Konfiguration falsch, scheitert der Aufruf
+// laut im Browser statt still offen zu stehen.
+//
+// delete-account nutzt seit 30.10.2026 ebenfalls diese Datei statt einer
+// eigenen Kopie.
 
 // Die Kopfzeilen, die der Browser im Preflight abfragt - und zwar ALLE, die
 // supabase-js von sich aus mitschickt.
@@ -36,24 +42,40 @@ const ALLOWED_HEADERS = 'authorization, x-client-info, apikey, content-type';
 // Aenderung an dieser Datei zeitnah greift.
 const MAX_AGE = '3600';
 
-const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
-  .split(',')
-  .map((value) => value.trim())
-  .filter(Boolean);
+/** Wenn nichts konfiguriert ist: die Adressen der lokalen Entwicklung. */
+const LOCAL_DEV_ORIGINS = ['http://localhost:8081', 'http://localhost:8099', 'http://127.0.0.1:8081'];
 
-export function corsHeaders(origin: string | null): Record<string, string> {
-  if (ALLOWED_ORIGINS.length === 0) {
-    return {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': ALLOWED_HEADERS,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Max-Age': MAX_AGE,
-    };
+/** Die erlaubten Herkuenfte aus ALLOWED_ORIGINS und APP_URL - rein, testbar. */
+export function resolveAllowedOrigins(list: string | undefined, appUrl: string | undefined): string[] {
+  const origins = new Set(
+    (list ?? '')
+      .split(',')
+      .map((value) => value.trim().replace(/\/+$/, ''))
+      .filter(Boolean),
+  );
+  try {
+    if (appUrl) {
+      const { origin, protocol, host } = new URL(appUrl);
+      origins.add(origin);
+      // Wer die Seite mit oder ohne www aufruft, soll gleich bedient werden.
+      origins.add(`${protocol}//${host.startsWith('www.') ? host.slice(4) : `www.${host}`}`);
+    }
+  } catch {
+    // Eine kaputte APP_URL faellt auf die Liste bzw. localhost zurueck.
   }
+  return origins.size > 0 ? [...origins] : LOCAL_DEV_ORIGINS;
+}
 
-  const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+const ALLOWED_ORIGINS = resolveAllowedOrigins(Deno.env.get('ALLOWED_ORIGINS'), Deno.env.get('APP_URL'));
+
+/**
+ * Die CORS-Kopfzeilen fuer eine Anfrage. Eine erlaubte Herkunft wird
+ * zurueckgespiegelt; jede andere bekommt die erste erlaubte - der Browser
+ * lehnt die Antwort dann ab.
+ */
+export function corsHeaders(origin: string | null, allowed: string[] = ALLOWED_ORIGINS): Record<string, string> {
   return {
-    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Origin': origin && allowed.includes(origin) ? origin : allowed[0],
     'Access-Control-Allow-Headers': ALLOWED_HEADERS,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Max-Age': MAX_AGE,

@@ -28,42 +28,8 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
 
-const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
-  .split(',')
-  .map((value) => value.trim())
-  .filter(Boolean);
-
-function corsHeaders(origin: string | null): Record<string, string> {
-  // Ohne gesetzte Liste steht hier "*", und das ist hier vertretbar: was diese
-  // Funktion schuetzt, ist nicht die Herkunft der Anfrage, sondern der
-  // Zugangstoken. Eine fremde Seite kommt an den gar nicht heran - er liegt im
-  // Speicher unserer eigenen Domain. Ohne Token gibt es unten 401, und mehr
-  // wuerde eine Herkunftsliste auch nicht verhindern. Sie laesst sich ueber
-  // ALLOWED_ORIGINS trotzdem enger ziehen; eine falsch gesetzte Liste macht
-  // dann allerdings das Loeschen kaputt, ohne dass es jemand merkt.
-  if (ALLOWED_ORIGINS.length === 0) {
-    return {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    };
-  }
-
-  const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    'Access-Control-Allow-Origin': allow,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    Vary: 'Origin',
-  };
-}
-
-function json(body: unknown, status: number, origin: string | null): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' },
-  });
-}
+// CORS seit 30.10.2026 aus der gemeinsamen Datei: nur die eigene Domain.
+import { corsHeaders, json } from '../_shared/http.ts';
 
 Deno.serve(async (request) => {
   const origin = request.headers.get('Origin');

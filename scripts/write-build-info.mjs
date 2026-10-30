@@ -147,8 +147,11 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   Header always set Cross-Origin-Resource-Policy "same-origin"
 
   # Hostinger liefert statische Dateien mit Access-Control-Allow-Origin "*"
-  # aus (ZAP: Cross-Domain Misconfiguration). Die App braucht das nicht -
-  # niemand ausser ihr selbst liest diese Dateien per fetch.
+  # aus (ZAP: Cross-Domain Misconfiguration). Die App braucht das nicht. Der
+  # Scan vom 30.10.2026 zeigt: das CDN setzt den Header NACH dieser Datei,
+  # das unset greift also nicht. Fuer oeffentliche Dateien harmlos - als
+  # akzeptiert eingetragen (security/policy.json, acceptedZap). Die Zeile
+  # bleibt, falls Hostinger das Verhalten aendert.
   Header always unset Access-Control-Allow-Origin
 
   # HTML NIE zwischenspeichern, die Dateien mit Inhaltspruefsumme dagegen lange.
