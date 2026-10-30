@@ -31,7 +31,8 @@ import { colors, radius, spacing } from '@/design/tokens';
 // Wie der Stern ein Schriftzeichen statt eines Icons: das Projekt hat keine
 // Icon-Bibliothek (CLAUDE.md §Stack, siehe FavoriteStar.tsx).
 
-export type HilfeAbschnitt = { titel: string; text: string };
+/** Ohne titel steht nur der Text - etwa die Beschreibung eines Habits. */
+export type HilfeAbschnitt = { titel?: string; text: string };
 
 type Props = {
   /** Beschriftung fuer Screenreader - sehend steht dort nur "i". */
@@ -84,9 +85,9 @@ export function InfoButton({ label, titel, abschnitte, kompakt = false }: Props)
               <Text role="heading" style={styles.titel}>
                 {titel}
               </Text>
-              {abschnitte.map((abschnitt) => (
-                <View key={abschnitt.titel} style={styles.abschnitt}>
-                  <Text style={styles.abschnittTitel}>{abschnitt.titel}</Text>
+              {abschnitte.map((abschnitt, index) => (
+                <View key={abschnitt.titel ?? index} style={styles.abschnitt}>
+                  {abschnitt.titel ? <Text style={styles.abschnittTitel}>{abschnitt.titel}</Text> : null}
                   <Text style={styles.text}>{abschnitt.text}</Text>
                 </View>
               ))}

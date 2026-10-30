@@ -390,6 +390,7 @@
   "diary.entry.done": "Erledigt",
   "diary.entry.markDone": "Abhaken",
   "diary.entry.undo": "Eintrag entfernen",
+  "diary.entry.info": "Beschreibung: {{title}}",
   "diary.entry.measure": "Messen",
   "diary.entry.save": "Speichern",
   "diary.entry.valueLabel": "Wert in {{unit}}",

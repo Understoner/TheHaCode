@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { InfoButton } from '@/components/InfoButton';
 import { PressableRing } from '@/components/PressableRing';
 import { StateMessage } from '@/components/StateMessage';
 import { responsive } from '@/design/responsive';
@@ -131,15 +132,35 @@ export function HabitEntryRow({
     save.mutate({ userHabitId: habit.id, date, valueNumeric: 1 });
   const undo = () => remove.mutate({ userHabitId: habit.id, date });
 
+  // Auf dem Handy steht die Beschreibung nicht in der Karte, sondern hinter
+  // einem "i" rechts oben (30.10.2026) - umgeschaltet per CSS, nicht per
+  // gemessener Breite (Begruendung in src/design/responsive.ts).
+  const description = template.description_md;
+  const mobileSlot = (target: 'habit-text' | 'habit-control') =>
+    description ? responsive(target) : {};
+
   return (
     <View style={styles.row}>
-      <View style={styles.rowText}>
+      {description ? (
+        <View {...responsive('habit-info')} style={styles.info}>
+          <InfoButton
+            kompakt
+            label={t('diary.entry.info', { title: template.title })}
+            titel={template.title}
+            abschnitte={[{ text: description }]}
+          />
+        </View>
+      ) : null}
+
+      <View {...mobileSlot('habit-text')} style={styles.rowText}>
         {category ? <Text style={styles.category}>{category.title}</Text> : null}
         <Text style={styles.title}>{template.title}</Text>
-        {template.description_md ? (
-          <Text style={styles.description} numberOfLines={3}>
-            {template.description_md}
-          </Text>
+        {description ? (
+          <View {...responsive('habit-desc')}>
+            <Text style={styles.description} numberOfLines={3}>
+              {description}
+            </Text>
+          </View>
         ) : null}
 
         {scoreOn && category && template.points > 0 ? (
@@ -185,17 +206,19 @@ export function HabitEntryRow({
         ) : null}
       </View>
 
-      <EntryControl
-        habit={habit}
-        log={log}
-        locked={locked}
-        pending={save.isPending || remove.isPending}
-        onDone={markDone}
-        onValue={(valueNumeric, valueText) =>
-          save.mutate({ userHabitId: habit.id, date, valueNumeric, valueText })
-        }
-        onUndo={undo}
-      />
+      <View {...mobileSlot('habit-control')}>
+        <EntryControl
+          habit={habit}
+          log={log}
+          locked={locked}
+          pending={save.isPending || remove.isPending}
+          onDone={markDone}
+          onValue={(valueNumeric, valueText) =>
+            save.mutate({ userHabitId: habit.id, date, valueNumeric, valueText })
+          }
+          onUndo={undo}
+        />
+      </View>
     </View>
   );
 }
@@ -385,6 +408,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
+  },
+  // Rechts oben in der Karte, nur auf dem Handy sichtbar (habit-info).
+  info: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    zIndex: 1,
   },
   rowText: {
     flex: 1,
