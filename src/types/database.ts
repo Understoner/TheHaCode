@@ -208,6 +208,7 @@ export type Database = {
           description: string | null
           icon: string | null
           id: string
+          is_published: boolean
           slug: string
           sort_order: number
           title: string
@@ -216,6 +217,7 @@ export type Database = {
           description?: string | null
           icon?: string | null
           id?: string
+          is_published?: boolean
           slug: string
           sort_order?: number
           title: string
@@ -224,6 +226,7 @@ export type Database = {
           description?: string | null
           icon?: string | null
           id?: string
+          is_published?: boolean
           slug?: string
           sort_order?: number
           title?: string
