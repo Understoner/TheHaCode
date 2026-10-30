@@ -11,7 +11,7 @@ import { colors, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
 import { useConsents } from '@/features/consents/useConsents';
-import { addDays, monthDays, today as heute, type IsoDate } from '@/features/habits/dates';
+import { monthDays, today as heute, weekStart, type IsoDate } from '@/features/habits/dates';
 import { DiaryConsent } from '@/features/habits/DiaryConsent';
 import { DiaryHeader } from '@/features/habits/DiaryHeader';
 import { DiaryMonth, DiaryWeek } from '@/features/habits/DiaryOverview';
@@ -22,10 +22,6 @@ import {
   useHabitScoreEnabled,
   useMyHabits,
 } from '@/features/habits/useHabits';
-
-// Wie weit die Uebersicht zurueckschaut, unabhaengig vom angezeigten Monat:
-// genug fuer die Serie in der Wochenkarte.
-const LOOKBACK_DAYS = 120;
 
 export default function TagebuchScreen() {
   const { session, loading } = useAuth();
@@ -108,11 +104,11 @@ function DiaryContent() {
   const [month, setMonth] = useState<IsoDate>(today);
   const { scoreOn } = useHabitScoreEnabled();
 
-  // Die Serie in der Wochenkarte braucht etwas Vorlauf, der Kalender seinen
-  // Monat, die Tagesliste ihren Tag. Score, Verlaeufe und alles Weitere
-  // rechnet die Auswertungsseite mit eigener Abfrage (30.10.2026).
+  // Die Wochenkarte braucht ihre Woche, der Kalender seinen Monat, die
+  // Tagesliste ihren Tag. Score, Verlaeufe und alles Weitere rechnet die
+  // Auswertungsseite mit eigener Abfrage (30.10.2026).
   const monthRange = monthDays(month);
-  const from = [monthRange[0], addDays(today, -LOOKBACK_DAYS), date].sort()[0];
+  const from = [monthRange[0], weekStart(today), date].sort()[0];
   const to = [monthRange[monthRange.length - 1], today].sort()[1];
 
   const catalog = useHabitCatalog();

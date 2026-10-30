@@ -8,7 +8,7 @@ import { colors, radius, spacing } from '@/design/tokens';
 
 import { shiftMonth, weekdayIndex, type IsoDate } from './dates';
 import { formatDay, formatMonth } from './format';
-import { daysDoneThisWeek, monthHeat, streakWithGrace, weekHeat, type HeatDay } from './stats';
+import { daysDoneThisWeek, monthHeat, weekHeat, type HeatDay } from './stats';
 import type { HabitLog } from './useHabits';
 
 // Die beiden Kalenderkarten der Tagebuch-Uebersicht (30.10.2026): die Woche
@@ -24,7 +24,7 @@ function useCountByDay(logs: HabitLog[]) {
   }, [logs]);
 }
 
-/** Die laufende Woche: Mo bis So, Serie und freier Tag. */
+/** Die laufende Woche: Mo bis So. */
 export function DiaryWeek({
   today,
   logs,
@@ -38,18 +38,15 @@ export function DiaryWeek({
   const counts = useCountByDay(logs);
   const doneDays = useMemo(() => new Set(counts.keys()), [counts]);
   const week = weekHeat(today, counts, activeCount);
-  const streak = streakWithGrace(doneDays, today);
 
+  // Serie und freier Tag standen bis 30.10.2026 darunter - auf Wunsch
+  // gestrichen, um auf dem Handy Platz zu sparen.
   return (
     <View style={styles.card}>
       <Text style={styles.big}>
         {t('diary.insights.week', { count: daysDoneThisWeek(doneDays, today) })}
       </Text>
       <DayGrid days={week} today={today} showNumbers />
-      <Text style={styles.text}>{t('diary.insights.streak', { count: streak.days })}</Text>
-      <Text style={styles.meta}>
-        {streak.graceUsedThisWeek ? t('diary.insights.graceUsed') : t('diary.insights.graceOpen')}
-      </Text>
     </View>
   );
 }
@@ -200,14 +197,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.ocean700,
-  },
-  text: {
-    fontSize: 14,
-    color: colors.ink700,
-  },
-  meta: {
-    fontSize: 12,
-    color: colors.ink700,
   },
   monthNav: {
     flexDirection: 'row',
