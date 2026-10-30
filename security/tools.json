@@ -1,0 +1,28 @@
+{
+  "_hinweis": "Werkzeuge des Security-Scans (scripts/security/scan.mjs). Images per Digest, Downloads per sha256 gepinnt - ein verschobener Tag aendert hier nichts (Lehre aus der Trivy-Kompromittierung im Maerz 2026). Neue Versionen erst, wenn sie mindestens 7 Tage alt sind, wie bei npm.",
+  "images": {
+    "gitleaks": "ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f",
+    "osvScanner": "ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0",
+    "guarddog": "ghcr.io/datadog/guarddog:v3.2.0@sha256:5b0804d480e83405120fc90c62b60ad844310418c836e567055b1ba8843e033d",
+    "zizmor": "ghcr.io/zizmorcore/zizmor:1.31.1@sha256:42d409dbb851d4c5d35a058cf042b828bea1e3f2884378c526eb0974780e18d9",
+    "zap": "ghcr.io/zaproxy/zaproxy:2.17.0@sha256:030d3df57735dacbb83464854758e674dd9ad01d79d12a129a8e58b1fd384238"
+  },
+  "opengrep": {
+    "version": "v1.32.0",
+    "url": "https://github.com/opengrep/opengrep/releases/download/v1.32.0/opengrep_manylinux_x86",
+    "sha256": "7360d60174880bd9214f2dfbe439b7bce82b7a3d44cfe945ba833c85cc8bda75"
+  },
+  "splinter": {
+    "_hinweis": "Nicht im Repo abgelegt: das Splinter-Repository nennt keine Lizenz. Geladen wird zur Laufzeit, fest auf diese Version und Pruefsumme.",
+    "version": "2026.09.1",
+    "url": "https://raw.githubusercontent.com/supabase/splinter/2026.09.1/splinter.sql",
+    "sha256": "d8d558baad3e03832e521c527907fa50a9a172fabd899dd0f5c2504a5a0e9349"
+  },
+  "npm": {
+    "minVersion": "11.10.0",
+    "minReleaseAgeDays": 7
+  },
+  "guarddog": {
+    "maxPackages": 200
+  }
+}

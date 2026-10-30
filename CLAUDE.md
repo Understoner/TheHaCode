@@ -181,3 +181,12 @@ npm run build:web
 
 Alles grün, sonst kein Merge. Die CI erzwingt es ohnehin — lokal zuerst zu prüfen
 spart eine Runde.
+
+---
+
+## Security-Scan
+
+`npm run security:scan` — läuft automatisch vor jeder Beförderung nach Live und
+auf Zuruf. Der Scan berichtet nur. Funde werden **erst nach Absprache**
+umgesetzt. Neue Paketversionen installiert npm erst nach 7 Tagen
+(`.npmrc`, npm ≥ 11.10). Details: `docs/SECURITY-SCAN.md`.

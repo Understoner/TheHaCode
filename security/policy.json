@@ -1,0 +1,16 @@
+{
+  "_hinweis": "Lizenz- und Kostenregeln fuer Abhaengigkeiten (Entscheidung 30.10.2026). Erlaubt sind NUR die Lizenzen unter allowedLicenses; Copyleft ergibt eine Warnung, alles andere - auch eine fehlende Angabe - einen Verstoss, der besprochen werden muss.",
+  "allowedLicenses": ["MIT", "ISC", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0"],
+  "copyleftPrefixes": ["GPL", "LGPL", "AGPL", "MPL", "EPL", "CDDL", "EUPL", "CC-BY-SA", "OSL", "CPL"],
+  "_paidServices": "Pakete, die selbst quelloffen sein koennen, aber an einen kostenpflichtigen Dienst gebunden sind. Eine Lizenzpruefung erkennt das nicht. Warnung, sobald eines davon neu als direkte Abhaengigkeit auftaucht - ausser es steht unter approvedPaidServices.",
+  "paidServices": [
+    "^stripe$", "^@stripe/", "^@sentry/", "^@supabase/", "^posthog", "^mixpanel", "^@segment/",
+    "^firebase$", "^@firebase/", "^@google-cloud/", "^aws-sdk$", "^@aws-sdk/", "^@vercel/",
+    "^@clerk/", "^@auth0/", "^auth0", "^algoliasearch$", "^@algolia/", "^launchdarkly",
+    "^@launchdarkly/", "^@datadog/", "^onesignal", "^@revenuecat/", "^react-native-purchases",
+    "^openai$", "^@anthropic-ai/", "^twilio$", "^@sendgrid/", "^@mailchimp/", "^@amplitude/",
+    "^@bugsnag/", "^logrocket", "^@logrocket/", "^@mux/", "^expo-updates$"
+  ],
+  "_approvedPaidServices": "Mit dem Team abgestimmt: Supabase (Backend), Stripe (Abo), Sentry (Fehlermeldungen, CLAUDE.md).",
+  "approvedPaidServices": ["^@supabase/", "^stripe$", "^@stripe/", "^@sentry/"]
+}

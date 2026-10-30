@@ -15,7 +15,8 @@
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
     "db:types": "mkdir -p src/types && supabase gen types typescript --local --schema public > src/types/database.ts",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "security:scan": "node scripts/security/scan.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.0",
