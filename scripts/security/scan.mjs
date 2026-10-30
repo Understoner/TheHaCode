@@ -500,6 +500,11 @@ await step('splinter', async () => {
   save('splinter.json', lints);
   const map = { ERROR: 'BLOCKER', WARN: 'WARNUNG', INFO: 'INFO' };
   for (const l of lints.filter((x) => (x.categories ?? []).includes('SECURITY'))) {
+    const ok = (POLICY.acceptedSplinter ?? []).find((a) => a.key === l.cache_key && a.until >= today);
+    if (ok) {
+      add('splinter', 'INFO', `Akzeptiert bis ${ok.until}: ${l.name}`, `${l.detail} - ${ok.reason}`);
+      continue;
+    }
     add('splinter', map[l.level] ?? 'INFO', `${l.name}: ${l.title}`, l.detail);
   }
   return `Splinter ${TOOLS.splinter.version} gegen die lokale Datenbank aus den Migrationen`;

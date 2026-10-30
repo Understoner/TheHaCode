@@ -112,5 +112,48 @@
       "until": "2027-04-30",
       "reason": "react-native-web setzt Stile als style-Attribute (rund 670 je Export) und fuegt zur Laufzeit <style>-Elemente ein. Ohne unsafe-inline gaebe es kein Layout. script-src ist seit 30.10.2026 ohne unsafe-inline."
     }
+  ],
+  "_acceptedSplinter": "Splinter-Befunde, die bewusst so sind - nach cache_key, mit Begruendung und Ablaufdatum. Nur nach Absprache eintragen.",
+  "acceptedSplinter": [
+    {
+      "key": "anon_security_definer_function_executable_public_has_plus_access_",
+      "until": "2027-04-30",
+      "reason": "Bewusst ausfuehrbar (Migration 0031): anonym lesbare Policies (news_read, exercises_read) rufen sie auf; ohne Recht bekaemen Besucher ohne Konto einen Fehler. Antwortet nur ueber die eigene Sitzung."
+    },
+    {
+      "key": "authenticated_security_definer_function_executable_public_has_plus_access_",
+      "until": "2027-04-30",
+      "reason": "Bewusst ausfuehrbar (Migration 0031): die App fragt den Plus-Zugang per RPC (CLAUDE.md §Zugriff). Antwortet nur ueber die eigene Sitzung."
+    },
+    {
+      "key": "anon_security_definer_function_executable_public_course_seats_",
+      "until": "2027-04-30",
+      "reason": "Bewusst ausfuehrbar (Migration 0031): die oeffentliche Kursseite zeigt freie Plaetze. Liefert nur Zahlen je Kurs."
+    },
+    {
+      "key": "authenticated_security_definer_function_executable_public_course_seats_",
+      "until": "2027-04-30",
+      "reason": "Bewusst ausfuehrbar (Migration 0031): wie fuer anon - freie Plaetze je Kurs."
+    },
+    {
+      "key": "authenticated_security_definer_function_executable_public_has_consent_p_kind public.consent_kind",
+      "until": "2027-04-30",
+      "reason": "Bewusst ausfuehrbar (Migration 0031): Schreib-Policies im Tagebuch pruefen damit die Einwilligung. Antwortet nur ueber die eigene Einwilligung."
+    },
+    {
+      "key": "authenticated_security_definer_function_executable_public_can_use_habit_template_p_template_id uuid",
+      "until": "2027-04-30",
+      "reason": "Bewusst ausfuehrbar (Migration 0031): Policy user_habits_insert_own. Beschraenkt auf veroeffentlichte und eigene Vorlagen."
+    },
+    {
+      "key": "rls_enabled_no_policy_public_stripe_events",
+      "until": "2027-04-30",
+      "reason": "Absicht: schreibt und liest nur der Stripe-Webhook mit service_role."
+    },
+    {
+      "key": "rls_enabled_no_policy_public_guest_booking_attempts",
+      "until": "2027-04-30",
+      "reason": "Absicht: nur die Edge Function zur Kursbuchung (service_role) fuehrt diese Drosselung."
+    }
   ]
 }

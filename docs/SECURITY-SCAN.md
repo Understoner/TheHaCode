@@ -55,6 +55,8 @@ erscheint es als Hinweis, danach wieder in seiner echten Stufe:
   von Expo ohne verfügbaren Fix.
 - `security/policy.json` → `acceptedZap`: ZAP-Meldungen, z. B.
   `style-src 'unsafe-inline'` (react-native-web).
+- `security/policy.json` → `acceptedSplinter`: Datenbank-Befunde, z. B.
+  Funktionen, die Policies für Besucher ohne Konto brauchen.
 - `security/guarddog-reviewed.json`: von Hand geprüfte GuardDog-Treffer, je
   exakte Paketversion. Eine neue Version wird wieder gemeldet.
 
