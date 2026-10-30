@@ -8,6 +8,7 @@ import {
   movingAverage,
   streakWithGrace,
   trendSummary,
+  weekHeat,
 } from './stats';
 
 // 2026-10-25 ist ein Sonntag, 2026-10-19 der Montag davor.
@@ -82,6 +83,28 @@ describe('streakWithGrace', () => {
   it('reicht nicht vor den ersten Eintrag zurueck', () => {
     const done = new Set([SO]);
     expect(streakWithGrace(done, SO)).toEqual({ days: 1, graceUsedThisWeek: false });
+  });
+});
+
+describe('weekHeat', () => {
+  it('liefert Montag bis Sonntag mit denselben Stufen wie der Monat', () => {
+    const counts = new Map([
+      ['2026-10-19', 2],
+      ['2026-10-21', 1],
+    ]);
+    // Mittwoch als heute: Donnerstag bis Sonntag liegen in der Zukunft.
+    const week = weekHeat('2026-10-21', counts, 2);
+    expect(week.map((d) => d.date)).toEqual([
+      '2026-10-19',
+      '2026-10-20',
+      '2026-10-21',
+      '2026-10-22',
+      '2026-10-23',
+      '2026-10-24',
+      '2026-10-25',
+    ]);
+    expect(week.map((d) => d.level)).toEqual([4, 0, 2, 0, 0, 0, 0]);
+    expect(week.map((d) => d.isFuture)).toEqual([false, false, false, true, true, true, true]);
   });
 });
 

@@ -36,7 +36,7 @@ export default function TagScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Link href="/habit-tracker" style={styles.back}>
-        {t('diary.pastDay.back')}
+        {t('diary.back')}
       </Link>
       <Text style={styles.title}>{t('diary.pastDay.title')}</Text>
       {date ? <Text style={styles.intro}>{t('diary.pastDay.intro')}</Text> : null}

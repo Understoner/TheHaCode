@@ -22,7 +22,7 @@ export default function HabitsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Link href="/habit-tracker" style={styles.back}>
+      <Link href="/habit-tracker/einstellungen" style={styles.back}>
         {t('habits.back')}
       </Link>
       <Text style={styles.title}>{t('diary.picker.title')}</Text>

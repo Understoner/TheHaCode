@@ -86,15 +86,35 @@ export function monthHeat(
   habitCount: number,
   today: IsoDate,
 ): HeatDay[] {
-  return monthDays(anchor).map((date) => {
-    const done = doneCountByDay.get(date) ?? 0;
-    let level: HeatDay['level'] = 0;
-    if (done > 0) {
-      const ratio = habitCount > 0 ? Math.min(1, done / habitCount) : 1;
-      level = Math.max(1, Math.ceil(ratio * 4)) as HeatDay['level'];
-    }
-    return { date, level, done, isFuture: date > today };
-  });
+  return monthDays(anchor).map((date) => heatDay(date, doneCountByDay, habitCount, today));
+}
+
+/**
+ * Die sieben Tage der laufenden Woche, Montag zuerst - fuer die Wochenreihe
+ * im Tagebuch (30.10.2026). Dieselben Stufen wie im Monatskalender, damit
+ * beide Ansichten dieselbe Farbe fuer denselben Tag zeigen.
+ */
+export function weekHeat(
+  today: IsoDate,
+  doneCountByDay: ReadonlyMap<IsoDate, number>,
+  habitCount: number,
+): HeatDay[] {
+  return weekDays(today).map((date) => heatDay(date, doneCountByDay, habitCount, today));
+}
+
+function heatDay(
+  date: IsoDate,
+  doneCountByDay: ReadonlyMap<IsoDate, number>,
+  habitCount: number,
+  today: IsoDate,
+): HeatDay {
+  const done = doneCountByDay.get(date) ?? 0;
+  let level: HeatDay['level'] = 0;
+  if (done > 0) {
+    const ratio = habitCount > 0 ? Math.min(1, done / habitCount) : 1;
+    level = Math.max(1, Math.ceil(ratio * 4)) as HeatDay['level'];
+  }
+  return { date, level, done, isFuture: date > today };
 }
 
 // ---------------------------------------------------------------------------

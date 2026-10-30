@@ -38,9 +38,14 @@ type Props = {
   label: string;
   titel: string;
   abschnitte: HilfeAbschnitt[];
+  /**
+   * So hoch wie eine Seitenueberschrift (28) statt 40 - fuer die Symbolreihe
+   * neben dem Titel im Tagebuch (30.10.2026).
+   */
+  kompakt?: boolean;
 };
 
-export function InfoButton({ label, titel, abschnitte }: Props) {
+export function InfoButton({ label, titel, abschnitte, kompakt = false }: Props) {
   const { t } = useTranslation();
   const [offen, setOffen] = useState(false);
   const schliessen = () => setOffen(false);
@@ -54,9 +59,11 @@ export function InfoButton({ label, titel, abschnitte }: Props) {
         aria-label={label}
         aria-expanded={offen}
         onPress={() => setOffen(true)}
-        style={styles.button}
+        // Die Trefferflaeche bleibt bei 44, auch wenn der Kreis kleiner ist.
+        hitSlop={kompakt ? 8 : undefined}
+        style={[styles.button, kompakt && styles.buttonKompakt]}
       >
-        <Text style={styles.glyph}>i</Text>
+        <Text style={[styles.glyph, kompakt && styles.glyphKompakt]}>i</Text>
       </PressableRing>
 
       <Modal visible={offen} transparent animationType="none" onRequestClose={schliessen}>
@@ -106,6 +113,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
+  },
+  buttonKompakt: {
+    width: 28,
+    height: 28,
+  },
+  glyphKompakt: {
+    fontSize: 14,
+    lineHeight: 18,
   },
   glyph: {
     fontSize: 18,

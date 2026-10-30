@@ -502,16 +502,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  // 92 statt 72: "Sekunden" als Platzhalter passt sonst nicht hinein.
+  // 100 statt 72: "Sekunden" als Platzhalter passt sonst nicht hinein.
   input: {
-    width: 92,
+    width: 100,
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.lineStrong,
     backgroundColor: colors.surface,
-    fontSize: 15,
+    // 16 ist das Minimum, unter dem iOS Safari beim Antippen in die Seite
+    // hineinzoomt - und danach verschoben stehen bleibt (30.10.2026).
+    fontSize: 16,
     color: colors.ink900,
   },
   inputWide: {

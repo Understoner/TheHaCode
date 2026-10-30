@@ -64,7 +64,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     paddingVertical: 12,
     paddingHorizontal: spacing.md,
-    fontSize: 15,
+    // 16 ist das Minimum, unter dem iOS Safari beim Antippen in die Seite
+    // hineinzoomt - und danach verschoben stehen bleibt (30.10.2026).
+    fontSize: 16,
     color: colors.ink900,
     // Der Browser-Fokusring passt nicht zu den uebrigen Bedienelementen; der
     // eigene steht unten in inputFocused (gleiche Form wie in Button.tsx).
