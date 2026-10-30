@@ -16,9 +16,11 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
 import { useConsents } from '@/features/consents/useConsents';
 import { ownHabitErrorKey } from '@/features/habits/diaryErrors';
+import { enabledCategoryIds } from '@/features/habits/habitAreas';
 import { ownHabitSchema, toOwnHabitInput, type OwnHabitValues } from '@/features/habits/ownHabitForm';
 import {
   useDeleteOwnHabit,
+  useHabitAreas,
   useHabitCatalog,
   useSaveOwnHabit,
   type HabitCategory,
@@ -60,6 +62,7 @@ export default function OwnHabitScreen() {
 function OwnHabitLoader({ id }: { id: string | null }) {
   const { t } = useTranslation();
   const catalog = useHabitCatalog();
+  const areas = useHabitAreas();
   const plus = usePlusAccess();
   const consents = useConsents();
 
@@ -69,40 +72,49 @@ function OwnHabitLoader({ id }: { id: string | null }) {
         <QueryBoundary query={consents}>
           {(consentList) => (
             <QueryBoundary query={catalog}>
-              {({ categories, templates }) => {
-                // Ein eigenes Habit ist selbst eine Gesundheitsangabe (0025):
-                // anlegen und aendern nur mit Einwilligung, loeschen immer.
-                const consented = consentList.some(
-                  (c) => c.definition.kind === 'health_data' && c.granted,
-                );
-                const existing = id
-                  ? templates.find((tpl) => tpl.id === id && tpl.owner_id !== null)
-                  : null;
+              {({ categories, templates }) => (
+                <QueryBoundary query={areas.query}>
+                  {(enabledAreas) => {
+                    // Ein eigenes Habit ist selbst eine Gesundheitsangabe (0025):
+                    // anlegen und aendern nur mit Einwilligung, loeschen immer.
+                    const consented = consentList.some(
+                      (c) => c.definition.kind === 'health_data' && c.granted,
+                    );
+                    const existing = id
+                      ? templates.find((tpl) => tpl.id === id && tpl.owner_id !== null)
+                      : null;
 
-                if (id && !existing) {
-                  return (
-                    <StateMessage
-                      title={t('habits.own.missingTitle')}
-                      body={t('habits.own.missingHint')}
-                    />
-                  );
-                }
-                if (!existing && !plusAccess) {
-                  return <StateMessage title={t('habits.own.title')} body={t('habits.own.plusOnly')} />;
-                }
-                if (!existing && !consented) {
-                  return (
-                    <StateMessage title={t('habits.own.title')} body={t('habits.own.consentNeeded')} />
-                  );
-                }
-                return (
-                  <OwnHabitForm
-                    categories={categories.filter((c) => !c.is_negative)}
-                    existing={existing ?? null}
-                    canEdit={plusAccess && consented}
-                  />
-                );
-              }}
+                    if (id && !existing) {
+                      return (
+                        <StateMessage
+                          title={t('habits.own.missingTitle')}
+                          body={t('habits.own.missingHint')}
+                        />
+                      );
+                    }
+                    if (!existing && !plusAccess) {
+                      return <StateMessage title={t('habits.own.title')} body={t('habits.own.plusOnly')} />;
+                    }
+                    if (!existing && !consented) {
+                      return (
+                        <StateMessage title={t('habits.own.title')} body={t('habits.own.consentNeeded')} />
+                      );
+                    }
+                    // Neue eigene Habits nur in eingeschalteten Bereichen (0032);
+                    // ein bestehendes behaelt seinen Bereich, auch wenn er aus ist.
+                    const shown = enabledCategoryIds(categories, enabledAreas);
+                    return (
+                      <OwnHabitForm
+                        categories={categories.filter(
+                          (c) => !c.is_negative && (shown.has(c.id) || c.id === existing?.category_id),
+                        )}
+                        existing={existing ?? null}
+                        canEdit={plusAccess && consented}
+                      />
+                    );
+                  }}
+                </QueryBoundary>
+              )}
             </QueryBoundary>
           )}
         </QueryBoundary>

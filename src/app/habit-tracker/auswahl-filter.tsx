@@ -15,7 +15,8 @@ import {
   type HabitFilter,
   type HabitSource,
 } from '@/features/habits/habitFilter';
-import { useHabitCatalog } from '@/features/habits/useHabits';
+import { enabledCategoryIds } from '@/features/habits/habitAreas';
+import { useHabitAreas, useHabitCatalog } from '@/features/habits/useHabits';
 
 const SOURCES: HabitSource[] = ['all', 'suggested', 'own', 'favorites'];
 
@@ -31,6 +32,7 @@ export default function HabitFilterScreen() {
   const params = useLocalSearchParams<{ quelle?: string; kategorie?: string; suche?: string }>();
   const [draft, setDraft] = useState<HabitFilter>(() => habitFilterFromParams(params));
   const catalog = useHabitCatalog();
+  const areas = useHabitAreas();
 
   const apply = (filter: HabitFilter) =>
     router.replace({ pathname: '/habit-tracker/auswahl', params: habitFilterToParams(filter) });
@@ -38,7 +40,10 @@ export default function HabitFilterScreen() {
   return (
     <ScrollView contentContainerStyle={filterPageStyles.container}>
       <Link
-        href={{ pathname: '/habit-tracker/auswahl', params: habitFilterToParams(habitFilterFromParams(params)) }}
+        href={{
+          pathname: '/habit-tracker/auswahl',
+          params: habitFilterToParams(habitFilterFromParams(params)),
+        }}
         style={filterPageStyles.back}
       >
         {t('habits.filter.back')}
@@ -73,28 +78,35 @@ export default function HabitFilterScreen() {
       </FilterGroup>
 
       <QueryBoundary query={catalog}>
-        {({ categories, templates }) => {
-          // Nur Kategorien, in denen es ueberhaupt Habits gibt.
-          const used = categories.filter((c) => templates.some((tpl) => tpl.category_id === c.id));
-          if (used.length < 2) return null;
-          return (
-            <FilterGroup title={t('habits.filter.category')}>
-              <FilterOption
-                label={t('habits.filter.allCategories')}
-                selected={draft.categoryId === null}
-                onPress={() => setDraft({ ...draft, categoryId: null })}
-              />
-              {used.map((category) => (
-                <FilterOption
-                  key={category.id}
-                  label={category.title}
-                  selected={draft.categoryId === category.id}
-                  onPress={() => setDraft({ ...draft, categoryId: category.id })}
-                />
-              ))}
-            </FilterGroup>
-          );
-        }}
+        {({ categories, templates }) => (
+          <QueryBoundary query={areas.query}>
+            {(enabledAreas) => {
+              // Nur eingeschaltete Bereiche, in denen es ueberhaupt Habits gibt.
+              const shown = enabledCategoryIds(categories, enabledAreas);
+              const used = categories.filter(
+                (c) => shown.has(c.id) && templates.some((tpl) => tpl.category_id === c.id),
+              );
+              if (used.length < 2) return null;
+              return (
+                <FilterGroup title={t('habits.filter.category')}>
+                  <FilterOption
+                    label={t('habits.filter.allCategories')}
+                    selected={draft.categoryId === null}
+                    onPress={() => setDraft({ ...draft, categoryId: null })}
+                  />
+                  {used.map((category) => (
+                    <FilterOption
+                      key={category.id}
+                      label={category.title}
+                      selected={draft.categoryId === category.id}
+                      onPress={() => setDraft({ ...draft, categoryId: category.id })}
+                    />
+                  ))}
+                </FilterGroup>
+              );
+            }}
+          </QueryBoundary>
+        )}
       </QueryBoundary>
 
       <View style={styles.actions}>

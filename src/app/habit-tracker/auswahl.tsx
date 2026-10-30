@@ -18,7 +18,9 @@ import {
   isFiltered,
   type HabitFilter,
 } from '@/features/habits/habitFilter';
+import { enabledCategoryIds } from '@/features/habits/habitAreas';
 import {
+  useHabitAreas,
   useHabitCatalog,
   useHabitFavorites,
   useMyHabits,
@@ -33,9 +35,8 @@ import {
 export default function HabitsScreen() {
   const { t } = useTranslation();
   const { session, loading } = useAuth();
-  const filter = habitFilterFromParams(
-    useLocalSearchParams<{ quelle?: string; kategorie?: string; suche?: string }>(),
-  );
+  const filter =
+    habitFilterFromParams(useLocalSearchParams<{ quelle?: string; kategorie?: string; suche?: string }>());
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -75,6 +76,7 @@ function HabitsForUser({ filter }: { filter: HabitFilter }) {
   const myHabits = useMyHabits();
   const favorites = useHabitFavorites();
   const plus = usePlusAccess();
+  const areas = useHabitAreas();
 
   return (
     <QueryBoundary query={plus}>
@@ -86,22 +88,30 @@ function HabitsForUser({ filter }: { filter: HabitFilter }) {
                 {(habits) => (
                   <QueryBoundary query={favorites}>
                     {(favoriteIds) => (
-                      <View style={styles.stack}>
-                        {isFiltered(filter) ? (
-                          <ActiveFilter
-                            summary={filterSummary(filter, categories, t)}
-                            resetHref="/habit-tracker/auswahl"
-                          />
-                        ) : null}
-                        <HabitCatalog
-                        categories={categories}
-                        templates={templates}
-                        myHabits={habits}
-                        favorites={favoriteIds}
-                        plusAccess={plusAccess}
-                          filter={filter}
-                        />
-                      </View>
+                      <QueryBoundary query={areas.query}>
+                        {(enabledAreas) => {
+                          // Nur eingeschaltete Bereiche (Einstellungen, 0032).
+                          const shown = enabledCategoryIds(categories, enabledAreas);
+                          return (
+                            <View style={styles.stack}>
+                              {isFiltered(filter) ? (
+                                <ActiveFilter
+                                  summary={filterSummary(filter, categories, t)}
+                                  resetHref="/habit-tracker/auswahl"
+                                />
+                              ) : null}
+                              <HabitCatalog
+                                categories={categories.filter((c) => shown.has(c.id))}
+                                templates={templates.filter((tpl) => shown.has(tpl.category_id))}
+                                myHabits={habits}
+                                favorites={favoriteIds}
+                                plusAccess={plusAccess}
+                                filter={filter}
+                              />
+                            </View>
+                          );
+                        }}
+                      </QueryBoundary>
                     )}
                   </QueryBoundary>
                 )}

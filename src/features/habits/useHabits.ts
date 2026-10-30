@@ -465,3 +465,49 @@ export function useDeleteOwnHabit() {
     },
   });
 }
+
+/**
+ * Die eingeschalteten Habit-Bereiche (0032): Slugs aus
+ * profiles.habit_categories, NULL = alle. Rechnen tut habitAreas.ts.
+ * Geschrieben wird optimistisch - ein Schalter, der erst nach der Antwort
+ * umspringt, fuehlt sich kaputt an.
+ */
+export function useHabitAreas() {
+  const { session, loading } = useAuth();
+  const userId = session?.user.id ?? null;
+  const queryClient = useQueryClient();
+  const key = ['habit-areas', userId];
+
+  const query = useQuery({
+    queryKey: key,
+    enabled: !loading && userId !== null,
+    queryFn: async (): Promise<string[] | null> => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('habit_categories')
+        .eq('id', userId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.habit_categories ?? null;
+    },
+  });
+
+  const save = useMutation({
+    mutationFn: async (slugs: string[]) => {
+      if (!userId) throw new Error('unauthorized');
+      const { error } = await supabase.from('profiles').update({ habit_categories: slugs }).eq('id', userId);
+      if (error) throw error;
+    },
+    onMutate: async (slugs) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const before = queryClient.getQueryData<string[] | null>(key);
+      queryClient.setQueryData(key, slugs);
+      return { before };
+    },
+    onError: (_error, _slugs, context) => {
+      queryClient.setQueryData(key, context?.before ?? null);
+    },
+  });
+
+  return { query, save };
+}

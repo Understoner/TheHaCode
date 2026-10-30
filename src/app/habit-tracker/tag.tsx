@@ -13,7 +13,9 @@ import { today as heute, type IsoDate } from '@/features/habits/dates';
 import { DiaryConsent } from '@/features/habits/DiaryConsent';
 import { HabitDay } from '@/features/habits/HabitDay';
 import { habitsForDay, parseDayParam } from '@/features/habits/pastDay';
+import { enabledCategoryIds } from '@/features/habits/habitAreas';
 import {
+  useHabitAreas,
   useHabitCatalog,
   useHabitLogs,
   useHabitScoreEnabled,
@@ -92,6 +94,7 @@ function DayContent({ date, today }: { date: IsoDate; today: IsoDate }) {
   const myHabits = useMyHabits();
   const plus = usePlusAccess();
   const logs = useHabitLogs(date, date);
+  const areas = useHabitAreas();
 
   return (
     <QueryBoundary query={catalog}>
@@ -102,19 +105,28 @@ function DayContent({ date, today }: { date: IsoDate; today: IsoDate }) {
               {(plusAccess) => (
                 <QueryBoundary query={logs}>
                   {(entries) => (
-                    <HabitDay
-                      date={date}
-                      today={today}
-                      // Blaettern bleibt auf dieser Seite und haelt den Tag
-                      // in der Adresse - Zurueck im Browser fuehrt dann ins
-                      // Tagebuch, nicht durch jeden einzelnen Tag.
-                      onChangeDate={(d) => router.setParams({ datum: d > today ? today : d })}
-                      habits={habitsForDay(habits, entries, date)}
-                      logs={entries}
-                      categories={categories}
-                      plusAccess={plusAccess}
-                      scoreOn={scoreOn}
-                    />
+                    <QueryBoundary query={areas.query}>
+                      {(enabledAreas) => {
+                        const shown = enabledCategoryIds(categories, enabledAreas);
+                        return (
+                          <HabitDay
+                            date={date}
+                            today={today}
+                            // Blaettern bleibt auf dieser Seite und haelt den Tag
+                            // in der Adresse - Zurueck im Browser fuehrt dann ins
+                            // Tagebuch, nicht durch jeden einzelnen Tag.
+                            onChangeDate={(d) => router.setParams({ datum: d > today ? today : d })}
+                            habits={habitsForDay(habits, entries, date).filter((h) =>
+                              shown.has(h.habit_templates.category_id),
+                            )}
+                            logs={entries}
+                            categories={categories}
+                            plusAccess={plusAccess}
+                            scoreOn={scoreOn}
+                          />
+                        );
+                      }}
+                    </QueryBoundary>
                   )}
                 </QueryBoundary>
               )}

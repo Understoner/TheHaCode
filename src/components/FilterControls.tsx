@@ -33,7 +33,11 @@ export function FilterOption({
     >
       {tone ? <View style={[styles.dot, { backgroundColor: tone }]} /> : null}
       <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{label}</Text>
-      <Text style={[styles.check, !selected && styles.checkHidden]}>✓</Text>
+      {/* Steht immer da, damit die Zeile nicht springt - fuer Screenreader
+          aber ausgeblendet: die Auswahl sagt aria-checked an. */}
+      <Text aria-hidden style={[styles.check, !selected && styles.checkHidden]}>
+        ✓
+      </Text>
     </PressableRing>
   );
 }
