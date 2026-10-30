@@ -6,8 +6,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { PressableRing } from '@/components/PressableRing';
 import { colors, radius, spacing } from '@/design/tokens';
 
-import { shiftMonth, weekdayIndex, type IsoDate } from './dates';
-import { formatDay, formatMonth } from './format';
+import { addDays, shiftMonth, weekdayIndex, weekStart, type IsoDate } from './dates';
+import { formatDay, formatMonth, formatShort } from './format';
 import { daysDoneThisWeek, monthHeat, weekHeat, type HeatDay } from './stats';
 import type { HabitLog } from './useHabits';
 
@@ -24,29 +24,69 @@ function useCountByDay(logs: HabitLog[]) {
   }, [logs]);
 }
 
-/** Die laufende Woche: Mo bis So. */
+/**
+ * Eine Woche Mo bis So, anfangs die laufende. Die Pfeile links und rechts
+ * blaettern wochenweise (30.10.2026); in die Zukunft geht es nicht.
+ */
 export function DiaryWeek({
   today,
+  week,
+  onChangeWeek,
   logs,
   activeCount,
 }: {
   today: IsoDate;
+  /** Irgendein Tag der angezeigten Woche. */
+  week: IsoDate;
+  onChangeWeek: (week: IsoDate) => void;
   logs: HabitLog[];
   activeCount: number;
 }) {
   const { t } = useTranslation();
   const counts = useCountByDay(logs);
   const doneDays = useMemo(() => new Set(counts.keys()), [counts]);
-  const week = weekHeat(today, counts, activeCount);
+  const monday = weekStart(week);
+  const sunday = addDays(monday, 6);
+  const isCurrent = monday >= weekStart(today);
+  const days = weekHeat(week, counts, activeCount, today);
+  // Gezaehlt wird bis heute bzw. bis zum Sonntag einer frueheren Woche.
+  const done = daysDoneThisWeek(doneDays, isCurrent ? today : sunday);
 
   // Serie und freier Tag standen bis 30.10.2026 darunter - auf Wunsch
   // gestrichen, um auf dem Handy Platz zu sparen.
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, styles.weekCard]}>
       <Text style={styles.big}>
-        {t('diary.insights.week', { count: daysDoneThisWeek(doneDays, today) })}
+        {isCurrent
+          ? t('diary.insights.week', { count: done })
+          : t('diary.insights.weekPast', {
+              count: done,
+              from: formatShort(monday),
+              to: formatShort(sunday),
+            })}
       </Text>
-      <DayGrid days={week} today={today} showNumbers />
+      <View style={styles.weekRow}>
+        <PressableRing
+          onPress={() => onChangeWeek(addDays(monday, -7))}
+          accessibilityLabel={t('diary.insights.prevWeek')}
+          hitSlop={8}
+          style={styles.weekNav}
+        >
+          <Text style={styles.weekNavText}>‹</Text>
+        </PressableRing>
+        <View style={styles.grow}>
+          <DayGrid days={days} today={today} showNumbers />
+        </View>
+        <PressableRing
+          onPress={() => onChangeWeek(addDays(monday, 7))}
+          disabled={isCurrent}
+          accessibilityLabel={t('diary.insights.nextWeek')}
+          hitSlop={8}
+          style={[styles.weekNav, isCurrent && styles.weekNavDisabled]}
+        >
+          <Text style={[styles.weekNavText, isCurrent && styles.weekNavTextDisabled]}>›</Text>
+        </PressableRing>
+      </View>
     </View>
   );
 }
@@ -165,6 +205,7 @@ function DayGrid({
 }
 
 const CELL = `${100 / 7}%` as const;
+const WEEK_NAV = 28;
 
 const heatStyles = StyleSheet.create({
   0: { backgroundColor: colors.background },
@@ -187,6 +228,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
+  },
+  // Die Pfeile neben der Reihe brauchen 2 x (28 + 4) zusaetzlich, sonst
+  // wuerden die Felder schmaler als die im Monat.
+  weekCard: {
+    maxWidth: 420 + 2 * (WEEK_NAV + 4) + 2 * spacing.md + 2,
+  },
+  weekRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  grow: {
+    flex: 1,
+  },
+  weekNav: {
+    width: WEEK_NAV,
+    height: WEEK_NAV,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Ausgegraut wie der Vorwaerts-Pfeil beim Tag (HabitDay): heute ist das
+  // Ende, weiter geht es nicht.
+  weekNavDisabled: {
+    borderColor: colors.background,
+    backgroundColor: colors.background,
+  },
+  weekNavText: {
+    fontSize: 16,
+    lineHeight: 18,
+    color: colors.ink700,
+  },
+  weekNavTextDisabled: {
+    color: colors.ink500,
   },
   cardTitle: {
     fontSize: 15,

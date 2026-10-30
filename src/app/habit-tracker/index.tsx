@@ -102,13 +102,14 @@ function DiaryContent() {
   const today = heute();
   const [date, setDate] = useState<IsoDate>(today);
   const [month, setMonth] = useState<IsoDate>(today);
+  const [week, setWeek] = useState<IsoDate>(today);
   const { scoreOn } = useHabitScoreEnabled();
 
   // Die Wochenkarte braucht ihre Woche, der Kalender seinen Monat, die
   // Tagesliste ihren Tag. Score, Verlaeufe und alles Weitere rechnet die
   // Auswertungsseite mit eigener Abfrage (30.10.2026).
   const monthRange = monthDays(month);
-  const from = [monthRange[0], weekStart(today), date].sort()[0];
+  const from = [monthRange[0], weekStart(week), date].sort()[0];
   const to = [monthRange[monthRange.length - 1], today].sort()[1];
 
   const catalog = useHabitCatalog();
@@ -130,7 +131,13 @@ function DiaryContent() {
                       // Reihenfolge nach Wunsch vom 30.10.2026: die Woche
                       // zuerst, dann der Tag, darunter der Monat.
                       <View style={styles.stack}>
-                        <DiaryWeek today={today} logs={entries} activeCount={active.length} />
+                        <DiaryWeek
+                          today={today}
+                          week={week}
+                          onChangeWeek={(w) => setWeek(w > today ? today : w)}
+                          logs={entries}
+                          activeCount={active.length}
+                        />
 
                         <HabitDay
                           date={date}

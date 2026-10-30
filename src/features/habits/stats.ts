@@ -90,16 +90,18 @@ export function monthHeat(
 }
 
 /**
- * Die sieben Tage der laufenden Woche, Montag zuerst - fuer die Wochenreihe
- * im Tagebuch (30.10.2026). Dieselben Stufen wie im Monatskalender, damit
- * beide Ansichten dieselbe Farbe fuer denselben Tag zeigen.
+ * Die sieben Tage der Woche, in der `anchor` liegt, Montag zuerst - fuer die
+ * Wochenreihe im Tagebuch (30.10.2026), die auch in fruehere Wochen
+ * blaettern kann. Dieselben Stufen wie im Monatskalender, damit beide
+ * Ansichten dieselbe Farbe fuer denselben Tag zeigen.
  */
 export function weekHeat(
-  today: IsoDate,
+  anchor: IsoDate,
   doneCountByDay: ReadonlyMap<IsoDate, number>,
   habitCount: number,
+  today: IsoDate = anchor,
 ): HeatDay[] {
-  return weekDays(today).map((date) => heatDay(date, doneCountByDay, habitCount, today));
+  return weekDays(anchor).map((date) => heatDay(date, doneCountByDay, habitCount, today));
 }
 
 function heatDay(

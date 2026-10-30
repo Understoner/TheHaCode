@@ -106,6 +106,14 @@ describe('weekHeat', () => {
     expect(week.map((d) => d.level)).toEqual([4, 0, 2, 0, 0, 0, 0]);
     expect(week.map((d) => d.isFuture)).toEqual([false, false, false, true, true, true, true]);
   });
+
+  it('zeigt eine fruehere Woche ganz, ohne Tage in der Zukunft', () => {
+    const counts = new Map([['2026-10-12', 1]]);
+    const week = weekHeat('2026-10-14', counts, 1, '2026-10-21');
+    expect(week[0]).toMatchObject({ date: '2026-10-12', level: 4 });
+    expect(week[6].date).toBe('2026-10-18');
+    expect(week.some((d) => d.isFuture)).toBe(false);
+  });
 });
 
 describe('monthHeat', () => {
