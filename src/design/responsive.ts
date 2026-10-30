@@ -44,7 +44,17 @@ export type ResponsiveTarget =
   // untereinander, ab dem Breakpoint zu zweit nebeneinander. Ohne das haengen
   // vier Bereiche in einer 420px-Spalte, waehrend rechts daneben die halbe
   // Seite leer bleibt.
-  | 'konto-grid';
+  | 'konto-grid'
+  // Die Habit-Karten im Tagebuch (30.10.2026): auf dem Handy ohne
+  // Beschreibung, dafuer mit einem "i" rechts oben, das sie als Karte
+  // oeffnet. Ab dem Breakpoint steht die Beschreibung wie bisher in der
+  // Karte und das "i" faellt weg. Die beiden letzten Ziele schaffen auf dem
+  // Handy Platz fuer das "i": der Text laeuft nicht darunter, und das
+  // Bedienelement rueckt unter das "i" statt daneben.
+  | 'habit-info'
+  | 'habit-desc'
+  | 'habit-text'
+  | 'habit-control';
 
 // Nur die Mindestbreiten unterscheiden sich. Teamkarten tragen seit dem
 // Umbau auf die News-Anatomie (Bild oben ueber die volle Breite) dieselbe
@@ -91,9 +101,13 @@ export function responsiveCss(): string {
 @media (max-width: ${mobileMax}px) {
   [data-thc="nav-desktop"] { display: none !important; }
   [data-thc="page-root"] { padding-bottom: ${MOBILE_TAB_BAR_SAFE_HEIGHT} !important; }
+  [data-thc="habit-desc"] { display: none !important; }
+  [data-thc="habit-text"] { padding-right: 28px !important; }
+  [data-thc="habit-control"] { margin-top: 28px !important; }
 }
 @media (min-width: ${MOBILE_NAV_BREAKPOINT}px) {
   [data-thc="nav-mobile"] { display: none !important; }
+  [data-thc="habit-info"] { display: none !important; }
 ${gridRules}
   [data-thc="konto-grid"] > * { flex-basis: 48% !important; min-width: ${KONTO_COLUMN_MIN_WIDTH}px !important; }
 }
