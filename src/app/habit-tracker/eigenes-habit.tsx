@@ -39,8 +39,10 @@ export default function OwnHabitScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Link href="/habit-tracker/auswahl" style={styles.back}>
-        {t('habits.own.back')}
+      {/* Angelegt wird aus den Einstellungen, bearbeitet aus der Auswahl
+          (30.10.2026) - der Weg zurueck fuehrt dorthin, woher man kam. */}
+      <Link href={id ? '/habit-tracker/auswahl' : '/habit-tracker/einstellungen'} style={styles.back}>
+        {id ? t('habits.own.back') : t('habits.back')}
       </Link>
       <Text style={styles.title}>{t(id ? 'habits.own.editTitle' : 'habits.own.createTitle')}</Text>
 

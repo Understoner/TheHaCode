@@ -66,3 +66,38 @@ export function groupByCategory(
     }))
     .filter((group) => group.templates.length > 0);
 }
+
+// ---------------------------------------------------------------------------
+// Der Filter in der Adresse (30.10.2026)
+// ---------------------------------------------------------------------------
+// Die Filter sitzen seit 30.10.2026 auf einer eigenen Seite
+// (/habit-tracker/auswahl-filter). Damit die Auswahl ihn nach der Rueckkehr
+// kennt, steht er in der Adresse: ?quelle=&kategorie=&suche=. Nur Bekanntes
+// wird uebernommen - eine erfundene Quelle faellt auf "alle" zurueck.
+
+type Param = string | string[] | undefined;
+const first = (value: Param) => (Array.isArray(value) ? value[0] : value);
+
+const SOURCE_VALUES: HabitSource[] = ['all', 'suggested', 'own', 'favorites'];
+
+export function habitFilterFromParams(params: { quelle?: Param; kategorie?: Param; suche?: Param }): HabitFilter {
+  const source = first(params.quelle);
+  const category = first(params.kategorie);
+  return {
+    source: SOURCE_VALUES.includes(source as HabitSource) ? (source as HabitSource) : 'all',
+    categoryId: category && /^[0-9a-f-]{36}$/i.test(category) ? category : null,
+    query: (first(params.suche) ?? '').slice(0, 100),
+  };
+}
+
+export function habitFilterToParams(filter: HabitFilter): Record<string, string> {
+  const params: Record<string, string> = {};
+  if (filter.source !== 'all') params.quelle = filter.source;
+  if (filter.categoryId) params.kategorie = filter.categoryId;
+  if (filter.query.trim()) params.suche = filter.query.trim();
+  return params;
+}
+
+export function isFiltered(filter: HabitFilter): boolean {
+  return Object.keys(habitFilterToParams(filter)).length > 0;
+}

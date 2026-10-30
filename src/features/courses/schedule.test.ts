@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCourseDate, formatCourseStart, courseDay, isPastCourse } from './schedule';
+import {
+  courseDay,
+  formatCourseDate,
+  formatCourseStart,
+  isInCoursePeriod,
+  isPastCourse,
+  parseCoursePeriod,
+  periodRange,
+} from './schedule';
 
 describe('Kurstermine', () => {
   it('zeigt die Kurzform mit oesterreichischem Monatsnamen', () => {
@@ -63,3 +71,37 @@ describe('isPastCourse', () => {
     expect(isPastCourse('2026-10-19T16:00:00Z', spaetAbends)).toBe(false);
   });
 });
+
+describe('Zeitraum-Filter', () => {
+  // Freitag, 30.10.2026, mittags in Wien.
+  const now = new Date('2026-10-30T11:00:00Z');
+
+  it('rechnet die Zeitraeume in Wiener Kalendertagen', () => {
+    expect(periodRange('alle', now)).toBeNull();
+    expect(periodRange('woche', now)).toEqual(['2026-10-30', '2026-11-01']);
+    expect(periodRange('monat', now)).toEqual(['2026-10-30', '2026-10-31']);
+    expect(periodRange('naechsterMonat', now)).toEqual(['2026-11-01', '2026-11-30']);
+    expect(periodRange('dreiMonate', now)).toEqual(['2026-10-30', '2027-01-29']);
+  });
+
+  it('filtert nach Termin und laesst Kurse ohne Termin immer stehen', () => {
+    expect(isInCoursePeriod('2026-11-01T18:00:00Z', 'woche', now)).toBe(true);
+    expect(isInCoursePeriod('2026-11-02T18:00:00Z', 'woche', now)).toBe(false);
+    expect(isInCoursePeriod('2026-11-15T18:00:00Z', 'naechsterMonat', now)).toBe(true);
+    expect(isInCoursePeriod('2026-12-01T18:00:00Z', 'naechsterMonat', now)).toBe(false);
+    expect(isInCoursePeriod(null, 'woche', now)).toBe(true);
+  });
+
+  // 23:30 UTC am 30.11. ist in Wien schon der 1.12. - massgeblich ist Wien.
+  it('rechnet nach dem Wiener Tag, nicht nach UTC', () => {
+    expect(isInCoursePeriod('2026-11-30T22:30:00Z', 'naechsterMonat', now)).toBe(true);
+    expect(isInCoursePeriod('2026-11-30T23:30:00Z', 'naechsterMonat', now)).toBe(false);
+  });
+
+  it('nimmt aus der Adresse nur bekannte Zeitraeume', () => {
+    expect(parseCoursePeriod('monat')).toBe('monat');
+    expect(parseCoursePeriod('gestern')).toBe('alle');
+    expect(parseCoursePeriod(undefined)).toBe('alle');
+  });
+});
+

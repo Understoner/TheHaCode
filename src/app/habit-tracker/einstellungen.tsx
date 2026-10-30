@@ -7,6 +7,7 @@ import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { colors, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { usePlusAccess } from '@/features/configurator/useSequences';
 import { useHabitScoreEnabled, useMyHabits } from '@/features/habits/useHabits';
 
 /**
@@ -46,6 +47,7 @@ function Settings() {
   const { t } = useTranslation();
   const { scoreOn, setScoreOn } = useHabitScoreEnabled();
   const myHabits = useMyHabits();
+  const plus = usePlusAccess();
 
   return (
     <View style={styles.stack}>
@@ -79,6 +81,31 @@ function Settings() {
         <Link href="/habit-tracker/auswahl" style={styles.primary}>
           {t('diary.settings.habitsAction')}
         </Link>
+      </View>
+
+      {/* Eigene Habits anlegen (30.10.2026 aus der Habit-Auswahl hierher
+          verschoben): eine Einstellung zum Tagebuch, keine Auswahl. Bearbeiten
+          und Loeschen bleiben an den Karten der Auswahl. */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>{t('habits.own.title')}</Text>
+        <QueryBoundary query={plus}>
+          {(plusAccess) => (
+            <>
+              <Text style={styles.text}>
+                {plusAccess ? t('habits.own.text') : t('habits.own.plusOnly')}
+              </Text>
+              {plusAccess ? (
+                <Link href="/habit-tracker/eigenes-habit" style={styles.primary}>
+                  {t('habits.own.create')}
+                </Link>
+              ) : (
+                <Link href="/plus" style={styles.link}>
+                  {t('diary.picker.toPlus')}
+                </Link>
+              )}
+            </>
+          )}
+        </QueryBoundary>
       </View>
     </View>
   );

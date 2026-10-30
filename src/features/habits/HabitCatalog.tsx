@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { PressableRing } from '@/components/PressableRing';
 import { StateMessage } from '@/components/StateMessage';
@@ -16,7 +16,6 @@ import {
   isOwn,
   NO_FILTER,
   type HabitFilter,
-  type HabitSource,
 } from './habitFilter';
 import {
   useChooseHabit,
@@ -26,11 +25,9 @@ import {
   type MyHabit,
 } from './useHabits';
 
-const SOURCES: HabitSource[] = ['all', 'suggested', 'own', 'favorites'];
-
 /**
- * Die Habit-Auswahl: filtern nach Herkunft (vorgeschlagen, selbst erstellt,
- * Favoriten) und Kategorie, aufnehmen, herausnehmen, merken.
+ * Die Habit-Auswahl: aufnehmen, herausnehmen, merken. Gefiltert wird auf
+ * einer eigenen Seite (seit 30.10.2026); hier kommt der Filter nur an.
  *
  * Gesperrte Habits stehen mit da - sichtbar, aber nicht waehlbar. Das ist die
  * Vorschau: wer ohne Plus BOLT fuehrt, sieht, was es sonst noch gibt. Die
@@ -43,15 +40,17 @@ export function HabitCatalog({
   myHabits,
   favorites,
   plusAccess,
+  filter = NO_FILTER,
 }: {
   categories: HabitCategory[];
   templates: HabitTemplate[];
   myHabits: MyHabit[];
   favorites: ReadonlySet<string>;
   plusAccess: boolean;
+  /** Aus der Adresse, gesetzt auf /habit-tracker/auswahl-filter (30.10.2026). */
+  filter?: HabitFilter;
 }) {
   const { t } = useTranslation();
-  const [filter, setFilter] = useState<HabitFilter>(NO_FILTER);
   const choose = useChooseHabit();
   const toggleFavorite = useToggleHabitFavorite();
   const active = new Set(myHabits.filter((h) => h.is_active).map((h) => h.template_id));
@@ -60,50 +59,11 @@ export function HabitCatalog({
     () => groupByCategory(categories, filterTemplates(templates, filter, favorites), favorites),
     [categories, templates, filter, favorites],
   );
-  const usedCategories = categories.filter((c) => templates.some((tpl) => tpl.category_id === c.id));
 
   const error = choose.error ?? toggleFavorite.error;
 
   return (
     <View style={styles.section}>
-      <View style={styles.chips} role="radiogroup" aria-label={t('habits.filter.source')}>
-        {SOURCES.map((source) => (
-          <Chip
-            key={source}
-            label={t(`habits.filter.${source}`)}
-            active={filter.source === source}
-            onPress={() => setFilter({ ...filter, source })}
-          />
-        ))}
-      </View>
-
-      {usedCategories.length > 1 ? (
-        <View style={styles.chips} role="radiogroup" aria-label={t('habits.filter.category')}>
-          <Chip
-            label={t('habits.filter.allCategories')}
-            active={filter.categoryId === null}
-            onPress={() => setFilter({ ...filter, categoryId: null })}
-          />
-          {usedCategories.map((category) => (
-            <Chip
-              key={category.id}
-              label={category.title}
-              active={filter.categoryId === category.id}
-              onPress={() => setFilter({ ...filter, categoryId: category.id })}
-            />
-          ))}
-        </View>
-      ) : null}
-
-      <TextInput
-        value={filter.query}
-        onChangeText={(query) => setFilter({ ...filter, query })}
-        placeholder={t('habits.filter.search')}
-        aria-label={t('habits.filter.search')}
-        placeholderTextColor={colors.ink500}
-        style={styles.search}
-      />
-
       {error ? (
         <Text role="alert" style={styles.error}>
           {t(diaryErrorKey(error))}
@@ -316,19 +276,6 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <PressableRing
-      role="radio"
-      aria-checked={active}
-      onPress={onPress}
-      style={[styles.chip, active && styles.chipActive]}
-    >
-      <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
-    </PressableRing>
-  );
-}
-
 const badge = {
   alignSelf: 'flex-start',
   fontSize: 11,
@@ -341,43 +288,6 @@ const badge = {
 const styles = StyleSheet.create({
   section: {
     gap: spacing.md,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  chip: {
-    paddingVertical: 7,
-    paddingHorizontal: 16,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-  },
-  chipActive: {
-    backgroundColor: colors.ocean700,
-    borderColor: colors.ocean700,
-  },
-  chipText: {
-    fontSize: 13,
-    color: colors.ink700,
-  },
-  chipTextActive: {
-    color: colors.surface,
-    fontWeight: '600',
-  },
-  search: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    // 16 ist das Minimum, unter dem iOS Safari beim Antippen in die Seite
-    // hineinzoomt - und danach verschoben stehen bleibt (30.10.2026).
-    fontSize: 16,
-    color: colors.ink900,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
   },
   group: {
     gap: spacing.sm,

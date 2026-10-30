@@ -5,11 +5,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { CoverImage } from '@/components/CoverImage';
 import { QueryBoundary } from '@/components/QueryBoundary';
+import { StateMessage } from '@/components/StateMessage';
 import { colors, radius, spacing } from '@/design/tokens';
 import { RECENT_ITEMS_COUNT } from '@/design/navigation';
 import { responsive } from '@/design/responsive';
 import { CourseBooking } from '@/features/courses/CourseBooking';
-import { formatCourseDate } from '@/features/courses/schedule';
+import { formatCourseDate, isInCoursePeriod, type CoursePeriod } from '@/features/courses/schedule';
 import { useCourseSeats } from '@/features/courses/useCourseBooking';
 import { useCoursesList } from '@/features/courses/useCoursesList';
 import { openExternalUrl, safeExternalUrl } from '@/lib/externalLink';
@@ -18,7 +19,7 @@ import { openExternalUrl, safeExternalUrl } from '@/lib/externalLink';
 // expo-router rendert Link nativ als Text, ein View darin waere dort ungueltig.
 const detailHref = (slug: string) => ({ pathname: '/kurse/[slug]' as const, params: { slug } });
 
-export function CoursesList() {
+export function CoursesList({ period = 'alle' }: { period?: CoursePeriod }) {
   const { t } = useTranslation();
   const query = useCoursesList();
   // Die freien Plaetze kommen aus einer eigenen Abfrage: sie aendern sich,
@@ -31,7 +32,14 @@ export function CoursesList() {
 
   return (
     <QueryBoundary query={query} empty={{ title: t('kurse.empty.title'), hint: t('kurse.empty.hint') }}>
-      {(courses) => {
+      {(allCourses) => {
+        // Der Zeitraum kommt von der Filterseite (/kurse/filter). Ist danach
+        // nichts uebrig, eine eigene Meldung: es GIBT Kurse, nur nicht in
+        // diesem Zeitraum.
+        const courses = allCourses.filter((course) => isInCoursePeriod(course.starts_at, period));
+        if (courses.length === 0) {
+          return <StateMessage title={t('kurse.filter.empty.title')} body={t('kurse.filter.empty.hint')} />;
+        }
         const recent = courses.slice(0, RECENT_ITEMS_COUNT);
         const older = courses.slice(RECENT_ITEMS_COUNT);
 

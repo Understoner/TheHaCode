@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { filterTemplates, groupByCategory, NO_FILTER } from './habitFilter';
+import {
+  filterTemplates,
+  groupByCategory,
+  habitFilterFromParams,
+  habitFilterToParams,
+  isFiltered,
+  NO_FILTER,
+} from './habitFilter';
 import type { HabitCategory, HabitTemplate } from './useHabits';
 
 const D = '2026-10-25';
@@ -99,3 +106,21 @@ describe('groupByCategory', () => {
     expect(atmung.templates.map((t) => t.id)).toEqual(['Einschlafen', 'BOLT', 'Eigenes']);
   });
 });
+
+describe('Filter in der Adresse', () => {
+  const KAT = '0b4c7a1e-2f3d-4c5b-8a9e-112233445566';
+
+  it('liest und schreibt dieselben Werte', () => {
+    const filter = habitFilterFromParams({ quelle: 'own', kategorie: KAT, suche: ' Atem ' });
+    expect(filter).toEqual({ source: 'own', categoryId: KAT, query: ' Atem ' });
+    expect(habitFilterToParams(filter)).toEqual({ quelle: 'own', kategorie: KAT, suche: 'Atem' });
+    expect(isFiltered(filter)).toBe(true);
+  });
+
+  it('laesst Unbekanntes fallen', () => {
+    expect(habitFilterFromParams({ quelle: 'fremd', kategorie: '1 or 1=1' })).toEqual(NO_FILTER);
+    expect(habitFilterToParams(NO_FILTER)).toEqual({});
+    expect(isFiltered(NO_FILTER)).toBe(false);
+  });
+});
+
