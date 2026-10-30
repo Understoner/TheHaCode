@@ -8,6 +8,7 @@ import { StyleSheet, View } from 'react-native';
 import { Footer } from '@/components/Footer';
 import { NavBar } from '@/components/NavBar';
 import { StagingBanner } from '@/components/StagingBanner';
+import { ViewportDiagnose } from '@/components/ViewportDiagnose';
 import { colors } from '@/design/tokens';
 import { responsive } from '@/design/responsive';
 import { AuthProvider } from '@/features/auth/AuthProvider';
@@ -47,6 +48,8 @@ export default function RootLayout() {
             /konto nach der Rueckkehr aus dem Checkout, manchmal auf
             /sequenzen. */}
         <EntitlementSync />
+        {/* Nur Staging mit ?diagnose=1 - Messung am iPhone (30.10.2026). */}
+        <ViewportDiagnose />
         {/* Der Titel gehoert hierher und nicht in +html.tsx: Expo rendert den
             <title> ueber react-helmet, und nur ueber <Head> gesetzt aendert er
             sich auch beim Wechsel der Seite ohne Neuladen. Einzelne Screens
