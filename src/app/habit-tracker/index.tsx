@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
@@ -14,28 +13,26 @@ import { usePlusAccess } from '@/features/configurator/useSequences';
 import { useConsents } from '@/features/consents/useConsents';
 import { addDays, monthDays, today as heute, type IsoDate } from '@/features/habits/dates';
 import { DiaryConsent } from '@/features/habits/DiaryConsent';
-import { DiaryInsights } from '@/features/habits/DiaryInsights';
+import { DiaryHeader } from '@/features/habits/DiaryHeader';
+import { DiaryMonth, DiaryWeek } from '@/features/habits/DiaryOverview';
 import { HabitDay } from '@/features/habits/HabitDay';
 import {
   useHabitCatalog,
   useHabitLogs,
   useHabitScoreEnabled,
   useMyHabits,
-  useMySessions,
 } from '@/features/habits/useHabits';
 
-// Wie weit die Auswertung zurueckschaut, unabhaengig vom angezeigten Monat:
-// genug fuer Serie und BOLT-Verlauf, wenig genug fuer eine Abfrage.
+// Wie weit die Uebersicht zurueckschaut, unabhaengig vom angezeigten Monat:
+// genug fuer die Serie in der Wochenkarte.
 const LOOKBACK_DAYS = 120;
 
 export default function TagebuchScreen() {
-  const { t } = useTranslation();
   const { session, loading } = useAuth();
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{t('diary.title')}</Text>
-      <Text style={styles.intro}>{t('diary.intro')}</Text>
+      <DiaryHeader />
 
       {loading ? <SkeletonList /> : session ? <DiaryForUser /> : <DiaryTeaser />}
     </ScrollView>
@@ -106,88 +103,67 @@ function DiaryForUser() {
 }
 
 function DiaryContent() {
-  const { t } = useTranslation();
   const today = heute();
   const [date, setDate] = useState<IsoDate>(today);
   const [month, setMonth] = useState<IsoDate>(today);
-  const { scoreOn, setScoreOn } = useHabitScoreEnabled();
+  const { scoreOn } = useHabitScoreEnabled();
 
+  // Die Serie in der Wochenkarte braucht etwas Vorlauf, der Kalender seinen
+  // Monat, die Tagesliste ihren Tag. Score, Verlaeufe und alles Weitere
+  // rechnet die Auswertungsseite mit eigener Abfrage (30.10.2026).
   const monthRange = monthDays(month);
-  // Ab dem 1. Jaenner, weil der Score auch das Jahr zeigt (score.ts).
-  const yearStart = `${today.slice(0, 4)}-01-01`;
-  const from = [monthRange[0], addDays(today, -LOOKBACK_DAYS), date, yearStart].sort()[0];
+  const from = [monthRange[0], addDays(today, -LOOKBACK_DAYS), date].sort()[0];
   const to = [monthRange[monthRange.length - 1], today].sort()[1];
 
   const catalog = useHabitCatalog();
   const myHabits = useMyHabits();
   const plus = usePlusAccess();
   const logs = useHabitLogs(from, to);
-  const sessions = useMySessions();
 
   return (
-    <View style={styles.stack}>
-      {/* Die Auswahl hat eine eigene Seite (25.10.2026) und sitzt gleich
-          neben dem Score-Schalter: zwei Einstellungen zum Tagebuch, eine Zeile. */}
-      <View style={styles.controls}>
-        <PressableRing
-          onPress={() => setScoreOn(!scoreOn)}
-          role="switch"
-          aria-checked={scoreOn}
-          style={[styles.toggle, scoreOn && styles.toggleOn]}
-        >
-          <Text style={[styles.toggleText, scoreOn && styles.toggleTextOn]}>
-            {`${t('diary.score.toggle')}: ${scoreOn ? t('diary.score.on') : t('diary.score.off')}`}
-          </Text>
-        </PressableRing>
-        <Link href="/habit-tracker/auswahl" style={[styles.toggle, styles.toggleText]}>
-          {t('diary.picker.title')}
-        </Link>
-      </View>
-
-      <QueryBoundary query={catalog}>
-        {({ categories }) => (
-          <QueryBoundary query={myHabits}>
-            {(habits) => (
-              <QueryBoundary query={plus}>
-                {(plusAccess) => (
-                  <QueryBoundary query={logs}>
-                    {(entries) => (
+    <QueryBoundary query={catalog}>
+      {({ categories }) => (
+        <QueryBoundary query={myHabits}>
+          {(habits) => (
+            <QueryBoundary query={plus}>
+              {(plusAccess) => (
+                <QueryBoundary query={logs}>
+                  {(entries) => {
+                    const active = habits.filter((h) => h.is_active);
+                    return (
+                      // Reihenfolge nach Wunsch vom 30.10.2026: die Woche
+                      // zuerst, dann der Tag, darunter der Monat.
                       <View style={styles.stack}>
+                        <DiaryWeek today={today} logs={entries} activeCount={active.length} />
+
                         <HabitDay
                           date={date}
                           today={today}
                           onChangeDate={(d) => setDate(d > today ? today : d)}
-                          habits={habits.filter((h) => h.is_active)}
+                          habits={active}
                           logs={entries}
                           categories={categories}
                           plusAccess={plusAccess}
                           scoreOn={scoreOn}
                         />
 
-                        <QueryBoundary query={sessions}>
-                          {(sessionList) => (
-                            <DiaryInsights
-                              today={today}
-                              month={month}
-                              onChangeMonth={setMonth}
-                              habits={habits}
-                              logs={entries}
-                              sessions={sessionList}
-                              categories={categories}
-                              scoreOn={scoreOn}
-                            />
-                          )}
-                        </QueryBoundary>
+                        <DiaryMonth
+                          today={today}
+                          month={month}
+                          onChangeMonth={setMonth}
+                          logs={entries}
+                          activeCount={active.length}
+                        />
                       </View>
-                    )}
-                  </QueryBoundary>
-                )}
-              </QueryBoundary>
-            )}
-          </QueryBoundary>
-        )}
-      </QueryBoundary>
-    </View>
+                    );
+                  }}
+                </QueryBoundary>
+              )}
+            </QueryBoundary>
+          )}
+        </QueryBoundary>
+      )}
+    </QueryBoundary>
   );
 }
 
@@ -200,18 +176,6 @@ const styles = StyleSheet.create({
     // Volle Breite wie die Sessions (26.10.2026) - die Karten darunter
     // verteilen sich ueber habits-grid auf mehrere Spalten.
     width: '100%',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '600',
-    color: colors.ink900,
-  },
-  intro: {
-    // Fliesstext bleibt lesbar schmal, auch wenn die Seite breit ist.
-    maxWidth: 720,
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.ink700,
   },
   stack: {
     gap: spacing.lg,
@@ -247,32 +211,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.ocean700,
-  },
-  controls: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  toggle: {
-    alignSelf: 'flex-start',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-  },
-  toggleOn: {
-    borderColor: colors.ocean700,
-    backgroundColor: colors.oceanTint,
-  },
-  toggleText: {
-    fontSize: 13,
-    color: colors.ink700,
-  },
-  toggleTextOn: {
-    color: colors.ocean700,
-    fontWeight: '600',
   },
 });
