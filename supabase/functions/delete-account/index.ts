@@ -26,7 +26,7 @@
 // Einzige Ausnahme seit 0022: Kursbuchungen bleiben als Zahlungsaufzeichnung
 // stehen, per "on delete set null" ohne Bezug zur Person.
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
   .split(',')

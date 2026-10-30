@@ -103,7 +103,9 @@ rules:
       §Verboten). Jede Policy braucht einen echten Bezug, meist auf auth.uid().
     paths:
       include: ['supabase/migrations/*.sql']
-    pattern-regex: (?i)(using|with\s+check)\s*\(\s*true\s*\)
+    # Zeilen, die mit -- beginnen, sind Kommentare (0017 erklaert dort gerade,
+    # warum es KEIN using (true) gibt).
+    pattern-regex: (?im)^(?![ \t]*--).*\b(using|with\s+check)\s*\(\s*true\s*\)
 
   - id: thc-security-definer
     languages: [generic]

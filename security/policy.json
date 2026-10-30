@@ -1,16 +1,116 @@
 {
-  "_hinweis": "Lizenz- und Kostenregeln fuer Abhaengigkeiten (Entscheidung 30.10.2026). Erlaubt sind NUR die Lizenzen unter allowedLicenses; Copyleft ergibt eine Warnung, alles andere - auch eine fehlende Angabe - einen Verstoss, der besprochen werden muss.",
-  "allowedLicenses": ["MIT", "ISC", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0"],
-  "copyleftPrefixes": ["GPL", "LGPL", "AGPL", "MPL", "EPL", "CDDL", "EUPL", "CC-BY-SA", "OSL", "CPL"],
+  "_hinweis": "Lizenz- und Kostenregeln fuer Abhaengigkeiten. Erlaubt sind NUR die Lizenzen unter allowedLicenses (Entscheidung 30.10.2026, am selben Tag um sieben freizuegige Lizenzen aus dem ersten Bericht erweitert); Copyleft ergibt eine Warnung, alles andere - auch eine fehlende Angabe - einen Verstoss, der besprochen werden muss.",
+  "allowedLicenses": [
+    "MIT",
+    "ISC",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "Apache-2.0",
+    "MIT-0",
+    "0BSD",
+    "Unlicense",
+    "CC0-1.0",
+    "BlueOak-1.0.0",
+    "Python-2.0",
+    "CC-BY-4.0"
+  ],
+  "_allowedLicensesSeit": "MIT-0, 0BSD, Unlicense, CC0-1.0, BlueOak-1.0.0, Python-2.0 und CC-BY-4.0 seit 30.10.2026 - alle frei und kostenlos, kommen ueber Expo und Metro mit (caniuse-lite: CC-BY-4.0, nur Daten).",
+  "copyleftPrefixes": [
+    "GPL",
+    "LGPL",
+    "AGPL",
+    "MPL",
+    "EPL",
+    "CDDL",
+    "EUPL",
+    "CC-BY-SA",
+    "OSL",
+    "CPL"
+  ],
   "_paidServices": "Pakete, die selbst quelloffen sein koennen, aber an einen kostenpflichtigen Dienst gebunden sind. Eine Lizenzpruefung erkennt das nicht. Warnung, sobald eines davon neu als direkte Abhaengigkeit auftaucht - ausser es steht unter approvedPaidServices.",
   "paidServices": [
-    "^stripe$", "^@stripe/", "^@sentry/", "^@supabase/", "^posthog", "^mixpanel", "^@segment/",
-    "^firebase$", "^@firebase/", "^@google-cloud/", "^aws-sdk$", "^@aws-sdk/", "^@vercel/",
-    "^@clerk/", "^@auth0/", "^auth0", "^algoliasearch$", "^@algolia/", "^launchdarkly",
-    "^@launchdarkly/", "^@datadog/", "^onesignal", "^@revenuecat/", "^react-native-purchases",
-    "^openai$", "^@anthropic-ai/", "^twilio$", "^@sendgrid/", "^@mailchimp/", "^@amplitude/",
-    "^@bugsnag/", "^logrocket", "^@logrocket/", "^@mux/", "^expo-updates$"
+    "^stripe$",
+    "^@stripe/",
+    "^@sentry/",
+    "^@supabase/",
+    "^posthog",
+    "^mixpanel",
+    "^@segment/",
+    "^firebase$",
+    "^@firebase/",
+    "^@google-cloud/",
+    "^aws-sdk$",
+    "^@aws-sdk/",
+    "^@vercel/",
+    "^@clerk/",
+    "^@auth0/",
+    "^auth0",
+    "^algoliasearch$",
+    "^@algolia/",
+    "^launchdarkly",
+    "^@launchdarkly/",
+    "^@datadog/",
+    "^onesignal",
+    "^@revenuecat/",
+    "^react-native-purchases",
+    "^openai$",
+    "^@anthropic-ai/",
+    "^twilio$",
+    "^@sendgrid/",
+    "^@mailchimp/",
+    "^@amplitude/",
+    "^@bugsnag/",
+    "^logrocket",
+    "^@logrocket/",
+    "^@mux/",
+    "^expo-updates$"
   ],
   "_approvedPaidServices": "Mit dem Team abgestimmt: Supabase (Backend), Stripe (Abo), Sentry (Fehlermeldungen, CLAUDE.md).",
-  "approvedPaidServices": ["^@supabase/", "^stripe$", "^@stripe/", "^@sentry/"]
+  "approvedPaidServices": [
+    "^@supabase/",
+    "^stripe$",
+    "^@stripe/",
+    "^@sentry/"
+  ],
+  "_acceptedVulns": "Bewusst hingenommene Luecken, je mit Begruendung und Ablaufdatum. Bis 'until' erscheinen sie im Bericht als Hinweis, danach wieder in ihrer echten Stufe - dann neu pruefen. Nur nach Absprache eintragen.",
+  "acceptedVulns": [
+    {
+      "id": "GHSA-5p2g-fcmc-qvqq",
+      "package": "image-size",
+      "until": "2027-01-31",
+      "reason": "Nur im Build (Metro liest Bildgroessen der eigenen Assets). Kein fremdes Bild erreicht den Parser. Fix erst in 2.x mit geaenderter API; Metro bindet 1.x."
+    },
+    {
+      "id": "GHSA-w3rx-r6r6-pgpr",
+      "package": "image-size",
+      "until": "2027-01-31",
+      "reason": "Wie GHSA-5p2g-fcmc-qvqq: nur im Build, nur eigene Assets."
+    },
+    {
+      "id": "GHSA-86w9-cpqp-85rv",
+      "package": "node-forge",
+      "until": "2027-01-31",
+      "reason": "Nur im Expo CLI (Code-Signing fuer native Updates, das die Web-App nicht nutzt). Noch kein Fix verfuegbar."
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "zod",
+      "until": "2027-01-31",
+      "reason": "Betrifft nur die zod-3-Kopie im Expo CLI (Build). Die App selbst nutzt zod 4.6.7 mit dem Fix."
+    },
+    {
+      "id": "GHSA-gcqx-w48m-w2h4",
+      "package": "deepmerge",
+      "until": "2027-01-31",
+      "reason": "Nur in @expo/config (Build), mischt eigene Konfiguration. Noch kein Fix verfuegbar."
+    }
+  ],
+  "_acceptedZap": "ZAP-Meldungen, die bewusst bleiben - nach Name der Meldung, mit Begruendung und Ablaufdatum. Nur nach Absprache eintragen.",
+  "acceptedZap": [
+    {
+      "alert": "CSP: style-src unsafe-inline",
+      "until": "2027-04-30",
+      "reason": "react-native-web setzt Stile als style-Attribute (rund 670 je Export) und fuegt zur Laufzeit <style>-Elemente ein. Ohne unsafe-inline gaebe es kein Layout. script-src ist seit 30.10.2026 ohne unsafe-inline."
+    }
+  ]
 }

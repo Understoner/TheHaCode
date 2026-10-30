@@ -13,7 +13,8 @@
 // Aufruf: node scripts/write-build-info.mjs (nach dem eigentlichen Build,
 // bevor dist/ hochgeladen wird — siehe Build-Befehl in DEPLOYMENT.md §2).
 
-import { writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -45,6 +46,39 @@ const robotsTxt =
 
 writeFileSync(join(distDir, 'robots.txt'), robotsTxt);
 console.log(`[thehacode] dist/robots.txt geschrieben (env: ${buildInfo.env})`);
+
+// Inline-Skripte gegen die CSP pruefen (30.10.2026).
+//
+// Die CSP erlaubt Inline-Skripte nur noch per Hash (src/lib/
+// inlineScriptHashes.json). Bringt ein Expo-Update ein anderes Inline-Skript
+// mit, wuerde der Browser es still blockieren: die Seite stuende ohne
+// JavaScript da - keine Anmeldung, kein Tagebuch. Deshalb hier laut abbrechen,
+// bevor so ein Build ausgeliefert wird.
+const erlaubt = new Set(
+  Object.values(JSON.parse(readFileSync(join(distDir, '..', 'src/lib/inlineScriptHashes.json'), 'utf8')).scripts),
+);
+function htmlDateien(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const pfad = join(dir, name);
+    if (statSync(pfad).isDirectory()) return htmlDateien(pfad);
+    return name.endsWith('.html') ? [pfad] : [];
+  });
+}
+const unbekannt = new Map();
+for (const datei of htmlDateien(distDir)) {
+  for (const m of readFileSync(datei, 'utf8').matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)) {
+    if (!m[1].trim()) continue;
+    const hash = `sha256-${createHash('sha256').update(m[1]).digest('base64')}`;
+    if (!erlaubt.has(hash)) unbekannt.set(hash, m[1].slice(0, 120));
+  }
+}
+if (unbekannt.size > 0) {
+  console.error('[thehacode] Der Export enthaelt Inline-Skripte, die die CSP blockieren wuerde:');
+  for (const [hash, auszug] of unbekannt) console.error(`  ${hash}  ${auszug}`);
+  console.error('  Pruefen, ob das Skript gewollt ist, und es dann in src/lib/inlineScriptHashes.json aufnehmen.');
+  process.exit(1);
+}
+console.log('[thehacode] Inline-Skripte passen zur CSP');
 
 // .htaccess — die Schutzmassnahmen, die per <meta> nicht gehen.
 //
@@ -102,6 +136,20 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   Header always set Strict-Transport-Security "max-age=31536000"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), usb=(), interest-cohort=()"
+
+  # Ergaenzt am 30.10.2026 (OWASP ZAP im Security-Scan). COOP trennt die Seite
+  # von Fenstern fremder Herkunft, die sie geoeffnet haben - die App oeffnet
+  # selbst keine Anmelde-Popups (OAuth laeuft per Weiterleitung). CORP
+  # verhindert, dass fremde Seiten unsere Dateien einbetten; die Mail-Vorlagen
+  # laden keine Bilder von hier. COEP bleibt bewusst weg: es wuerde Bilder aus
+  # Supabase Storage blockieren.
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Cross-Origin-Resource-Policy "same-origin"
+
+  # Hostinger liefert statische Dateien mit Access-Control-Allow-Origin "*"
+  # aus (ZAP: Cross-Domain Misconfiguration). Die App braucht das nicht -
+  # niemand ausser ihr selbst liest diese Dateien per fetch.
+  Header always unset Access-Control-Allow-Origin
 
   # HTML NIE zwischenspeichern, die Dateien mit Inhaltspruefsumme dagegen lange.
   #

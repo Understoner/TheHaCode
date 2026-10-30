@@ -1,6 +1,9 @@
+import { createHash } from 'node:crypto';
+
 import { describe, expect, it } from 'vitest';
 
 import { contentSecurityPolicy, supabaseOrigins } from './contentSecurityPolicy';
+import inlineScripts from './inlineScriptHashes.json';
 
 /** Die Quellen einer Direktive, ohne ihren Namen. */
 function direktive(csp: string, name: string): string[] {
@@ -53,6 +56,21 @@ describe('contentSecurityPolicy', () => {
       const csp = contentSecurityPolicy(adresse);
       expect(direktive(csp, 'connect-src')).toEqual(["'self'"]);
       expect(csp).not.toContain('undefined');
+    }
+  });
+
+  // Fund aus dem Security-Scan (30.10.2026): Inline-Skripte nur noch per Hash.
+  it('erlaubt Skripte nur von der eigenen Domain und per Hash', () => {
+    const quellen = direktive(contentSecurityPolicy('https://abc.supabase.co'), 'script-src');
+
+    expect(quellen).not.toContain("'unsafe-inline'");
+    expect(quellen[0]).toBe("'self'");
+    expect(quellen.slice(1).every((q) => /^'sha256-[A-Za-z0-9+/]+=*'$/.test(q))).toBe(true);
+  });
+
+  it('fuehrt zu jedem Inline-Skript den passenden Hash', () => {
+    for (const [skript, hash] of Object.entries(inlineScripts.scripts)) {
+      expect(`sha256-${createHash('sha256').update(skript).digest('base64')}`).toBe(hash);
     }
   });
 });

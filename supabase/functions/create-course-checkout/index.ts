@@ -41,8 +41,8 @@
 // Scheitert Schritt 3, wird die Reservierung sofort wieder freigegeben. Sonst
 // blockierte ein Stripe-Ausfall den Platz bis zum Ablauf der Haltezeit.
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import Stripe from 'npm:stripe@18';
+import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
+import Stripe from 'npm:stripe@18.5.0';
 
 import { guestKey, clientIp } from '../_shared/guest-limit.ts';
 import { json, preflight } from '../_shared/http.ts';

@@ -36,6 +36,7 @@ import { join, relative, resolve } from 'node:path';
 const ROOT = resolve(import.meta.dirname, '..', '..');
 const TOOLS = JSON.parse(readFileSync(join(ROOT, 'security/tools.json'), 'utf8'));
 const POLICY = JSON.parse(readFileSync(join(ROOT, 'security/policy.json'), 'utf8'));
+const REVIEWED = JSON.parse(readFileSync(join(ROOT, 'security/guarddog-reviewed.json'), 'utf8'));
 const CACHE = join(process.env.XDG_CACHE_HOME ?? join(homedir(), '.cache'), 'thehacode-security');
 
 // --------------------------------------------------------------- Argumente
@@ -164,6 +165,14 @@ function severityOf(vuln) {
   return 'UNBEKANNT';
 }
 
+// Bewusst hingenommene Luecken (security/policy.json, acceptedVulns): bis
+// zum Ablaufdatum ein Hinweis mit Begruendung, danach wieder ihre echte Stufe.
+const today = new Date().toISOString().slice(0, 10);
+function accepted(vulnId, pkgName) {
+  const hit = (POLICY.acceptedVulns ?? []).find((a) => a.id === vulnId && a.package === pkgName);
+  return hit && hit.until >= today ? hit : null;
+}
+
 function licenseLevel(licenses) {
   if (!licenses || licenses.length === 0) return { level: 'BLOCKER', why: 'keine Lizenzangabe' };
   // Eine Angabe kann ein SPDX-Ausdruck sein ("MIT OR Apache-2.0"). Erlaubt,
@@ -205,13 +214,19 @@ await step('osv-scanner', () => {
           continue;
         }
         const sev = severityOf(vuln);
-        const level = sev === 'CRITICAL' || sev === 'HIGH' ? 'BLOCKER' : 'WARNUNG';
         const fixed = (vuln.affected ?? [])
           .flatMap((a) => a.ranges ?? [])
           .flatMap((r) => r.events ?? [])
           .map((e) => e.fixed)
           .filter(Boolean);
-        add('osv-scanner', level, `${sev} in ${name}: ${vuln.summary ?? vuln.id}`, `${vuln.id}${fixed.length ? `, behoben in ${fixed.join(', ')}` : ', noch kein Fix'}`);
+        const detail = `${vuln.id}${fixed.length ? `, behoben in ${fixed.join(', ')}` : ', noch kein Fix'}`;
+        const ok = accepted(vuln.id, pkg.package.name);
+        if (ok) {
+          add('osv-scanner', 'INFO', `Akzeptiert bis ${ok.until}: ${sev} in ${name}`, `${detail} - ${ok.reason}`);
+          continue;
+        }
+        const level = sev === 'CRITICAL' || sev === 'HIGH' ? 'BLOCKER' : 'WARNUNG';
+        add('osv-scanner', level, `${sev} in ${name}: ${vuln.summary ?? vuln.id}`, detail);
       }
       const verdict = licenseLevel(pkg.licenses);
       if (verdict) {
@@ -332,6 +347,8 @@ await step('guarddog', () => {
   }
   const results = {};
   const capabilityOnly = [];
+  const reviewedHits = [];
+  const binaryOnly = [];
   for (const { name, version } of batch) {
     const res = docker(TOOLS.images.guarddog, [], ['npm', 'scan', name, '--version', version, '--output-format', 'json']);
     let data = null;
@@ -351,12 +368,29 @@ await step('guarddog', () => {
     // Umgebung abgreifen, Code nachladen, verschleiern). Nur Letztere sind
     // eine Warnung wert.
     const threats = hits.filter((k) => !k.startsWith('capability-'));
+    const key = `${name}@${version}`;
+    if (threats.length > 0 && REVIEWED.reviewed?.[key]) {
+      reviewedHits.push(`${key} (${REVIEWED.reviewed[key]})`);
+      continue;
+    }
+    // Plattform-Pakete (rolldown-, lightningcss-Bindings, Hermes) bestehen
+    // aus einer Binaerdatei - das ist ihr Zweck, kein Befund fuer sich.
+    if (threats.length === 1 && threats[0] === 'bundled_binary') {
+      binaryOnly.push(key);
+      continue;
+    }
     if (threats.length > 0) {
       const where = threats.map((k) => `${k} (${[].concat(data.results[k])[0]?.location ?? '?'})`);
       add('guarddog', 'WARNUNG', `Verdaechtig: ${name}@${version}`, `${where.join(', ')} - Heuristik, Quelltext von Hand pruefen.`);
     } else if (hits.length > 0) {
       capabilityOnly.push(`${name}@${version}`);
     }
+  }
+  if (reviewedHits.length > 0) {
+    add('guarddog', 'INFO', `${reviewedHits.length} Treffer von Hand geprueft (security/guarddog-reviewed.json, ${REVIEWED.geprueftAm})`, reviewedHits.join('; '));
+  }
+  if (binaryOnly.length > 0) {
+    add('guarddog', 'INFO', `${binaryOnly.length} Plattform-Paket(e) mit mitgelieferter Binaerdatei`, binaryOnly.join(', '));
   }
   if (capabilityOnly.length > 0) {
     add('guarddog', 'INFO', `${capabilityOnly.length} Paket(e) nur mit Faehigkeiten (Dateien, Netz, Prozesse), ohne Bedrohungsmuster`, capabilityOnly.slice(0, 30).join(', '));
@@ -371,7 +405,10 @@ await step('npm', () => {
   const [a, b] = version.split('.').map(Number);
   const [ma, mb] = TOOLS.npm.minVersion.split('.').map(Number);
   if (a < ma || (a === ma && b < mb)) {
-    add('npm', 'WARNUNG', `npm ${version} kennt keine Wartezeit fuer neue Versionen`, `Ab ${TOOLS.npm.minVersion} greift min-release-age aus .npmrc.`);
+    // In der CI installiert npm ci exakt das Lockfile - die Wartezeit wirkt
+    // dort, wo Pakete hinzukommen: am Rechner im Team. Deshalb dort nur ein
+    // Hinweis.
+    add('npm', process.env.CI ? 'INFO' : 'WARNUNG', `npm ${version} kennt keine Wartezeit fuer neue Versionen`, `Ab ${TOOLS.npm.minVersion} greift min-release-age aus .npmrc.${process.env.CI ? ' In der CI ohne Belang (npm ci).' : ''}`);
   }
   const npmrc = existsSync(join(ROOT, '.npmrc')) ? readFileSync(join(ROOT, '.npmrc'), 'utf8') : '';
   if (!/^min-release-age\s*=\s*\d+/m.test(npmrc)) {
@@ -486,6 +523,11 @@ if (!zapTarget && !skip.has('zap')) {
     for (const site of data.site ?? []) {
       for (const alert of site.alerts ?? []) {
         const urls = (alert.instances ?? []).slice(0, 3).map((i) => i.uri).join(', ');
+        const ok = (POLICY.acceptedZap ?? []).find((a) => a.alert === alert.name && a.until >= today);
+        if (ok) {
+          add('zap', 'INFO', `Akzeptiert bis ${ok.until}: ${alert.name}`, ok.reason);
+          continue;
+        }
         add('zap', map[alert.riskcode] ?? 'INFO', `${alert.name} (${alert.riskdesc})`, `${alert.count ?? alert.instances?.length ?? 0}x, z. B. ${urls}`);
       }
     }

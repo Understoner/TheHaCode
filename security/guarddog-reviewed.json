@@ -1,0 +1,19 @@
+{
+  "_hinweis": "Von Hand gepruefte GuardDog-Treffer, je EXAKTE Version. Eine neue Version taucht wieder als Warnung auf und muss neu angesehen werden. Nur nach Durchsicht der gemeldeten Codestellen eintragen.",
+  "geprueftAm": "2026-10-30",
+  "reviewed": {
+    "@expo/cli@57.0.32": "Startet den Android-Emulator abgekoppelt (emulator.js) und liest EXPO_TOKEN fuer die Anmeldung bei Expo - dokumentiertes Verhalten.",
+    "@expo/devcert@1.2.2": "Sucht die NSS-Zertifikatsablagen von Firefox/Chrome unter $HOME, um ein lokales Entwicklungszertifikat einzutragen; der bit.ly-Link steht nur im Text einer Passwortabfrage.",
+    "@expo/env@2.4.3": "Liest .env-Dateien des Projekts - Zweck des Pakets.",
+    "@expo/log-box@57.0.4": "Minifiziertes Fehler-Overlay, das console.error fuer die Anzeige umleitet - keine Verschleierung.",
+    "@expo/metro-config@57.0.13": "Baut process.env aus den .env-Dateien fuer den Bundler - Zweck des Pakets.",
+    "@expo/ui@57.0.26": "Treffer ist eine Import-Zeile in einer .d.ts/.ts-Datei - Fehlalarm.",
+    "@react-native/debugger-frontend@0.86.3": "Gebuendelte Chrome DevTools samt Lighthouse: Liste von Tracking-Domains, 'Als PowerShell kopieren', CSP-Pruefung - Inhalte der DevTools, kein ausgefuehrter Code.",
+    "@react-native/dev-middleware@0.86.3": "Startet Chrome abgekoppelt fuer den Debugger - dokumentiertes Verhalten.",
+    "expo-modules-autolinking@57.0.16": "iOS-Build-Skript liest .xcode.env - Standard bei React Native.",
+    "expo-router@57.0.29": "metadata_mismatch: npm-Manifest nennt ein start-Skript, package.json nicht - harmlose Abweichung beim Veroeffentlichen.",
+    "react-native@0.86.3": "CocoaPods-Hilfsskript liest .xcode.env - Standard bei React Native.",
+    "vite@8.3.5": "Erkennt Docker/WSL ueber /proc, prueft Netzlaufwerke unter Windows (net use) und ersetzt import.meta.env - dokumentiertes Verhalten des Dev-Servers.",
+    "vitest@4.1.12": "Erbt die Treffer von vite 8 (risky_new_dependency) und entfernt define-Eintraege fuer Tests - unbedenklich."
+  }
+}

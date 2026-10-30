@@ -32,8 +32,8 @@
 // haelt an genau dieser Stelle - und in 011_course_bookings.test.sql steht der
 // Test dazu.
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import Stripe from 'npm:stripe@18';
+import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
+import Stripe from 'npm:stripe@18.5.0';
 
 import {
   bookingUpdateFor,

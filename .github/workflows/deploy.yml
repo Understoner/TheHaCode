@@ -43,6 +43,11 @@ on:
 # abzubrechen, weil zufaellig jemand anderes pusht, waere der teuerste
 # denkbare Weg, ein bisschen Wartezeit zu sparen.
 
+# Grundsaetzlich nur Lesen. Was mehr braucht (die Befoerderung pusht nach
+# main), sagt es am Job selbst.
+permissions:
+  contents: read
+
 jobs:
   # ---------------------------------------------------------------- STAGING
   staging:
@@ -61,13 +66,15 @@ jobs:
       # Environment (und dessen Secrets) nicht.
       url: ${{ vars.STAGING_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Startzeit merken
         id: t0
         run: echo "value=$(date -u +%s)" >> "$GITHUB_OUTPUT"
 
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           # FESTGENAGELT statt "latest" (06.09.2026). Grund: das CLI bestimmt
           # nicht nur sich selbst, sondern auch die Images und das Verhalten der
@@ -90,20 +97,25 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
-          supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+          supabase link --project-ref "$SUPABASE_PROJECT_REF"
           supabase db push
 
       - name: Edge Functions nach Staging
         if: hashFiles('supabase/functions/**') != ''
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Auf Hostinger-Deployment warten
-        run: bash scripts/wait-for-deploy.sh "${{ vars.STAGING_URL }}" "${{ steps.t0.outputs.value }}" "${{ github.sha }}"
+        env:
+          TARGET_URL: ${{ vars.STAGING_URL }}
+          STARTED_AT: ${{ steps.t0.outputs.value }}
+        run: bash scripts/wait-for-deploy.sh "$TARGET_URL" "$STARTED_AT" "$GITHUB_SHA"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -116,7 +128,7 @@ jobs:
           BASE_URL: ${{ vars.STAGING_URL }}
         run: npm run e2e
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
           name: playwright-report-staging
@@ -142,20 +154,20 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Ganze Historie: Gitleaks prueft alle Commits, GuardDog und der
           # Abhaengigkeitsvergleich brauchen origin/main als Basis.
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
       - run: npm ci
 
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           # Dieselbe Version wie in ci.yml (siehe Begruendung dort).
           version: 2.116.0
@@ -173,7 +185,7 @@ jobs:
         if: always()
         run: cat security-reports/ci/BERICHT.md >> "$GITHUB_STEP_SUMMARY" || true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: security-report
@@ -199,7 +211,10 @@ jobs:
       contents: write
       actions: write
     steps:
-      - uses: actions/checkout@v4
+      # Bewusst MIT gespeicherten Zugangsdaten: der naechste Schritt pusht nach
+      # main. Der Job laedt keine Artifacts hoch, ueber die sie abfliessen
+      # koennten (das ist das Risiko hinter "artipacked").
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0 # zizmor: ignore[artipacked]
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -231,13 +246,15 @@ jobs:
       cancel-in-progress: false
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Startzeit merken
         id: t0
         run: echo "value=$(date -u +%s)" >> "$GITHUB_OUTPUT"
 
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           # FESTGENAGELT statt "latest" (06.09.2026). Grund: das CLI bestimmt
           # nicht nur sich selbst, sondern auch die Images und das Verhalten der
@@ -260,20 +277,25 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
-          supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+          supabase link --project-ref "$SUPABASE_PROJECT_REF"
           supabase db push
 
       - name: Edge Functions nach Production
         if: hashFiles('supabase/functions/**') != ''
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Auf Hostinger-Deployment warten
-        run: bash scripts/wait-for-deploy.sh "${{ vars.PRODUCTION_URL }}" "${{ steps.t0.outputs.value }}" "${{ github.sha }}"
+        env:
+          TARGET_URL: ${{ vars.PRODUCTION_URL }}
+          STARTED_AT: ${{ steps.t0.outputs.value }}
+        run: bash scripts/wait-for-deploy.sh "$TARGET_URL" "$STARTED_AT" "$GITHUB_SHA"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -285,7 +307,7 @@ jobs:
           BASE_URL: ${{ vars.PRODUCTION_URL }}
         run: npm run e2e
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
           name: playwright-report-production

@@ -39,10 +39,24 @@ Der Bericht landet unter `security-reports/<zeitstempel>/BERICHT.md`
 | Splinter | Sicherheitsregeln der Datenbank aus den Migrationen (wie der Security Advisor im Supabase Dashboard) | ERROR: Blocker |
 | OWASP ZAP | Baseline, passiv, gegen Staging: Header, CSP, Cookies | hoch: Blocker |
 
-**Lizenzen:** Erlaubt sind nur MIT, ISC, BSD-2-Clause, BSD-3-Clause und
-Apache-2.0. Copyleft (GPL, LGPL, AGPL, MPL, …) ergibt eine Warnung, alles andere
-einen Verstoß zur Besprechung. Ausnahmen kommen nach Absprache in
-`security/policy.json`.
+**Lizenzen:** Erlaubt sind nur MIT, ISC, BSD-2-Clause, BSD-3-Clause,
+Apache-2.0 und, seit dem ersten Bericht, MIT-0, 0BSD, Unlicense, CC0-1.0,
+BlueOak-1.0.0, Python-2.0 und CC-BY-4.0. Copyleft (GPL, LGPL, AGPL, MPL, …)
+ergibt eine Warnung, alles andere einen Verstoß zur Besprechung. Ausnahmen
+kommen nach Absprache in `security/policy.json`.
+
+## Bewusst Hingenommenes
+
+Nichts verschwindet still aus dem Bericht. Was nach Absprache bleiben darf,
+steht mit Begründung und **Ablaufdatum** in einer Datei. Bis zum Ablauf
+erscheint es als Hinweis, danach wieder in seiner echten Stufe:
+
+- `security/policy.json` → `acceptedVulns`: Lücken, z. B. in Build-Werkzeugen
+  von Expo ohne verfügbaren Fix.
+- `security/policy.json` → `acceptedZap`: ZAP-Meldungen, z. B.
+  `style-src 'unsafe-inline'` (react-native-web).
+- `security/guarddog-reviewed.json`: von Hand geprüfte GuardDog-Treffer, je
+  exakte Paketversion. Eine neue Version wird wieder gemeldet.
 
 **Kostenpflichtige Dienste:** Eine Lizenz sagt nichts über Betriebskosten. Die
 Liste `paidServices` in `security/policy.json` nennt Pakete, die an bezahlte

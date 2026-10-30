@@ -1,0 +1,6 @@
+{
+  "_hinweis": "Erlaubte Inline-Skripte des statischen Exports als sha256 fuer die CSP (script-src). Gelesen von src/lib/contentSecurityPolicy.ts und geprueft von scripts/write-build-info.mjs, das den Build abbricht, wenn der Export ein Skript enthaelt, das hier fehlt.",
+  "scripts": {
+    "globalThis.__EXPO_ROUTER_HYDRATE__=true;": "sha256-67fhrP0+BkBqmgGGXTtgiVO/9EQs3QruYNU/7fnRkI8="
+  }
+}

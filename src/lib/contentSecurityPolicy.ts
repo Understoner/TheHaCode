@@ -5,9 +5,14 @@
 // Ohne Header-Zugriff (statischer Export, kein eigener Serverprozess) ist das
 // <meta>-CSP der einzige Weg, eine Content Security Policy auszuliefern.
 // Bewusste Einschraenkungen dieses Wegs:
-//   - 'unsafe-inline' bei script-src ist unvermeidbar: Expo legt den
-//     Hydrations-Bootstrap als Inline-Modul ab, dessen Hash zur Bauzeit hier
-//     nicht bekannt ist.
+//   - script-src ohne 'unsafe-inline' (seit 30.10.2026, Fund aus dem
+//     Security-Scan): Der Export enthaelt genau ein Inline-Skript, den
+//     Hydrations-Bootstrap von Expo, und der ist auf jeder Seite derselbe
+//     Einzeiler. Sein Hash steht in inlineScriptHashes.json. Aendert Expo ihn,
+//     bricht scripts/write-build-info.mjs den Build ab - sonst stuende die
+//     Seite still ohne JavaScript da.
+//   - style-src behaelt 'unsafe-inline': react-native-web setzt Stile als
+//     style-Attribute und fuegt zur Laufzeit <style>-Elemente ein.
 //   - frame-ancestors wirkt in <meta> nicht (nur als echter Header) und steht
 //     deshalb nicht drin - es gehoert in die Hostinger-Konfiguration,
 //     zusammen mit X-Content-Type-Options (docs/DEPLOYMENT.md §2).
@@ -29,6 +34,8 @@
 // Dieselbe Herkunft, nur das Schema getauscht - kein Platzhalter, kein
 // weiterer Host. Die Regel bleibt so eng wie vorher.
 
+import inlineScripts from './inlineScriptHashes.json';
+
 /** https://x.supabase.co -> [https://x.supabase.co, wss://x.supabase.co]. Leer bei ungueltiger Adresse. */
 export function supabaseOrigins(url: string | undefined): string[] {
   try {
@@ -49,7 +56,7 @@ export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
     "base-uri 'self'",
     "object-src 'none'",
     "form-action 'self'",
-    "script-src 'self' 'unsafe-inline'",
+    liste('script-src', "'self'", ...Object.values(inlineScripts.scripts).map((hash) => `'${hash}'`)),
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' data:",
     // Hintergrundmusik liegt unter public/musik/ und damit auf der eigenen
