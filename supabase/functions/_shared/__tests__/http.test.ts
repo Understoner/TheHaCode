@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 // gescheitert.
 (globalThis as unknown as { Deno: unknown }).Deno = { env: { get: () => undefined } };
 
-const { corsHeaders, preflight } = await import('../http.ts');
+const { corsHeaders, preflight, resolveAllowedOrigins } = await import('../http.ts');
 
 // Was supabase-js bei jedem functions.invoke von sich aus mitschickt. Fehlt
 // eine davon in Access-Control-Allow-Headers, bricht der Browser den Preflight
@@ -39,10 +39,41 @@ describe('corsHeaders', () => {
     expect(Number(corsHeaders(null)['Access-Control-Max-Age'])).toBeGreaterThan(0);
   });
 
-  // Ohne ALLOWED_ORIGINS steht dort '*' - das ist die bewusste Vorgabe
-  // (siehe Kopf von http.ts: was schuetzt, ist der Token, nicht die Herkunft).
-  it('laesst ohne Herkunftsliste jede Herkunft zu', () => {
-    expect(corsHeaders('https://irgendwo.example')['Access-Control-Allow-Origin']).toBe('*');
+  // Seit 30.10.2026 (Security-Scan): nie mehr '*'.
+  it('laesst nur erlaubte Herkuenfte durch', () => {
+    const erlaubt = ['https://deratemcode.at', 'https://www.deratemcode.at'];
+    expect(corsHeaders('https://deratemcode.at', erlaubt)['Access-Control-Allow-Origin']).toBe(
+      'https://deratemcode.at',
+    );
+    // Missbrauchsfall: eine fremde Seite bekommt nicht ihre eigene Herkunft
+    // zurueck - der Browser verwirft die Antwort.
+    expect(corsHeaders('https://boese.example', erlaubt)['Access-Control-Allow-Origin']).toBe(
+      'https://deratemcode.at',
+    );
+    expect(corsHeaders('https://boese.example')['Access-Control-Allow-Origin']).not.toBe('*');
+  });
+});
+
+describe('resolveAllowedOrigins', () => {
+  it('nimmt die Herkunft aus APP_URL samt www-Variante', () => {
+    expect(resolveAllowedOrigins(undefined, 'https://deratemcode.at/')).toEqual([
+      'https://deratemcode.at',
+      'https://www.deratemcode.at',
+    ]);
+    expect(resolveAllowedOrigins('', 'https://dev.deratemcode.at')).toContain('https://dev.deratemcode.at');
+  });
+
+  it('ergaenzt ALLOWED_ORIGINS', () => {
+    expect(resolveAllowedOrigins('https://a.example, https://b.example/', undefined)).toEqual([
+      'https://a.example',
+      'https://b.example',
+    ]);
+  });
+
+  it('erlaubt ohne Konfiguration nur localhost - nie *', () => {
+    const lokal = resolveAllowedOrigins(undefined, undefined);
+    expect(lokal.every((o) => o.startsWith('http://localhost') || o.startsWith('http://127.0.0.1'))).toBe(true);
+    expect(resolveAllowedOrigins(undefined, 'kein url')).toEqual(lokal);
   });
 });
 

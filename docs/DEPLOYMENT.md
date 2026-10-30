@@ -86,6 +86,13 @@ supabase secrets set --project-ref <ref> \
   APP_URL=https://app.deine-domain.at
 ```
 
+**`APP_URL` bestimmt seit 30.10.2026 auch CORS:** Die Edge Functions
+antworten nur noch Anfragen von dieser Herkunft (samt `www.`-Variante), nicht
+mehr jeder (`*`). Weitere Herkünfte optional per `ALLOWED_ORIGINS`
+(kommagetrennt). Stimmt `APP_URL` nicht mit der Adresse der Website überein,
+scheitern Checkout, Kundenportal und Kontolöschung im Browser
+(`supabase/functions/_shared/http.ts`).
+
 `SUPABASE_SERVICE_ROLE_KEY` setzt Supabase in Edge Functions automatisch. **Dieser Schlüssel gehört nirgendwo sonst hin** — nicht in GitHub, nicht in hPanel, nicht auf einen Laptop.
 
 ---
