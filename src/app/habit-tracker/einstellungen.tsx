@@ -59,6 +59,57 @@ function Settings() {
 
   return (
     <View style={styles.stack}>
+      {/* Reihenfolge nach Wunsch vom 30.10.2026: Auswahl, eigene Habits,
+          Score, zuletzt die Bereiche. */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>{t('diary.picker.title')}</Text>
+        {/* Gezaehlt wird, was im Tagebuch sichtbar ist - ohne abgeschaltete
+            Bereiche. */}
+        <QueryBoundary query={myHabits}>
+          {(habits) => (
+            <QueryBoundary query={catalog}>
+              {({ categories }) => (
+                <QueryBoundary query={areas.query}>
+                  {(enabled) => {
+                    const shown = enabledCategoryIds(categories, enabled);
+                    const count = habits.filter(
+                      (h) => h.is_active && shown.has(h.habit_templates.category_id),
+                    ).length;
+                    return <Text style={styles.text}>{t('diary.settings.habits', { count })}</Text>;
+                  }}
+                </QueryBoundary>
+              )}
+            </QueryBoundary>
+          )}
+        </QueryBoundary>
+        <Link href="/habit-tracker/auswahl" style={styles.primary}>
+          {t('diary.settings.habitsAction')}
+        </Link>
+      </View>
+
+      {/* Eigene Habits anlegen (30.10.2026 aus der Habit-Auswahl hierher
+          verschoben): eine Einstellung zum Tagebuch, keine Auswahl. Bearbeiten
+          und Loeschen bleiben an den Karten der Auswahl. */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>{t('habits.own.title')}</Text>
+        <QueryBoundary query={plus}>
+          {(plusAccess) => (
+            <>
+              <Text style={styles.text}>{plusAccess ? t('habits.own.text') : t('habits.own.plusOnly')}</Text>
+              {plusAccess ? (
+                <Link href="/habit-tracker/eigenes-habit" style={styles.primary}>
+                  {t('habits.own.create')}
+                </Link>
+              ) : (
+                <Link href="/plus" style={styles.link}>
+                  {t('diary.picker.toPlus')}
+                </Link>
+              )}
+            </>
+          )}
+        </QueryBoundary>
+      </View>
+
       <View style={styles.card}>
         <View style={styles.cardHead}>
           <Text style={[styles.cardTitle, styles.grow]}>{t('diary.score.toggle')}</Text>
@@ -119,55 +170,6 @@ function Settings() {
                 </View>
               )}
             </QueryBoundary>
-          )}
-        </QueryBoundary>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t('diary.picker.title')}</Text>
-        {/* Gezaehlt wird, was im Tagebuch sichtbar ist - ohne abgeschaltete
-            Bereiche. */}
-        <QueryBoundary query={myHabits}>
-          {(habits) => (
-            <QueryBoundary query={catalog}>
-              {({ categories }) => (
-                <QueryBoundary query={areas.query}>
-                  {(enabled) => {
-                    const shown = enabledCategoryIds(categories, enabled);
-                    const count = habits.filter(
-                      (h) => h.is_active && shown.has(h.habit_templates.category_id),
-                    ).length;
-                    return <Text style={styles.text}>{t('diary.settings.habits', { count })}</Text>;
-                  }}
-                </QueryBoundary>
-              )}
-            </QueryBoundary>
-          )}
-        </QueryBoundary>
-        <Link href="/habit-tracker/auswahl" style={styles.primary}>
-          {t('diary.settings.habitsAction')}
-        </Link>
-      </View>
-
-      {/* Eigene Habits anlegen (30.10.2026 aus der Habit-Auswahl hierher
-          verschoben): eine Einstellung zum Tagebuch, keine Auswahl. Bearbeiten
-          und Loeschen bleiben an den Karten der Auswahl. */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t('habits.own.title')}</Text>
-        <QueryBoundary query={plus}>
-          {(plusAccess) => (
-            <>
-              <Text style={styles.text}>{plusAccess ? t('habits.own.text') : t('habits.own.plusOnly')}</Text>
-              {plusAccess ? (
-                <Link href="/habit-tracker/eigenes-habit" style={styles.primary}>
-                  {t('habits.own.create')}
-                </Link>
-              ) : (
-                <Link href="/plus" style={styles.link}>
-                  {t('diary.picker.toPlus')}
-                </Link>
-              )}
-            </>
           )}
         </QueryBoundary>
       </View>

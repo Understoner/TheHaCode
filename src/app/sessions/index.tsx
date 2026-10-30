@@ -10,6 +10,7 @@ import {
   HeaderIconLink,
   ListGlyph,
 } from '@/components/HeaderIcon';
+import { responsive } from '@/design/responsive';
 import { colors, spacing } from '@/design/tokens';
 import { parseSessionFilter } from '@/features/sessions/effects';
 import { PlayerHilfe } from '@/features/sessions/PlayerHilfe';
@@ -35,7 +36,7 @@ export default function SessionsScreen() {
         <Text role="heading" style={styles.title}>
           {t('sessions.title')}
         </Text>
-        <View style={styles.icons}>
+        <View {...responsive('header-icons')} style={styles.icons}>
           <HeaderIconLink
             href={{ pathname: '/sessions/filter', params: { filter } }}
             label={t('sessions.filter.open')}

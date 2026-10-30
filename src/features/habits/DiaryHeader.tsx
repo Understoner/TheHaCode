@@ -3,16 +3,18 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import {
   ChartGlyph,
+  ChecklistGlyph,
   GearGlyph,
   HEADER_ICON_GAP,
   HEADER_ICON_SIZE,
   HeaderIconLink,
 } from '@/components/HeaderIcon';
 import { InfoButton } from '@/components/InfoButton';
+import { responsive } from '@/design/responsive';
 import { colors, spacing } from '@/design/tokens';
 
-// Die Ueberschrift des Tagebuchs mit drei Symbolen rechts daneben
-// (30.10.2026): Auswertung, Einstellungen, Info. Die Erklaerung, die bis
+// Die Ueberschrift des Tagebuchs mit Symbolen rechts daneben (30.10.2026):
+// Habit-Auswahl, Auswertung, Einstellungen, Info. Die Erklaerung, die bis
 // dahin als Absatz unter dem Titel stand, liegt jetzt hinter dem "i" - der
 // Tag rueckt damit auf dem Handy eine Bildschirmhoehe naeher nach oben.
 //
@@ -27,7 +29,10 @@ export function DiaryHeader() {
       <Text role="heading" style={styles.title}>
         {t('diary.title')}
       </Text>
-      <View style={styles.icons}>
+      <View {...responsive('header-icons')} style={styles.icons}>
+        <HeaderIconLink href="/habit-tracker/auswahl" label={t('diary.header.picker')}>
+          <ChecklistGlyph />
+        </HeaderIconLink>
         <HeaderIconLink href="/habit-tracker/auswertung" label={t('diary.header.insights')}>
           <ChartGlyph />
         </HeaderIconLink>
