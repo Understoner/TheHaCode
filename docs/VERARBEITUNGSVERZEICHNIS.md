@@ -70,12 +70,23 @@ Abschnitt 7 entschieden sind.
 | **Betroffene** | registrierte Nutzer:innen |
 | **Datenkategorien** | E-Mail-Adresse, Passwort-Hash, Zeitpunkte von Registrierung und letzter Anmeldung (`auth.users`, verwaltet von Supabase Auth); Anzeigename, Sprache, Zeitzone, Einstellungen (Ton, Stimme, Tagebuch-Score an oder aus, eingeschaltete Habit-Bereiche), Zugriffsmerkmal (`public.profiles`) |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b — Erfüllung des Nutzungsvertrags |
-| **Empfänger** | Supabase (Auftragsverarbeiter, betreibt auch den Versand der Kontomails) |
+| **Empfänger** | Supabase (Auftragsverarbeiter, Kontoverwaltung); Hostinger (Auftragsverarbeiter, versendet seit 31.10.2026 die Kontomails über das Postfach der Domain `deratemcode.at`) |
 | **Drittland** | möglich, abgesichert über Standardvertragsklauseln |
 | **Löschfrist** | mit der Löschung des Kontos; sie erfolgt sofort und vollständig über `on delete cascade` (Edge Function `delete-account`) — zur Einschränkung siehe „Sicherungskopien" am Ende dieses Abschnitts |
 
 > Kein eigenes Passwort-Hashing, keine eigene Sitzungstabelle — die
 > Nutzerverwaltung liegt vollständig bei Supabase Auth (CLAUDE.md).
+>
+> **Versand der Kontomails seit 31.10.2026 über Hostinger.** Bestätigungs- und
+> Passwort-Mails erzeugt weiterhin Supabase Auth, verschickt werden sie aber
+> über den SMTP-Server von Hostinger (eigener SMTP in den Auth-Einstellungen).
+> Der eingebaute Versand von Supabase schickt im kostenlosen Plan nur an
+> Team-Adressen. Scheiterte der Versand, brach Supabase die ganze Registrierung
+> ab, und Fremde konnten sich nicht per E-Mail registrieren. Hostinger sieht
+> dabei Empfängeradresse und Inhalt der Mail (Bestätigungslink). Der Vertrag
+> nach Art. 28 besteht bereits (Abschnitt 4). **Die Datenschutzerklärung nennt
+> bisher nur Supabase als Versender und muss mit der nächsten Fassung angepasst
+> werden** (Abschnitt 7).
 
 ### V3 · Eigene Atemsequenzen
 
@@ -324,8 +335,8 @@ erfolgen kann".
 
 | Dienstleister | Rolle | Vertrag nach Art. 28 | Fassung |
 |---|---|---|---|
-| Supabase | Datenbank, Auth, Storage, Edge Functions, Kontomails | geschlossen mit Annahme der Nutzungsbedingungen (DPA Klausel 12.2: „acceptance of the Agreement shall have the same effect as signing the SCCs") | Version 1, gültig ab 1. August 2026 |
-| Hostinger | Hosting der Website | geschlossen als Anhang der Nutzungsbedingungen | Stand 18. August 2026 |
+| Supabase | Datenbank, Auth, Storage, Edge Functions; erzeugt die Kontomails | geschlossen mit Annahme der Nutzungsbedingungen (DPA Klausel 12.2: „acceptance of the Agreement shall have the same effect as signing the SCCs") | Version 1, gültig ab 1. August 2026 |
+| Hostinger | Hosting der Website; Versand der Kontomails (SMTP, seit 31.10.2026) | geschlossen als Anhang der Nutzungsbedingungen | Stand 18. August 2026 |
 | Stripe | Zahlungsabwicklung (eigenverantwortlich für Zahlungsdaten, Auftragsverarbeiter im Übrigen) | geschlossen als Bestandteil des Services Agreement | Stand 18. November 2025 |
 
 **Drittland.** Alle drei binden die Standardvertragsklauseln der EU ein, Modul 2
@@ -476,4 +487,9 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
    entsprechend länger liegen. Der Personenbezug ist gering (HMAC, keine IP),
    die Aussage ist aber nicht genau. **Zu entscheiden:** Aufräumen zusätzlich
    an einer regelmäßig aufgerufenen Stelle einbauen oder den Satz in der
-   Datenschutzerklärung anpassen.
+   Datenschutzerklärung anpassen.3. **Datenschutzerklärung: Versand der Kontomails.** Abschnitt „Empfänger und
+   Auftragsverarbeiter“ nennt Supabase für den „Versand der Kontomails“. Seit
+   31.10.2026 verschickt sie Hostinger (V2). Mit der nächsten Fassung
+   (`privacy` Version 5 per Migration, neues Datum in `legal.json`) anpassen,
+   am besten zusammen mit den Entscheidungen zu Punkt 1 und 2. Außerdem fehlt
+   im DNS von `deratemcode.at` noch der DKIM-Eintrag für den Hostinger-Versand.
