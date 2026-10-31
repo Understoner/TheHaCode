@@ -15,11 +15,19 @@ Nach Art. 30 Abs. 1 DSGVO. Gehört zu **T19**.
 > Repository ableiten ließen, hat der Verantwortliche am selben Tag gesetzt:
 > Server-Protokolle sieben Tage, E-Mail ohne Vertragsbezug zwölf Monate.
 > Damit ist der Entwurfsvermerk gefallen.
+>
+> **Ergänzt am 31. Oktober 2026 für V1.1** (live seit demselben Tag, Commit
+> `64f3f7b`). Abgeglichen gegen die Migrationen 0013 bis 0032 und die
+> Datenschutzerklärung Fassung 4 vom 26.10.2026. Neu sind das Tagebuch mit
+> Gesundheitsdaten nach Art. 9 (V10), das Übungsprotokoll (V11), der
+> Missbrauchsschutz für Gastbuchungen (V12), Favoriten und Playlist-Links (V3)
+> sowie Gastbuchungen und deren Aufbewahrung nach der Kontolöschung (V5).
+> Abschnitt 3 hat zwei Auslassungen verloren („keine Gesundheitsdaten“, „keine
+> Sitzungsprotokolle“). Zwei Punkte sind offen und stehen in Abschnitt 7.
 
-**Stand:** 23. August 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
-Personenbezug, spätestens vor V1.1 (Atem-Tagebuch — dann fallen erstmals
-Gesundheitsdaten nach Art. 9 an, und dieses Verzeichnis braucht einen eigenen
-Eintrag samt Rechtsgrundlage).
+**Stand:** 31. Oktober 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
+Personenbezug, beim Wechsel auf Supabase Pro und sobald die offenen Punkte in
+Abschnitt 7 entschieden sind.
 
 ---
 
@@ -60,7 +68,7 @@ Eintrag samt Rechtsgrundlage).
 |---|---|
 | **Zweck** | Registrierung, Anmeldung, Sitzungen, Passwort zurücksetzen, Kontoführung |
 | **Betroffene** | registrierte Nutzer:innen |
-| **Datenkategorien** | E-Mail-Adresse, Passwort-Hash, Zeitpunkte von Registrierung und letzter Anmeldung (`auth.users`, verwaltet von Supabase Auth); Anzeigename, Sprache, Zeitzone, Tonschalter, Zugriffsmerkmal (`public.profiles`) |
+| **Datenkategorien** | E-Mail-Adresse, Passwort-Hash, Zeitpunkte von Registrierung und letzter Anmeldung (`auth.users`, verwaltet von Supabase Auth); Anzeigename, Sprache, Zeitzone, Einstellungen (Ton, Stimme, Tagebuch-Score an oder aus, eingeschaltete Habit-Bereiche), Zugriffsmerkmal (`public.profiles`) |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b — Erfüllung des Nutzungsvertrags |
 | **Empfänger** | Supabase (Auftragsverarbeiter, betreibt auch den Versand der Kontomails) |
 | **Drittland** | möglich, abgesichert über Standardvertragsklauseln |
@@ -73,16 +81,19 @@ Eintrag samt Rechtsgrundlage).
 
 | | |
 |---|---|
-| **Zweck** | Speichern und Abspielen selbst gebauter Sequenzen (die bezahlte Funktion) |
+| **Zweck** | Speichern und Abspielen selbst gebauter Sequenzen (die bezahlte Funktion), Merken von Favoriten, Hinterlegen einer Playlist |
 | **Betroffene** | registrierte Nutzer:innen |
-| **Datenkategorien** | Titel, Untertitel, Blöcke, Phasen, Dauern, Rundenzahlen, Pausen (`exercises`, `exercise_steps`, `exercise_phases`) |
+| **Datenkategorien** | Titel, Untertitel, Blöcke, Phasen, Dauern, Rundenzahlen, Pausen (`exercises`, `exercise_steps`, `exercise_phases`); Links zu einer Playlist bei Spotify oder Apple Music (`exercises.spotify_url`, `apple_music_url`, seit 0017); als Favorit markierte Sequenzen und seit wann (`exercise_favorites`, seit 0017) |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b |
 | **Empfänger** | Supabase |
-| **Löschfrist** | mit der Löschung des Kontos oder der einzelnen Sequenz |
+| **Löschfrist** | mit der Löschung des Kontos oder der einzelnen Sequenz bzw. des Favoriten |
 
-> Diese Angaben beschreiben eine Übung, nicht die Person. Es wird **nicht**
-> mitgeschrieben, ob, wann oder wie lange jemand geübt hat — ein
-> Sitzungsprotokoll gibt es in V1 nicht.
+> Diese Angaben beschreiben eine Übung, nicht die Person. Ob, wann und wie
+> lange jemand geübt hat, steht seit V1.1 im Übungsprotokoll (V11), nicht hier.
+>
+> Spotify und Apple Music sind **nicht** eingebunden und keine Empfänger: Die
+> App speichert nur den Link. Erst wenn jemand ihn antippt, öffnet sich der
+> Dienst, und ab dann gelten dessen Bestimmungen.
 
 ### V4 · Abonnement und Zahlungsabwicklung
 
@@ -113,17 +124,23 @@ Eintrag samt Rechtsgrundlage).
 | | |
 |---|---|
 | **Zweck** | Anmeldung zu Workshops, Camps und Kursen, Platzvergabe, Anzahlung und Restzahlung |
-| **Betroffene** | buchende Nutzer:innen |
-| **Datenkategorien** | Kurs, Status, Gesamtbetrag, gezahlter Betrag, Anzahlung, Fälligkeit und Zahlung des Restbetrags, Reservierungsende, Zeitpunkt der AGB-Zustimmung, Stripe-Sitzungs- und Zahlungsnummer (`course_bookings`) |
+| **Betroffene** | buchende Nutzer:innen mit Konto und Gäste ohne Konto |
+| **Datenkategorien** | Kurs, Status, Gesamtbetrag, gezahlter Betrag, Anzahlung, Fälligkeit und Zahlung des Restbetrags, Reservierungsende, Zeitpunkt der AGB-Zustimmung, Stripe-Sitzungs- und Zahlungsnummer (`course_bookings`); bei Gästen zusätzlich E-Mail-Adresse und, falls angegeben, Name für die Teilnehmerliste (`guest_email`, `guest_name`) |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b; für die Aufzeichnung Art. 6 Abs. 1 lit. c |
 | **Empfänger** | Stripe, Supabase |
-| **Löschfrist** | mit der Löschung des Kontos; der steuerliche Beleg ist die Zahlung bei Stripe, nicht diese Zeile |
+| **Löschfrist** | **sieben Jahre** nach § 132 BAO, gerechnet ab dem Ende des Kalenderjahres der Buchung. Löscht jemand das Konto, bleibt die Buchung ohne `user_id`, ohne Name und ohne E-Mail mit gesetztem `anonymized_at` stehen (seit 0022); eine unbezahlte Reservierung verfällt. Die Löschung nach Ablauf erfolgt einmal im Jahr im Jänner von Hand (SQL in `docs/INHALTE.md`, Abschnitt „Anonymisierte Kursbuchungen“). |
+
+> **Geändert am 31.10.2026.** Bis 0022 verschwand die Buchung mit dem Konto
+> (`on delete cascade`). Seitdem hängt sie mit `on delete set null` an
+> `auth.users`, damit die Zahlungsaufzeichnung die Kontolöschung übersteht.
+> Gastbuchungen behalten ihre E-Mail-Adresse bis zum Ablauf der Frist, weil
+> sie zu keinem Konto gehören, das gelöscht werden könnte.
 
 ### V6 · Nachweis von Zustimmungen und Einwilligungen
 
 | | |
 |---|---|
-| **Zweck** | Nachweisen, wer welcher Fassung von AGB und Datenschutzerklärung wann zugestimmt hat (Art. 7 Abs. 1, § 6 KSchG) |
+| **Zweck** | Nachweisen, wer welcher Fassung von AGB und Datenschutzerklärung wann zugestimmt hat (Art. 7 Abs. 1, § 6 KSchG), und seit V1.1, wer wann in die Verarbeitung von Gesundheitsdaten im Tagebuch eingewilligt oder sie widerrufen hat (`health_data`) |
 | **Betroffene** | registrierte Nutzer:innen |
 | **Datenkategorien** | Art der Erklärung, Fassung, Zeitpunkt der Erteilung oder des Widerrufs, Herkunft (`user_consents`, `consent_definitions`) |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. c in Verbindung mit Art. 7 Abs. 1 — Nachweispflicht |
@@ -132,6 +149,10 @@ Eintrag samt Rechtsgrundlage).
 
 > Erklärungen werden nie überschrieben: Widerruf erzeugt eine **neue** Zeile.
 > UPDATE und DELETE sind auf dieser Tabelle in der Datenbank verboten.
+> Seit 0022 ist auch der Wortlaut einer **veröffentlichten** Fassung in
+> `consent_definitions` per Trigger unveränderlich; eine Korrektur ist eine
+> neue Version. Für das Tagebuch gilt derzeit `health_data` Version 3
+> („Einwilligung Tagebuch“, 0027), die Datenschutzerklärung steht bei Version 4.
 > Die Zustimmung im Bezahlvorgang (AGB und sofortiger Leistungsbeginn) liegt
 > zusätzlich bei Stripe am jeweiligen Vorgang.
 
@@ -160,7 +181,7 @@ Eintrag samt Rechtsgrundlage).
 |---|---|
 | **Zweck** | Auskunft (Art. 15), Löschung (Art. 17), Datenübertragbarkeit (Art. 20) |
 | **Betroffene** | registrierte Nutzer:innen |
-| **Datenkategorien** | alle zum Konto gehörenden Zeilen; die Auskunft wird im Browser unter RLS zusammengestellt und als JSON-Datei ausgegeben |
+| **Datenkategorien** | alle zum Konto gehörenden Zeilen; die Auskunft wird im Browser unter RLS zusammengestellt und als JSON-Datei ausgegeben. Seit V1.1 gehören dazu auch `exercise_favorites`, `user_habits`, `habit_logs`, `habit_templates` (nur eigene), `habit_favorites` und `exercise_sessions` (Liste `EXPORT_TABLES` in `src/features/auth/dataExport.ts`) — auch nach einem Widerruf der Einwilligung |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. c |
 | **Empfänger** | keine — die Daten verlassen den Verantwortungsbereich nicht |
 | **Löschfrist** | entfällt; es entsteht keine eigene Aufzeichnung über die Ausübung |
@@ -180,6 +201,65 @@ Eintrag samt Rechtsgrundlage).
 > Vorher stand hier „wenn die Anfrage erledigt ist" — danach räumt niemand ein
 > Postfach auf, und eine Frist, die im Verzeichnis steht, aber nie eintritt,
 > ist schlechter als gar keine.
+
+### V10 · Tagebuch (Gesundheitsdaten nach Art. 9) — seit V1.1
+
+| | |
+|---|---|
+| **Zweck** | Den Nutzer:innen ihre eigenen Gewohnheiten, Einträge und Auswertungen anzeigen (Kalender, Serien, Verläufe, Übungsminuten, auf Wunsch Tagebuch-Score). Kein anderer Zweck. |
+| **Betroffene** | registrierte Nutzer:innen, die das Tagebuch nutzen |
+| **Datenkategorien** | **Gesundheitsdaten:** Einträge je Kalendertag — erledigt, Messwert (z. B. BOLT-Sekunden, Schritte), Text, Notiz (`habit_logs`); selbst angelegte Gewohnheiten mit Titel, Beschreibung, Kategorie, Erfassungsart, Einheit, Wertebereich, Punkten, Vorzeichen, Link (`habit_templates` mit `owner_id`). **Keine Gesundheitsdaten im engeren Sinn, aber im selben Zusammenhang:** gewählte Vorschläge, seit wann, Zielwert, Archivierung (`user_habits`); Habit-Favoriten (`habit_favorites`) |
+| **Rechtsgrundlage** | Einträge und eigene Gewohnheiten: **Art. 9 Abs. 2 lit. a in Verbindung mit Art. 6 Abs. 1 lit. a** — ausdrückliche, gesonderte Einwilligung `health_data` vor dem ersten Eintrag, freiwillig und keine Voraussetzung für Konto oder Abonnement. Auswahl und Favoriten: Art. 6 Abs. 1 lit. b. Nachweis der Einwilligung: V6. |
+| **Empfänger** | Supabase (Frankfurt). Keine Weitergabe, keine Werbung, keine Profilbildung, keine Forschung, keine Statistik über die Nutzer:innen. |
+| **Drittland** | möglich über Unterauftragsverarbeiter von Supabase, abgesichert über Standardvertragsklauseln |
+| **Löschfrist** | Einzelne Einträge: sofort beim Entfernen (echtes `DELETE`, Policy `habit_logs_delete_own`). Eigene Gewohnheit: verschwindet beim Löschen aus der Auswahl (`deleted_at`), bleibt mit ihren Einträgen für die Auswertungen bis zur Kontolöschung; auf Anfrage vorher vollständig (SQL in `docs/INHALTE.md`). Konto: alles sofort über `on delete cascade`. Nach einem **Widerruf**: siehe Abschnitt 7. |
+
+> **Wie die Einwilligung technisch durchgesetzt wird.** Schreiben in
+> `habit_logs` erlaubt die Datenbank nur mit gültiger Einwilligung
+> `health_data` und über `can_use_habit_template()` (Vorschau-Habit oder Plus);
+> eigene Gewohnheiten anlegen nur mit Plus **und** Einwilligung (0025). Lesen
+> erlaubt RLS ausschließlich dem Konto, dem die Zeile gehört. Ohne
+> Einwilligung bleibt das Tagebuch leer, alle übrigen Funktionen bleiben
+> nutzbar.
+>
+> **Keine Auswertung durch uns.** Score und Auswertungen werden in der App aus
+> den eigenen Einträgen berechnet. Punkte gibt es für das Durchführen, nicht
+> für die Höhe eines Messwerts. Wir ordnen keine Werte ein und treffen keine
+> Entscheidungen auf ihrer Grundlage.
+>
+> **Datenschutz-Folgenabschätzung (Art. 35).** Einschätzung vom 31.10.2026,
+> **vom Verantwortlichen zu bestätigen:** Art. 35 Abs. 3 lit. b verlangt eine
+> DSFA bei *umfangreicher* Verarbeitung besonderer Kategorien. Das Tagebuch ist
+> ein Nebenangebot eines Kleinbetriebs, die Daten sind von den Betroffenen
+> selbst erfasst, nur für sie sichtbar und werden nicht ausgewertet. Daraus
+> folgt nach dieser Einschätzung keine DSFA-Pflicht. Wächst die Nutzerzahl
+> deutlich oder kommen Auswertungen durch uns dazu, ist das neu zu prüfen.
+
+### V11 · Übungsprotokoll — seit V1.1
+
+| | |
+|---|---|
+| **Zweck** | Übungsminuten pro Woche im Tagebuch anzeigen; nach Abschluss einer Sequenz das zugehörige Habit automatisch eintragen (nur mit Einwilligung, dann V10) |
+| **Betroffene** | angemeldete Nutzer:innen, die eine Sequenz starten |
+| **Datenkategorien** | welche Sequenz, Beginn, Abschluss, Dauer, abgeschlossene Runden, ob abgeschlossen (`exercise_sessions`) |
+| **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b |
+| **Empfänger** | Supabase |
+| **Löschfrist** | mit der Löschung des Kontos (`on delete cascade`) |
+
+> Das Protokoll sagt, *dass* geübt wurde, nicht wie es jemandem dabei ging.
+> Darum behandeln wir es nicht als Gesundheitsdatum. Der automatische Eintrag
+> ins Tagebuch dagegen ist eines und entsteht nur mit Einwilligung.
+
+### V12 · Schutz vor missbräuchlichen Gastbuchungen — seit 0022
+
+| | |
+|---|---|
+| **Zweck** | Verhindern, dass jemand einen Kurs mit erfundenen Gastreservierungen blockiert (höchstens fünf Versuche je Absender und Stunde; Gäste dürfen höchstens die Hälfte der Plätze offen halten) |
+| **Betroffene** | Personen, die ohne Konto buchen |
+| **Datenkategorien** | eine Kennung, die `create-course-checkout` als HMAC aus der IP-Adresse bildet, und der Zeitpunkt des Versuchs (`guest_booking_attempts`). Die IP-Adresse selbst wird nicht gespeichert. |
+| **Rechtsgrundlage** | Art. 6 Abs. 1 lit. f — faire Platzvergabe, Schutz vor Missbrauch |
+| **Empfänger** | Supabase; kein Client kann die Tabelle lesen (RLS ohne Policy) |
+| **Löschfrist** | 24 Stunden — **siehe Abschnitt 7**, wann genau gelöscht wird |
 
 ### Sicherungskopien — die Frist hinter allen anderen Fristen
 
@@ -213,16 +293,20 @@ Eintrag samt Rechtsgrundlage).
 Für die Vollständigkeit dieses Verzeichnisses ebenso wichtig wie die Liste oben,
 weil dieselben Sätze in der Datenschutzerklärung stehen:
 
-- **Keine Gesundheitsdaten nach Art. 9.** Kein Tagebuch, keine Messwerte, keine
-  Angaben zum Befinden. Die Consent-Definition `health_data` ist angelegt, aber
-  unveröffentlicht — sie wird erst mit V1.1 gebraucht.
+- ~~Keine Gesundheitsdaten nach Art. 9.~~ **Seit V1.1 (31.10.2026) entfallen:**
+  Gesundheitsdaten gibt es jetzt, aber **nur im Tagebuch und nur mit
+  ausdrücklicher Einwilligung** (V10). Außerhalb des Tagebuchs gilt weiter:
+  keine Angaben zum Befinden.
 - **Keine Analyse-, Tracking- oder Marketingwerkzeuge**, keine Werbenetzwerke,
   kein Profiling, keine automatisierte Entscheidungsfindung nach Art. 22.
 - **Kein Fehler-Monitoring.** CLAUDE.md nennt Sentry als Ziel für technische
   Details; eingebunden ist es (Stand 21.08.2026) nicht. Kommt es dazu, braucht
   es hier einen Eintrag und einen in der Datenschutzerklärung.
-- **Keine Sitzungsprotokolle** — wann und wie lange jemand übt, wird nicht
-  gespeichert.
+- ~~Keine Sitzungsprotokolle.~~ **Seit V1.1 entfallen:** Für angemeldete
+  Nutzer:innen gibt es das Übungsprotokoll (V11). Ohne Anmeldung wird
+  weiterhin nichts mitgeschrieben.
+- **Keine Einbindung von Musikdiensten.** Spotify und Apple Music erscheinen
+  nur als gespeicherter Link (V3), nicht als eingebettetes Element.
 - **Keine Cookies zu Analyse- oder Werbezwecken.** Im Browser liegt allein das
   Sitzungsmerkmal der Anmeldung, technisch notwendig und daher ohne
   Einwilligung zulässig.
@@ -292,7 +376,12 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
 - **Löschung durch Bauweise.** Jede Nutzertabelle hängt mit `on delete cascade`
   an `auth.users`; ein Test prüft laufend, dass keine Zeile zurückbleibt. Am
   23.08.2026 gegen die Migrationen nachgeprüft: `profiles`, `exercises`,
-  `subscriptions`, `course_bookings` und `user_consents` hängen alle so. Dass
+  `subscriptions`, `course_bookings` und `user_consents` hängen alle so. Am
+  31.10.2026 ergänzt: `exercise_favorites`, `exercise_sessions`, `user_habits`,
+  `habit_logs`, `habit_favorites` und eigene `habit_templates` hängen ebenfalls
+  mit Kaskade daran. **Ausnahme seit 0022:** `course_bookings` hängt mit
+  `on delete set null` daran und wird bei der Kontolöschung anonymisiert statt
+  gelöscht (V5). Dass
   auf `user_consents` weder UPDATE noch DELETE erlaubt ist, steht dem nicht im
   Weg — die Sperre ist eine fehlende RLS-Regel, und der Kaskadenlauf der
   Datenbank unterliegt ihr nicht. Eine Löschsperre als Trigger hätte das
@@ -300,6 +389,19 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
 - **Nachvollziehbarkeit der Änderungen.** Schemaänderungen ausschließlich als
   Migration im Repository, jede Änderung über einen Pull Request, automatische
   Prüfung vor der Auslieferung.
+- **Gesundheitsdaten nur hinter Einwilligung.** Die Einwilligung `health_data`
+  wird in der Datenbank selbst geprüft (RLS und `can_use_habit_template()`),
+  nicht nur in der Oberfläche. Policies dazu sind mit pgTAP auf den
+  Missbrauchsfall getestet.
+- **Kein Klartext, wo eine Kennung reicht.** Für den Schutz vor Gastbuchungen
+  wird die IP-Adresse nur als HMAC gespeichert (V12).
+- **Härtung der Auslieferung** (seit Oktober 2026): HSTS, Referrer- und
+  Permissions-Policy, Content-Security-Policy mit Hashes für Inline-Skripte,
+  Edge Functions nehmen nur Anfragen der eigenen Domain an (CORS), Ausführungsrechte
+  an `security definer`-Funktionen sind eingeschränkt (0031).
+- **Security-Scan vor jedem Livegang** (Gitleaks, OSV-Scanner, GuardDog,
+  zizmor, Opengrep, Splinter, ZAP; `docs/SECURITY-SCAN.md`). Er berichtet nur;
+  Funde werden nach Absprache umgesetzt.
 - **Datensparsamkeit als Voreinstellung.** Erhoben wird, was die Leistung
   braucht; alles Weitere steht in Abschnitt 3 als bewusste Auslassung.
 
@@ -345,3 +447,33 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
   Konten und Zahlungen um zwei Monate). Wer eine dieser Zeilen streicht, prüft
   zuerst, welche Sätze in `src/i18n/locales/de/legal.json` dadurch unwahr
   werden.
+- Eine **Entscheidung aus Abschnitt 7 fällt** → Eintrag hier anpassen und
+  prüfen, ob die Datenschutzerklärung (Abschnitte „Tagebuch“, „Kursbuchungen“,
+  „Speicherdauer“) noch stimmt.
+
+---
+
+## 7. Offene Punkte (Stand 31.10.2026)
+
+1. **Löschung nach Widerruf der Einwilligung `health_data`.** Heute gilt: Nach
+   dem Widerruf sind keine neuen Einträge und keine neuen eigenen Gewohnheiten
+   mehr möglich; Gespeichertes bleibt, die Person kann es ansehen, exportieren
+   und selbst löschen. So steht es auch in der Datenschutzerklärung. Art. 17
+   Abs. 1 lit. b DSGVO gibt der Person aber ein Recht auf Löschung, wenn die
+   Einwilligung widerrufen wird und keine andere Rechtsgrundlage besteht — und
+   eine andere Rechtsgrundlage für die Einträge gibt es nicht. **Zu
+   entscheiden:** Bleibt es beim Aufbewahren bis zur Löschung durch die Person
+   (dann sollte die App beim Widerruf ausdrücklich anbieten, alles zu löschen),
+   oder löschen wir beim Widerruf automatisch? Beides braucht eine Änderung an
+   App oder Datenbank und gegebenenfalls am Text der Datenschutzerklärung.
+   Offen seit 25.10.2026.
+2. **24-Stunden-Frist bei Gastbuchungs-Kennungen (V12).** Die Datenschutz-
+   erklärung sagt: „Die Kennung wird nach 24 Stunden gelöscht.“ Tatsächlich
+   räumt `take_guest_booking_slot()` alte Kennungen nur **beim nächsten
+   Gastbuchungsversuch** auf (0022, „Aufraeumen nebenbei“); einen
+   zeitgesteuerten Job gibt es nicht (das Projekt verzichtet bewusst auf
+   pg_cron, siehe 0010). Bucht tagelang niemand als Gast, bleiben Kennungen
+   entsprechend länger liegen. Der Personenbezug ist gering (HMAC, keine IP),
+   die Aussage ist aber nicht genau. **Zu entscheiden:** Aufräumen zusätzlich
+   an einer regelmäßig aufgerufenen Stelle einbauen oder den Satz in der
+   Datenschutzerklärung anpassen.
