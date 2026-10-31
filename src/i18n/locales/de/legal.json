@@ -57,7 +57,7 @@
     }
   ],
   "datenschutz.title": "Datenschutzerklärung",
-  "datenschutz.stand": "Fassung 4 vom 26. Oktober 2026",
+  "datenschutz.stand": "Fassung 5 vom 31. Oktober 2026",
   "datenschutz.sections": [
     {
       "title": "Worum es hier geht",
@@ -119,7 +119,7 @@
         "Zweck ist allein, Ihnen Ihre eigenen Einträge und Auswertungen anzuzeigen: Kalender, Serien, Verläufe, Übungsminuten und — falls Sie ihn einschalten — den Tagebuch-Score. Diese Auswertungen werden in Ihrer Anwendung aus Ihren Einträgen berechnet. Punkte gibt es für das Durchführen einer Gewohnheit, nicht für die Höhe eines Messwerts.",
         "Die Auswertungen sind keine medizinische Beurteilung. Wir ordnen Ihre Werte nicht ein, ziehen keine Schlüsse auf Ihre Gesundheit und treffen keine Entscheidungen auf ihrer Grundlage.",
         "Wir nutzen Ihre Einträge und Ihre selbst angelegten Gewohnheiten nicht für Werbung, Profilbildung, Forschung oder Statistiken über unsere Nutzer:innen und geben sie nicht an Dritte weiter. Einsehen können sie nur Sie selbst: Die Datenbank gibt jeden Eintrag und jede selbst angelegte Gewohnheit ausschließlich an das Konto heraus, dem sie gehören. Die Übertragung erfolgt verschlüsselt, gespeichert wird auf Servern in der Europäischen Union.",
-        "Ihre Einwilligung können Sie jederzeit und ohne Angabe von Gründen unter „Konto“ widerrufen. Ab dem Widerruf sind keine neuen Einträge und keine neuen oder geänderten eigenen Gewohnheiten mehr möglich; die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung bleibt unberührt. Bereits Gespeichertes können Sie danach weiterhin ansehen, exportieren und löschen.",
+        "Ihre Einwilligung können Sie jederzeit und ohne Angabe von Gründen unter „Konto“ widerrufen. Ab dem Widerruf sind keine neuen Einträge und keine neuen oder geänderten eigenen Gewohnheiten mehr möglich; die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung bleibt unberührt. Beim Widerruf bieten wir Ihnen an, alle Daten im Tagebuch – Ihre Einträge, Ihre Auswahl, Ihre Favoriten und Ihre selbst angelegten Gewohnheiten – sofort und vollständig zu löschen. Entscheiden Sie sich dagegen, können Sie Gespeichertes weiterhin ansehen, exportieren und löschen.",
         "Damit wir nachweisen können, dass Sie eingewilligt haben (Art. 7 Abs. 1 DSGVO), speichern wir, welcher Fassung des Einwilligungstexts Sie wann zugestimmt und wann Sie widerrufen haben. Rechtsgrundlage dafür ist unsere rechtliche Verpflichtung zu diesem Nachweis (Art. 6 Abs. 1 lit. c DSGVO)."
       ]
     },
@@ -137,7 +137,7 @@
         "Buchen Sie einen Workshop, Kurs oder ein Event über die Website, speichern wir den gebuchten Kurs, den Preis, eine allfällige Anzahlung und deren Fälligkeit, den Status der Buchung und der Zahlung, die Zeitpunkte von Reservierung, Bestätigung oder Stornierung sowie den Zeitpunkt, zu dem Sie den AGB zugestimmt haben.",
         "Mit Konto wird die Buchung Ihrem Konto zugeordnet. Ohne Konto speichern wir Ihre E-Mail-Adresse und, falls Sie ihn angeben, Ihren Namen für die Teilnehmerliste. An diese Adresse gehen der Zahlungsbeleg und Rückfragen zur Buchung.",
         "Während des Bezahlvorgangs halten wir Ihren Platz für kurze Zeit frei. Wird die Zahlung nicht abgeschlossen, verfällt die Reservierung.",
-        "Damit niemand einen Kurs mit erfundenen Gastbuchungen blockieren kann, zählen wir Buchungsversuche ohne Konto je Absender. Dazu bilden wir aus Ihrer IP-Adresse mit einem geheimen Schlüssel eine Kennung, aus der sich die Adresse nicht zurückrechnen lässt. Die IP-Adresse selbst speichern wir nicht. Die Kennung wird nach 24 Stunden gelöscht. Rechtsgrundlage ist unser berechtigtes Interesse an einer fairen Platzvergabe und am Schutz vor Missbrauch (Art. 6 Abs. 1 lit. f DSGVO).",
+        "Damit niemand einen Kurs mit erfundenen Gastbuchungen blockieren kann, zählen wir Buchungsversuche ohne Konto je Absender. Dazu bilden wir aus Ihrer IP-Adresse mit einem geheimen Schlüssel eine Kennung, aus der sich die Adresse nicht zurückrechnen lässt. Die IP-Adresse selbst speichern wir nicht. Die Kennung benötigen wir nur 24 Stunden; ältere Kennungen werden beim nächsten Buchungsversuch ohne Konto automatisch gelöscht. Rechtsgrundlage ist unser berechtigtes Interesse an einer fairen Platzvergabe und am Schutz vor Missbrauch (Art. 6 Abs. 1 lit. f DSGVO).",
         "Zweck ist die Abwicklung und Durchführung der gebuchten Leistung. Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie die Erfüllung steuer- und unternehmensrechtlicher Aufbewahrungspflichten (Art. 6 Abs. 1 lit. c DSGVO)."
       ]
     },
@@ -163,8 +163,8 @@
     {
       "title": "Empfänger und Auftragsverarbeiter",
       "lines": [
-        "Hostinger — Betrieb der Website. Auftragsverarbeiter gemäß Art. 28 DSGVO.",
-        "Supabase — Datenbank einschließlich der Einträge im Tagebuch, Kontoverwaltung und Versand der Kontomails. Die Daten liegen in einem Rechenzentrum in Frankfurt am Main. Auftragsverarbeiter gemäß Art. 28 DSGVO.",
+        "Hostinger — Betrieb der Website und Versand der Kontomails (Bestätigung der Registrierung, Zurücksetzen des Passworts). Auftragsverarbeiter gemäß Art. 28 DSGVO.",
+        "Supabase — Datenbank einschließlich der Einträge im Tagebuch und Kontoverwaltung. Die Daten liegen in einem Rechenzentrum in Frankfurt am Main. Auftragsverarbeiter gemäß Art. 28 DSGVO.",
         "Stripe — Zahlungsabwicklung. Stripe ist hinsichtlich der Zahlungsdaten eigenverantwortlich tätig.",
         "Eine Übermittlung in Drittländer kann bei diesen Dienstleistern nicht ausgeschlossen werden. Sie ist durch die Standardvertragsklauseln der Europäischen Kommission und ergänzende Maßnahmen abgesichert.",
         "Darüber hinaus geben wir Ihre Daten nicht weiter — insbesondere nicht zu Werbezwecken und nicht an Dritte zur eigenen Nutzung."

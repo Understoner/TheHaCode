@@ -84,9 +84,8 @@ Abschnitt 7 entschieden sind.
 > Team-Adressen. Scheiterte der Versand, brach Supabase die ganze Registrierung
 > ab, und Fremde konnten sich nicht per E-Mail registrieren. Hostinger sieht
 > dabei Empfängeradresse und Inhalt der Mail (Bestätigungslink). Der Vertrag
-> nach Art. 28 besteht bereits (Abschnitt 4). **Die Datenschutzerklärung nennt
-> bisher nur Supabase als Versender und muss mit der nächsten Fassung angepasst
-> werden** (Abschnitt 7).
+> nach Art. 28 besteht bereits (Abschnitt 4). Die Datenschutzerklärung nennt
+> Hostinger als Versender seit Fassung 5 vom 31.10.2026 (0034).
 
 ### V3 · Eigene Atemsequenzen
 
@@ -270,7 +269,7 @@ Abschnitt 7 entschieden sind.
 | **Datenkategorien** | eine Kennung, die `create-course-checkout` als HMAC aus der IP-Adresse bildet, und der Zeitpunkt des Versuchs (`guest_booking_attempts`). Die IP-Adresse selbst wird nicht gespeichert. |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. f — faire Platzvergabe, Schutz vor Missbrauch |
 | **Empfänger** | Supabase; kein Client kann die Tabelle lesen (RLS ohne Policy) |
-| **Löschfrist** | 24 Stunden — **siehe Abschnitt 7**, wann genau gelöscht wird |
+| **Löschfrist** | Kennungen werden nur 24 Stunden gebraucht; ältere löscht `take_guest_booking_slot()` beim nächsten Buchungsversuch ohne Konto (kein zeitgesteuerter Job, siehe Abschnitt 7) |
 
 ### Sicherungskopien — die Frist hinter allen anderen Fristen
 
@@ -472,11 +471,12 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
    (`delete_my_diary_data()`, löscht nur Zeilen von `auth.uid()`) und dem
    Widerrufsdialog auf der Kontoseite. Erst wird widerrufen, dann gelöscht;
    scheitert das Löschen, bleibt ein Knopf für den neuen Versuch. Das
-   Übungsprotokoll (V11) und der Nachweis des Widerrufs (V6) bleiben. **Noch
-   offen:** In der Datenschutzerklärung (Abschnitt „Tagebuch“) gehört mit der
-   nächsten Fassung ergänzt, dass beim Widerruf das sofortige Löschen angeboten
-   wird (zusammen mit Punkt 3).
-2. **24-Stunden-Frist bei Gastbuchungs-Kennungen (V12).** Die Datenschutz-
+   Übungsprotokoll (V11) und der Nachweis des Widerrufs (V6) bleiben. Die
+   Datenschutzerklärung sagt das seit Fassung 5 (0034).
+2. ~~**24-Stunden-Frist bei Gastbuchungs-Kennungen (V12).**~~ **Entschieden am
+   31.10.2026: Satz angepasst** (Fassung 5, 0034). Die Erklärung sagt jetzt, dass
+   ältere Kennungen beim nächsten Buchungsversuch ohne Konto gelöscht werden.
+   Bisheriger Befund: Die Datenschutz-
    erklärung sagt: „Die Kennung wird nach 24 Stunden gelöscht.“ Tatsächlich
    räumt `take_guest_booking_slot()` alte Kennungen nur **beim nächsten
    Gastbuchungsversuch** auf (0022, „Aufraeumen nebenbei“); einen
@@ -485,7 +485,8 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
    entsprechend länger liegen. Der Personenbezug ist gering (HMAC, keine IP),
    die Aussage ist aber nicht genau. **Zu entscheiden:** Aufräumen zusätzlich
    an einer regelmäßig aufgerufenen Stelle einbauen oder den Satz in der
-   Datenschutzerklärung anpassen.3. **Datenschutzerklärung: Versand der Kontomails.** Abschnitt „Empfänger und
+   Datenschutzerklärung anpassen.3. ~~**Datenschutzerklärung: Versand der Kontomails.**~~ **Erledigt mit Fassung 5
+   (0034).** Offen bleibt nur der DKIM-Eintrag. Bisheriger Befund: Abschnitt „Empfänger und
    Auftragsverarbeiter“ nennt Supabase für den „Versand der Kontomails“. Seit
    31.10.2026 verschickt sie Hostinger (V2). Mit der nächsten Fassung
    (`privacy` Version 5 per Migration, neues Datum in `legal.json`) anpassen,
