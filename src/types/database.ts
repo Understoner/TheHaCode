@@ -1178,6 +1178,7 @@ export type Database = {
           seats_taken: number
         }[]
       }
+      delete_my_diary_data: { Args: never; Returns: undefined }
       has_consent: {
         Args: { p_kind: Database["public"]["Enums"]["consent_kind"] }
         Returns: boolean

@@ -223,7 +223,7 @@ Abschnitt 7 entschieden sind.
 | **Rechtsgrundlage** | Einträge und eigene Gewohnheiten: **Art. 9 Abs. 2 lit. a in Verbindung mit Art. 6 Abs. 1 lit. a** — ausdrückliche, gesonderte Einwilligung `health_data` vor dem ersten Eintrag, freiwillig und keine Voraussetzung für Konto oder Abonnement. Auswahl und Favoriten: Art. 6 Abs. 1 lit. b. Nachweis der Einwilligung: V6. |
 | **Empfänger** | Supabase (Frankfurt). Keine Weitergabe, keine Werbung, keine Profilbildung, keine Forschung, keine Statistik über die Nutzer:innen. |
 | **Drittland** | möglich über Unterauftragsverarbeiter von Supabase, abgesichert über Standardvertragsklauseln |
-| **Löschfrist** | Einzelne Einträge: sofort beim Entfernen (echtes `DELETE`, Policy `habit_logs_delete_own`). Eigene Gewohnheit: verschwindet beim Löschen aus der Auswahl (`deleted_at`), bleibt mit ihren Einträgen für die Auswertungen bis zur Kontolöschung; auf Anfrage vorher vollständig (SQL in `docs/INHALTE.md`). Konto: alles sofort über `on delete cascade`. Nach einem **Widerruf**: siehe Abschnitt 7. |
+| **Löschfrist** | Einzelne Einträge: sofort beim Entfernen (echtes `DELETE`, Policy `habit_logs_delete_own`). Eigene Gewohnheit: verschwindet beim Löschen aus der Auswahl (`deleted_at`), bleibt mit ihren Einträgen für die Auswertungen bis zur Kontolöschung; auf Anfrage vorher vollständig (SQL in `docs/INHALTE.md`). Konto: alles sofort über `on delete cascade`. **Beim Widerruf** fragt die App, ob alles gelöscht werden soll; wer zustimmt, verliert sofort Einträge, Auswahl, Habit-Favoriten und eigene Habits (`delete_my_diary_data()`, 0033). Wer ablehnt, behält die Daten bis zur eigenen Löschung oder Kontolöschung. |
 
 > **Wie die Einwilligung technisch durchgesetzt wird.** Schreiben in
 > `habit_logs` erlaubt die Datenbank nur mit gültiger Einwilligung
@@ -466,18 +466,16 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
 
 ## 7. Offene Punkte (Stand 31.10.2026)
 
-1. **Löschung nach Widerruf der Einwilligung `health_data`.** Heute gilt: Nach
-   dem Widerruf sind keine neuen Einträge und keine neuen eigenen Gewohnheiten
-   mehr möglich; Gespeichertes bleibt, die Person kann es ansehen, exportieren
-   und selbst löschen. So steht es auch in der Datenschutzerklärung. Art. 17
-   Abs. 1 lit. b DSGVO gibt der Person aber ein Recht auf Löschung, wenn die
-   Einwilligung widerrufen wird und keine andere Rechtsgrundlage besteht — und
-   eine andere Rechtsgrundlage für die Einträge gibt es nicht. **Zu
-   entscheiden:** Bleibt es beim Aufbewahren bis zur Löschung durch die Person
-   (dann sollte die App beim Widerruf ausdrücklich anbieten, alles zu löschen),
-   oder löschen wir beim Widerruf automatisch? Beides braucht eine Änderung an
-   App oder Datenbank und gegebenenfalls am Text der Datenschutzerklärung.
-   Offen seit 25.10.2026.
+1. ~~**Löschung nach Widerruf der Einwilligung `health_data`.**~~ **Entschieden
+   am 31.10.2026:** Beim Widerruf bietet die App an, alles aus dem Tagebuch
+   sofort zu löschen (Art. 17 Abs. 1 lit. b). Umgesetzt mit Migration 0033
+   (`delete_my_diary_data()`, löscht nur Zeilen von `auth.uid()`) und dem
+   Widerrufsdialog auf der Kontoseite. Erst wird widerrufen, dann gelöscht;
+   scheitert das Löschen, bleibt ein Knopf für den neuen Versuch. Das
+   Übungsprotokoll (V11) und der Nachweis des Widerrufs (V6) bleiben. **Noch
+   offen:** In der Datenschutzerklärung (Abschnitt „Tagebuch“) gehört mit der
+   nächsten Fassung ergänzt, dass beim Widerruf das sofortige Löschen angeboten
+   wird (zusammen mit Punkt 3).
 2. **24-Stunden-Frist bei Gastbuchungs-Kennungen (V12).** Die Datenschutz-
    erklärung sagt: „Die Kennung wird nach 24 Stunden gelöscht.“ Tatsächlich
    räumt `take_guest_booking_slot()` alte Kennungen nur **beim nächsten

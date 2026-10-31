@@ -1,9 +1,11 @@
 import { Link } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
+import { HealthDataRevoke } from '@/features/consents/HealthDataRevoke';
 import { useConsents, useSetConsent, type ConsentState } from '@/features/consents/useConsents';
 import { formatDate } from '@/features/plus/plus';
 import { PressableRing } from '@/components/PressableRing';
@@ -46,8 +48,13 @@ export function ConsentPanel() {
 function ConsentRow({ state }: { state: ConsentState }) {
   const { t } = useTranslation();
   const setConsent = useSetConsent();
+  // Beim Tagebuch fragt der Widerruf nach, ob auch alles geloescht werden
+  // soll (HealthDataRevoke). Der Zustand lebt hier, weil die Zeile nach dem
+  // Widerruf neu rendert und die Rueckmeldung sonst verloren ginge.
+  const [revokeOpen, setRevokeOpen] = useState(false);
 
   const { definition, latest, granted } = state;
+  const isHealthData = definition.kind === 'health_data';
   const wannGeaendert = latest?.granted_at ?? latest?.revoked_at ?? null;
 
   return (
@@ -70,7 +77,7 @@ function ConsentRow({ state }: { state: ConsentState }) {
       </View>
 
       {/* Zustimmen darf man immer; widerrufen nur, was keine Pflicht ist. */}
-      {!granted ? (
+      {revokeOpen ? null : !granted ? (
         <PressableRing
           onPress={() => setConsent.mutate({ definition, granted: true })}
           disabled={setConsent.isPending}
@@ -84,7 +91,9 @@ function ConsentRow({ state }: { state: ConsentState }) {
         </Link>
       ) : (
         <PressableRing
-          onPress={() => setConsent.mutate({ definition, granted: false })}
+          onPress={() =>
+            isHealthData ? setRevokeOpen(true) : setConsent.mutate({ definition, granted: false })
+          }
           disabled={setConsent.isPending}
           style={styles.action}
         >
@@ -92,7 +101,11 @@ function ConsentRow({ state }: { state: ConsentState }) {
         </PressableRing>
       )}
 
-      {setConsent.isError ? (
+      {revokeOpen ? (
+        <HealthDataRevoke definition={definition} onClose={() => setRevokeOpen(false)} />
+      ) : null}
+
+      {setConsent.isError && !revokeOpen ? (
         <Text role="alert" style={styles.error}>
           {t('errors:konto.consent')}
         </Text>
