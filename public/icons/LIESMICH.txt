@@ -18,3 +18,7 @@ Wer die Icons aendert, prueft danach beides:
     Bildschirmabzug ab.
 
 Die Verweise darauf stehen in src/app/+html.tsx.
+
+Unterordner mondlicht/ (seit 01.11.2026): dieselben Bilder im Stil der
+Darstellung "Mondlicht" plus public/manifest-mondlicht.json. Verwiesen wird
+darauf nur im Testsystem (DESIGN_PREVIEW, SAD §6.1a).

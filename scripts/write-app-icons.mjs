@@ -4,6 +4,10 @@
 //
 //   node scripts/write-app-icons.mjs
 //
+// Seit 01.11.2026 zusaetzlich die Darstellung "Mondlicht" (nur Testsystem,
+// SAD §6.1a): eigene Bilder unter public/icons/mondlicht/ und ein eigenes
+// public/manifest-mondlicht.json. Die bisherigen Dateien bleiben unveraendert.
+//
 // Kein Teil des Builds - die Dateien aendern sich nur, wenn sich das Motiv
 // oder die Marke aendert, und dann soll man das Ergebnis im Diff sehen.
 //
@@ -264,3 +268,114 @@ const manifest = {
 
 writeFileSync(join(root, 'public', 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 console.log('manifest.json');
+
+// =====================================================================
+// Mondlicht (01.11.2026, nur Testsystem)
+// =====================================================================
+// Goldene Mondsichel auf Nachtblau, darum ein feiner Atemring mit der Marke
+// auf 6 Uhr wie im Icon oben, in der Oeffnung der Sichel zwei Sterne. Die
+// Sichel ist dieselbe Form wie das Zeichen links oben in der App
+// (src/components/MoonMark.tsx): ein Kreis, aus dem oben rechts ein zweiter
+// herausgeschnitten ist.
+//
+// Die Farben stehen in tokens.ts im Objekt `mondlicht`; gelesen wird deshalb
+// nur ab dort, sonst faende die Suche die gleichnamigen Werte von "Klar".
+function mondlichtFarben() {
+  const quelle = readFileSync(join(root, 'src', 'design', 'tokens.ts'), 'utf8');
+  const start = quelle.indexOf('const mondlicht');
+  if (start < 0) throw new Error('tokens.ts kennt keine Palette mondlicht - Icons nicht erzeugt');
+  const block = quelle.slice(start, quelle.indexOf('};', start));
+  const lies = (name) => {
+    const treffer = block.match(new RegExp(`\\b${name}:\\s*'(#[0-9A-Fa-f]{6})'`));
+    if (!treffer) throw new Error(`mondlicht kennt kein ${name} - Icons nicht erzeugt`);
+    return hex(treffer[1]);
+  };
+  return {
+    background: lies('background'),
+    surface: lies('surface'),
+    glow: lies('glow'),
+    blossom: lies('blossom'),
+    ink900: lies('ink900'),
+  };
+}
+
+function zeichneMondlicht(size, { mass }, f) {
+  const px = new Uint8Array(size * size * 4);
+  const m = size / 2;
+  const u = size * mass; // eine "Einheit": der Radius des Atemrings
+  const strich = Math.max(1, size * 0.022);
+
+  // Sichel: Kreis A minus Kreis B (B verschoben nach oben rechts)
+  const rA = u * 0.62;
+  const bx = u * 0.3;
+  const by = -u * 0.26;
+  const rB = u * 0.52;
+  const sterne = [
+    { x: u * 0.5, y: -u * 0.52, r: Math.max(0.7, u * 0.06), farbe: f.ink900 },
+    { x: u * 0.72, y: -u * 0.2, r: Math.max(0.6, u * 0.04), farbe: f.blossom },
+  ];
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dx = x + 0.5 - m;
+      const dy = y + 0.5 - m;
+      const d = Math.hypot(dx, dy);
+
+      // 1. Nachtblau, nach unten leicht dunkler - vollflaechig wie oben.
+      let farbe = mische(f.background, mische(f.background, [0, 0, 0], 0.28), (y / size) * 0.9);
+
+      // 2. Ein schwacher Schein um den Mond.
+      const schein = Math.max(0, 1 - d / (u * 1.05)) * 0.16;
+      farbe = mische(farbe, f.glow, schein);
+
+      // 3. Der Atemring, zart.
+      farbe = mische(farbe, f.glow, 0.55 * deckung(Math.abs(d - u) - strich / 2));
+
+      // 4. Die Marke auf 6 Uhr.
+      const dp = Math.hypot(dx, dy - u);
+      farbe = mische(farbe, f.glow, deckung(dp - Math.max(1, strich * 1.7)));
+
+      // 5. Die Sichel.
+      const inA = deckung(d - rA);
+      const inB = deckung(Math.hypot(dx - bx, dy - by) - rB);
+      farbe = mische(farbe, f.glow, inA * (1 - inB));
+
+      // 6. Sterne in der Oeffnung.
+      for (const s of sterne) farbe = mische(farbe, s.farbe, deckung(Math.hypot(dx - s.x, dy - s.y) - s.r));
+
+      const i = (y * size + x) * 4;
+      px[i] = farbe[0];
+      px[i + 1] = farbe[1];
+      px[i + 2] = farbe[2];
+      px[i + 3] = 255;
+    }
+  }
+  return px;
+}
+
+{
+  const f = mondlichtFarben();
+  const dir = join(outDir, 'mondlicht');
+  mkdirSync(dir, { recursive: true });
+  const mondDateien = [
+    { name: 'apple-touch-icon.png', size: 180, mass: 0.36 },
+    { name: 'icon-192.png', size: 192, mass: 0.36 },
+    { name: 'icon-512.png', size: 512, mass: 0.36 },
+    // Enger gefasst fuer Android (nur die mittleren 80 % sind sicher).
+    { name: 'icon-maskable-512.png', size: 512, mass: 0.29 },
+    { name: 'favicon-32.png', size: 32, mass: 0.36 },
+    { name: 'favicon-192.png', size: 192, mass: 0.38 },
+  ];
+  for (const { name: datei, size, mass } of mondDateien) {
+    writeFileSync(join(dir, datei), png(size, zeichneMondlicht(size, { mass }, f)));
+    console.log(`icons/mondlicht/${datei} (${size}x${size})`);
+  }
+  const mondManifest = {
+    ...manifest,
+    background_color: rgb(f.background),
+    theme_color: rgb(f.background),
+    icons: manifest.icons.map((icon) => ({ ...icon, src: icon.src.replace('/icons/', '/icons/mondlicht/') })),
+  };
+  writeFileSync(join(root, 'public', 'manifest-mondlicht.json'), `${JSON.stringify(mondManifest, null, 2)}\n`);
+  console.log('manifest-mondlicht.json');
+}
