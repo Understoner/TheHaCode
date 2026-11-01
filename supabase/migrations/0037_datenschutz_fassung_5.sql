@@ -1,4 +1,8 @@
--- 0034: Datenschutzerklaerung Fassung 5 vom 31.10.2026.
+-- 0037: Datenschutzerklaerung Fassung 5 vom 31.10.2026.
+--
+-- Urspruenglich als 0034 geschrieben; vor dem Mergen umbenannt, weil 0035
+-- und 0036 schon auf Staging liefen - supabase db push nimmt keine
+-- Migration, die aelter ist als die zuletzt eingespielte.
 --
 -- Drei Aenderungen im Text (src/i18n/locales/de/legal.json):
 --   * Tagebuch: beim Widerruf wird angeboten, alles sofort zu loeschen (0033).

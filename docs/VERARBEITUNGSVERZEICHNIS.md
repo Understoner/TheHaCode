@@ -85,7 +85,7 @@ Abschnitt 7 entschieden sind.
 > ab, und Fremde konnten sich nicht per E-Mail registrieren. Hostinger sieht
 > dabei Empfängeradresse und Inhalt der Mail (Bestätigungslink). Der Vertrag
 > nach Art. 28 besteht bereits (Abschnitt 4). Die Datenschutzerklärung nennt
-> Hostinger als Versender seit Fassung 5 vom 31.10.2026 (0034).
+> Hostinger als Versender seit Fassung 5 vom 31.10.2026 (0037).
 
 ### V3 · Eigene Atemsequenzen
 
@@ -472,9 +472,9 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
    Widerrufsdialog auf der Kontoseite. Erst wird widerrufen, dann gelöscht;
    scheitert das Löschen, bleibt ein Knopf für den neuen Versuch. Das
    Übungsprotokoll (V11) und der Nachweis des Widerrufs (V6) bleiben. Die
-   Datenschutzerklärung sagt das seit Fassung 5 (0034).
+   Datenschutzerklärung sagt das seit Fassung 5 (0037).
 2. ~~**24-Stunden-Frist bei Gastbuchungs-Kennungen (V12).**~~ **Entschieden am
-   31.10.2026: Satz angepasst** (Fassung 5, 0034). Die Erklärung sagt jetzt, dass
+   31.10.2026: Satz angepasst** (Fassung 5, 0037). Die Erklärung sagt jetzt, dass
    ältere Kennungen beim nächsten Buchungsversuch ohne Konto gelöscht werden.
    Bisheriger Befund: Die Datenschutz-
    erklärung sagt: „Die Kennung wird nach 24 Stunden gelöscht.“ Tatsächlich
@@ -486,7 +486,7 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
    die Aussage ist aber nicht genau. **Zu entscheiden:** Aufräumen zusätzlich
    an einer regelmäßig aufgerufenen Stelle einbauen oder den Satz in der
    Datenschutzerklärung anpassen.3. ~~**Datenschutzerklärung: Versand der Kontomails.**~~ **Erledigt mit Fassung 5
-   (0034).** Offen bleibt nur der DKIM-Eintrag. Bisheriger Befund: Abschnitt „Empfänger und
+   (0037).** Offen bleibt nur der DKIM-Eintrag. Bisheriger Befund: Abschnitt „Empfänger und
    Auftragsverarbeiter“ nennt Supabase für den „Versand der Kontomails“. Seit
    31.10.2026 verschickt sie Hostinger (V2). Mit der nächsten Fassung
    (`privacy` Version 5 per Migration, neues Datum in `legal.json`) anpassen,

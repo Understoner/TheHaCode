@@ -1,6 +1,6 @@
--- supabase/tests/034_datenschutz_fassung_5.test.sql
+-- supabase/tests/037_datenschutz_fassung_5.test.sql
 --
--- Migration 0034: Datenschutzerklaerung Fassung 5. Missbrauchsfall wie in
+-- Migration 0037: Datenschutzerklaerung Fassung 5. Missbrauchsfall wie in
 -- 027: die neue Fassung nachtraeglich umschreiben - der Nachweis, WOZU
 -- jemand zugestimmt hat, waere weg.
 begin;
