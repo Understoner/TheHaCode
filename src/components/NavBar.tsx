@@ -2,7 +2,8 @@ import { Link, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/design/tokens';
+import { MoonMark } from '@/components/MoonMark';
+import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { MOBILE_TAB_BAR_SAFE_HEIGHT, navItems, type NavIcon } from '@/design/navigation';
 import { responsive } from '@/design/responsive';
 
@@ -86,8 +87,19 @@ export function NavBar() {
           Handy waere sie damit ein leerer Streifen mit Trennlinie. Deshalb
           faellt jetzt die ganze Leiste weg statt nur ihr Inhalt: Desktop
           navigiert oben, das Handy unten. */}
-      <View {...responsive('nav-desktop')} style={styles.topBar}>
-        <View style={styles.pillRow}>
+      {/* Im Testsystem (01.11.2026) gibt es die Kopfzeile auch auf dem Handy:
+          links der Mond, der immer zur Startseite fuehrt. Die Pillen bleiben
+          dem Desktop vorbehalten, unten bleibt die Tab-Leiste. */}
+      <View {...(DESIGN_PREVIEW ? {} : responsive('nav-desktop'))} style={styles.topBar}>
+        {DESIGN_PREVIEW ? (
+          <Link href="/" aria-label={t('start.homeLink')} style={styles.homeLink}>
+            <View style={styles.homeMark}>
+              <MoonMark />
+              <Text style={styles.wordmark}>{t('home.title')}</Text>
+            </View>
+          </Link>
+        ) : null}
+        <View {...(DESIGN_PREVIEW ? responsive('nav-desktop') : {})} style={styles.pillRow}>
           {navItems.map((item) => {
             if (item.kind === 'comingSoon') {
               return (
@@ -160,11 +172,28 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.line,
     backgroundColor: colors.surface,
+  },
+  homeLink: {
+    minHeight: 44,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  homeMark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  wordmark: {
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 1.5,
+    color: colors.ink900,
   },
   pillRow: {
     flexDirection: 'row',

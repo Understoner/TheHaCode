@@ -1733,6 +1733,19 @@ export const tokens = {
 * **Buttons ohne Fläche, wo möglich:** primär gefüllt in `ocean500`, sekundär nur mit Linie, tertiär reiner Text.
 * **Icons:** ausschließlich Strichicons mit 1,5 px Strichstärke (`lucide-react-native`), niemals gefüllt.
 
+### 6.1a Darstellung „Mondlicht" und Startseite (nur Testsystem, seit 01.11.2026)
+
+Ein Versuch, ob eine verspielte, spirituelle Darstellung trägt. Er läuft **nur im Testsystem** und ist mit einem Revert des PR „Design Mondlicht" vollständig zurückzunehmen — keine Migration, keine neue Bibliothek.
+
+- **Schalter:** `DESIGN_PREVIEW` in `src/design/tokens.ts` (`EXPO_PUBLIC_APP_ENV === 'staging'`, zur Bauzeit eingesetzt). Im Livesystem sind `colors` und `radius` die bisherigen festen Werte; der Live-Build ist im Markup unverändert.
+- **Zwei Paletten, gleiche Namen:** „Klar" (bisher) und „Mondlicht" (Nachtblau, Mondgold, Lotusrosa). Im Testsystem sind `colors`/`radius` CSS-Variablen; `+html.tsx` setzt die Werte je `<html data-theme>`. Umschalten ändert nur das Attribut — kein Neuladen, kein Hydration-Konflikt mit dem statischen HTML. Text bleibt über 4,5:1.
+- **Wahl im Gerät** (`localStorage`, Schlüssel `thehacode.theme`), unter `/einstellungen`. Begründung in `src/design/theme.ts`: Darstellung ist keine fachliche Angabe, und eine Profilspalte bräuchte eine Migration, die sich nicht revertieren lässt. `public/theme-init.js` setzt die Wahl vor dem ersten Bild (eigene Datei wegen der CSP).
+- **Schriften** Fraunces und Nunito, selbst gehostet unter `public/fonts` (SIL OFL), nur in Mondlicht — keine Anfrage an Google.
+- **Startseite** `/` mit Impuls des Tages, „Deine 3 Rituale" (Favoriten zuerst) und „Deine Woche" (Tage als Mondphasen), in beiden Darstellungen. Die News ziehen nach `/news`; der Mond links oben führt immer zur Startseite. Live bleibt `/` die News-Seite.
+- **Lotusblüte** im Atemkreis, nur Mondlicht (`src/features/breathing/Lotus.tsx`). Sie hängt am Skalierungswert des Rings und rechnet nichts selbst; Takt, Ring und Marke sind unverändert.
+
+Rückbau: PR revertieren. Danach bleibt allenfalls `thehacode.theme` im Browser liegen; ohne `theme-init.js` liest ihn niemand mehr.
+
 ### 6.2 Verbindliche Zustände jeder Datenkomponente
 
 Jede Komponente, die serverseitige Daten anzeigt, behandelt vier Zustände. Keine Ausnahme, kein „machen wir später":

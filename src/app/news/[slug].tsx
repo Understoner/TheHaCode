@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CoverImage } from '@/components/CoverImage';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { StateMessage } from '@/components/StateMessage';
-import { colors, radius, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { Markdown } from '@/features/news/Markdown';
 import { newsCategoryColors } from '@/features/news/categories';
 import { estimateReadingMinutes } from '@/features/news/readingTime';
@@ -41,7 +41,7 @@ function NotFound() {
   return (
     <View style={styles.notFound}>
       <StateMessage title={t('news.detail.notFound.title')} body={t('news.detail.notFound.hint')} />
-      <Link href="/" style={styles.back}>
+      <Link href={DESIGN_PREVIEW ? '/news' : '/'} style={styles.back}>
         {t('news.detail.back')}
       </Link>
     </View>
@@ -54,7 +54,7 @@ function Article({ post }: { post: NewsPost }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Link href="/" style={styles.back}>
+      <Link href={DESIGN_PREVIEW ? '/news' : '/'} style={styles.back}>
         {t('news.detail.back')}
       </Link>
 
@@ -86,7 +86,7 @@ function Article({ post }: { post: NewsPost }) {
 
       <View style={styles.rule} />
 
-      <Link href="/" style={styles.back}>
+      <Link href={DESIGN_PREVIEW ? '/news' : '/'} style={styles.back}>
         {t('news.detail.back')}
       </Link>
     </ScrollView>

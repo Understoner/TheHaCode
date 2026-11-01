@@ -1,8 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import de from '@/i18n/locales/de/common.json';
 
 import { INNER_DIAMETER_MIN, LABEL_MAX_HEIGHT, LABEL_MAX_WIDTH } from './BreathCircle';
+
+// react-native-svg (Lotus, nur Mondlicht) bringt unkompilierte Quellen mit,
+// die esbuild nicht parsen kann; hier geht es nur um die Masse.
+vi.mock('@/features/breathing/Lotus', () => ({ Lotus: () => null }));
 
 // Die Beschriftung im Kreis wird nicht mitskaliert. Ob sie am Ende in den Ring
 // passt, entscheidet sich an zwei Stellen, die weit auseinanderliegen: an der

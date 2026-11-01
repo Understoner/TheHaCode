@@ -2,7 +2,7 @@ import { ScrollViewStyleReset } from 'expo-router/html';
 import type { PropsWithChildren } from 'react';
 
 import { responsiveCss } from '@/design/responsive';
-import { colors } from '@/design/tokens';
+import { DESIGN_PREVIEW, palettes, themeCss } from '@/design/tokens';
 import { contentSecurityPolicy } from '@/lib/contentSecurityPolicy';
 
 // Die HTML-Huelle des statischen Exports, ausschliesslich zur Bauzeit
@@ -70,7 +70,19 @@ export default function Root({ children }: PropsWithChildren) {
         {/* Faerbt die Systemleiste in Android. Dieselbe Farbe wie im Manifest
             und wie die Seite selbst, damit es beim Starten keinen Farbsprung
             gibt - deshalb aus den Tokens und nicht als Literal. */}
-        <meta name="theme-color" content={colors.background} />
+        {/* Hex statt colors.background: im Testsystem ist das eine
+            CSS-Variable, und die versteht das Meta-Tag nicht. */}
+        <meta name="theme-color" content={palettes.klar.background} />
+
+        {/* Darstellungen Klar/Mondlicht, nur im Testsystem (src/design/tokens.ts).
+            Das Skript steht nach dem theme-color-Tag, weil es dieses umfaerbt,
+            und vor dem Inhalt, damit nichts hell aufblitzt. */}
+        {DESIGN_PREVIEW ? (
+          <>
+            <style id="thehacode-theme" dangerouslySetInnerHTML={{ __html: themeCss() }} />
+            <script src="/theme-init.js" />
+          </>
+        ) : null}
 
         {/* Die Breakpoints der Seite. Sie stehen als CSS und nicht als
             JavaScript im Dokument, damit der statische Export auf jeder
