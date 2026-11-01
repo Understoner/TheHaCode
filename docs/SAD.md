@@ -1267,10 +1267,19 @@ für Plus — Vorschau-Nutzer sehen so, dass ihr Tageslimit nicht voll wird.
   bleiben ein Betrag (`points >= 0`). `habit_categories.is_negative` gibt es
   weiter für Altbestand: dort zieht jedes Habit ab, und die Kategorie zählt
   nicht zu P.
-* **Punkte gibt es fürs Erledigen, nicht für den Wert.** Ein Eintrag an einem
-  Tag bringt die Punkte der Vorlage (`habit_templates.points`), egal welcher
-  BOLT-Wert herauskommt (§5.7). Mehr als ein Eintrag je Habit und Tag ist
-  durch den Unique-Index ausgeschlossen.
+* **Punkte gibt es fürs Erledigen – außer ein Zahlen-Habit hat Wertgrenzen**
+  (Entscheidung 01.11.2026, Migration 0035, „Lebensstil ja, BOLT nie“). Ohne
+  Grenzen bringt ein Eintrag die Punkte der Vorlage (`habit_templates.points`),
+  egal welcher Wert herauskommt. Mit Grenzen hängt das Ergebnis vom Wert ab,
+  Beispiel Schlafdauer: ab 7 Stunden `+points` (`points_from`), unter 6
+  Stunden `−penalty_points` (`penalty_from`), dazwischen 0; bei
+  `higher_is_better = false` drehen sich die Vergleiche um. Beide Grenzen sind
+  freiwillig. Erlaubt nur an Zahlen-Habits ohne eigenes Vorzeichen und **nie**
+  an Gesundheits-Messwerten (`is_health_measure`: BOLT-Wert, Schlafwert der
+  Uhr) – dort sperrt die Datenbank sie (§5.7). Eigene Habits dürfen Grenzen
+  setzen, Minuspunkte 0 bis 10. Gerechnet in
+  `src/features/habits/valuePoints.ts`. Mehr als ein Eintrag je Habit und Tag
+  ist durch den Unique-Index ausgeschlossen.
 * **Der Score wird nicht gespeichert**, sondern aus `habit_logs` gerechnet
   (`src/features/habits/score.ts`, Vitest-Pflicht wie die Streaks).
 
@@ -1351,6 +1360,45 @@ stehen in ihrer Kategorie oben.
   ist nach dem Anlegen fest.
 * `habit_favorites`: ein Stern je Person und Vorlage; auch gesperrte
   Plus-Habits lassen sich merken.
+
+#### Challenges (Migration 0036, Entscheidungen vom 01.11.2026)
+
+Eine Challenge bündelt mehrere Habits (vorgeschlagene oder eigene) für einen
+Zeitraum und plant sie auf Tage. Seiten: `/habit-tracker/challenges`
+(Übersicht und Vorlagen, Fahne neben der Tagebuch-Überschrift),
+`/habit-tracker/challenge?id=` (Fortschritt, Kalender, Abhaken) und
+`/habit-tracker/challenge-planen` (Editor, auch `?vorlage=` und `?id=`).
+
+* **Anlegen:** Vorlagen der Redaktion (`challenge_templates`,
+  `challenge_template_items`, gepflegt in Studio, Beispiel in
+  `docs/inhalte/challenges.sql`) und eigene Challenges.
+* **Zugang:** Plus; einzelne Vorlagen als Vorschau (`is_preview`) auch ohne.
+  Dann müssen alle ihre Habits Vorschau-Habits sein. Lesen, Auswerten,
+  Abbrechen und Löschen gehen immer, auch nach Abo-Ende (§3.4).
+  `can_start_challenge()` und `can_plan_challenge()` sind die einzigen
+  Prüfstellen; sie fragen `has_plus_access()`.
+* **Abhaken ist derselbe Eintrag wie im Tagebuch** (`habit_logs`). Die
+  Challenge legt nur einen Plan darüber und hat keine eigenen Haken. Beim
+  Speichern wählt `save_challenge_plan()` die Habits ins Tagebuch.
+* **Planung je Habit kombinierbar:** jeden Tag, feste Wochentage, bestimmte
+  Daten, mehrtägige Blöcke („3 Tage Fasten“, einmal am letzten Tag abgehakt).
+  Die Regel steht im Item (`challenge_items.plan`, nur für den Editor), die
+  Termine in `challenge_slots` (`starts_on`..`due_on`) – sie sind die Wahrheit
+  für Kalender und Auswertung. Gerechnet in `src/features/challenges/plan.ts`.
+* **Plan ändern: nur künftige Tage.** Termine, die vor heute begonnen haben,
+  lassen sich weder löschen noch nachträglich anlegen, und ein Habit mit
+  solchen Terminen bleibt in der Challenge (Trigger, Rolle `authenticated`).
+  Abbrechen räumt die künftigen Termine ab; eine ganze Challenge zu löschen
+  geht immer.
+* **Auswertung: Planerfüllung, ohne Score.** Erfüllt ist ein Termin mit einem
+  Eintrag am Tag (Block: irgendwo im Block). Ein Zahlen-Habit mit Wertgrenzen
+  zählt erst ab der Plus-Grenze. Fortschritt = erfüllt / geplant, je Habit und
+  gesamt. Der Habit Score bleibt unberührt.
+* **Gesundheitsdaten:** schreiben nur mit Einwilligung `health_data`;
+  `delete_my_diary_data()` löscht Challenges mit, die Auskunft
+  (`EXPORT_TABLES`) enthält sie.
+* **Nicht gebaut:** Erinnerungen an geplante Termine (§11.6), Teilen oder
+  Ranglisten.
 
 ---
 
@@ -1611,6 +1659,11 @@ Die App darf keine Diagnose stellen, keine Therapie empfehlen und keine Krankhei
 
 * Der BOLT-Wert wird als **Trainingsmetrik** dargestellt, nie als medizinischer Messwert; keine Normbereiche mit Gesundheitsbewertung („dein Wert ist zu niedrig" → stattdessen „dein Wert über die letzten 30 Tage")
 * Keine automatisierten Warnungen oder Handlungsempfehlungen auf Basis von Nutzerwerten
+* Wertgrenzen im Habit Score (0035, Entscheidung 01.11.2026) nur für
+  Lebensstil-Werte (Schlafdauer, Schritte, Bildschirmzeit) und eigene Habits,
+  deren Grenzen sich die Person selbst setzt. **Nie** für Messwerte mit
+  Gesundheitsbezug (`is_health_measure`: BOLT-Wert, Schlafwert der Uhr). Die
+  App nennt dabei nur Punkte, keine Bewertung wie „zu wenig“.
 * `contraindications_md` ist Pflichtfeld für alle Retention- und High-Frequency-Übungen (Schwangerschaft, Epilepsie, Herz-Kreislauf-Erkrankungen, Nutzung im Wasser)
 * Einmaliger Disclaimer im Onboarding mit Zeitstempel, gespeichert als `consent_kind = 'terms'`
 
@@ -2390,7 +2443,7 @@ Der zweite Gegenpunkt — Firebase hat reifere native SDKs und Push-Infrastruktu
 | Nutzer bauen unsinnige Sequenzen (60 s Ausatmen) | Mittel | Grenzen als CHECK-Constraints in der Datenbank, nicht nur im Slider |
 | Animations-Performance auf Mittelklasse-Android | Mittel | Nur `transform`/`opacity` animieren (§7.6); früh auf echtem Gerät testen |
 | Gesundheitliche Kontraindikationen | Mittel (Haftung) | `contraindications_md` Pflichtfeld, Disclaimer als versionierte Einwilligung (§3.10) |
-| MDR-Abgrenzung (kein Medizinprodukt) | Mittel | Content-Regeln in §5.7, keine Bewertung von Nutzerwerten |
+| MDR-Abgrenzung (kein Medizinprodukt) | Mittel | Content-Regeln in §5.7; Wertgrenzen nur für Lebensstil-Werte, nie für Gesundheits-Messwerte (0035) |
 | USt./OSS bei EU-Kunden | Mittel | Käuferland ab Tag 1 mitschreiben (§4.5), Steuerberatung |
 | Trial-Mehrfachnutzung über neue Konten | Niedrig | Bewusst akzeptiert (§3.3) |
 | Timer-Genauigkeit der Engine | Niedrig — gelöst | Ankeruhr (§7.1), abgesichert durch Unit-Tests (§8.1) |

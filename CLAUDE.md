@@ -27,6 +27,9 @@ Habit Score Tracker und Session-Protokoll.
 Gesundheitsdaten nach Art. 9: Schreiben in `habit_logs` nur mit Einwilligung
 `health_data` und über `can_use_habit_template()` (Vorschau oder Plus). Eigene
 Habits anlegen: Plus und Einwilligung (Migration 0025).
+Seit 01.11.2026 dazu: Wertgrenzen für Zahlen-Habits (0035, nie für BOLT) und
+Challenges (0036, Plus oder Vorschau-Vorlage; Abhaken = `habit_logs`; vergangene
+Termine sind fest). Details SAD §3.14.
 
 **Nicht in V1/V1.1:** geführte Aufnahmen, Hintergrundmusik, Sprachansagen,
 Testzeitraum, Lifetime-Tarif, native Apps, Offline-Betrieb, Erinnerungen,

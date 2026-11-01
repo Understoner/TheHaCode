@@ -150,11 +150,18 @@ function OwnHabitForm({
       maxValue: existing?.max_value?.toString() ?? '',
       points: existing?.points ?? 5,
       isNegative: existing?.is_negative ?? false,
+      higherIsBetter: existing?.higher_is_better ?? true,
+      pointsFrom: existing?.points_from?.toString() ?? '',
+      penaltyFrom: existing?.penalty_from?.toString() ?? '',
+      penaltyPoints: existing?.penalty_points ?? 5,
       link: existing?.link_url ?? '',
     },
     mode: 'onTouched',
   });
   const trackingType = useWatch({ control, name: 'trackingType' });
+  const isNegative = useWatch({ control, name: 'isNegative' });
+  const higherIsBetter = useWatch({ control, name: 'higherIsBetter' });
+  const penaltyFrom = useWatch({ control, name: 'penaltyFrom' });
 
   const onSubmit = (values: OwnHabitValues) => {
     save.mutate(
@@ -364,6 +371,89 @@ function OwnHabitForm({
         )}
       />
 
+      {/* Punkte nach Wert (0035): nur fuer Messwerte, die Punkte bringen.
+          Beide Grenzen sind freiwillig. */}
+      {trackingType === 'number' && !isNegative ? (
+        <View style={styles.valueBox}>
+          <Text style={styles.label}>{t('habits.own.valueTitle')}</Text>
+          <Text style={styles.hint}>{t('habits.own.valueHint')}</Text>
+
+          <Controller
+            control={control}
+            name="higherIsBetter"
+            render={({ field }) => (
+              <View style={styles.chips} role="radiogroup" aria-label={t('habits.own.valueDirection')}>
+                {([true, false] as const).map((higher) => (
+                  <Choice
+                    key={String(higher)}
+                    label={t(higher ? 'habits.own.valueHigher' : 'habits.own.valueLower')}
+                    active={field.value === higher}
+                    onPress={() => field.onChange(higher)}
+                  />
+                ))}
+              </View>
+            )}
+          />
+
+          <View style={styles.range}>
+            <View style={styles.rangeField}>
+              <Controller
+                control={control}
+                name="pointsFrom"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    label={t(higherIsBetter ? 'habits.own.fieldPointsFrom' : 'habits.own.fieldPointsUpTo')}
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    inputMode="decimal"
+                    error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
+                  />
+                )}
+              />
+            </View>
+            <View style={styles.rangeField}>
+              <Controller
+                control={control}
+                name="penaltyFrom"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    label={t(higherIsBetter ? 'habits.own.fieldPenaltyBelow' : 'habits.own.fieldPenaltyAbove')}
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    inputMode="decimal"
+                    error={fieldState.error ? t(fieldState.error.message ?? '') : undefined}
+                  />
+                )}
+              />
+            </View>
+          </View>
+
+          {penaltyFrom.trim() !== '' ? (
+            <Controller
+              control={control}
+              name="penaltyPoints"
+              render={({ field }) => (
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('habits.own.fieldPenaltyPoints')}</Text>
+                  <View style={styles.chips} role="radiogroup" aria-label={t('habits.own.fieldPenaltyPoints')}>
+                    {Array.from({ length: 11 }, (_, points) => (
+                      <Choice
+                        key={points}
+                        label={String(points)}
+                        active={field.value === points}
+                        onPress={() => field.onChange(points)}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
+            />
+          ) : null}
+        </View>
+      ) : null}
+
       {save.error ? (
         <Text role="alert" style={styles.error}>
           {t(ownHabitErrorKey(save.error))}
@@ -498,6 +588,14 @@ const styles = StyleSheet.create({
   chipTextActive: {
     color: colors.surface,
     fontWeight: '600',
+  },
+  valueBox: {
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
   },
   range: {
     flexDirection: 'row',

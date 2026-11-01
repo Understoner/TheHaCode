@@ -383,6 +383,14 @@ export type OwnHabitInput = {
   points: number;
   /** Zieht die Punkte ab, statt sie zu bringen (0028). */
   isNegative: boolean;
+  /** Mehr ist besser (Schritte) oder weniger (Bildschirmzeit) - fuer die Wertgrenzen. */
+  higherIsBetter: boolean;
+  /** Punkte erst ab (bzw. bis) diesem Wert, null = fuer jeden Wert (0035). */
+  pointsFrom: number | null;
+  /** Abzug unter (bzw. ueber) diesem Wert, null = nie (0035). */
+  penaltyFrom: number | null;
+  /** 0 bis 10 Abzug, nur mit penaltyFrom (0035). */
+  penaltyPoints: number | null;
   /** App-Pfad oder http(s), zum Beispiel eine Session (0030). */
   link: string | null;
 };
@@ -411,6 +419,10 @@ export function useSaveOwnHabit() {
         step_value: input.trackingType === 'number' ? 1 : null,
         points: input.points,
         is_negative: input.isNegative,
+        higher_is_better: input.higherIsBetter,
+        points_from: input.trackingType === 'number' ? input.pointsFrom : null,
+        penalty_from: input.trackingType === 'number' ? input.penaltyFrom : null,
+        penalty_points: input.trackingType === 'number' ? input.penaltyPoints : null,
         link_url: input.link,
       };
 

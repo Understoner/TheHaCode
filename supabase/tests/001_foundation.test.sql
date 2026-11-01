@@ -123,6 +123,19 @@ values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-0000000
 insert into public.habit_favorites (user_id, template_id)
 values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000002');
 
+-- Challenges (0036) haengen per cascade an auth.users, ihre Habits und
+-- Termine ausserdem an der Challenge. Als postgres angelegt; ein begonnener
+-- Termin darf beim Loeschen des Kontos nicht stehen bleiben.
+insert into public.challenges (id, user_id, title, starts_on, ends_on)
+values ('11111111-aaaa-0000-0000-000000000005', '11111111-1111-1111-1111-111111111111',
+        'Kaskade', current_date - 2, current_date + 5);
+insert into public.challenge_items (id, user_id, challenge_id, user_habit_id)
+values ('11111111-aaaa-0000-0000-000000000006', '11111111-1111-1111-1111-111111111111',
+        '11111111-aaaa-0000-0000-000000000005', '11111111-aaaa-0000-0000-000000000003');
+insert into public.challenge_slots (user_id, challenge_id, item_id, starts_on, due_on)
+values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000005',
+        '11111111-aaaa-0000-0000-000000000006', current_date - 1, current_date - 1);
+
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
   select count(*) from (
@@ -147,6 +160,12 @@ select is((
     select owner_id from public.habit_templates where owner_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.habit_favorites where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.challenges where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.challenge_items where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.challenge_slots where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select is(

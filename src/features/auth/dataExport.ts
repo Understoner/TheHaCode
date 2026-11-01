@@ -29,6 +29,11 @@ export const EXPORT_TABLES = [
   // Eigene Habits und Habit-Favoriten (0024).
   'habit_templates',
   'habit_favorites',
+  // Challenges mit ihren Habits und Terminen (0036) - Gesundheitsdaten wie
+  // das Tagebuch.
+  'challenges',
+  'challenge_items',
+  'challenge_slots',
 ] as const;
 
 /**
