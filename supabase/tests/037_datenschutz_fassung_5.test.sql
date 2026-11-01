@@ -12,12 +12,12 @@ select is(
   '75729c2c8503994ae1968154fe168f2bee19c747204dc948d01fe7c33b31efe1',
   'Datenschutz Fassung 5 ist veroeffentlicht, im freigegebenen Wortlaut');
 
+-- Seit 0038 ist Fassung 6 die juengste; hier zaehlt nur noch, dass 5 steht.
 select is(
-  (select version from public.consent_definitions
-    where kind = 'privacy' and published_at is not null
-    order by version desc limit 1),
-  5,
-  'Fassung 5 ist die juengste - neue Konten stimmen ihr zu');
+  (select count(*)::int from public.consent_definitions
+    where kind = 'privacy' and version = 5 and published_at is not null),
+  1,
+  'Fassung 5 bleibt als Nachweis stehen');
 
 select is(
   (select count(*)::int from public.consent_definitions
