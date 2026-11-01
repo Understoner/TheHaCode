@@ -24,8 +24,13 @@ Nach Art. 30 Abs. 1 DSGVO. Gehört zu **T19**.
 > sowie Gastbuchungen und deren Aufbewahrung nach der Kontolöschung (V5).
 > Abschnitt 3 hat zwei Auslassungen verloren („keine Gesundheitsdaten“, „keine
 > Sitzungsprotokolle“). Zwei Punkte sind offen und stehen in Abschnitt 7.
+>
+> **Ergänzt am 1. November 2026:** Challenges (0036) und Wertgrenzen im
+> Tagebuch-Score (0035) in V10; Datenschutzerklärung Fassung 6 und
+> Einwilligung Tagebuch Version 4 (0038), die die Challenges ausdrücklich
+> nennt. Wer Version 3 zugestimmt hat, bleibt eingewilligt.
 
-**Stand:** 31. Oktober 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
+**Stand:** 1. November 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
 Personenbezug, beim Wechsel auf Supabase Pro und sobald die offenen Punkte in
 Abschnitt 7 entschieden sind.
 
@@ -161,8 +166,9 @@ Abschnitt 7 entschieden sind.
 > UPDATE und DELETE sind auf dieser Tabelle in der Datenbank verboten.
 > Seit 0022 ist auch der Wortlaut einer **veröffentlichten** Fassung in
 > `consent_definitions` per Trigger unveränderlich; eine Korrektur ist eine
-> neue Version. Für das Tagebuch gilt derzeit `health_data` Version 3
-> („Einwilligung Tagebuch“, 0027), die Datenschutzerklärung steht bei Version 4.
+> neue Version. Für das Tagebuch gilt derzeit `health_data` Version 4
+> („Einwilligung Tagebuch“, 0038, nennt seit 01.11.2026 auch die Challenges),
+> die Datenschutzerklärung steht bei Version 6 (0038).
 > Die Zustimmung im Bezahlvorgang (AGB und sofortiger Leistungsbeginn) liegt
 > zusätzlich bei Stripe am jeweiligen Vorgang.
 
