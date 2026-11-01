@@ -1,10 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { colors, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, spacing } from '@/design/tokens';
 import { NewsList } from '@/features/news/NewsList';
+import { StartScreen } from '@/features/start/StartScreen';
 
+// Im Testsystem (01.11.2026) ist "/" die neue Startseite mit Impuls, Ritualen
+// und Woche; die News stehen dort unter /news. Live bleibt es bei den News.
 export default function HomeScreen() {
+  return DESIGN_PREVIEW ? <StartScreen /> : <NewsHome />;
+}
+
+function NewsHome() {
   const { t } = useTranslation();
 
   return (

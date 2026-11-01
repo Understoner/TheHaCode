@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
+import { Lotus } from '@/features/breathing/Lotus';
+import { useThemeName } from '@/design/theme';
 import { colors, radius as radii } from '@/design/tokens';
 import type { TimelineSegment } from '@/features/breathing/timeline';
 
@@ -112,6 +114,7 @@ export function BreathCircle({ segment, round, running, label, sublabel }: Props
   const [scale] = useState(() => new Animated.Value(RADIUS_MIN));
   const [angle] = useState(() => new Animated.Value(0));
   const [reduceMotion, setReduceMotion] = useState(false);
+  const theme = useThemeName();
 
   useEffect(() => {
     let active = true;
@@ -209,6 +212,11 @@ export function BreathCircle({ segment, round, running, label, sublabel }: Props
     <View style={styles.box}>
       {/* Ruhige Bahn, auf der die Marke laeuft */}
       <View style={styles.track} />
+
+      {/* Mondlicht (01.11.2026, nur Testsystem): eine Lotusbluete, die mit
+          demselben Wert atmet wie der Ring. Reine Darstellung - Takt, Ring
+          und Marke bleiben unveraendert. */}
+      {theme === 'mondlicht' ? <Lotus scale={scale} size={SIZE} innerDiameter={INNER_DIAMETER_MIN} /> : null}
 
       <Animated.View
         testID="breath-ring"

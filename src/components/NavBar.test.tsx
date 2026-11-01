@@ -17,6 +17,10 @@ vi.mock('expo-router', () => ({
   usePathname: () => '/',
 }));
 
+// react-native-svg bringt wie expo-router unkompilierte Quellen mit; der Mond
+// in der Kopfzeile (nur Testsystem) ist fuer diesen Test belanglos.
+vi.mock('@/components/MoonMark', () => ({ MoonMark: () => null }));
+
 // Seit dem Umstieg auf CSS-Breakpoints stehen BEIDE Navigationsfassungen im
 // HTML; sichtbar ist je nach Fensterbreite genau eine, ausgeblendet per Media
 // Query (src/design/responsive.ts). jsdom wertet keine Media Queries aus, hier

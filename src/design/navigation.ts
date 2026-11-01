@@ -1,6 +1,8 @@
 import type { Href } from 'expo-router';
 import type { DimensionValue } from 'react-native';
 
+import { DESIGN_PREVIEW } from './tokens';
+
 // typedRoutes (app.json) lehnt ein Href auf eine nicht existierende Route
 // beim Typecheck ab - comingSoon-Eintraege bekommen deshalb bewusst kein
 // href und sind nicht anklickbar, statt auf eine erfundene Route zu zeigen.
@@ -46,7 +48,8 @@ export const MOBILE_TAB_BAR_SAFE_HEIGHT =
 export const RECENT_ITEMS_COUNT = 3;
 
 export const navItems: NavItem[] = [
-  { key: 'news', labelKey: 'nav.news', icon: 'news', kind: 'link', href: '/' },
+  // Im Testsystem ist "/" die neue Startseite, die News ziehen nach /news.
+  { key: 'news', labelKey: 'nav.news', icon: 'news', kind: 'link', href: DESIGN_PREVIEW ? '/news' : '/' },
   { key: 'kurse', labelKey: 'nav.kurse', icon: 'kurse', kind: 'link', href: '/kurse' },
   { key: 'sessions', labelKey: 'nav.sessions', icon: 'sessions', kind: 'link', href: '/sessions' },
   { key: 'tagebuch', labelKey: 'nav.tagebuch', icon: 'tagebuch', kind: 'link', href: '/habit-tracker' },
