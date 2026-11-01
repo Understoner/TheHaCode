@@ -12,6 +12,10 @@ const basis: OwnHabitValues = {
   maxValue: '30',
   points: 5,
   isNegative: false,
+  higherIsBetter: true,
+  pointsFrom: '',
+  penaltyFrom: '',
+  penaltyPoints: 5,
   link: '',
 };
 
@@ -81,5 +85,37 @@ describe('Link', () => {
     );
     expect(input.link).toBe('/sessions/abc');
     expect(toOwnHabitInput(basis, null).link).toBeNull();
+  });
+});
+
+describe('Punkte nach Wert (0035)', () => {
+  it('nimmt Grenzen auf der richtigen Seite an und gibt sie als Zahlen weiter', () => {
+    const values = { ...basis, pointsFrom: '7', penaltyFrom: '6', penaltyPoints: 8 };
+    expect(ownHabitSchema.safeParse(values).success).toBe(true);
+    expect(toOwnHabitInput(values)).toMatchObject({ pointsFrom: 7, penaltyFrom: 6, penaltyPoints: 8 });
+  });
+
+  it('lehnt eine Minus-Grenze ueber der Plus-Grenze ab, wenn mehr besser ist', () => {
+    const result = ownHabitSchema.safeParse({ ...basis, pointsFrom: '6', penaltyFrom: '7' });
+    expect(result.error?.issues[0]?.message).toBe('errors:habits.valueOrder');
+  });
+
+  it('dreht die Pruefung um, wenn weniger besser ist', () => {
+    expect(
+      ownHabitSchema.safeParse({ ...basis, higherIsBetter: false, pointsFrom: '2', penaltyFrom: '4' }).success,
+    ).toBe(true);
+    expect(
+      ownHabitSchema.safeParse({ ...basis, higherIsBetter: false, pointsFrom: '4', penaltyFrom: '2' }).success,
+    ).toBe(false);
+  });
+
+  it('laesst die Grenzen weg bei Abzugs-Habits und beim Abhaken', () => {
+    const values = { ...basis, pointsFrom: '7', penaltyFrom: '6' };
+    expect(toOwnHabitInput({ ...values, isNegative: true })).toMatchObject({ pointsFrom: null, penaltyFrom: null, penaltyPoints: null });
+    expect(toOwnHabitInput({ ...values, trackingType: 'done' })).toMatchObject({ pointsFrom: null, penaltyFrom: null });
+  });
+
+  it('ohne Minus-Grenze keine Minuspunkte', () => {
+    expect(toOwnHabitInput({ ...basis, pointsFrom: '7' }).penaltyPoints).toBeNull();
   });
 });

@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import {
   ChartGlyph,
   ChecklistGlyph,
+  FlagGlyph,
   GearGlyph,
   HEADER_ICON_GAP,
   HEADER_ICON_SIZE,
@@ -32,6 +33,9 @@ export function DiaryHeader() {
       <View {...responsive('header-icons')} style={styles.icons}>
         <HeaderIconLink href="/habit-tracker/auswahl" label={t('diary.header.picker')}>
           <ChecklistGlyph />
+        </HeaderIconLink>
+        <HeaderIconLink href="/habit-tracker/challenges" label={t('diary.header.challenges')}>
+          <FlagGlyph />
         </HeaderIconLink>
         <HeaderIconLink href="/habit-tracker/auswertung" label={t('diary.header.insights')}>
           <ChartGlyph />

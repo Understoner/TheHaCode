@@ -9,6 +9,251 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      challenge_items: {
+        Row: {
+          challenge_id: string
+          client_id: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          plan: Json
+          sort_order: number
+          updated_at: string
+          user_habit_id: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          plan?: Json
+          sort_order?: number
+          updated_at?: string
+          user_habit_id: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          plan?: Json
+          sort_order?: number
+          updated_at?: string
+          user_habit_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_items_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_items_user_habit_id_fkey"
+            columns: ["user_habit_id"]
+            isOneToOne: false
+            referencedRelation: "user_habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_slots: {
+        Row: {
+          challenge_id: string
+          client_id: string | null
+          created_at: string
+          deleted_at: string | null
+          due_on: string
+          id: string
+          item_id: string
+          starts_on: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          due_on: string
+          id?: string
+          item_id: string
+          starts_on: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          due_on?: string
+          id?: string
+          item_id?: string
+          starts_on?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_slots_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_slots_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_template_items: {
+        Row: {
+          created_at: string
+          habit_template_id: string
+          id: string
+          plan: Json
+          sort_order: number
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          habit_template_id: string
+          id?: string
+          plan?: Json
+          sort_order?: number
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          habit_template_id?: string
+          id?: string
+          plan?: Json
+          sort_order?: number
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_template_items_habit_template_id_fkey"
+            columns: ["habit_template_id"]
+            isOneToOne: false
+            referencedRelation: "habit_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_templates: {
+        Row: {
+          created_at: string
+          description_md: string | null
+          duration_days: number
+          id: string
+          is_preview: boolean
+          is_published: boolean
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_md?: string | null
+          duration_days: number
+          id?: string
+          is_preview?: boolean
+          is_published?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_md?: string | null
+          duration_days?: number
+          id?: string
+          is_preview?: boolean
+          is_published?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      challenges: {
+        Row: {
+          cancelled_at: string | null
+          client_id: string | null
+          created_at: string
+          deleted_at: string | null
+          description_md: string | null
+          ends_on: string
+          id: string
+          starts_on: string
+          template_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description_md?: string | null
+          ends_on: string
+          id?: string
+          starts_on: string
+          template_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description_md?: string | null
+          ends_on?: string
+          id?: string
+          starts_on?: string
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent_definitions: {
         Row: {
           body_md: string
@@ -700,6 +945,7 @@ export type Database = {
           higher_is_better: boolean
           icon: string | null
           id: string
+          is_health_measure: boolean
           is_negative: boolean
           is_preview: boolean
           is_published: boolean
@@ -707,7 +953,10 @@ export type Database = {
           max_value: number | null
           min_value: number | null
           owner_id: string | null
+          penalty_from: number | null
+          penalty_points: number | null
           points: number
+          points_from: number | null
           slug: string
           sort_order: number
           step_value: number | null
@@ -727,6 +976,7 @@ export type Database = {
           higher_is_better?: boolean
           icon?: string | null
           id?: string
+          is_health_measure?: boolean
           is_negative?: boolean
           is_preview?: boolean
           is_published?: boolean
@@ -734,7 +984,10 @@ export type Database = {
           max_value?: number | null
           min_value?: number | null
           owner_id?: string | null
+          penalty_from?: number | null
+          penalty_points?: number | null
           points?: number
+          points_from?: number | null
           slug?: string
           sort_order?: number
           step_value?: number | null
@@ -754,6 +1007,7 @@ export type Database = {
           higher_is_better?: boolean
           icon?: string | null
           id?: string
+          is_health_measure?: boolean
           is_negative?: boolean
           is_preview?: boolean
           is_published?: boolean
@@ -761,7 +1015,10 @@ export type Database = {
           max_value?: number | null
           min_value?: number | null
           owner_id?: string | null
+          penalty_from?: number | null
+          penalty_points?: number | null
           points?: number
+          points_from?: number | null
           slug?: string
           sort_order?: number
           step_value?: number | null
@@ -1165,6 +1422,8 @@ export type Database = {
       }
     }
     Functions: {
+      can_plan_challenge: { Args: { p_challenge_id: string }; Returns: boolean }
+      can_start_challenge: { Args: { p_template_id: string }; Returns: boolean }
       can_use_habit_template: {
         Args: { p_template_id: string }
         Returns: boolean
@@ -1304,6 +1563,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      save_challenge_plan: {
+        Args: { p_challenge: Json; p_items: Json }
+        Returns: string
       }
       save_exercise:
         | {
