@@ -20,6 +20,8 @@ import { contentSecurityPolicy } from '@/lib/contentSecurityPolicy';
 // als woertliches process.env.EXPO_PUBLIC_SUPABASE_URL: nur so setzt Expo den
 // Wert zur Bauzeit ein.
 
+const ICONS = DESIGN_PREVIEW ? '/icons/mondlicht' : '/icons';
+
 export default function Root({ children }: PropsWithChildren) {
   return (
     // data-theme steht schon im ausgelieferten HTML: Mondlicht ist im
@@ -55,10 +57,12 @@ export default function Root({ children }: PropsWithChildren) {
             nimmt ausschliesslich apple-touch-icon. Fehlt die Zeile, macht iOS
             einen verkleinerten Bildschirmabzug der Seite daraus, und der ist
             unter einem Symbol nicht wiederzuerkennen. */}
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/icons/favicon-192.png" />
+        {/* Im Testsystem (01.11.2026) eigene Icons im Stil Mondlicht und ein
+            eigenes Manifest - erzeugt vom selben Skript, siehe dort. */}
+        <link rel="manifest" href={DESIGN_PREVIEW ? '/manifest-mondlicht.json' : '/manifest.json'} />
+        <link rel="apple-touch-icon" href={`${ICONS}/apple-touch-icon.png`} />
+        <link rel="icon" type="image/png" sizes="32x32" href={`${ICONS}/favicon-32.png`} />
+        <link rel="icon" type="image/png" sizes="192x192" href={`${ICONS}/favicon-192.png`} />
 
         {/* Ohne die erste Zeile oeffnet iOS die abgelegte Seite in Safari
             statt in einem eigenen Fenster. Der Name darunter steht unter dem
@@ -69,7 +73,8 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-title" content="Atemcode" />
         {/* "default" heisst dunkle Schrift auf hellem Grund - die Seite ist
             hell (color-scheme oben). */}
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        {/* Im Testsystem ist die Seite dunkel (Mondlicht): helle Schrift in der Statusleiste. */}
+        <meta name="apple-mobile-web-app-status-bar-style" content={DESIGN_PREVIEW ? 'black' : 'default'} />
         {/* Faerbt die Systemleiste in Android. Dieselbe Farbe wie im Manifest
             und wie die Seite selbst, damit es beim Starten keinen Farbsprung
             gibt - deshalb aus den Tokens und nicht als Literal. */}

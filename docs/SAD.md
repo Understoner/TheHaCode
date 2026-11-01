@@ -1742,6 +1742,7 @@ Ein Versuch, ob eine verspielte, spirituelle Darstellung trägt. Er läuft **nur
 - **Wahl im Gerät** (`localStorage`, Schlüssel `thehacode.theme`), unter `/einstellungen`. Grundeinstellung im Testsystem ist seit 01.11.2026 Mondlicht (`DEFAULT_THEME`); es steht schon im ausgelieferten HTML. Begründung in `src/design/theme.ts`: Darstellung ist keine fachliche Angabe, und eine Profilspalte bräuchte eine Migration, die sich nicht revertieren lässt. `public/theme-init.js` setzt die Wahl vor dem ersten Bild (eigene Datei wegen der CSP).
 - **Schriften** Fraunces und Nunito, selbst gehostet unter `public/fonts` (SIL OFL), nur in Mondlicht — keine Anfrage an Google.
 - **Startseite** `/` mit Impuls des Tages, „Deine 3 Rituale" (Favoriten zuerst) und „Deine Woche" (Tage als Mondphasen), in beiden Darstellungen. Die News ziehen nach `/news`; der Mond links oben führt immer zur Startseite. Live bleibt `/` die News-Seite.
+- **App-Icon** im Stil Mondlicht (goldene Sichel auf Nachtblau) für den Startbildschirm, `public/icons/mondlicht/` und `public/manifest-mondlicht.json`, nur im Testsystem verlinkt.
 - **Lotusblüte** im Atemkreis, nur Mondlicht (`src/features/breathing/Lotus.tsx`). Sie hängt am Skalierungswert des Rings und rechnet nichts selbst; Takt, Ring und Marke sind unverändert.
 
 Rückbau: PR revertieren. Danach bleibt allenfalls `thehacode.theme` im Browser liegen; ohne `theme-init.js` liest ihn niemand mehr.
