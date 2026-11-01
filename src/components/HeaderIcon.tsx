@@ -108,6 +108,16 @@ export function ChecklistGlyph() {
   );
 }
 
+/** Eine Fahne am Mast - die Challenges (0036). */
+export function FlagGlyph() {
+  return (
+    <Svg width={GLYPH} height={GLYPH} viewBox="0 0 16 16">
+      <Line x1={3.5} y1={2} x2={3.5} y2={14.5} stroke={colors.ink700} strokeWidth={1.8} strokeLinecap="round" />
+      <Path d="M4.5 2.5h8.5l-2 3 2 3H4.5z" fill={colors.ink700} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
 /** Eine Liste mit Punkten - die eigenen Sequenzen. */
 export function ListGlyph() {
   return (

@@ -25,6 +25,7 @@ import {
 } from './score';
 import { minutesPerWeek, movingAverage, trendSummary } from './stats';
 import type { ExerciseSession, HabitCategory, HabitLog, MyHabit } from './useHabits';
+import { pointsForEntry } from './valuePoints';
 
 /** Zeitraum der Kategorie- und Habit-Auswertungen, in Tagen. */
 const WINDOW_DAYS = 28;
@@ -71,14 +72,13 @@ export function DiaryInsights({ today, habits, logs, sessions, categories, score
     const entries: ScoreEntry[] = logs.flatMap((l) => {
       const habit = byHabit.get(l.user_habit_id);
       if (!habit) return [];
-      return [
-        {
-          categoryId: habit.habit_templates.category_id,
-          points: habit.habit_templates.points,
-          isNegative: habit.habit_templates.is_negative,
-          date: l.log_date,
-        },
-      ];
+      // Wertgrenzen (0035): bei Schlafdauer & Co. haengen Betrag und
+      // Richtung vom eingetragenen Wert ab; ohne Grenzen wie bisher.
+      const { points, isNegative } = pointsForEntry(
+        habit.habit_templates,
+        l.value_numeric === null ? null : Number(l.value_numeric),
+      );
+      return [{ categoryId: habit.habit_templates.category_id, points, isNegative, date: l.log_date }];
     });
 
     // Nur Kategorien, die im jeweiligen Monat aktiv verwendet wurden, zaehlen

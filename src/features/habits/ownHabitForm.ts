@@ -29,6 +29,16 @@ export const ownHabitSchema = z
     maxValue: optionalNumber,
     points: z.number().int().min(0, { error: 'errors:habits.points' }).max(10, { error: 'errors:habits.points' }),
     isNegative: z.boolean(),
+    // Punkte nach Wert (0035), nur fuer Zahlen-Habits ohne Abzug. Leer = keine
+    // Grenze.
+    higherIsBetter: z.boolean(),
+    pointsFrom: optionalNumber,
+    penaltyFrom: optionalNumber,
+    penaltyPoints: z
+      .number()
+      .int()
+      .min(0, { error: 'errors:habits.points' })
+      .max(10, { error: 'errors:habits.points' }),
     link: z
       .string()
       .trim()
@@ -44,6 +54,16 @@ export const ownHabitSchema = z
       v.maxValue === '' ||
       toNumber(v.minValue)! <= toNumber(v.maxValue)!,
     { error: 'errors:habits.range', path: ['maxValue'] },
+  )
+  .refine(
+    (v) => {
+      if (v.trackingType !== 'number' || v.isNegative) return true;
+      const plus = toNumber(v.pointsFrom);
+      const minus = toNumber(v.penaltyFrom);
+      if (plus === null || minus === null) return true;
+      return v.higherIsBetter ? minus <= plus : minus >= plus;
+    },
+    { error: 'errors:habits.valueOrder', path: ['penaltyFrom'] },
   );
 
 export type OwnHabitValues = z.infer<typeof ownHabitSchema>;
@@ -59,6 +79,9 @@ export function toOwnHabitInput(
   appOrigin: string | null = currentOrigin(),
 ): OwnHabitInput {
   const number = values.trackingType === 'number';
+  // Grenzen nur an Zahlen-Habits ohne Abzug - die Datenbank lehnt sie sonst ab.
+  const valueRule = number && !values.isNegative;
+  const penaltyFrom = valueRule ? toNumber(values.penaltyFrom) : null;
   return {
     categoryId: values.categoryId,
     title: values.title.trim(),
@@ -69,6 +92,10 @@ export function toOwnHabitInput(
     maxValue: number ? toNumber(values.maxValue) : null,
     points: values.points,
     isNegative: values.isNegative,
+    higherIsBetter: values.higherIsBetter,
+    pointsFrom: valueRule ? toNumber(values.pointsFrom) : null,
+    penaltyFrom,
+    penaltyPoints: penaltyFrom === null ? null : values.penaltyPoints,
     link: normalizeHabitLink(values.link, appOrigin),
   };
 }

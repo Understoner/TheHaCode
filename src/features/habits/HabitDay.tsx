@@ -18,8 +18,10 @@ import {
   useSaveLog,
   type HabitCategory,
   type HabitLog,
+  type HabitTemplate,
   type MyHabit,
 } from './useHabits';
+import { hasValueRule, pointsForEntry } from './valuePoints';
 
 /** Das Habit, fuer das es den Messbildschirm gibt (docs/inhalte). */
 export const BOLT_SLUG = 'bolt-wert';
@@ -163,7 +165,9 @@ export function HabitEntryRow({
           </View>
         ) : null}
 
-        {scoreOn && category && template.points > 0 ? (
+        {scoreOn && category && hasValueRule(template) ? (
+          <ValuePointsLine template={template} log={log} />
+        ) : scoreOn && category && template.points > 0 ? (
           <Text style={negative ? styles.pointsNegative : styles.points}>
             {t(negative ? 'diary.entry.pointsNegative' : 'diary.entry.points', {
               points: template.points,
@@ -219,6 +223,54 @@ export function HabitEntryRow({
           onUndo={undo}
         />
       </View>
+    </View>
+  );
+}
+
+/** Zahl im deutschen Format, ohne unnoetige Nachkommastellen. */
+function formatValue(value: number): string {
+  return String(value).replace('.', ',');
+}
+
+/**
+ * Punkte eines Habits mit Wertgrenzen (0035): die Regel ("+8 ab 7 Stunden ·
+ * −8 unter 6 Stunden") und, sobald eingetragen, was der Wert gebracht hat.
+ */
+function ValuePointsLine({ template, log }: { template: HabitTemplate; log: HabitLog | null }) {
+  const { t } = useTranslation();
+  const unit = template.unit ?? '';
+  const higher = template.higher_is_better;
+  const rule: string[] = [];
+  if (template.points_from !== null && template.points > 0) {
+    rule.push(
+      t(higher ? 'diary.entry.rule.plusFrom' : 'diary.entry.rule.plusUpTo', {
+        points: template.points,
+        value: formatValue(template.points_from),
+        unit,
+      }),
+    );
+  }
+  if (template.penalty_from !== null && (template.penalty_points ?? 0) > 0) {
+    rule.push(
+      t(higher ? 'diary.entry.rule.minusBelow' : 'diary.entry.rule.minusAbove', {
+        points: template.penalty_points,
+        value: formatValue(template.penalty_from),
+        unit,
+      }),
+    );
+  }
+  const result = log ? pointsForEntry(template, log.value_numeric === null ? null : Number(log.value_numeric)) : null;
+
+  return (
+    <View style={styles.ruleBox}>
+      {rule.length > 0 ? <Text style={styles.meta}>{rule.join(' · ')}</Text> : null}
+      {result ? (
+        <Text style={result.points === 0 ? styles.meta : result.isNegative ? styles.pointsNegative : styles.points}>
+          {result.points === 0
+            ? t('diary.entry.rule.zero')
+            : t(result.isNegative ? 'diary.entry.pointsNegative' : 'diary.entry.points', { points: result.points })}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -441,6 +493,9 @@ const styles = StyleSheet.create({
   meta: {
     fontSize: 13,
     color: colors.ink700,
+  },
+  ruleBox: {
+    gap: 2,
   },
   points: {
     fontSize: 13,

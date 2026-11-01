@@ -69,7 +69,21 @@
   "habits.forbidden": "Eigene Habits anlegen und bearbeiten gehört zu Plus und braucht deine Einwilligung zum Tagebuch. Beides findest du unter „Konto“.",
   "habits.limit": "Du hast schon 100 eigene Habits. Lösch eines, das du nicht mehr brauchst, dann geht es weiter.",
   "habits.points": "Wähl zwischen 0 und 10 Punkten.",
+  "habits.valueOrder": "Die Grenze für Minuspunkte muss auf der schlechteren Seite der Grenze für Pluspunkte liegen – bei „mehr ist besser“ darunter, bei „weniger ist besser“ darüber.",
   "habits.link": "Der Link muss mit https:// beginnen oder ein Pfad dieser App sein, etwa /sessions/… – am einfachsten kopierst du die Adresse der Session aus der Adresszeile.",
   "habits.linkLong": "Der Link darf höchstens 500 Zeichen haben.",
-  "habits.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal."
+  "habits.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal.",
+  "challenges.titleRequired": "Bitte gib der Challenge einen Titel.",
+  "challenges.titleLong": "Der Titel darf höchstens 80 Zeichen haben.",
+  "challenges.descriptionLong": "Die Beschreibung darf höchstens 500 Zeichen haben.",
+  "challenges.start": "Bitte wähl einen Starttag.",
+  "challenges.duration": "Eine Challenge dauert 1 bis 365 Tage.",
+  "challenges.noHabits": "Füg mindestens ein Habit hinzu.",
+  "challenges.tooManyHabits": "Eine Challenge hat höchstens 30 Habits.",
+  "challenges.emptyPlan": "Jedes Habit braucht mindestens einen Termin. Tipp im Kalender auf einen Tag oder wähl Wochentage.",
+  "challenges.forbidden": "Challenges planen gehört zu Plus (außer bei kostenlosen Vorlagen) und braucht deine Einwilligung zum Tagebuch. Beides findest du unter „Konto“.",
+  "challenges.past": "Vergangene Tage lassen sich nicht mehr planen. Wähl einen Tag ab heute.",
+  "challenges.startPast": "Eine Challenge beginnt heute oder später. Wähl einen anderen Starttag.",
+  "challenges.range": "Ein Termin liegt außerhalb der Challenge. Prüf Start und Dauer noch einmal.",
+  "challenges.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal."
 }
