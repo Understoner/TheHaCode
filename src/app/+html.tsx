@@ -2,7 +2,7 @@ import { ScrollViewStyleReset } from 'expo-router/html';
 import type { PropsWithChildren } from 'react';
 
 import { responsiveCss } from '@/design/responsive';
-import { DESIGN_PREVIEW, palettes, themeCss } from '@/design/tokens';
+import { DEFAULT_THEME, DESIGN_PREVIEW, palettes, themeCss } from '@/design/tokens';
 import { contentSecurityPolicy } from '@/lib/contentSecurityPolicy';
 
 // Die HTML-Huelle des statischen Exports, ausschliesslich zur Bauzeit
@@ -22,7 +22,10 @@ import { contentSecurityPolicy } from '@/lib/contentSecurityPolicy';
 
 export default function Root({ children }: PropsWithChildren) {
   return (
-    <html lang="de">
+    // data-theme steht schon im ausgelieferten HTML: Mondlicht ist im
+    // Testsystem die Grundeinstellung, theme-init.js schaltet nur fuer
+    // jemanden um, der "Klar" gewaehlt hat.
+    <html lang="de" data-theme={DESIGN_PREVIEW ? DEFAULT_THEME : undefined}>
       <head>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -72,7 +75,7 @@ export default function Root({ children }: PropsWithChildren) {
             gibt - deshalb aus den Tokens und nicht als Literal. */}
         {/* Hex statt colors.background: im Testsystem ist das eine
             CSS-Variable, und die versteht das Meta-Tag nicht. */}
-        <meta name="theme-color" content={palettes.klar.background} />
+        <meta name="theme-color" content={palettes[DEFAULT_THEME].background} />
 
         {/* Darstellungen Klar/Mondlicht, nur im Testsystem (src/design/tokens.ts).
             Das Skript steht nach dem theme-color-Tag, weil es dieses umfaerbt,

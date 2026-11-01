@@ -117,6 +117,13 @@ const mondlicht: Palette = {
 export type ThemeName = 'klar' | 'mondlicht';
 export const palettes: Record<ThemeName, Palette> = { klar, mondlicht };
 
+/**
+ * Was gilt, solange niemand gewaehlt hat. Im Testsystem seit 01.11.2026
+ * Mondlicht (Wunsch des Users: erst die Farben machen es wirklich anders),
+ * im Livesystem unveraendert Klar.
+ */
+export const DEFAULT_THEME: ThemeName = DESIGN_PREVIEW ? 'mondlicht' : 'klar';
+
 const colorNames = Object.keys(klar) as ColorName[];
 
 export const colors: Palette = DESIGN_PREVIEW

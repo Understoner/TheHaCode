@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
-import { DESIGN_PREVIEW, palettes, type Palette, type ThemeName } from './tokens';
+import { DEFAULT_THEME, DESIGN_PREVIEW, palettes, type Palette, type ThemeName } from './tokens';
 
 // Welche Darstellung gerade gilt (01.11.2026, nur Testsystem).
 //
@@ -23,8 +23,9 @@ export const THEME_STORAGE_KEY = 'thehacode.theme';
 const listeners = new Set<() => void>();
 
 function readTheme(): ThemeName {
-  if (typeof document === 'undefined') return 'klar';
-  return document.documentElement.dataset.theme === 'mondlicht' ? 'mondlicht' : 'klar';
+  if (typeof document === 'undefined') return DEFAULT_THEME;
+  const value = document.documentElement.dataset.theme;
+  return value === 'klar' || value === 'mondlicht' ? value : DEFAULT_THEME;
 }
 
 function subscribe(listener: () => void) {
@@ -32,9 +33,9 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
-/** Die aktuelle Darstellung. Beim statischen Rendern und im Livesystem immer "klar". */
+/** Die aktuelle Darstellung. Beim statischen Rendern die Grundeinstellung, im Livesystem immer "klar". */
 export function useThemeName(): ThemeName {
-  const theme = useSyncExternalStore(subscribe, readTheme, () => 'klar' as ThemeName);
+  const theme = useSyncExternalStore(subscribe, readTheme, () => DEFAULT_THEME);
   return DESIGN_PREVIEW ? theme : 'klar';
 }
 
