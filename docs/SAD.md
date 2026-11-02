@@ -1735,6 +1735,8 @@ export const tokens = {
 
 ### 6.1a Darstellung „Mondlicht" und Startseite (nur Testsystem, seit 01.11.2026)
 
+**Seit 02.11.2026 auch im Livesystem** (Freigabe des Users): `DESIGN_PREVIEW` ist `true`. Wo unten „nur Testsystem“ steht, gilt das für die Zeit bis dahin. Zurück auf nur Testsystem: den Schalter wieder auf `EXPO_PUBLIC_APP_ENV === 'staging'` setzen.
+
 Ein Versuch, ob eine verspielte, spirituelle Darstellung trägt. Er läuft **nur im Testsystem** und ist mit einem Revert des PR „Design Mondlicht" vollständig zurückzunehmen — keine Migration, keine neue Bibliothek.
 
 - **Schalter:** `DESIGN_PREVIEW` in `src/design/tokens.ts` (`EXPO_PUBLIC_APP_ENV === 'staging'`, zur Bauzeit eingesetzt). Im Livesystem sind `colors` und `radius` die bisherigen festen Werte; der Live-Build ist im Markup unverändert.

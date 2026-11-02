@@ -14,15 +14,18 @@
 // Im Testsystem sind `colors` und `radius` CSS-Variablen (var(--c-...)); die
 // Werte setzt +html.tsx je nach <html data-theme>. Umschalten heisst, dieses
 // Attribut zu aendern - kein Neuladen, kein Abgleich mit dem statisch
-// gerenderten HTML. Im Livesystem bleiben es die festen Werte von "Klar",
-// genau wie bisher: DESIGN_PREVIEW ist dort false (EXPO_PUBLIC_APP_ENV wird
-// zur Bauzeit eingesetzt).
+// gerenderten HTML. Seit 02.11.2026 auch im Livesystem (Freigabe des Users);
+// vorher war DESIGN_PREVIEW nur im Testsystem an.
 //
 // Rueckbau: diesen Abschnitt, themeCss() und alles mit DESIGN_PREVIEW
 // entfernen - der PR "Design Mondlicht" laesst sich als Ganzes reverten.
 
-/** Alternative Darstellung und neue Startseite - nur im Testsystem. */
-export const DESIGN_PREVIEW = process.env.EXPO_PUBLIC_APP_ENV === 'staging';
+/**
+ * Darstellung Mondlicht und alle Seiten im neuen Design - seit 02.11.2026 in
+ * beiden Umgebungen. Zurueck auf nur Testsystem:
+ * `process.env.EXPO_PUBLIC_APP_ENV === 'staging'`.
+ */
+export const DESIGN_PREVIEW = true;
 
 const klar = {
   // Seiten- und Flaechenfarben. Die Seite selbst ist getoent (nicht reines
