@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
-import { colors, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, spacing } from '@/design/tokens';
+import { displayFont } from '@/design/responsive';
 import { KonfiguratorHilfe } from '@/features/configurator/KonfiguratorHilfe';
 import { PlusGate } from '@/features/configurator/PlusGate';
+import { SequenceBuilder } from '@/features/configurator/SequenceBuilder';
 import { SequenceEditor } from '@/features/configurator/SequenceEditor';
 import { useSession } from '@/features/sessions/useSessions';
 
@@ -24,13 +26,13 @@ export default function SequenzBearbeitenScreen() {
       </Link>
       {/* Die Hilfe steht ausserhalb von PlusGate: lesen darf sie jeder. */}
       <View style={styles.titleRow}>
-        <Text style={styles.title}>{t('sequenz.bearbeitenTitel')}</Text>
+        <Text style={styles.title} {...displayFont}>{t('sequenz.bearbeitenTitel')}</Text>
         <KonfiguratorHilfe />
       </View>
 
       <PlusGate>
         <QueryBoundary query={query}>
-          {(sequence) => <SequenceEditor sequence={sequence} />}
+          {(sequence) => (DESIGN_PREVIEW ? <SequenceBuilder sequence={sequence} /> : <SequenceEditor sequence={sequence} />)}
         </QueryBoundary>
       </PlusGate>
     </ScrollView>

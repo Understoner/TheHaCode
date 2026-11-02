@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing } from '@/design/tokens';
+import { displayFont } from '@/design/responsive';
 import { MySequencesList } from '@/features/configurator/MySequencesList';
 import { PlusGate } from '@/features/configurator/PlusGate';
 
@@ -11,7 +12,7 @@ export default function SequenzenScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{t('sequenz.title')}</Text>
+      <Text style={styles.title} {...displayFont}>{t('sequenz.title')}</Text>
       <Text style={styles.intro}>{t('sequenz.intro')}</Text>
 
       <PlusGate>

@@ -8,16 +8,18 @@ import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { useThemePalette } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
+import { displayFont } from '@/design/responsive';
 import { NEWS_CATEGORIES, type NewsCategory } from '@/features/news/categories';
 import { isFresh } from '@/features/news/fresh';
-import { CategoryGlyph, categoryTone, NewsCover } from '@/features/news/NewsArt';
+import { CategoryGlyph, categoryTone, MoonScene, NewsCover } from '@/features/news/NewsArt';
 import { estimateReadingMinutes } from '@/features/news/readingTime';
 import { useNewsList, type NewsPost } from '@/features/news/useNewsList';
 
 // Die News im Vorschlag "Mondlicht Mobile" (02.11.2026, nur Testsystem):
 // Kategorien als eine wischbare Leiste mit Symbolen, die ganze Karte ist der
 // Link, zwei Zeilen Anriss, Lesezeit als Symbol, neue Beitraege mit goldenem
-// Punkt. Der erste Beitrag gross, die weiteren als kompakte Zeilen.
+// Punkt. Der erste Beitrag gross mit Mondszene, die weiteren als kompakte
+// Zeilen mit Motiv je Kategorie - ohne Fotos (03.11.2026).
 //
 // Im Livesystem bleibt NewsList.tsx.
 
@@ -116,7 +118,7 @@ function FeaturedCard({ post, fresh }: { post: NewsPost; fresh: boolean }) {
     <Link href={detailHref(post.slug)} style={styles.featuredLink}>
       <View style={styles.featured}>
         <View>
-          <NewsCover path={post.cover_image_path} category={post.category} label={post.title} style={styles.featuredCover} />
+          <MoonScene label={post.title} style={styles.featuredCover} />
           <View style={styles.pill}>
             <CategoryGlyph category={post.category} color={tone} size={14} />
             <Text style={[styles.pillText, { color: tone }]}>{t(`news.categories.${post.category}`)}</Text>
@@ -128,7 +130,7 @@ function FeaturedCard({ post, fresh }: { post: NewsPost; fresh: boolean }) {
           ) : null}
         </View>
         <View style={styles.featuredBody}>
-          <Text role="heading" aria-level={2} data-font="display" style={styles.featuredTitle}>
+          <Text role="heading" aria-level={2} {...displayFont} style={styles.featuredTitle}>
             {post.title}
           </Text>
           {post.excerpt ? (
@@ -162,7 +164,6 @@ function PostRow({ post, fresh }: { post: NewsPost; fresh: boolean }) {
     <Link href={detailHref(post.slug)} style={styles.rowLink}>
       <View style={styles.row}>
         <NewsCover
-          path={post.cover_image_path}
           category={post.category}
           label={post.title}
           compact
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'none',
   },
   featured: {
-    borderRadius: radius.lg,
+    borderRadius: 26,
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
   },
   featuredCover: {
     width: '100%',
-    height: 172,
+    height: 210,
   },
   pill: {
     position: 'absolute',
@@ -268,8 +269,8 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   featuredTitle: {
-    fontSize: 21,
-    lineHeight: 25,
+    fontSize: 24,
+    lineHeight: 29,
     fontWeight: '600',
     color: colors.ink900,
   },

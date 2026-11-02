@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { useThemeName } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
+import { displayFont } from '@/design/responsive';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { addDays, today as heute, weekStart, type IsoDate } from '@/features/habits/dates';
 import { weekHeat } from '@/features/habits/stats';
@@ -22,9 +23,6 @@ import { dayTime, impulseIndex, moonPhase } from './today';
 // Rituale, deine Woche. Sie ersetzt im Testsystem die News als Landing Page;
 // die News stehen dort unter /news. Gleich aufgebaut in beiden Darstellungen,
 // Mondlicht bringt nur Sterne und weichere Formen mit.
-
-/** Die Ueberschrift auf Fraunces setzen (Mondlicht, siehe tokens.ts themeCss). */
-const displayFont = { dataSet: { font: 'display' } } as object;
 
 /**
  * Das Datum erst im Browser: die Seite wird zur Bauzeit gerendert, und dort

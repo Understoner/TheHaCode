@@ -37,7 +37,7 @@ const AREA_ICON: Record<string, string> = {
 };
 const FALLBACK_ICON = 'M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18z';
 
-function AreaGlyph({ slug, color, size = 22 }: { slug: string; color: string; size?: number }) {
+export function AreaGlyph({ slug, color, size = 22 }: { slug: string; color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>
       <Path

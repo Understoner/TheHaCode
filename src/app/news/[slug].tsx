@@ -7,6 +7,7 @@ import { QueryBoundary } from '@/components/QueryBoundary';
 import { StateMessage } from '@/components/StateMessage';
 import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { Markdown } from '@/features/news/Markdown';
+import { NewsCover } from '@/features/news/NewsArt';
 import { newsCategoryColors } from '@/features/news/categories';
 import { estimateReadingMinutes } from '@/features/news/readingTime';
 import { useNewsPost } from '@/features/news/useNewsPost';
@@ -58,7 +59,12 @@ function Article({ post }: { post: NewsPost }) {
         {t('news.detail.back')}
       </Link>
 
-      <CoverImage path={post.cover_image_path} label={post.title} tone="ocean" style={styles.cover} />
+      {/* Im Testsystem ohne Foto, mit dem Motiv der Kategorie (03.11.2026). */}
+      {DESIGN_PREVIEW ? (
+        <NewsCover category={post.category} label={post.title} style={styles.cover} />
+      ) : (
+        <CoverImage path={post.cover_image_path} label={post.title} tone="ocean" style={styles.cover} />
+      )}
 
       <View style={styles.meta}>
         <Text style={[styles.category, { color: tone.text }]}>

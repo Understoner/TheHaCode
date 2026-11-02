@@ -10,6 +10,7 @@ import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
 import { useThemePalette } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
+import { displayFont } from '@/design/responsive';
 import { buildTimeline, totalDurationMs } from '@/features/breathing/timeline';
 import { type SessionFilter } from '@/features/sessions/effects';
 import {
@@ -139,7 +140,7 @@ function Suggestion({ session, now }: { session: PlayableExercise; now: Date }) 
         <MoodGlyph mood={leadMood(session.effects) ?? 'ruhig'} color={palette.ocean700} size={40} />
         <View style={styles.suggestText}>
           <Text style={styles.suggestBadge}>{t(`sessions.suggest.${daySlot(now)}`)}</Text>
-          <Text data-font="display" style={styles.suggestTitle}>
+          <Text {...displayFont} style={styles.suggestTitle}>
             {session.title}
           </Text>
           {meta ? <Text style={styles.suggestMeta}>{meta}</Text> : null}

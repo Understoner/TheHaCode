@@ -120,3 +120,11 @@ ${gridRules}
 }
 `.trim();
 }
+
+/**
+ * Ueberschrift-Schrift (Fraunces) in Mondlicht, siehe tokens.ts themeCss.
+ * Ueber dataSet, nicht als data-font-Prop: react-native-web reicht nur
+ * dataSet als data-Attribut ins HTML durch (03.11.2026 bemerkt - die
+ * data-font-Props aus "Mondlicht Mobile" kamen nie an).
+ */
+export const displayFont = { dataSet: { font: 'display' } } as object;
