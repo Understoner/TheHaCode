@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   categoryComparison,
+  cycleDays,
   habitConsistency,
   weekdayPattern,
   type AnalysisHabit,
@@ -136,5 +137,40 @@ describe('habitConsistency', () => {
     expect(result).toEqual([
       { habitId: 'a', doneDays: 0, windowDays: 28, currentStreak: 0, longestStreak: 0, daysSinceLast: null },
     ]);
+  });
+});
+
+describe('cycleDays', () => {
+  it('liefert die letzten Tage, aelteste zuerst', () => {
+    const days = cycleDays([habit('a')], [], HEUTE, 28);
+    expect(days).toHaveLength(28);
+    expect(days[0].date).toBe('2026-10-03');
+    expect(days[27].date).toBe(HEUTE);
+  });
+
+  it('rechnet den Anteil erledigter positiver Habits', () => {
+    const days = cycleDays(
+      [habit('a'), habit('b'), habit('minus', { isNegative: true })],
+      [log('a', HEUTE), log('minus', HEUTE), log('a', '2026-10-29'), log('b', '2026-10-29')],
+      HEUTE,
+      2,
+    );
+    expect(days.map((d) => d.share)).toEqual([1, 0.5]);
+    expect(days[1]).toMatchObject({ done: 1, possible: 2 });
+  });
+
+  it('zaehlt ein Habit erst ab seinem Start, ein herausgenommenes nur mit Eintrag', () => {
+    const days = cycleDays(
+      [habit('neu', { startedOn: HEUTE }), habit('alt', { isActive: false })],
+      [log('alt', '2026-10-29')],
+      HEUTE,
+      2,
+    );
+    expect(days[0]).toMatchObject({ done: 1, possible: 1, share: 1 });
+    expect(days[1]).toMatchObject({ done: 0, possible: 1, share: 0 });
+  });
+
+  it('gibt ohne gewaehlte Habits 0', () => {
+    expect(cycleDays([], [], HEUTE, 1)[0]).toMatchObject({ possible: 0, share: 0 });
   });
 });

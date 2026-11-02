@@ -8,6 +8,7 @@ import { colors, radius, spacing } from '@/design/tokens';
 
 import {
   categoryComparison,
+  cycleDays,
   habitConsistency,
   weekdayPattern,
   type AnalysisHabit,
@@ -28,10 +29,10 @@ import type { ExerciseSession, HabitCategory, HabitLog, MyHabit } from './useHab
 import { pointsForEntry } from './valuePoints';
 
 /** Zeitraum der Kategorie- und Habit-Auswertungen, in Tagen. */
-const WINDOW_DAYS = 28;
-const PATTERN_WEEKS = 8;
+export const WINDOW_DAYS = 28;
+export const PATTERN_WEEKS = 8;
 
-type Props = {
+export type Props = {
   today: IsoDate;
   habits: MyHabit[];
   logs: HabitLog[];
@@ -41,14 +42,12 @@ type Props = {
 };
 
 /**
- * Die Auswertungsseite des Tagebuchs (SAD §3.14, eigene Seite seit
- * 30.10.2026). Gerechnet wird in score.ts, stats.ts und analysis.ts; hier
- * wird nur angeordnet.
+ * Alles, was die Auswertung rechnet - fuer DiaryInsights (Livesystem) und
+ * DiaryJourney (Testsystem, 02.11.2026) dieselben Zahlen. Gerechnet wird in
+ * score.ts, stats.ts und analysis.ts; hier wird nur zusammengestellt.
  */
-export function DiaryInsights({ today, habits, logs, sessions, categories, scoreOn }: Props) {
-  const { t } = useTranslation();
-
-  const derived = useMemo(() => {
+export function useInsightsData({ today, habits, logs, sessions, categories }: Omit<Props, 'scoreOn'>) {
+  return useMemo(() => {
     const byHabit = new Map(habits.map((h) => [h.id, h]));
     const byCategory = new Map(categories.map((c) => [c.id, c]));
 
@@ -107,8 +106,17 @@ export function DiaryInsights({ today, habits, logs, sessions, categories, score
     const analysisLogs: AnalysisLog[] = logs.map((l) => ({ habitId: l.user_habit_id, date: l.log_date }));
     const comparison = categoryComparison(analysisHabits, analysisLogs, today, WINDOW_DAYS);
 
+    const datesByHabit = new Map<string, Set<IsoDate>>();
+    for (const l of logs) {
+      const set = datesByHabit.get(l.user_habit_id) ?? new Set<IsoDate>();
+      set.add(l.log_date);
+      datesByHabit.set(l.user_habit_id, set);
+    }
+
     return {
       trends,
+      cycle: cycleDays(analysisHabits, analysisLogs, today, WINDOW_DAYS),
+      datesByHabit,
       minutes: minutesPerWeek(sessions, today, (ts) => toIsoDate(new Date(ts))),
       scores: [
         scoreFor('day', today, scoreCategories, entries, active),
@@ -127,6 +135,17 @@ export function DiaryInsights({ today, habits, logs, sessions, categories, score
       }),
     };
   }, [logs, habits, sessions, categories, today]);
+}
+
+/**
+ * Die Auswertungsseite des Tagebuchs (SAD §3.14, eigene Seite seit
+ * 30.10.2026). Gerechnet wird in score.ts, stats.ts und analysis.ts; hier
+ * wird nur angeordnet.
+ */
+export function DiaryInsights({ today, habits, logs, sessions, categories, scoreOn }: Props) {
+  const { t } = useTranslation();
+
+  const derived = useInsightsData({ today, habits, logs, sessions, categories });
 
   const totalMinutes = derived.minutes.reduce((sum, w) => sum + w.minutes, 0);
 

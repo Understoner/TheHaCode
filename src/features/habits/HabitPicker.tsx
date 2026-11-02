@@ -36,6 +36,10 @@ const AREA_ICON: Record<string, string> = {
   stressmanagement: 'M3 10c3-3 6-3 9 0s6 3 9 0M3 16c3-3 6-3 9 0s6 3 9 0',
 };
 const FALLBACK_ICON = 'M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18z';
+const ALL_ICON = 'M4 6h16M4 12h16M4 18h16';
+const STAR_ICON = 'M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z';
+/** Kennung des Chips "Favoriten" - keine Kategorie-ID kann so heissen. */
+const FAVORITES = 'favoriten';
 
 export function AreaGlyph({ slug, color, size = 22 }: { slug: string; color: string; size?: number }) {
   return (
@@ -72,7 +76,12 @@ export function HabitPicker({
   const choose = useChooseHabit();
   const toggleFavorite = useToggleHabitFavorite();
   const [query, setQuery] = useState(filter.query);
-  const [areaId, setAreaId] = useState<string | null>(filter.categoryId ?? categories[0]?.id ?? null);
+  // Auswahl in der Leiste: alle Habits (Vorgabe), nur gemerkte oder ein
+  // Bereich. Bis 02.11.2026 war immer ein Bereich fest gewaehlt, und Favoriten
+  // gab es nur auf der Filterseite - die entfaellt im Testsystem.
+  const [areaId, setAreaId] = useState<string | null>(
+    filter.categoryId ?? (filter.source === 'favorites' ? FAVORITES : null),
+  );
   const [open, setOpen] = useState<string | null>(null);
   const chosen = new Set(myHabits.filter((h) => h.is_active).map((h) => h.template_id));
 
@@ -82,7 +91,16 @@ export function HabitPicker({
     () =>
       groupByCategory(
         categories,
-        filterTemplates(templates, { ...filter, query, categoryId: searching ? null : areaId }, favorites),
+        filterTemplates(
+          templates,
+          {
+            ...filter,
+            query,
+            source: !searching && areaId === FAVORITES ? 'favorites' : filter.source === 'favorites' ? 'all' : filter.source,
+            categoryId: searching || areaId === FAVORITES ? null : areaId,
+          },
+          favorites,
+        ),
         favorites,
       ),
     [categories, templates, filter, query, searching, areaId, favorites],
@@ -107,6 +125,39 @@ export function HabitPicker({
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.areas}>
+        {[
+          { id: null, label: t('habits.filter.all'), icon: ALL_ICON },
+          { id: FAVORITES, label: t('habits.filter.favorites'), icon: STAR_ICON },
+        ].map((chip) => {
+          const on = !searching && areaId === chip.id;
+          return (
+            <PressableRing
+              key={chip.id ?? 'alle'}
+              onPress={() => {
+                setAreaId(chip.id);
+                setQuery('');
+                setOpen(null);
+              }}
+              role="button"
+              aria-pressed={on}
+              style={[styles.area, on && styles.areaOn]}
+            >
+              <Svg width={22} height={22} viewBox="0 0 24 24" aria-hidden>
+                <Path
+                  d={chip.icon}
+                  fill="none"
+                  stroke={on ? palette.surface : palette.ink900}
+                  strokeWidth={1.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              <Text numberOfLines={1} style={[styles.areaText, on && styles.areaTextOn]}>
+                {chip.label}
+              </Text>
+            </PressableRing>
+          );
+        })}
         {categories.map((c) => {
           const on = !searching && c.id === areaId;
           return (
@@ -132,7 +183,11 @@ export function HabitPicker({
 
       <View style={styles.head}>
         <Text role="heading" aria-level={2} style={styles.headTitle}>
-          {searching ? t('habits.picker.results') : (area?.title ?? '')}
+          {searching
+            ? t('habits.picker.results')
+            : areaId === FAVORITES
+              ? t('habits.filter.favorites')
+              : (area?.title ?? t('habits.picker.allTitle'))}
         </Text>
         <Text style={styles.headCount}>{t('habits.picker.inDiary', { count: chosen.size })}</Text>
       </View>
@@ -148,7 +203,7 @@ export function HabitPicker({
       ) : (
         groups.map(({ category, templates: list }) => (
           <View key={category.id} style={styles.rows}>
-            {searching ? <Text style={styles.groupLabel}>{category.title}</Text> : null}
+            {searching || area === null ? <Text style={styles.groupLabel}>{category.title}</Text> : null}
             {list.map((template) => (
               <PickerRow
                 key={template.id}

@@ -1,7 +1,9 @@
 import { QueryBoundary } from '@/components/QueryBoundary';
+import { DESIGN_PREVIEW } from '@/design/tokens';
 
 import { addDays, today as heute } from './dates';
 import { DiaryInsights } from './DiaryInsights';
+import { DiaryJourney } from './DiaryJourney';
 import { useHabitCatalog, useHabitLogs, useHabitScoreEnabled, useMyHabits, useMySessions } from './useHabits';
 
 // Genug fuer BOLT-Verlauf und den Vergleich zweier 4-Wochen-Zeitraeume.
@@ -31,8 +33,11 @@ export function InsightsForUser() {
             <QueryBoundary query={logs}>
               {(entries) => (
                 <QueryBoundary query={sessions}>
-                  {(sessionList) => (
-                    <DiaryInsights
+                  {(sessionList) => {
+                    // Im Testsystem die Auswertung als Erlebnis (DiaryJourney, 02.11.2026).
+                    const View = DESIGN_PREVIEW ? DiaryJourney : DiaryInsights;
+                    return (
+                    <View
                       today={today}
                       habits={habits}
                       logs={entries}
@@ -40,7 +45,8 @@ export function InsightsForUser() {
                       categories={categories}
                       scoreOn={scoreOn}
                     />
-                  )}
+                    );
+                  }}
                 </QueryBoundary>
               )}
             </QueryBoundary>

@@ -202,3 +202,56 @@ export function habitConsistency(
       return { habitId: habit.id, doneDays, windowDays, currentStreak, longestStreak, daysSinceLast };
     });
 }
+
+// ---------------------------------------------------------------------------
+// Der Mondzyklus: je Tag der Anteil erledigter Habits (02.11.2026)
+// ---------------------------------------------------------------------------
+
+export type CycleDay = {
+  date: IsoDate;
+  /** Erledigte Habits, die Punkte bringen. */
+  done: number;
+  /** Habits, die an diesem Tag gewaehlt waren und Punkte bringen. */
+  possible: number;
+  /** done / possible, begrenzt auf 0..1; ohne gewaehlte Habits 0. */
+  share: number;
+};
+
+/**
+ * Die letzten `days` Tage bis heute, aelteste zuerst. Gezaehlt werden nur
+ * Habits, die etwas bringen - ein Abzug macht keinen Mond voller. Als
+ * "gewaehlt" gilt ein heute aktives Habit ab seinem Starttag; ein spaeter
+ * herausgenommenes zaehlt an den Tagen, an denen es eingetragen ist. Keine
+ * Wertung: ein voller Mond heisst "alles Gewaehlte erledigt", nicht "gut".
+ */
+export function cycleDays(
+  habits: AnalysisHabit[],
+  logs: AnalysisLog[],
+  today: IsoDate,
+  days = 28,
+): CycleDay[] {
+  const positive = new Map(habits.filter((h) => !h.isNegative).map((h) => [h.id, h]));
+  const doneByDay = new Map<IsoDate, Set<string>>();
+  for (const log of logs) {
+    if (!positive.has(log.habitId)) continue;
+    const set = doneByDay.get(log.date) ?? new Set<string>();
+    set.add(log.habitId);
+    doneByDay.set(log.date, set);
+  }
+
+  const result: CycleDay[] = [];
+  for (let day = windowStart(today, days); day <= today; day = addDays(day, 1)) {
+    const done = doneByDay.get(day) ?? new Set<string>();
+    let possible = 0;
+    for (const habit of positive.values()) {
+      if ((habit.isActive && habit.startedOn <= day) || done.has(habit.id)) possible += 1;
+    }
+    result.push({
+      date: day,
+      done: done.size,
+      possible,
+      share: possible > 0 ? Math.min(1, done.size / possible) : 0,
+    });
+  }
+  return result;
+}
