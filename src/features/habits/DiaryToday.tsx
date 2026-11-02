@@ -8,7 +8,9 @@ import { PressableRing } from '@/components/PressableRing';
 import { StateMessage } from '@/components/StateMessage';
 import { useThemePalette } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
+import { displayFont } from '@/design/responsive';
 import { useReduceMotion } from '@/design/useReduceMotion';
+import { openExternalUrl } from '@/lib/externalLink';
 import { MoonPhaseGlyph } from '@/features/start/Ornaments';
 
 import { weekStart, type IsoDate } from './dates';
@@ -16,6 +18,7 @@ import { groupByDayPart, type DayPart } from './dayParts';
 import { dayScore } from './dayScore';
 import { diaryErrorKey } from './diaryErrors';
 import { BOLT_SLUG, HabitEntryRow } from './HabitDay';
+import { habitLinkTarget } from './habitLink';
 import { weekHeat } from './stats';
 import {
   useDeleteLog,
@@ -175,7 +178,7 @@ function ScoreRing({ ratio, value, label }: { ratio: number; value: string; labe
           />
         ) : null}
       </Svg>
-      <Text data-font="display" style={styles.ringValue}>
+      <Text {...displayFont} style={styles.ringValue}>
         {value}
       </Text>
       <Text style={styles.ringLabel}>{label}</Text>
@@ -219,11 +222,22 @@ function WeekMoons({ today, logs, habitCount }: { today: IsoDate; logs: HabitLog
   );
 }
 
-/** Kleine Aktion neben dem Habit: Session starten, Messen oder Link oeffnen. */
+/**
+ * Kleine Aktion im Block des Habits: Session starten oder Messen. Steht seit
+ * 03.11.2026 IM Block (Wunsch des Users) - vorher daneben, wo sie wie ein
+ * eigenes Element wirkte. Sie ist ein eigener Link neben der Abhak-Flaeche,
+ * nicht in ihr: ein Link in einer Checkbox waere ungueltiges Markup.
+ */
 function SideAction({ habit, date, log, locked }: { habit: MyHabit; date: IsoDate; log: HabitLog | null; locked: boolean }) {
   const { t } = useTranslation();
+  const palette = useThemePalette();
   const template = habit.habit_templates;
   if (locked || log) return null;
+  const play = (
+    <Svg width={12} height={12} viewBox="0 0 24 24" aria-hidden>
+      <Path d="M8 5.5v13l10-6.5z" fill={palette.ocean700} />
+    </Svg>
+  );
   if (template.slug === BOLT_SLUG) {
     return (
       <Link href={{ pathname: '/habit-tracker/bolt', params: { habit: habit.id, date } }} style={styles.sideLink}>
@@ -233,9 +247,35 @@ function SideAction({ habit, date, log, locked }: { habit: MyHabit; date: IsoDat
   }
   if (template.exercise_id) {
     return (
-      <Link href={`/sessions/${template.exercise_id}`} style={styles.sideLink}>
-        {t('diary.entry.start')}
+      <Link
+        href={`/sessions/${template.exercise_id}`}
+        accessibilityLabel={`${template.title}: ${t('diary.entry.start')}`}
+        style={styles.sideLink}
+      >
+        {play} {t('diary.entry.start')}
       </Link>
+    );
+  }
+  // Eigene Habits verknuepfen eine Session ueber link_url (0030).
+  const target = habitLinkTarget(template.link_url);
+  if (target?.kind === 'app') {
+    return (
+      <Link href={target.href as never} style={styles.sideLink}>
+        {target.isSession ? (
+          <>
+            {play} {t('diary.entry.start')}
+          </>
+        ) : (
+          t('diary.entry.openLink')
+        )}
+      </Link>
+    );
+  }
+  if (target) {
+    return (
+      <PressableRing role="link" onPress={() => openExternalUrl(target.href)} style={styles.sideButton}>
+        <Text style={styles.sideButtonText}>{`${t('diary.entry.openLink')} ↗`}</Text>
+      </PressableRing>
     );
   }
   return null;
@@ -298,7 +338,15 @@ function TickRow({
 
   return (
     <View>
-      <View style={styles.tickLine}>
+      <View
+        style={[
+          styles.tickBlock,
+          corner,
+          checked && styles.tickRowOn,
+          checked && { borderColor: accent },
+          !checked && locked && styles.tickRowLocked,
+        ]}
+      >
         <PressableRing
           onPress={toggle}
           // Entfernen geht immer - auch gesperrt (SAD §3.10). Neu abhaken nicht.
@@ -306,13 +354,7 @@ function TickRow({
           role="checkbox"
           aria-checked={checked}
           accessibilityLabel={`${template.title}: ${checked ? t('diary.entry.undo') : t('diary.entry.markDone')}`}
-          style={[
-            styles.tickRow,
-            corner,
-            checked && styles.tickRowOn,
-            checked && { borderColor: accent },
-            !checked && locked && styles.tickRowLocked,
-          ]}
+          style={styles.tickRow}
         >
           <View style={[styles.tickCircle, checked && { borderColor: accent, backgroundColor: accent }]}>
             {checked ? (
@@ -437,7 +479,9 @@ function NumberRow({
           <Text style={styles.title}>{template.title}</Text>
           <Sparkline values={past.slice(-7)} color={palette.sage700} />
           {locked && !log ? <Text style={styles.meta}>{t('diary.entry.locked')}</Text> : null}
-          <SideAction habit={habit} date={date} log={log} locked={locked} />
+          <View style={styles.sideWrap}>
+            <SideAction habit={habit} date={date} log={log} locked={locked} />
+          </View>
         </View>
         {log ? (
           <View style={styles.stepper}>
@@ -580,24 +624,28 @@ const styles = StyleSheet.create({
   rows: {
     gap: spacing.sm,
   },
-  tickLine: {
+  tickBlock: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: spacing.sm,
-  },
-  tickRow: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    minHeight: 58,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    columnGap: spacing.sm,
+    paddingRight: 12,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: 'transparent',
     backgroundColor: colors.surface,
+  },
+  tickRow: {
+    flex: 1,
+    minWidth: 180,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    minHeight: 58,
+    paddingLeft: 14,
+    paddingRight: 2,
+    paddingVertical: 8,
+    borderRadius: radius.lg,
   },
   tickRowOn: {
     backgroundColor: colors.oceanTint,
@@ -650,10 +698,37 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.sage700,
   },
-  sideLink: {
+  sideButton: {
+    minHeight: 36,
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.ocean700,
+  },
+  sideButtonText: {
     fontSize: 13,
     fontWeight: '700',
     color: colors.ocean700,
+  },
+  sideWrap: {
+    flexDirection: 'row',
+    marginTop: 4,
+  },
+  sideLink: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 36,
+    paddingHorizontal: 12,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.ocean700,
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.ocean700,
+    textDecorationLine: 'none',
   },
   numberRow: {
     flexDirection: 'row',

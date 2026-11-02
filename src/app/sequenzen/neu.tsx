@@ -2,9 +2,11 @@ import { Link } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { colors, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, spacing } from '@/design/tokens';
+import { displayFont } from '@/design/responsive';
 import { KonfiguratorHilfe } from '@/features/configurator/KonfiguratorHilfe';
 import { PlusGate } from '@/features/configurator/PlusGate';
+import { SequenceBuilder } from '@/features/configurator/SequenceBuilder';
 import { SequenceEditor } from '@/features/configurator/SequenceEditor';
 
 export default function NeueSequenzScreen() {
@@ -18,12 +20,12 @@ export default function NeueSequenzScreen() {
       {/* Die Hilfe steht ausserhalb von PlusGate: lesen darf sie jeder, auch
           wer noch ueberlegt, ob sich Plus lohnt. */}
       <View style={styles.titleRow}>
-        <Text style={styles.title}>{t('sequenz.neuTitel')}</Text>
+        <Text style={styles.title} {...displayFont}>{t('sequenz.neuTitel')}</Text>
         <KonfiguratorHilfe />
       </View>
 
       <PlusGate>
-        <SequenceEditor />
+        {DESIGN_PREVIEW ? <SequenceBuilder /> : <SequenceEditor />}
       </PlusGate>
     </ScrollView>
   );

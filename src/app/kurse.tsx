@@ -4,8 +4,9 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ActiveFilter } from '@/components/FilterControls';
 import { FilterGlyph, HEADER_ICON_SIZE, HeaderIconLink } from '@/components/HeaderIcon';
-import { colors, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, spacing } from '@/design/tokens';
 import { BookingResultBanner, bookingResultFrom } from '@/features/courses/BookingResultBanner';
+import { CoursesFeed } from '@/features/courses/CoursesFeed';
 import { CoursesList } from '@/features/courses/CoursesList';
 import { parseCoursePeriod } from '@/features/courses/schedule';
 
@@ -20,6 +21,17 @@ export default function KurseScreen() {
   // Zurueckkehren von der Filterseite und laesst sich verlinken.
   const { buchung, zeitraum } = useLocalSearchParams<{ buchung?: string; zeitraum?: string }>();
   const period = parseCoursePeriod(zeitraum);
+
+  // Im Testsystem die Kurse des Vorschlags "Mondlicht Mobile" (03.11.2026):
+  // Art und Monat waehlt man direkt auf der Seite, die Filterseite entfaellt.
+  if (DESIGN_PREVIEW) {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <BookingResultBanner result={bookingResultFrom(buchung)} />
+        <CoursesFeed />
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

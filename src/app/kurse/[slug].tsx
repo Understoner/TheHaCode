@@ -6,8 +6,9 @@ import { Button } from '@/components/Button';
 import { CoverImage } from '@/components/CoverImage';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { StateMessage } from '@/components/StateMessage';
-import { colors, radius, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { CourseBooking } from '@/features/courses/CourseBooking';
+import { CourseDetailView } from '@/features/courses/CourseDetailView';
 import { formatCourseStart } from '@/features/courses/schedule';
 import { useCourse } from '@/features/courses/useCourse';
 import { useCourseSeats } from '@/features/courses/useCourseBooking';
@@ -31,7 +32,10 @@ export default function KursDetailScreen() {
 
   return (
     <QueryBoundary query={query}>
-      {(course) => (course ? <CourseDetail course={course} /> : <NotFound />)}
+      {/* Im Testsystem die Kursseite des Vorschlags "Mondlicht Mobile" (03.11.2026). */}
+      {(course) =>
+        course ? DESIGN_PREVIEW ? <CourseDetailView course={course} /> : <CourseDetail course={course} /> : <NotFound />
+      }
     </QueryBoundary>
   );
 }

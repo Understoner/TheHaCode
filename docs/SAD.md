@@ -1760,6 +1760,16 @@ Umbau der Handy-Ansichten nach dem Design-Vorschlag gleichen Namens, ebenfalls h
 - **Tageszeit an der Vorlage:** Migration 0039, `habit_templates.day_part` (`morgens`/`tagsueber`/`abends`, NULL = tagsüber). Nur die Redaktion setzt sie (keine Spaltenrechte für `authenticated`); 0039 füllt eindeutige Fälle per Slug vor. Additiv; sie bleibt auch bei einem Revert des Codes stehen.
 - **Habit-Auswahl** (`HabitPicker.tsx`): Suche, Bereiche als Symbolleiste, kompakte Zeilen, Details auf Tipp.
 
+Nachtrag 03.11.2026 (ebenfalls nur Testsystem):
+
+- **Kurse** (`CoursesFeed.tsx`, `CourseDetailView.tsx`): Einstieg „Wie willst du üben?" (Online, Vor Ort, Für dich), Monate als Leiste statt Filterseite, nächster Termin groß mit Kalenderblatt, kompakte Zeilen, „Atmung nach Maß" als eigene Karte. Kursseite mit gezeichnetem Bild, Eckdaten-Kacheln, Abenden als Zeitleiste mit Monden, aufklappbaren Abschnitten und fester Leiste für Preis und Knopf (dort ohne Tab-Leiste, wie die Session-Seite). **Keine neue Spalte:** Art aus `location`/`is_pinned`, Thema aus dem Titel, Abende aus der Liste unter „## Termine" im `body_md` (`courseFacts.ts`). Fehlt etwas, entfällt die Anzeige. Gebucht wird unverändert über `CourseBooking`.
+- **News ohne Fotos:** Feed und Beitragsseite zeigen nur noch gezeichnete Motive, der erste Beitrag größer mit Mondszene. `cover_image_path` bleibt in der Datenbank; Live zeigt die Fotos weiter.
+- **Tagebuch:** „Sequenz starten" steht im Block des Habits, nicht daneben; eigene Habits mit Session-Link (`link_url`) bekommen denselben Knopf.
+- **Konfigurator** (`SequenceBuilder.tsx`): dasselbe Formular, Schema und Speichern wie `SequenceEditor`, aber mit Schnellstart-Mustern, Plus/Minus statt Tastatur, Rhythmus-Streifen und zugeklappten Nebensachen (Blockname, Pause, Musik).
+- **Tagebuch-Einstellungen** (`HabitSettingsView.tsx`): Zeilen mit Zeichen und echten Schaltern.
+- **„Challenges" heißen in der Oberfläche „Übungswege"** (Wunsch des Users: kein Wettbewerb, sondern Habits für die nächste Zeit bündeln und planen). Nur Texte und Symbol (Weg statt Fahne); Tabellen, Routen und Code-Namen bleiben `challenge*`. Gilt in beiden Umgebungen, Live kennt die Funktion noch nicht. **Offen:** Die Datenschutzerklärung (Fassung 6) sagt noch „Challenges" — angleichen nur mit einer neuen Fassung.
+- **Überschrift-Schrift:** `displayFont` aus `responsive.ts` (`dataSet`) statt `data-font`-Prop, die react-native-web nicht ins HTML durchreicht.
+
 ### 6.2 Verbindliche Zustände jeder Datenkomponente
 
 Jede Komponente, die serverseitige Daten anzeigt, behandelt vier Zustände. Keine Ausnahme, kein „machen wir später":

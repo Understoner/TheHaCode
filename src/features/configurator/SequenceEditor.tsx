@@ -23,7 +23,7 @@ import type { PlayableExercise } from '@/types/breathing';
 import { PressableRing } from '@/components/PressableRing';
 
 /** Bestehende Sequenz -> Formularstand. Zahlen werden zu Text, sonst nichts. */
-function toForm(sequence: PlayableExercise): SequenceFormValues {
+export function toForm(sequence: PlayableExercise): SequenceFormValues {
   const zahl = (value: number | string | null) => {
     const n = Number(value ?? 0);
     return Number.isInteger(n) ? String(n) : String(n);
@@ -55,7 +55,7 @@ function toForm(sequence: PlayableExercise): SequenceFormValues {
   };
 }
 
-function mmss(ms: number): string {
+export function mmss(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }

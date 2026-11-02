@@ -34,7 +34,11 @@ export default function RootLayout() {
   // "Beenden" (BACKLOG T11). Betroffen ist nur /sessions/<id>, nicht die
   // Liste darueber. Ohne Navigation entfaellt auch der reservierte Platz fuer
   // die Tab-Leiste, sonst bliebe unten ein leerer Streifen stehen.
-  const immersive = /^\/sessions\/.+/.test(pathname);
+  const immersive =
+    /^\/sessions\/.+/.test(pathname) ||
+    // Im Testsystem auch die Kursseite (03.11.2026): Zurueck-Knopf im Bild,
+    // Preis und Buchen fest unten - wie die Session-Seite vor dem Start.
+    (DESIGN_PREVIEW && /^\/kurse\/(?!filter$).+/.test(pathname));
 
   return (
     <QueryClientProvider client={queryClient}>

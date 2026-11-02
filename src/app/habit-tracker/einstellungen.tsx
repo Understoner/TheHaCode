@@ -5,9 +5,11 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
-import { colors, radius, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
+import { displayFont } from '@/design/responsive';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
+import { HabitSettingsView } from '@/features/habits/HabitSettingsView';
 import { CORE_AREA, enabledCategoryIds, isAreaEnabled, toggleArea } from '@/features/habits/habitAreas';
 import {
   useHabitAreas,
@@ -30,12 +32,19 @@ export default function EinstellungenScreen() {
       <Link href="/habit-tracker" style={styles.back}>
         {t('diary.back')}
       </Link>
-      <Text style={styles.title}>{t('diary.settings.title')}</Text>
+      <Text style={styles.title} {...displayFont}>
+        {t('diary.settings.title')}
+      </Text>
 
       {loading ? (
         <SkeletonList />
       ) : session ? (
-        <Settings />
+        // Im Testsystem im Design des Vorschlags "Mondlicht Mobile" (03.11.2026).
+        DESIGN_PREVIEW ? (
+          <HabitSettingsView />
+        ) : (
+          <Settings />
+        )
       ) : (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{t('diary.login.title')}</Text>

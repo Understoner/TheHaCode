@@ -108,12 +108,23 @@ export function ChecklistGlyph() {
   );
 }
 
-/** Eine Fahne am Mast - die Challenges (0036). */
-export function FlagGlyph() {
+/**
+ * Ein geschwungener Weg mit Ziel - die Uebungswege (0036, bis 02.11.2026
+ * "Challenges" mit Fahne; umbenannt, weil es kein Wettbewerb sein soll).
+ */
+export function PathGlyph() {
   return (
     <Svg width={GLYPH} height={GLYPH} viewBox="0 0 16 16">
-      <Line x1={3.5} y1={2} x2={3.5} y2={14.5} stroke={colors.ink700} strokeWidth={1.8} strokeLinecap="round" />
-      <Path d="M4.5 2.5h8.5l-2 3 2 3H4.5z" fill={colors.ink700} strokeLinejoin="round" />
+      <Path
+        d="M2.5 14c3.5 0 2-4.5 5.5-4.5S11 5 13 3.5"
+        fill="none"
+        stroke={colors.ink700}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeDasharray="0.1 3"
+      />
+      <Circle cx={2.5} cy={14} r={1.6} fill={colors.ink700} />
+      <Circle cx={13} cy={3.2} r={2.2} fill="none" stroke={colors.ink700} strokeWidth={1.6} />
     </Svg>
   );
 }

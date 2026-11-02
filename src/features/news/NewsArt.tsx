@@ -1,19 +1,18 @@
-import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
-import { useThemeName, useThemePalette } from '@/design/theme';
+import { useThemePalette } from '@/design/theme';
 import { palettes, type Palette } from '@/design/tokens';
 import type { NewsCategory } from '@/features/news/categories';
-import { supabase } from '@/lib/supabase';
 
-// Bilder der News im Vorschlag "Mondlicht Mobile" (02.11.2026, nur
-// Testsystem).
+// Bilder der News im Vorschlag "Mondlicht Mobile" (nur Testsystem).
 //
-// - Ein gepflegtes Foto erscheint in Mondlicht als Duoton: erst grau, dann
-//   mit Gold multipliziert und mit Nachtblau aufgehellt. So brechen helle
-//   Stockfotos das Nachtblau nicht mehr. In "Klar" bleibt das Foto, wie es ist.
-// - Ohne Foto zeichnet die App ein Motiv je Kategorie - kein Stockfoto, keine
-//   erfundene Illustration, nur Formen aus der Palette.
+// Seit 03.11.2026 ohne Fotos (Wunsch des User: die Fotos, auch als Duoton,
+// passen nicht). Jeder Beitrag bekommt ein gezeichnetes Motiv je Kategorie,
+// der erste Beitrag im Feed die grosse Mondszene aus dem Vorschlag. Kein
+// Stockfoto, keine erfundene Illustration, nur Formen aus der Palette.
+// cover_image_path bleibt in der Datenbank stehen - das Livesystem zeigt die
+// Fotos weiter (NewsList.tsx).
 //
 // SVG-Farben als Hex aus der Palette (var() loest als SVG-Attribut nicht
 // jeder Browser auf, siehe Lotus.tsx).
@@ -137,49 +136,76 @@ function Motif({ category, compact }: { category: NewsCategory; compact: boolean
   );
 }
 
-/** Titelbild eines Beitrags: Foto (in Mondlicht als Duoton) oder Motiv. */
+/** Titelbild eines Beitrags: das gezeichnete Motiv seiner Kategorie. */
 export function NewsCover({
-  path,
   category,
   label,
   compact = false,
   style,
 }: {
-  path: string | null;
   category: NewsCategory;
   label: string;
   compact?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
-  const theme = useThemeName();
+  return (
+    <View style={[styles.frame, style]} accessibilityLabel={label}>
+      <Motif category={category} compact={compact} />
+    </View>
+  );
+}
+
+/**
+ * Die grosse Szene fuer den ersten Beitrag, wie im Vorschlag: Mond mit Hof
+ * ueber dem Horizont, ein paar Sterne, drei Atemwellen und der Widerschein
+ * des Mondes im Wasser. Fuer jede Kategorie dieselbe Szene - die Kategorie
+ * steht als Pille darueber.
+ */
+export function MoonScene({ label, style }: { label: string; style?: StyleProp<ViewStyle> }) {
   const palette = useThemePalette();
-  const url = path ? supabase.storage.from('public-assets').getPublicUrl(path).data.publicUrl : null;
+  const W = 358;
+  const H = 210;
+  const horizon = 136;
+  const mx = 262;
+  const my = 64;
+  const r = 24;
 
   return (
     <View style={[styles.frame, style]} accessibilityLabel={label}>
-      {url ? (
-        <>
-          <Image
-            source={{ uri: url }}
-            style={[
-              StyleSheet.absoluteFill,
-              theme === 'mondlicht' ? ({ filter: 'grayscale(1) contrast(1.1)' } as object) : null,
-            ]}
-          />
-          {theme === 'mondlicht' ? (
-            <>
-              <View
-                style={[StyleSheet.absoluteFill, { backgroundColor: palette.glow, mixBlendMode: 'multiply' } as object]}
-              />
-              <View
-                style={[StyleSheet.absoluteFill, { backgroundColor: palette.background, mixBlendMode: 'lighten' } as object]}
-              />
-            </>
-          ) : null}
-        </>
-      ) : (
-        <Motif category={category} compact={compact} />
-      )}
+      <Svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" aria-hidden>
+        <Rect width={W} height={H} fill={palette.oceanImageBg} />
+        <Circle cx={mx} cy={my} r={r * 2.3} fill={palette.glow} opacity={0.07} />
+        <Circle cx={mx} cy={my} r={r * 1.5} fill={palette.glow} opacity={0.1} />
+        {/* Sichel: voller Kreis, ein zweiter in Grundfarbe schneidet sie aus. */}
+        <Circle cx={mx} cy={my} r={r} fill={palette.glow} />
+        <Circle cx={mx + r * 0.55} cy={my - r * 0.35} r={r * 0.92} fill={palette.oceanImageBg} />
+        {[
+          [40, 34, 1.4, palette.ink900],
+          [96, 62, 1, palette.ink900],
+          [128, 20, 1.1, palette.ink900],
+          [190, 48, 1.3, palette.blossom],
+          [214, 18, 0.9, palette.ink900],
+          [320, 26, 1, palette.ink900],
+          [338, 96, 1.2, palette.blossom],
+        ].map(([x, y, size, fill]) => (
+          <Circle key={`${x}-${y}`} cx={x} cy={y} r={size} fill={fill as string} opacity={0.75} />
+        ))}
+        <Path d={`M0 ${horizon} H${W}`} stroke={palette.lineStrong} strokeWidth={1} />
+        <Path d={`M${mx - 18} ${horizon} L${mx} ${H - 14} L${mx + 18} ${horizon} Z`} fill={palette.glow} opacity={0.12} />
+        {[0, 1, 2].map((i) => {
+          const base = horizon + 16 + i * 18;
+          return (
+            <Path
+              key={i}
+              d={`M0 ${base} C 60 ${base - 8}, 120 ${base + 8}, 180 ${base} S 300 ${base - 8}, ${W} ${base}`}
+              fill="none"
+              stroke={palette.glow}
+              strokeOpacity={[0.45, 0.3, 0.18][i]}
+              strokeWidth={1.5}
+            />
+          );
+        })}
+      </Svg>
     </View>
   );
 }
