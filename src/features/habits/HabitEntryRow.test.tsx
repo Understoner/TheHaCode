@@ -53,6 +53,7 @@ function habit(tracking: 'done' | 'number', overrides: Partial<MyHabit['habit_te
       id: 'tpl-1',
       slug: tracking === 'done' ? 'atmen-zum-einschlafen' : 'bolt-wert',
       category_id: 'cat-1',
+      day_part: null,
       title: tracking === 'done' ? 'Atmen zum Einschlafen' : 'BOLT-Wert ermitteln',
       description_md: null,
       tracking_type: tracking,

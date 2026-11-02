@@ -8,10 +8,11 @@ import { FilterGlyph, HEADER_ICON_SIZE, HeaderIconLink } from '@/components/Head
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
-import { colors, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
 import { HabitCatalog } from '@/features/habits/HabitCatalog';
+import { HabitPicker } from '@/features/habits/HabitPicker';
 import {
   habitFilterFromParams,
   habitFilterToParams,
@@ -40,8 +41,8 @@ export default function HabitsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Link href="/habit-tracker/einstellungen" style={styles.back}>
-        {t('habits.back')}
+      <Link href={DESIGN_PREVIEW ? '/habit-tracker' : '/habit-tracker/einstellungen'} style={styles.back}>
+        {DESIGN_PREVIEW ? t('diary.back') : t('habits.back')}
       </Link>
       {/* Der Trichter neben der Ueberschrift oeffnet die Filterseite
           (30.10.2026); die Chips und die Suche standen bis dahin hier. */}
@@ -57,7 +58,9 @@ export default function HabitsScreen() {
           <FilterGlyph active={isFiltered(filter)} />
         </HeaderIconLink>
       </View>
-      <Text style={styles.intro}>{t('habits.intro')}</Text>
+      {/* Im Testsystem (02.11.2026) steht die Erklaerung nicht mehr ueber der
+          Liste - die kompakten Zeilen sollen gleich unter der Suche beginnen. */}
+      {DESIGN_PREVIEW ? null : <Text style={styles.intro}>{t('habits.intro')}</Text>}
 
       {loading ? (
         <SkeletonList />
@@ -100,6 +103,16 @@ function HabitsForUser({ filter }: { filter: HabitFilter }) {
                                   resetHref="/habit-tracker/auswahl"
                                 />
                               ) : null}
+                              {DESIGN_PREVIEW ? (
+                                <HabitPicker
+                                  categories={categories.filter((c) => shown.has(c.id))}
+                                  templates={templates.filter((tpl) => shown.has(tpl.category_id))}
+                                  myHabits={habits}
+                                  favorites={favoriteIds}
+                                  plusAccess={plusAccess}
+                                  filter={filter}
+                                />
+                              ) : (
                               <HabitCatalog
                                 categories={categories.filter((c) => shown.has(c.id))}
                                 templates={templates.filter((tpl) => shown.has(tpl.category_id))}
@@ -108,6 +121,7 @@ function HabitsForUser({ filter }: { filter: HabitFilter }) {
                                 plusAccess={plusAccess}
                                 filter={filter}
                               />
+                              )}
                             </View>
                           );
                         }}

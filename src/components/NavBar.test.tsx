@@ -20,6 +20,8 @@ vi.mock('expo-router', () => ({
 // react-native-svg bringt wie expo-router unkompilierte Quellen mit; der Mond
 // in der Kopfzeile (nur Testsystem) ist fuer diesen Test belanglos.
 vi.mock('@/components/MoonMark', () => ({ MoonMark: () => null }));
+// Ebenso die Tab-Leiste des Vorschlags "Mondlicht Mobile" (nur Testsystem).
+vi.mock('@/components/MobileTabBar', () => ({ MobileTabBar: () => null }));
 
 // Seit dem Umstieg auf CSS-Breakpoints stehen BEIDE Navigationsfassungen im
 // HTML; sichtbar ist je nach Fensterbreite genau eine, ausgeblendet per Media

@@ -2,22 +2,10 @@ import { Link } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { colors, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { addDays, today as heute } from '@/features/habits/dates';
-import { DiaryInsights } from '@/features/habits/DiaryInsights';
-import {
-  useHabitCatalog,
-  useHabitLogs,
-  useHabitScoreEnabled,
-  useMyHabits,
-  useMySessions,
-} from '@/features/habits/useHabits';
-
-// Genug fuer BOLT-Verlauf und den Vergleich zweier 4-Wochen-Zeitraeume.
-const LOOKBACK_DAYS = 120;
+import { InsightsForUser } from '@/features/habits/InsightsForUser';
 
 /**
  * Die Auswertung des Tagebuchs auf eigener Seite (30.10.2026), erreichbar
@@ -50,46 +38,6 @@ export default function AuswertungScreen() {
         </View>
       )}
     </ScrollView>
-  );
-}
-
-function InsightsForUser() {
-  const today = heute();
-  // Ab dem 1. Jaenner, weil der Score auch das Jahr zeigt (score.ts).
-  const yearStart = `${today.slice(0, 4)}-01-01`;
-  const from = [addDays(today, -LOOKBACK_DAYS), yearStart].sort()[0];
-
-  const { scoreOn } = useHabitScoreEnabled();
-  const catalog = useHabitCatalog();
-  const myHabits = useMyHabits();
-  const logs = useHabitLogs(from, today);
-  const sessions = useMySessions();
-
-  return (
-    <QueryBoundary query={catalog}>
-      {({ categories }) => (
-        <QueryBoundary query={myHabits}>
-          {(habits) => (
-            <QueryBoundary query={logs}>
-              {(entries) => (
-                <QueryBoundary query={sessions}>
-                  {(sessionList) => (
-                    <DiaryInsights
-                      today={today}
-                      habits={habits}
-                      logs={entries}
-                      sessions={sessionList}
-                      categories={categories}
-                      scoreOn={scoreOn}
-                    />
-                  )}
-                </QueryBoundary>
-              )}
-            </QueryBoundary>
-          )}
-        </QueryBoundary>
-      )}
-    </QueryBoundary>
   );
 }
 

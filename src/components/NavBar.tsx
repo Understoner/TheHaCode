@@ -2,6 +2,7 @@ import { Link, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { MobileTabBar } from '@/components/MobileTabBar';
 import { MoonMark } from '@/components/MoonMark';
 import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { MOBILE_TAB_BAR_SAFE_HEIGHT, navItems, type NavIcon } from '@/design/navigation';
@@ -120,6 +121,11 @@ export function NavBar() {
         </View>
       </View>
 
+      {/* Im Testsystem (02.11.2026) die Leiste des Vorschlags "Mondlicht
+          Mobile": fuenf Eintraege und ein Blatt "Mehr" (MobileTabBar.tsx). */}
+      {DESIGN_PREVIEW ? (
+        <MobileTabBar />
+      ) : (
       <View {...responsive('nav-mobile')} role="navigation" style={styles.mobileTabBar}>
         {navItems.map((item) => {
           const active = item.kind === 'link' && isActive(String(item.href), pathname);
@@ -164,6 +170,7 @@ export function NavBar() {
           );
         })}
       </View>
+      )}
     </>
   );
 }

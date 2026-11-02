@@ -938,6 +938,7 @@ export type Database = {
           category_id: string
           client_id: string | null
           created_at: string
+          day_part: string | null
           default_target: number | null
           deleted_at: string | null
           description_md: string | null
@@ -969,6 +970,7 @@ export type Database = {
           category_id: string
           client_id?: string | null
           created_at?: string
+          day_part?: string | null
           default_target?: number | null
           deleted_at?: string | null
           description_md?: string | null
@@ -1000,6 +1002,7 @@ export type Database = {
           category_id?: string
           client_id?: string | null
           created_at?: string
+          day_part?: string | null
           default_target?: number | null
           deleted_at?: string | null
           description_md?: string | null
