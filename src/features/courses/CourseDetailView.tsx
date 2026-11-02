@@ -6,6 +6,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 import { PressableRing } from '@/components/PressableRing';
 import { useThemePalette } from '@/design/theme';
+import { moonPath } from '@/design/moon';
 import { colors, radius, spacing } from '@/design/tokens';
 import { displayFont } from '@/design/responsive';
 import { formatPrice } from '@/features/courses/booking';
@@ -67,7 +68,9 @@ export function CourseDetailView({ course }: { course: Course }) {
   const actionLabel = course.booking_enabled
     ? t('kurse.m.toBooking')
     : signupUrl
-      ? `${course.signup_label ?? (kind === 'mass' ? t('kurse.m.ask') : t('kurse.signup'))} ↗`
+      ? // Bei "Atmung nach Mass" bewusst kurz statt signup_label ("Jetzt
+        // individuelles Angebot anfragen" quetschte Titel und Text, 02.11.2026).
+        `${kind === 'mass' ? t('kurse.m.askOffer') : (course.signup_label ?? t('kurse.signup'))} ↗`
       : null;
   const onAction = () => {
     if (course.booking_enabled) {
@@ -183,13 +186,6 @@ function Tile({ icon, value, label }: { icon: ReactNode; value: string; label: s
       </Text>
     </View>
   );
-}
-
-/** Mond in der Phase p (0..1, 1 = voll) als Pfad um den Mittelpunkt 0/0. */
-function moonPath(p: number, r: number): string {
-  if (p >= 0.99) return `M0 ${-r} A ${r} ${r} 0 1 1 0 ${r} A ${r} ${r} 0 1 1 0 ${-r} Z`;
-  const rx = r * Math.abs(1 - 2 * p);
-  return `M0 ${-r} A ${r} ${r} 0 0 1 0 ${r} A ${rx.toFixed(2)} ${r} 0 0 ${p < 0.5 ? 0 : 1} 0 ${-r} Z`;
 }
 
 /** Die Abende als Zeitleiste: der Mond waechst von Abend zu Abend. */

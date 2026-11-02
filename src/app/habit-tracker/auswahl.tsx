@@ -50,13 +50,17 @@ export default function HabitsScreen() {
         <Text role="heading" style={styles.title}>
           {t('diary.picker.title')}
         </Text>
-        <HeaderIconLink
-          href={{ pathname: '/habit-tracker/auswahl-filter', params: habitFilterToParams(filter) }}
-          label={t('habits.filter.open')}
-          active={isFiltered(filter)}
-        >
-          <FilterGlyph active={isFiltered(filter)} />
-        </HeaderIconLink>
+        {/* Im Testsystem kein Filter (02.11.2026): Alle, Favoriten und die
+            Bereiche stehen als Leiste direkt ueber den Habits. */}
+        {DESIGN_PREVIEW ? null : (
+          <HeaderIconLink
+            href={{ pathname: '/habit-tracker/auswahl-filter', params: habitFilterToParams(filter) }}
+            label={t('habits.filter.open')}
+            active={isFiltered(filter)}
+          >
+            <FilterGlyph active={isFiltered(filter)} />
+          </HeaderIconLink>
+        )}
       </View>
       {/* Im Testsystem (02.11.2026) steht die Erklaerung nicht mehr ueber der
           Liste - die kompakten Zeilen sollen gleich unter der Suche beginnen. */}
@@ -97,7 +101,7 @@ function HabitsForUser({ filter }: { filter: HabitFilter }) {
                           const shown = enabledCategoryIds(categories, enabledAreas);
                           return (
                             <View style={styles.stack}>
-                              {isFiltered(filter) ? (
+                              {!DESIGN_PREVIEW && isFiltered(filter) ? (
                                 <ActiveFilter
                                   summary={filterSummary(filter, categories, t)}
                                   resetHref="/habit-tracker/auswahl"

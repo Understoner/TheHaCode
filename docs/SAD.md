@@ -1770,6 +1770,14 @@ Nachtrag 02.11.2026 (ebenfalls nur Testsystem):
 - **„Challenges" heißen in der Oberfläche „Übungswege"** (Wunsch des Users: kein Wettbewerb, sondern Habits für die nächste Zeit bündeln und planen). Nur Texte und Symbol (Weg statt Fahne); Tabellen, Routen und Code-Namen bleiben `challenge*`. Gilt in beiden Umgebungen, Live kennt die Funktion noch nicht. **Offen:** Die Datenschutzerklärung (Fassung 6) sagt noch „Challenges" — angleichen nur mit einer neuen Fassung.
 - **Überschrift-Schrift:** `displayFont` aus `responsive.ts` (`dataSet`) statt `data-font`-Prop, die react-native-web nicht ins HTML durchreicht.
 
+Dritte Runde, ebenfalls 02.11.2026 (nur Testsystem):
+
+- **Tagebuch-Kopf:** wieder einzelne Symbole (Auswahl, Übungswege, Einstellungen) neben dem „i"; das „…"-Menü ist weg. Die Auswertung bleibt die dritte Ansicht im Umschalter.
+- **Auswertung als Erlebnis** (`DiaryJourney.tsx`): Mondzyklus (28 Tage als Monde, voll = alles Gewählte erledigt, `cycleDays()` in `analysis.ts`), Höhepunkte, Punkte-Ringe, Wochenrhythmus als Kurve, Spuren je Habit, Blüte der Bereiche, Atemzeit. Dieselben Zahlen wie `DiaryInsights` über `useInsightsData()`; weiter ohne Normen und Wertung (§5.7).
+- **Habit-Auswahl:** kein Filter-Knopf und keine Filterseite im Testsystem; die Leiste bietet „Alle" (Vorgabe), „Favoriten" und die Bereiche.
+- **Team** (`TeamMondlicht.tsx`) und **Konto** (`KontoMondlicht.tsx`): Konto mit „Mondpass" (Begrüßung, dabei seit, Plus-Status, eigene Zahlen, acht Wochen als Monde nach Atemminuten), darunter Abo, Einwilligungen, Daten und Löschen unverändert; abgemeldet ein kurzer Vorraum vor dem Anmeldeformular.
+- **Kleinigkeiten:** „Atmung nach Maß" zeigt „Angebot anfragen" statt des langen `signup_label`; Sessions-Überschrift „Was brauchst du?".
+
 ### 6.2 Verbindliche Zustände jeder Datenkomponente
 
 Jede Komponente, die serverseitige Daten anzeigt, behandelt vier Zustände. Keine Ausnahme, kein „machen wir später":

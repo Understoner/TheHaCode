@@ -283,8 +283,8 @@ function ForYouCard({ course }: { course: Course }) {
           <Text style={styles.meta} numberOfLines={2}>
             {t('kurse.m.forYouText')}
           </Text>
+          <Text style={styles.ask}>{`${t('kurse.m.askOffer')} ›`}</Text>
         </View>
-        <Text style={styles.ask}>{course.signup_label ?? t('kurse.m.ask')}</Text>
       </View>
     </Link>
   );
@@ -575,6 +575,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.oceanTint,
   },
   ask: {
+    marginTop: 4,
     fontSize: 13,
     fontWeight: '800',
     color: colors.ocean700,
