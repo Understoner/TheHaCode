@@ -8,7 +8,7 @@ import { QueryBoundary } from '@/components/QueryBoundary';
 import { StateMessage } from '@/components/StateMessage';
 import { useThemePalette } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
-import { displayFont } from '@/design/responsive';
+import { displayFont, responsive } from '@/design/responsive';
 import { availabilityOf, formatPrice } from '@/features/courses/booking';
 import { courseIconPath, courseTone, Glyph, KIND_ICON } from '@/features/courses/CourseArt';
 import {
@@ -44,7 +44,7 @@ export function CoursesFeed() {
   const [month, setMonth] = useState<string | null>(null);
 
   return (
-    <View style={styles.container}>
+    <View {...responsive('m-page')} style={styles.container}>
       <Text role="heading" aria-level={1} {...displayFont} style={styles.title}>
         {t('kurse.m.title')}
       </Text>
@@ -124,7 +124,7 @@ export function CoursesFeed() {
                     </Text>
                     <Text style={styles.count}>{t('kurse.m.count', { count: list.length })}</Text>
                   </View>
-                  <View style={styles.rows}>
+                  <View {...responsive('m-grid')} style={styles.gridRows}>
                     {rest.map((c) => (
                       <CourseRow key={c.id} course={c} seatsLeft={seatsLeft(c)} />
                     ))}
@@ -135,13 +135,15 @@ export function CoursesFeed() {
               {(kind === null || kind === 'mass') && forYou.length > 0 ? (
                 <View style={styles.rows}>
                   {kind === 'mass' ? (
-                    <Text role="heading" aria-level={2} {...displayFont} style={styles.listTitle}>
+                    <Text role="heading" aria-level={2} {...displayFont} style={[styles.listTitle, styles.inset]}>
                       {t('kurse.m.forYou')}
                     </Text>
                   ) : null}
-                  {forYou.map((c) => (
-                    <ForYouCard key={c.id} course={c} />
-                  ))}
+                  <View {...responsive('m-grid')} style={styles.gridRows}>
+                    {forYou.map((c) => (
+                      <ForYouCard key={c.id} course={c} />
+                    ))}
+                  </View>
                 </View>
               ) : null}
             </View>
@@ -241,7 +243,7 @@ function CourseRow({ course, seatsLeft }: { course: Course; seatsLeft: number | 
   const series = kind === 'online' && theme ? `${t('kurse.m.kind.online')} · ${t(`kurse.m.theme.${theme}`)}` : t(`kurse.m.kind.${kind}`);
 
   return (
-    <Link href={detailHref(course.slug)} style={styles.cardLink}>
+    <Link href={detailHref(course.slug)} style={styles.cardLinkFlat}>
       <View style={styles.row}>
         {cal ? (
           <View style={styles.rowSheet}>
@@ -273,7 +275,7 @@ function ForYouCard({ course }: { course: Course }) {
   const { t } = useTranslation();
   const palette = useThemePalette();
   return (
-    <Link href={detailHref(course.slug)} style={styles.cardLink}>
+    <Link href={detailHref(course.slug)} style={styles.cardLinkFlat}>
       <View style={styles.forYou}>
         <View style={styles.forYouIcon}>
           <Glyph d={KIND_ICON.mass} color={palette.blossom} size={20} />
@@ -363,6 +365,11 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     marginHorizontal: spacing.md,
+    textDecorationLine: 'none',
+  },
+  cardLinkFlat: {
+    display: 'flex',
+    flexDirection: 'column',
     textDecorationLine: 'none',
   },
   next: {
@@ -485,6 +492,14 @@ const styles = StyleSheet.create({
   },
   rows: {
     gap: spacing.sm,
+  },
+  // Kartenliste: mobil untereinander, am Desktop 2-3 Spalten (m-grid).
+  gridRows: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  inset: {
+    paddingHorizontal: spacing.md + 2,
   },
   row: {
     flexDirection: 'row',

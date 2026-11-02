@@ -1,11 +1,12 @@
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
+import { PageColumn } from '@/design/PageColumn';
 import { responsive } from '@/design/responsive';
 import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -13,6 +14,7 @@ import { usePlusAccess } from '@/features/configurator/useSequences';
 import { useConsents } from '@/features/consents/useConsents';
 import { addDays, monthDays, today as heute, weekStart, type IsoDate } from '@/features/habits/dates';
 import { DiaryConsent } from '@/features/habits/DiaryConsent';
+import { DiaryGuest } from '@/features/habits/DiaryGuest';
 import { enabledCategoryIds } from '@/features/habits/habitAreas';
 import { DiaryHeader, DiaryHeaderMenu, parseDiaryView, type DiaryView } from '@/features/habits/DiaryHeader';
 import { DiaryMonth, DiaryWeek } from '@/features/habits/DiaryOverview';
@@ -36,25 +38,41 @@ export default function TagebuchScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {DESIGN_PREVIEW ? (
-        <DiaryHeaderMenu view={view} onChangeView={(v) => router.setParams({ ansicht: v === 'heute' ? '' : v })} />
-      ) : (
-        <DiaryHeader />
-      )}
-
-      {loading ? (
-        <SkeletonList />
-      ) : !session ? (
-        <DiaryTeaser />
-      ) : DESIGN_PREVIEW && view === 'auswertung' ? (
-        // Lesen geht immer, auch nach Widerruf (SAD §3.10) - wie auf
-        // /habit-tracker/auswertung ohne Abfrage der Einwilligung.
-        <InsightsForUser />
-      ) : (
-        <DiaryForUser view={view} />
-      )}
+      <Column>
+        {DESIGN_PREVIEW ? (
+          <DiaryHeaderMenu
+            view={view}
+            guest={!loading && !session}
+            onChangeView={(v) => router.setParams({ ansicht: v === 'heute' ? '' : v })}
+          />
+        ) : (
+          <DiaryHeader />
+        )}
+  
+        {loading ? (
+          <SkeletonList />
+        ) : !session ? (
+          DESIGN_PREVIEW ? (
+            <DiaryGuest />
+          ) : (
+            <DiaryTeaser />
+          )
+        ) : DESIGN_PREVIEW && view === 'auswertung' ? (
+          // Lesen geht immer, auch nach Widerruf (SAD §3.10) - wie auf
+          // /habit-tracker/auswertung ohne Abfrage der Einwilligung.
+          <InsightsForUser />
+        ) : (
+          <DiaryForUser view={view} />
+        )}
+      </Column>
     </ScrollView>
   );
+}
+
+// Im Testsystem steht das Tagebuch in der zentrierten Seitenspalte
+// (PageColumn, 02.11.2026), im Livesystem bleibt es wie bisher.
+function Column({ children }: { children: ReactNode }) {
+  return DESIGN_PREVIEW ? <PageColumn>{children}</PageColumn> : <>{children}</>;
 }
 
 /** Ohne Konto: was es gibt, und der Weg zum Konto. */

@@ -8,7 +8,7 @@ import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { useThemePalette } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
-import { displayFont } from '@/design/responsive';
+import { displayFont, responsive } from '@/design/responsive';
 import { NEWS_CATEGORIES, type NewsCategory } from '@/features/news/categories';
 import { isFresh } from '@/features/news/fresh';
 import { CategoryGlyph, categoryTone, MoonScene, NewsCover } from '@/features/news/NewsArt';
@@ -84,7 +84,7 @@ export function NewsFeed() {
                   <Text role="heading" aria-level={2} style={styles.sectionTitle}>
                     {t('news.moreTitle')}
                   </Text>
-                  <View style={styles.rows}>
+                  <View {...responsive('m-grid')} style={styles.rows}>
                     {rest.map((post) => (
                       <PostRow key={post.id} post={post} fresh={isFresh(post.published_at, now)} />
                     ))}
@@ -116,7 +116,7 @@ function FeaturedCard({ post, fresh }: { post: NewsPost; fresh: boolean }) {
 
   return (
     <Link href={detailHref(post.slug)} style={styles.featuredLink}>
-      <View style={styles.featured}>
+      <View {...responsive('m-feature')} style={styles.featured}>
         <View>
           <MoonScene label={post.title} style={styles.featuredCover} />
           <View style={styles.pill}>
@@ -212,10 +212,10 @@ const styles = StyleSheet.create({
   chipTextActive: {
     color: colors.surface,
   },
+  // Breite und Mitte kommen von der Seitenspalte (PageColumn, news/index.tsx).
   list: {
     gap: spacing.md,
     paddingHorizontal: spacing.md,
-    maxWidth: 720,
     width: '100%',
   },
   featuredLink: {
