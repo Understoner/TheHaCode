@@ -19,12 +19,16 @@ import type { HabitCategory } from './useHabits';
 // Testsystem). Dieselben Zahlen wie DiaryInsights (useInsightsData), aber als
 // Bilder, die man auf einen Blick liest:
 //
-//   Mondzyklus    28 Tage als Monde - voll heisst "alles Gewaehlte erledigt"
+//   28 Tage       als Monde - voll heisst "alles Gewaehlte erledigt"
 //   Hoehepunkte   laengste laufende Serie, staerkster Wochentag, Atemzeit
 //   Punkte-Ringe  Tag, Woche, Monat, Jahr als Ringe um eine Mitte
 //   Wochenwelle   der Wochenrhythmus als Atemkurve
-//   Sternspuren   je Habit 28 Punkte, ein leuchtender je erledigtem Tag
-//   Bluete        je Bereich ein Blatt, so lang wie die aktiven Tage
+//   Verlaeufe     BOLT, Schlaf und andere Zahlen-Habits
+//   Habit fuer Habit  je Habit 28 Punkte, ein leuchtender je erledigtem Tag
+//   Bereiche      je Bereich ein Blatt, so lang wie die aktiven Tage
+//
+// Ueberschriften seit 02.11.2026 ohne "Mondzyklus", "Spuren", "Bluete"
+// (Wunsch User: weniger esoterisch); die Bilder bleiben.
 //
 // Bewusst ohne Wertung (SAD §5.7): keine Normen, kein "gut/schlecht", nur
 // die eigenen Zahlen und der Vergleich mit dem eigenen Zeitraum davor.
@@ -89,6 +93,19 @@ export function DiaryJourney(props: Props) {
         {bestDay < 0 ? <Text style={styles.text}>{t('diary.analysis.empty')}</Text> : <RhythmWave pattern={data.pattern} best={bestDay} />}
       </Card>
 
+      {data.trends.map(({ habit, trend, summary }) => (
+        <Card key={habit.id} title={t('diary.insights.trend', { title: habit.habit_templates.title })} hint={t('diary.insights.average')}>
+          {summary.best === null ? (
+            <Text style={styles.text}>{t('diary.insights.trendEmpty')}</Text>
+          ) : (
+            <>
+              <TrendChart points={trend} today={today} title={habit.habit_templates.title} />
+              <Text style={styles.text}>{t('diary.insights.best', { value: summary.best, unit: habit.habit_templates.unit ?? '' })}</Text>
+            </>
+          )}
+        </Card>
+      ))}
+
       <Card title={t('diary.journey.trails')} hint={t('diary.journey.trailsHint', { days: WINDOW_DAYS })}>
         {data.consistency.length === 0 ? (
           <Text style={styles.text}>{t('diary.analysis.habits.empty')}</Text>
@@ -122,19 +139,6 @@ export function DiaryJourney(props: Props) {
           <Bloom comparison={data.comparison} categories={categories} />
         )}
       </Card>
-
-      {data.trends.map(({ habit, trend, summary }) => (
-        <Card key={habit.id} title={t('diary.insights.trend', { title: habit.habit_templates.title })} hint={t('diary.insights.average')}>
-          {summary.best === null ? (
-            <Text style={styles.text}>{t('diary.insights.trendEmpty')}</Text>
-          ) : (
-            <>
-              <TrendChart points={trend} today={today} title={habit.habit_templates.title} />
-              <Text style={styles.text}>{t('diary.insights.best', { value: summary.best, unit: habit.habit_templates.unit ?? '' })}</Text>
-            </>
-          )}
-        </Card>
-      ))}
 
       <Card title={t('diary.journey.breathTime')} hint={totalMinutes > 0 ? t('diary.insights.minutesTotal', { minutes: totalMinutes }) : undefined}>
         {totalMinutes > 0 ? (
@@ -188,9 +192,8 @@ function CycleHero({ cycle, today }: { cycle: ReturnType<typeof useInsightsData>
           <Circle key={`${x}-${y}`} cx={x} cy={y} r={r} fill={palette.ink900} opacity={0.6} />
         ))}
       </Svg>
-      <Text style={styles.kicker}>{t('diary.journey.cycleKicker', { days: WINDOW_DAYS })}</Text>
       <Text {...displayFont} style={styles.heroTitle}>
-        {t('diary.journey.cycleTitle')}
+        {t('diary.journey.cycleTitle', { days: WINDOW_DAYS })}
       </Text>
       <View style={styles.weekHead}>
         {Array.from({ length: 7 }, (_, i) => (
@@ -480,15 +483,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.oceanImageBg,
     overflow: 'hidden',
   },
-  kicker: {
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.1,
-    textTransform: 'uppercase',
-    color: colors.ocean700,
-  },
   heroTitle: {
-    marginTop: -6,
     fontSize: 26,
     lineHeight: 31,
     color: colors.ink900,
