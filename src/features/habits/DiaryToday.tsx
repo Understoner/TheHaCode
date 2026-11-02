@@ -395,8 +395,11 @@ function TickRow({
             <Text style={styles.title}>{template.title}</Text>
             {!checked && locked ? <Text style={styles.meta}>{t('diary.entry.locked')}</Text> : null}
           </View>
+        </PressableRing>
+        <View style={styles.tickTail}>
+          <SideAction habit={habit} date={date} log={log} locked={locked} />
           {points ? (
-            <View>
+            <View style={styles.pointsWrap}>
               <Text style={[styles.points, negative && styles.pointsNegative]}>{points}</Text>
               {celebrate ? (
                 <Animated.Text
@@ -414,8 +417,7 @@ function TickRow({
               ) : null}
             </View>
           ) : null}
-        </PressableRing>
-        <SideAction habit={habit} date={date} log={log} locked={locked} />
+        </View>
       </View>
       {error ? (
         <Text role="alert" style={styles.error}>
@@ -637,7 +639,7 @@ const styles = StyleSheet.create({
   },
   tickRow: {
     flex: 1,
-    minWidth: 180,
+    minWidth: 150,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -686,6 +688,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     color: colors.sage700,
+  },
+  // Punkte stehen ganz rechts im Block - auch rechts von "Sequenz starten"
+  // (02.11.2026), damit sie in jeder Zeile an derselben Stelle sitzen.
+  // Aktion und Punkte bleiben beim Umbrechen beisammen.
+  tickTail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginLeft: 'auto',
+  },
+  pointsWrap: {
+    minWidth: 24,
+    alignItems: 'flex-end',
   },
   pointsNegative: {
     color: colors.danger,

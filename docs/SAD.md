@@ -1774,6 +1774,7 @@ Dritte Runde, ebenfalls 02.11.2026 (nur Testsystem):
 
 - **Tagebuch-Kopf:** wieder einzelne Symbole (Auswahl, Übungswege, Einstellungen) neben dem „i"; das „…"-Menü ist weg. Die Auswertung bleibt die dritte Ansicht im Umschalter.
 - **Auswertung als Erlebnis** (`DiaryJourney.tsx`): Mondzyklus (28 Tage als Monde, voll = alles Gewählte erledigt, `cycleDays()` in `analysis.ts`), Höhepunkte, Punkte-Ringe, Wochenrhythmus als Kurve, Spuren je Habit, Blüte der Bereiche, Atemzeit. Dieselben Zahlen wie `DiaryInsights` über `useInsightsData()`; weiter ohne Normen und Wertung (§5.7).
+- **Feinschliff (02.11.2026):** Überschriften der Auswertung sachlicher – „Die letzten 28 Tage“ statt „Dein Mondzyklus“, „Habit für Habit“ statt „Deine Spuren“, „Deine Bereiche“ statt „Deine Blüte“ (die Bilder bleiben). Verläufe der Zahlen-Habits (BOLT, Schlaf) stehen vor „Habit für Habit“. Im Tagebuch stehen die Punkte immer ganz rechts im Block, auch rechts von „Sequenz starten“.
 - **Habit-Auswahl:** kein Filter-Knopf und keine Filterseite im Testsystem; die Leiste bietet „Alle" (Vorgabe), „Favoriten" und die Bereiche.
 - **Team** (`TeamMondlicht.tsx`) und **Konto** (`KontoMondlicht.tsx`): Konto mit „Mondpass" (Begrüßung, dabei seit, Plus-Status, eigene Zahlen, acht Wochen als Monde nach Atemminuten), darunter Abo, Einwilligungen, Daten und Löschen unverändert; abgemeldet ein kurzer Vorraum vor dem Anmeldeformular.
 - **Kleinigkeiten:** „Atmung nach Maß" zeigt „Angebot anfragen" statt des langen `signup_label`; Sessions-Überschrift „Was brauchst du?".
