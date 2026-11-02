@@ -8,7 +8,7 @@ import { StyleSheet, View } from 'react-native';
 import { Footer } from '@/components/Footer';
 import { NavBar } from '@/components/NavBar';
 import { StagingBanner } from '@/components/StagingBanner';
-import { colors } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW } from '@/design/tokens';
 import { responsive } from '@/design/responsive';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { useEntitlementSync } from '@/features/plus/useEntitlementSync';
@@ -70,7 +70,16 @@ export default function RootLayout() {
             </>
           )}
           <Stack screenOptions={{ headerShown: false, contentStyle: styles.screen }} />
-          {immersive ? null : <Footer />}
+          {/* Im Testsystem stehen die Rechtstexte auf dem Handy im Blatt
+              "Mehr" der Tab-Leiste (02.11.2026); der Streifen bleibt dem
+              Desktop. */}
+          {immersive ? null : DESIGN_PREVIEW ? (
+            <View {...responsive('nav-desktop')}>
+              <Footer />
+            </View>
+          ) : (
+            <Footer />
+          )}
         </View>
       </AuthProvider>
     </QueryClientProvider>

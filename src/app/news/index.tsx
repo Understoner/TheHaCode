@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 
-import { colors, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, spacing } from '@/design/tokens';
+import { NewsFeed } from '@/features/news/NewsFeed';
 import { NewsList } from '@/features/news/NewsList';
 
 // Die News als eigene Seite (01.11.2026): im Testsystem ist "/" die neue
@@ -15,7 +16,8 @@ export default function NewsScreen() {
       <Text role="heading" aria-level={1} style={styles.title}>
         {t('news.pageTitle')}
       </Text>
-      <NewsList />
+      {/* Im Testsystem die News des Vorschlags "Mondlicht Mobile" (02.11.2026). */}
+      {DESIGN_PREVIEW ? <NewsFeed /> : <NewsList />}
     </ScrollView>
   );
 }

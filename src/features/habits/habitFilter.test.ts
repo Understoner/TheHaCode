@@ -34,6 +34,7 @@ function template(id: string, overrides: Partial<HabitTemplate> = {}): HabitTemp
   return {
     id,
     slug: id,
+    day_part: null,
     category_id: 'atmung',
     title: id,
     description_md: null,

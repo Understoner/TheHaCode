@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -7,16 +7,18 @@ import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
 import { responsive } from '@/design/responsive';
-import { colors, radius, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
 import { useConsents } from '@/features/consents/useConsents';
-import { monthDays, today as heute, weekStart, type IsoDate } from '@/features/habits/dates';
+import { addDays, monthDays, today as heute, weekStart, type IsoDate } from '@/features/habits/dates';
 import { DiaryConsent } from '@/features/habits/DiaryConsent';
 import { enabledCategoryIds } from '@/features/habits/habitAreas';
-import { DiaryHeader } from '@/features/habits/DiaryHeader';
+import { DiaryHeader, DiaryHeaderMenu, parseDiaryView, type DiaryView } from '@/features/habits/DiaryHeader';
 import { DiaryMonth, DiaryWeek } from '@/features/habits/DiaryOverview';
+import { DiaryToday } from '@/features/habits/DiaryToday';
 import { HabitDay } from '@/features/habits/HabitDay';
+import { InsightsForUser } from '@/features/habits/InsightsForUser';
 import {
   useHabitAreas,
   useHabitCatalog,
@@ -27,12 +29,30 @@ import {
 
 export default function TagebuchScreen() {
   const { session, loading } = useAuth();
+  const router = useRouter();
+  // Testsystem (02.11.2026): Heute, Woche oder Auswertung - in der Adresse,
+  // damit "Zurueck" von einem Tag oder einer Session dieselbe Ansicht zeigt.
+  const view = parseDiaryView(useLocalSearchParams<{ ansicht?: string }>().ansicht);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <DiaryHeader />
+      {DESIGN_PREVIEW ? (
+        <DiaryHeaderMenu view={view} onChangeView={(v) => router.setParams({ ansicht: v === 'heute' ? '' : v })} />
+      ) : (
+        <DiaryHeader />
+      )}
 
-      {loading ? <SkeletonList /> : session ? <DiaryForUser /> : <DiaryTeaser />}
+      {loading ? (
+        <SkeletonList />
+      ) : !session ? (
+        <DiaryTeaser />
+      ) : DESIGN_PREVIEW && view === 'auswertung' ? (
+        // Lesen geht immer, auch nach Widerruf (SAD §3.10) - wie auf
+        // /habit-tracker/auswertung ohne Abfrage der Einwilligung.
+        <InsightsForUser />
+      ) : (
+        <DiaryForUser view={view} />
+      )}
     </ScrollView>
   );
 }
@@ -74,7 +94,7 @@ function DiaryTeaser() {
  * erlaubt (SAD §3.10) - und darueber die Einwilligung, falls er wieder
  * eintragen moechte.
  */
-function DiaryForUser() {
+function DiaryForUser({ view }: { view: DiaryView }) {
   const { t } = useTranslation();
   const consents = useConsents();
 
@@ -92,7 +112,7 @@ function DiaryForUser() {
         return (
           <View style={styles.stack}>
             {!health.granted ? <DiaryConsent definition={health.definition} /> : null}
-            <DiaryContent />
+            <DiaryContent view={view} />
           </View>
         );
       }}
@@ -100,7 +120,7 @@ function DiaryForUser() {
   );
 }
 
-function DiaryContent() {
+function DiaryContent({ view }: { view: DiaryView }) {
   const today = heute();
   const [date, setDate] = useState<IsoDate>(today);
   const [month, setMonth] = useState<IsoDate>(today);
@@ -111,7 +131,9 @@ function DiaryContent() {
   // Tagesliste ihren Tag. Score, Verlaeufe und alles Weitere rechnet die
   // Auswertungsseite mit eigener Abfrage (30.10.2026).
   const monthRange = monthDays(month);
-  const from = [monthRange[0], weekStart(week), date].sort()[0];
+  // Testsystem: zwei Wochen zurueck mindestens, fuer den Mini-Verlauf der
+  // Zahlen-Habits in der Ansicht "Heute" (DiaryToday.tsx).
+  const from = [monthRange[0], weekStart(week), date, ...(DESIGN_PREVIEW ? [addDays(today, -13)] : [])].sort()[0];
   const to = [monthRange[monthRange.length - 1], today].sort()[1];
 
   const catalog = useHabitCatalog();
@@ -141,6 +163,39 @@ function DiaryContent() {
                           habits.filter((h) => shown.has(h.habit_templates.category_id)).map((h) => h.id),
                         );
                         const entries = allEntries.filter((l) => visibleIds.has(l.user_habit_id));
+                        if (DESIGN_PREVIEW && view === 'heute') {
+                          return (
+                            <DiaryToday
+                              today={today}
+                              habits={active}
+                              allHabits={habits}
+                              logs={entries}
+                              categories={categories}
+                              plusAccess={plusAccess}
+                              scoreOn={scoreOn}
+                            />
+                          );
+                        }
+                        if (DESIGN_PREVIEW && view === 'woche') {
+                          return (
+                            <View style={styles.stack}>
+                              <DiaryWeek
+                                today={today}
+                                week={week}
+                                onChangeWeek={(w) => setWeek(w > today ? today : w)}
+                                logs={entries}
+                                activeCount={active.length}
+                              />
+                              <DiaryMonth
+                                today={today}
+                                month={month}
+                                onChangeMonth={setMonth}
+                                logs={entries}
+                                activeCount={active.length}
+                              />
+                            </View>
+                          );
+                        }
                         return (
                           // Reihenfolge nach Wunsch vom 30.10.2026: die Woche
                           // zuerst, dann der Tag, darunter der Monat.

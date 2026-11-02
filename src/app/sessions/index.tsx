@@ -11,15 +11,21 @@ import {
   ListGlyph,
 } from '@/components/HeaderIcon';
 import { responsive } from '@/design/responsive';
-import { colors, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, spacing } from '@/design/tokens';
 import { parseSessionFilter } from '@/features/sessions/effects';
+import { MoodSessions } from '@/features/sessions/MoodSessions';
+import { parseMood } from '@/features/sessions/moods';
 import { PlayerHilfe } from '@/features/sessions/PlayerHilfe';
 import { SessionsList } from '@/features/sessions/SessionsList';
 
 export default function SessionsScreen() {
   const { t } = useTranslation();
   // Der Filter steht in der Adresse (?filter=), gesetzt von /sessions/filter.
-  const filter = parseSessionFilter(useLocalSearchParams<{ filter?: string }>().filter);
+  const params = useLocalSearchParams<{ filter?: string; stimmung?: string }>();
+  const filter = parseSessionFilter(params.filter);
+  // Die Stimmung (Testsystem, 02.11.2026) steht wie der Filter in der Adresse,
+  // damit "Zurueck" aus einer Session dieselbe Auswahl zeigt.
+  const mood = parseMood(params.stimmung);
   const filtered = filter !== 'all';
 
   return (
@@ -34,7 +40,7 @@ export default function SessionsScreen() {
           Player. */}
       <View style={styles.titleRow}>
         <Text role="heading" style={styles.title}>
-          {t('sessions.title')}
+          {DESIGN_PREVIEW ? t('sessions.mood.title') : t('sessions.title')}
         </Text>
         <View {...responsive('header-icons')} style={styles.icons}>
           <HeaderIconLink
@@ -62,7 +68,7 @@ export default function SessionsScreen() {
         </View>
       ) : null}
 
-      <SessionsList filter={filter} />
+      {DESIGN_PREVIEW ? <MoodSessions filter={filter} mood={mood} /> : <SessionsList filter={filter} />}
     </ScrollView>
   );
 }

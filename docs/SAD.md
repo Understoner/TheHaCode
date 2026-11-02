@@ -1747,6 +1747,19 @@ Ein Versuch, ob eine verspielte, spirituelle Darstellung trägt. Er läuft **nur
 
 Rückbau: PR revertieren. Danach bleibt allenfalls `thehacode.theme` im Browser liegen; ohne `theme-init.js` liest ihn niemand mehr.
 
+#### Vorschlag „Mondlicht Mobile" (nur Testsystem, seit 02.11.2026)
+
+Umbau der Handy-Ansichten nach dem Design-Vorschlag gleichen Namens, ebenfalls hinter `DESIGN_PREVIEW`. Live bleibt unverändert.
+
+- **Navigation:** fünf Tabs (Start, Atmen, Tagebuch, Kurse, Mehr), `src/components/MobileTabBar.tsx`. „Mehr" öffnet ein Blatt mit News, Team, Konto, Einstellungen und den vier Rechtstexten; der Fußstreifen entfällt dafür auf dem Handy (Desktop unverändert).
+- **News** (`NewsFeed.tsx`): Kategorien als wischbare Symbolleiste, ganze Karte als Link, zwei Zeilen Anriss. Fotos in Mondlicht als Duoton, ohne Foto ein gezeichnetes Motiv je Kategorie. Der goldene Punkt heißt **„neu" (14 Tage)**, nicht „ungelesen" — Lesestand zu speichern hieße Nutzerdaten oder `localStorage` für Fachliches.
+- **Sessions** (`MoodSessions.tsx`): Einstieg über Stimmungen Wach, Fokus, Ruhig, Schlafen, **abgeleitet aus den Wirkungs-Chips** (`moods.ts`, kein eigenes Feld). Vorschlag zur Tageszeit, Atemform als Kurve mit Punkt im Takt der ersten Runde.
+- **Session-Seite vor dem Start** (`SessionIntro.tsx`): Lotus atmet die erste Runde vor, Rhythmus als Zeitstrahl, Texte aufklappbar, Start-Knopf fest unten. Ab „Starten" der bisherige Player; Uhr, Töne und Protokoll unverändert. Die Vorschau-Animationen sind keine Zeitquelle (§7.1 gilt für die Übung).
+- **Audio- und Video-Sessions** sind vorbereitet, nicht abspielbar: die Art ergibt sich aus den Spalten von 0007 (`video_external_id` → Video, `playback_mode ≠ 'timer'` → Audio, sonst Box; `sessionKind()`). Liste und Seite zeigen dann ein eigenes Zeichen statt Kurve und Lotus, der Start-Knopf heißt „Kommt bald". Keine neue Spalte nötig — es gäbe sonst zwei Wahrheiten.
+- **Tagebuch:** Umschalter Heute · Woche · Auswertung (`?ansicht=`), Symbolreihe ersetzt durch „…"-Menü. „Heute" (`DiaryToday.tsx`) mit Punkte-Ring (rechnet über `score.ts`, `dayScore.ts`), Woche als Monde, Habits nach Tageszeit, Abhaken mit Blütenblatt-Effekt, Zahlen-Habits mit Plus/Minus und Mini-Verlauf. Speichern, Sperren und Einwilligung über dieselben Hooks wie bisher.
+- **Tageszeit an der Vorlage:** Migration 0039, `habit_templates.day_part` (`morgens`/`tagsueber`/`abends`, NULL = tagsüber). Nur die Redaktion setzt sie (keine Spaltenrechte für `authenticated`); 0039 füllt eindeutige Fälle per Slug vor. Additiv; sie bleibt auch bei einem Revert des Codes stehen.
+- **Habit-Auswahl** (`HabitPicker.tsx`): Suche, Bereiche als Symbolleiste, kompakte Zeilen, Details auf Tipp.
+
 ### 6.2 Verbindliche Zustände jeder Datenkomponente
 
 Jede Komponente, die serverseitige Daten anzeigt, behandelt vier Zustände. Keine Ausnahme, kein „machen wir später":

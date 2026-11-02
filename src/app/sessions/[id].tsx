@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { FavoriteStar } from '@/components/FavoriteStar';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { VolumeSlider } from '@/components/VolumeSlider';
-import { colors, radius, spacing } from '@/design/tokens';
+import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { BreathCircle } from '@/features/breathing/BreathCircle';
 import { createMusicPlayer, TRACKS, type TrackId } from '@/features/breathing/music';
 import { createSessionKeepAlive, type SessionKeepAlive } from '@/features/breathing/audioSession';
@@ -22,6 +22,8 @@ import { useBreathClock } from '@/features/breathing/useBreathClock';
 import { effectColors } from '@/features/sessions/effects';
 import { PlayerHilfe } from '@/features/sessions/PlayerHilfe';
 import { PlaylistLinks } from '@/features/sessions/PlaylistLinks';
+import { sessionKind } from '@/features/sessions/moods';
+import { SessionIntro } from '@/features/sessions/SessionIntro';
 import { useSessionProtocol } from '@/features/habits/useSessionProtocol';
 import { useSession } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
@@ -326,6 +328,108 @@ function Player({ session }: { session: PlayableExercise }) {
 
   const stepCount = session.exercise_steps.length;
 
+  // Ton, Ansage, Playlist und Musik - im Player wie auf der Seite vor dem
+  // Start (SessionIntro, Testsystem) derselbe Block.
+  const settingsContent = (
+    <>
+          {/* Die Ansage sagt, was zu tun ist; der Ton sagt nur, DASS etwas zu
+              tun ist. Beides laesst sich einzeln schalten - und beides
+              gleichzeitig ist erlaubt. */}
+          <View style={styles.settingsRow}>
+            <PressableRing
+              onPress={() => setSoundOn(!soundOn)}
+              style={[styles.secondary, soundOn && styles.secondaryActive]}
+            >
+              <Text style={[styles.secondaryText, soundOn && styles.secondaryTextActive]}>
+                {soundOn ? t('player.soundOn') : t('player.soundOff')}
+              </Text>
+            </PressableRing>
+            <PressableRing
+              onPress={() => setVoiceOn(!voiceOn)}
+              style={[styles.secondary, voiceOn && styles.secondaryActive]}
+            >
+              <Text style={[styles.secondaryText, voiceOn && styles.secondaryTextActive]}>
+                {voiceOn ? t('player.voiceOn') : t('player.voiceOff')}
+              </Text>
+            </PressableRing>
+          </View>
+
+          {/* Die passende Playlist beim Nutzer selbst - Spotify oder Apple
+              Music. Sie laeuft dort, nicht hier; deshalb steht sie ueber der
+              eigenen Hintergrundmusik und nicht als dritter Regler darunter. */}
+          <PlaylistLinks exercise={session} />
+
+          {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
+          <View style={styles.musicRow}>
+            <Text style={styles.musicLabel}>{t('player.musicLabel')}</Text>
+            <View style={styles.musicChoices}>
+              <PressableRing
+                onPress={() => setMusicTrack(null)}
+                style={[styles.chip, musicTrack === null && styles.chipActive]}
+              >
+                <Text style={[styles.chipText, musicTrack === null && styles.chipTextActive]}>
+                  {t('player.musicOff')}
+                </Text>
+              </PressableRing>
+              {TRACKS.map((track) => (
+                <PressableRing
+                  key={track.id}
+                  onPress={() => setMusicTrack(track.id)}
+                  style={[styles.chip, musicTrack === track.id && styles.chipActive]}
+                >
+                  <Text
+                    style={[styles.chipText, musicTrack === track.id && styles.chipTextActive]}
+                  >
+                    {t(`player.music.${track.id}`)}
+                  </Text>
+                </PressableRing>
+              ))}
+            </View>
+
+            {/* Drei Regler, weil die drei Wege unterschiedliche Aufgaben haben:
+                der Ton markiert den Wechsel, die Ansage benennt ihn, die Musik
+                traegt den Hintergrund. Ein gemeinsamer Regler wuerde alle drei
+                verschieben. */}
+            <View style={styles.sliders}>
+              <VolumeSlider
+                label={t('player.volumeTone')}
+                value={toneVolume}
+                onChange={setToneVolume}
+              />
+              <VolumeSlider
+                label={t('player.volumeVoice')}
+                value={voiceVolume}
+                onChange={setVoiceVolume}
+              />
+              <VolumeSlider
+                label={t('player.volumeMusic')}
+                value={musicVolume}
+                onChange={setMusicVolume}
+              />
+            </View>
+          </View>
+        
+    </>
+  );
+
+  // Testsystem (02.11.2026): vor dem ersten Start die Seite des Vorschlags
+  // "Mondlicht Mobile"; ab "Starten" der Player wie bisher. Audio- und
+  // Video-Sessions bleiben auf dieser Seite - abspielen laesst sich noch nichts.
+  const notStarted = !clock.isRunning && elapsedMs === 0 && !finished;
+  if (DESIGN_PREVIEW && (notStarted || sessionKind(session) !== 'box')) {
+    return (
+      <SessionIntro
+        session={session}
+        onStart={start}
+        soundOn={soundOn}
+        onToggleSound={() => setSoundOn(!soundOn)}
+        settingsOpen={settingsOpen}
+        onToggleSettings={() => setSettingsOpen((open) => !open)}
+        settings={settingsContent}
+      />
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.screen}>
       <View style={styles.topRow}>
@@ -465,86 +569,7 @@ function Player({ session }: { session: PlayableExercise }) {
         </PressableRing>
       </View>
 
-      {settingsOpen ? (
-        <View style={styles.settings}>
-          {/* Die Ansage sagt, was zu tun ist; der Ton sagt nur, DASS etwas zu
-              tun ist. Beides laesst sich einzeln schalten - und beides
-              gleichzeitig ist erlaubt. */}
-          <View style={styles.settingsRow}>
-            <PressableRing
-              onPress={() => setSoundOn(!soundOn)}
-              style={[styles.secondary, soundOn && styles.secondaryActive]}
-            >
-              <Text style={[styles.secondaryText, soundOn && styles.secondaryTextActive]}>
-                {soundOn ? t('player.soundOn') : t('player.soundOff')}
-              </Text>
-            </PressableRing>
-            <PressableRing
-              onPress={() => setVoiceOn(!voiceOn)}
-              style={[styles.secondary, voiceOn && styles.secondaryActive]}
-            >
-              <Text style={[styles.secondaryText, voiceOn && styles.secondaryTextActive]}>
-                {voiceOn ? t('player.voiceOn') : t('player.voiceOff')}
-              </Text>
-            </PressableRing>
-          </View>
-
-          {/* Die passende Playlist beim Nutzer selbst - Spotify oder Apple
-              Music. Sie laeuft dort, nicht hier; deshalb steht sie ueber der
-              eigenen Hintergrundmusik und nicht als dritter Regler darunter. */}
-          <PlaylistLinks exercise={session} />
-
-          {/* Musik getrennt vom Ton: beides laesst sich unabhaengig schalten. */}
-          <View style={styles.musicRow}>
-            <Text style={styles.musicLabel}>{t('player.musicLabel')}</Text>
-            <View style={styles.musicChoices}>
-              <PressableRing
-                onPress={() => setMusicTrack(null)}
-                style={[styles.chip, musicTrack === null && styles.chipActive]}
-              >
-                <Text style={[styles.chipText, musicTrack === null && styles.chipTextActive]}>
-                  {t('player.musicOff')}
-                </Text>
-              </PressableRing>
-              {TRACKS.map((track) => (
-                <PressableRing
-                  key={track.id}
-                  onPress={() => setMusicTrack(track.id)}
-                  style={[styles.chip, musicTrack === track.id && styles.chipActive]}
-                >
-                  <Text
-                    style={[styles.chipText, musicTrack === track.id && styles.chipTextActive]}
-                  >
-                    {t(`player.music.${track.id}`)}
-                  </Text>
-                </PressableRing>
-              ))}
-            </View>
-
-            {/* Drei Regler, weil die drei Wege unterschiedliche Aufgaben haben:
-                der Ton markiert den Wechsel, die Ansage benennt ihn, die Musik
-                traegt den Hintergrund. Ein gemeinsamer Regler wuerde alle drei
-                verschieben. */}
-            <View style={styles.sliders}>
-              <VolumeSlider
-                label={t('player.volumeTone')}
-                value={toneVolume}
-                onChange={setToneVolume}
-              />
-              <VolumeSlider
-                label={t('player.volumeVoice')}
-                value={voiceVolume}
-                onChange={setVoiceVolume}
-              />
-              <VolumeSlider
-                label={t('player.volumeMusic')}
-                value={musicVolume}
-                onChange={setMusicVolume}
-              />
-            </View>
-          </View>
-        </View>
-      ) : null}
+      {settingsOpen ? <View style={styles.settings}>{settingsContent}</View> : null}
 
       {session.description_md ? (
         <View style={styles.section}>
