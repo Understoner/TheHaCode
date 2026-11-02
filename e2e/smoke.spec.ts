@@ -1,12 +1,12 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 
-// Im Testsystem laeuft der Vorschlag "Mondlicht Mobile" (02.11.2026, SAD
-// §6.1a): fuenf Tabs und die Rechtstexte im Blatt "Mehr" statt im
-// Fussstreifen. Welches System gerade antwortet, steht in build-info.json.
+// Mit Mondlicht (SAD §6.1a, seit 02.11.2026 auch Live): fuenf Tabs und die
+// Rechtstexte im Blatt "Mehr" statt im Fussstreifen. Ob es an ist, verraet
+// das ausgelieferte HTML: nur dann traegt <html> ein data-theme.
 async function isStaging(request: APIRequestContext): Promise<boolean> {
-  const res = await request.get('/build-info.json');
+  const res = await request.get('/');
   if (!res.ok()) return false;
-  return ((await res.json()) as { env?: string }).env === 'staging';
+  return /<html[^>]*data-theme=/.test(await res.text());
 }
 
 test('Startseite laedt und zeigt den Titel', async ({ page }) => {

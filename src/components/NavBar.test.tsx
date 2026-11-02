@@ -8,59 +8,58 @@ import { NavBar } from './NavBar';
 // expo-router's Link zieht react-native-web's unkompilierte Animated-Quelle
 // (Flow-Syntax), die esbuild nicht parsen kann. Der Test prueft NavBar, nicht
 // expo-router selbst - ein einfacher Stub reicht.
+// vi.hoisted, weil vi.mock vor allen Importen und Konstanten laeuft.
+const pathname = vi.hoisted(() => ({ current: '/' }));
+
 vi.mock('expo-router', () => ({
   Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
-  usePathname: () => '/',
+  usePathname: () => pathname.current,
 }));
 
 // react-native-svg bringt wie expo-router unkompilierte Quellen mit; der Mond
-// in der Kopfzeile (nur Testsystem) ist fuer diesen Test belanglos.
+// in der Kopfzeile ist fuer diesen Test belanglos.
 vi.mock('@/components/MoonMark', () => ({ MoonMark: () => null }));
-// Ebenso die Tab-Leiste des Vorschlags "Mondlicht Mobile" (nur Testsystem).
+// Ebenso die Tab-Leiste des Vorschlags "Mondlicht Mobile".
 vi.mock('@/components/MobileTabBar', () => ({ MobileTabBar: () => null }));
 
-// Seit dem Umstieg auf CSS-Breakpoints stehen BEIDE Navigationsfassungen im
-// HTML; sichtbar ist je nach Fensterbreite genau eine, ausgeblendet per Media
-// Query (src/design/responsive.ts). jsdom wertet keine Media Queries aus, hier
-// sind also immer beide zu sehen - genau das pruefen die Tests unten. Dass die
-// sichtbare Fassung dann auch richtig aussieht, prueft der Playwright-Test in
-// e2e/smoke.spec.ts an echtem Layout.
-function variants() {
-  const desktop = document.querySelector('[data-thc="nav-desktop"]');
-  const mobile = document.querySelector('[data-thc="nav-mobile"]');
-  if (!(desktop instanceof HTMLElement) || !(mobile instanceof HTMLElement)) {
-    throw new Error('Beide Navigationsfassungen muessen im HTML stehen');
-  }
-  return { desktop, mobile };
+// Mit Mondlicht (seit 02.11.2026 in beiden Umgebungen) navigiert der Desktop
+// ueber die Pillen in der Kopfzeile, das Handy ueber MobileTabBar (oben
+// gestubbt; ihr Layout prueft e2e/smoke.spec.ts an echtem Layout). Links in
+// der Kopfzeile steht immer der Mond als Weg zur Startseite.
+function desktop() {
+  const el = document.querySelector('[data-thc="nav-desktop"]');
+  if (!(el instanceof HTMLElement)) throw new Error('Die Desktop-Navigation muss im HTML stehen');
+  return el;
 }
 
 describe('NavBar', () => {
-  it('rendert beide Fassungen, damit CSS und nicht JavaScript entscheidet', () => {
+  it('zeigt am Desktop alle Eintraege als Pillen', () => {
     render(<NavBar />);
 
-    const { desktop, mobile } = variants();
     for (const label of ['News', 'Kurse', 'Sessions', 'Tagebuch', 'Team', 'Konto']) {
-      expect(within(desktop).getByText(label, { exact: false })).toBeTruthy();
-      expect(within(mobile).getByText(label)).toBeTruthy();
+      expect(within(desktop()).getByText(label, { exact: false })).toBeTruthy();
     }
   });
 
-  it('kennzeichnet die mobile Fassung als Navigationsbereich', () => {
+  it('fuehrt ueber den Mond immer zur Startseite', () => {
     render(<NavBar />);
 
-    expect(variants().mobile.tagName).toBe('NAV');
+    const home = screen.getByLabelText('Zur Startseite', { exact: false });
+    expect(home.closest('a')?.getAttribute('href') ?? home.getAttribute('href')).toBe('/');
   });
 
-  it('markiert die aktuelle Seite in beiden Fassungen', () => {
-    render(<NavBar />);
-
-    const { desktop, mobile } = variants();
-    expect(desktop.querySelector('a[aria-current="page"]')?.getAttribute('href')).toBe('/');
-    expect(mobile.querySelector('a[aria-current="page"]')?.getAttribute('href')).toBe('/');
+  it('markiert die aktuelle Seite', () => {
+    pathname.current = '/kurse';
+    try {
+      render(<NavBar />);
+      expect(desktop().querySelector('a[aria-current="page"]')?.getAttribute('href')).toBe('/kurse');
+    } finally {
+      pathname.current = '/';
+    }
   });
 
   it('fuehrt jeden Eintrag auf eine echte Route', () => {
