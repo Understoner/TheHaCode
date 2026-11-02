@@ -1,6 +1,6 @@
 import type { SequenceFormValues } from '@/features/configurator/schema';
 
-// Hilfen fuer den Konfigurator im Vorschlag "Mondlicht Mobile" (03.11.2026,
+// Hilfen fuer den Konfigurator im Vorschlag "Mondlicht Mobile" (02.11.2026,
 // nur Testsystem): Plus/Minus statt Tippen und ein paar Ausgangsmuster zum
 // Loslegen. Reine Funktionen, ohne Browser testbar. Die Grenzen pruefen
 // weiter schema.ts und die Datenbank - hier wird nur bequem eingestellt.

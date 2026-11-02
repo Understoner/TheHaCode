@@ -1,5 +1,5 @@
 // Was die Kurse-Seite im Vorschlag "Mondlicht Mobile" aus einem Kurs liest
-// (03.11.2026, nur Testsystem). Reine Funktionen, ohne Browser testbar.
+// (02.11.2026, nur Testsystem). Reine Funktionen, ohne Browser testbar.
 //
 // Entscheidung: KEINE neue Spalte. Alles steht schon in den Kursdaten, wie
 // sie im Studio gepflegt werden:

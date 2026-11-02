@@ -36,7 +36,7 @@ export default function RootLayout() {
   // die Tab-Leiste, sonst bliebe unten ein leerer Streifen stehen.
   const immersive =
     /^\/sessions\/.+/.test(pathname) ||
-    // Im Testsystem auch die Kursseite (03.11.2026): Zurueck-Knopf im Bild,
+    // Im Testsystem auch die Kursseite (02.11.2026): Zurueck-Knopf im Bild,
     // Preis und Buchen fest unten - wie die Session-Seite vor dem Start.
     (DESIGN_PREVIEW && /^\/kurse\/(?!filter$).+/.test(pathname));
 

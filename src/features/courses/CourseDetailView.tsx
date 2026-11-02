@@ -27,7 +27,7 @@ import type { Course } from '@/features/courses/useCoursesList';
 import { Markdown } from '@/features/news/Markdown';
 import { openExternalUrl, safeExternalUrl } from '@/lib/externalLink';
 
-// Die Kursseite im Vorschlag "Mondlicht Mobile" (03.11.2026, nur
+// Die Kursseite im Vorschlag "Mondlicht Mobile" (02.11.2026, nur
 // Testsystem): gezeichnetes Bild statt Foto, Eckdaten als Kacheln, die Abende
 // als Zeitleiste mit Monden, Texte aufklappbar, Preis und Knopf immer unten.
 //

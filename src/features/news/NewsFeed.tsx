@@ -19,7 +19,7 @@ import { useNewsList, type NewsPost } from '@/features/news/useNewsList';
 // Kategorien als eine wischbare Leiste mit Symbolen, die ganze Karte ist der
 // Link, zwei Zeilen Anriss, Lesezeit als Symbol, neue Beitraege mit goldenem
 // Punkt. Der erste Beitrag gross mit Mondszene, die weiteren als kompakte
-// Zeilen mit Motiv je Kategorie - ohne Fotos (03.11.2026).
+// Zeilen mit Motiv je Kategorie - ohne Fotos (02.11.2026).
 //
 // Im Livesystem bleibt NewsList.tsx.
 

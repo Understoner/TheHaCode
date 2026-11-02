@@ -37,7 +37,7 @@ import { mmss, toForm } from '@/features/configurator/SequenceEditor';
 import { useSaveSequence } from '@/features/configurator/useSequences';
 import type { PlayableExercise } from '@/types/breathing';
 
-// Der Konfigurator im Vorschlag "Mondlicht Mobile" (03.11.2026, nur
+// Der Konfigurator im Vorschlag "Mondlicht Mobile" (02.11.2026, nur
 // Testsystem). Dasselbe Formular, dieselbe Pruefung (schema.ts) und dasselbe
 // Speichern wie SequenceEditor - nur fuer die Hand gebaut:
 //   * Schnellstart mit bekannten Mustern statt leerem Blatt
