@@ -58,7 +58,16 @@ export type ResponsiveTarget =
   // Die Symbolreihe neben einer Seitenueberschrift (HeaderIcon.tsx). Mit vier
   // Symbolen (Tagebuch) ragte sie bei 320 px ueber den Rand; unter 360 px
   // ruecken die Symbole deshalb enger zusammen (30.10.2026).
-  | 'header-icons';
+  | 'header-icons'
+  // Mondlicht am Desktop (02.11.2026, nur Testsystem): die Seitenspalte
+  // waechst von 720 auf 1120 px und steht in der Mitte, Kartenlisten laufen
+  // in zwei (ab 1100 px drei) Spalten. Mobil bleibt alles einspaltig.
+  | 'm-page'
+  | 'm-grid'
+  // Zwei Bloecke, mobil untereinander, am Desktop gleich breit nebeneinander.
+  | 'm-split'
+  // Die Titelkarte der News: am Desktop Bild links, Text rechts.
+  | 'm-feature';
 
 // Nur die Mindestbreiten unterscheiden sich. Teamkarten tragen seit dem
 // Umbau auf die News-Anatomie (Bild oben ueber die volle Breite) dieselbe
@@ -117,6 +126,16 @@ export function responsiveCss(): string {
   [data-thc="habit-info"] { display: none !important; }
 ${gridRules}
   [data-thc="konto-grid"] > * { flex-basis: 48% !important; min-width: ${KONTO_COLUMN_MIN_WIDTH}px !important; }
+  [data-thc="m-page"] { max-width: 1120px !important; }
+  [data-thc="m-grid"] { flex-direction: row !important; flex-wrap: wrap !important; gap: 12px !important; }
+  [data-thc="m-grid"] > * { flex: 0 0 calc(50% - 6px) !important; min-width: 0 !important; }
+  [data-thc="m-split"] { flex-direction: row !important; align-items: flex-start !important; }
+  [data-thc="m-split"] > * { flex: 1 1 0 !important; min-width: 0 !important; }
+  [data-thc="m-feature"] { flex-direction: row !important; align-items: center !important; }
+  [data-thc="m-feature"] > * { flex: 1 1 0 !important; min-width: 0 !important; }
+}
+@media (min-width: 1100px) {
+  [data-thc="m-grid"] > * { flex-basis: calc(33.333% - 8px) !important; }
 }
 `.trim();
 }

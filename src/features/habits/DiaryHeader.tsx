@@ -95,7 +95,17 @@ export function parseDiaryView(raw: string | string[] | undefined): DiaryView {
   return (DIARY_VIEWS as string[]).includes(value ?? '') ? (value as DiaryView) : 'heute';
 }
 
-export function DiaryHeaderMenu({ view, onChangeView }: { view: DiaryView; onChangeView: (view: DiaryView) => void }) {
+export function DiaryHeaderMenu({
+  view,
+  onChangeView,
+  guest = false,
+}: {
+  view: DiaryView;
+  onChangeView: (view: DiaryView) => void;
+  // Gaeste (02.11.2026): nur Titel und "i" - Auswahl, Wege, Einstellungen und
+  // die Ansichten brauchen ein Konto.
+  guest?: boolean;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -105,15 +115,19 @@ export function DiaryHeaderMenu({ view, onChangeView }: { view: DiaryView; onCha
           {t('diary.title')}
         </Text>
         <View style={styles.icons}>
-          <HeaderIconLink href="/habit-tracker/auswahl" label={t('diary.header.picker')}>
-            <ChecklistGlyph />
-          </HeaderIconLink>
-          <HeaderIconLink href="/habit-tracker/challenges" label={t('diary.header.challenges')}>
-            <PathGlyph />
-          </HeaderIconLink>
-          <HeaderIconLink href="/habit-tracker/einstellungen" label={t('diary.header.settings')}>
-            <GearGlyph />
-          </HeaderIconLink>
+          {guest ? null : (
+            <>
+              <HeaderIconLink href="/habit-tracker/auswahl" label={t('diary.header.picker')}>
+                <ChecklistGlyph />
+              </HeaderIconLink>
+              <HeaderIconLink href="/habit-tracker/challenges" label={t('diary.header.challenges')}>
+                <PathGlyph />
+              </HeaderIconLink>
+              <HeaderIconLink href="/habit-tracker/einstellungen" label={t('diary.header.settings')}>
+                <GearGlyph />
+              </HeaderIconLink>
+            </>
+          )}
           <InfoButton
             kompakt
             label={t('diary.header.info')}
@@ -127,22 +141,24 @@ export function DiaryHeaderMenu({ view, onChangeView }: { view: DiaryView; onCha
         </View>
       </View>
 
-      <View role="tablist" aria-label={t('diary.view.label')} style={menuStyles.tabs}>
-        {DIARY_VIEWS.map((v) => {
-          const on = v === view;
-          return (
-            <PressableRing
-              key={v}
-              onPress={() => onChangeView(v)}
-              role="tab"
-              aria-selected={on}
-              style={[menuStyles.tab, on && menuStyles.tabOn]}
-            >
-              <Text style={[menuStyles.tabText, on && menuStyles.tabTextOn]}>{t(`diary.view.${v}`)}</Text>
-            </PressableRing>
-          );
-        })}
-      </View>
+      {guest ? null : (
+        <View role="tablist" aria-label={t('diary.view.label')} style={menuStyles.tabs}>
+          {DIARY_VIEWS.map((v) => {
+            const on = v === view;
+            return (
+              <PressableRing
+                key={v}
+                onPress={() => onChangeView(v)}
+                role="tab"
+                aria-selected={on}
+                style={[menuStyles.tab, on && menuStyles.tabOn]}
+              >
+                <Text style={[menuStyles.tabText, on && menuStyles.tabTextOn]}>{t(`diary.view.${v}`)}</Text>
+              </PressableRing>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }

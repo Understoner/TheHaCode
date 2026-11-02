@@ -18,9 +18,11 @@ type Mode = 'signIn' | 'signUp' | 'reset';
 // eigene Seite: der Weg zurueck zum Anmelden soll ein Klick bleiben. Nur der
 // zweite Schritt (neues Passwort setzen) braucht eine eigene Route, weil der
 // Link aus der E-Mail irgendwo landen muss - /passwort-neu.
-export function AuthPanel() {
+export function AuthPanel({ initialMode = 'signIn' }: { initialMode?: 'signIn' | 'signUp' } = {}) {
   const { t } = useTranslation();
-  const [mode, setMode] = useState<Mode>('signIn');
+  // Testsystem (02.11.2026): "Kostenlos registrieren" aus Tagebuch und
+  // Vergleich oeffnet /konto?modus=registrieren direkt beim Registrieren.
+  const [mode, setMode] = useState<Mode>(initialMode);
 
   if (mode === 'reset') {
     return (

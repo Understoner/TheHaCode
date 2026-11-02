@@ -199,18 +199,22 @@ export function GuestWelcome() {
     { icon: 'M6 4h10a2 2 0 0 1 2 2v14H8a2 2 0 0 1-2-2zM9.5 11l2 2 3.5-4', text: t('konto.m.guest.diary') },
     { icon: 'M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z', text: t('konto.m.guest.favorites') },
     { icon: 'M12 3c-4 5-4 11 0 18M12 3c4 5 4 11 0 18M4 12c4-2 12-2 16 0', text: t('konto.m.guest.sequences') },
+    { icon: 'M5 19c3-1 4-4 7-4s4 2 7 0M5 12c3-1 4-4 7-4s4 2 7 0', text: t('konto.m.guest.paths') },
   ];
   return (
     <View style={styles.guest}>
-      <Svg width="100%" height="100%" viewBox="0 0 358 220" preserveAspectRatio="xMidYMid slice" style={StyleSheet.absoluteFill} aria-hidden>
-        <Circle cx={296} cy={52} r={62} fill={palette.glow} opacity={0.06} />
-        <Circle cx={296} cy={52} r={22} fill={palette.glow} />
-        <Circle cx={306} cy={45} r={20} fill={palette.oceanImageBg} />
-        <Path d="M0 200 C 90 188, 250 212, 358 198" fill="none" stroke={palette.glow} strokeOpacity={0.3} strokeWidth={1.5} />
+      {/* Fest oben rechts, damit der Mond bei keiner Breite angeschnitten wird. */}
+      <Svg width={150} height={130} viewBox="0 0 150 130" style={styles.guestArt} aria-hidden>
+        <Circle cx={96} cy={56} r={52} fill={palette.glow} opacity={0.06} />
+        <Circle cx={96} cy={56} r={22} fill={palette.glow} />
+        <Circle cx={106} cy={49} r={20} fill={palette.oceanImageBg} />
+        <Circle cx={22} cy={30} r={1.2} fill={palette.ink900} opacity={0.6} />
+        <Circle cx={140} cy={112} r={1} fill={palette.ink900} opacity={0.6} />
       </Svg>
       <Text {...displayFont} style={styles.guestTitle}>
         {t('konto.m.guest.title')}
       </Text>
+      <Text style={styles.guestLead}>{t('konto.m.guest.lead')}</Text>
       <View style={styles.guestList}>
         {items.map((item) => (
           <View key={item.text} style={styles.guestRow}>
@@ -371,14 +375,27 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 28,
     borderRadius: 26,
+    borderWidth: 1,
+    borderColor: colors.ocean700,
     backgroundColor: colors.oceanImageBg,
     overflow: 'hidden',
   },
+  guestArt: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
   guestTitle: {
-    fontSize: 26,
-    lineHeight: 31,
+    fontSize: 30,
+    lineHeight: 35,
     color: colors.ink900,
-    maxWidth: 240,
+    maxWidth: 260,
+  },
+  guestLead: {
+    maxWidth: 420,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.ink700,
   },
   guestList: {
     gap: 10,

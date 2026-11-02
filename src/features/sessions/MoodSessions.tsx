@@ -10,7 +10,7 @@ import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
 import { useThemePalette } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
-import { displayFont } from '@/design/responsive';
+import { displayFont, responsive } from '@/design/responsive';
 import { buildTimeline, totalDurationMs } from '@/features/breathing/timeline';
 import { type SessionFilter } from '@/features/sessions/effects';
 import {
@@ -114,7 +114,7 @@ export function MoodSessions({ filter, mood }: { filter: SessionFilter; mood: Mo
               {shown.length === 0 ? (
                 <StateMessage title={t('sessions.mood.empty.title')} body={t('sessions.mood.empty.hint')} />
               ) : (
-                <View style={styles.rows}>
+                <View {...responsive('m-grid')} style={styles.rows}>
                   {shown.map((session) => (
                     <SessionRow key={session.id} session={session} />
                   ))}
@@ -198,10 +198,10 @@ function SessionRow({ session }: { session: PlayableExercise }) {
 }
 
 const styles = StyleSheet.create({
+  // Breite und Mitte kommen von der Seitenspalte (PageColumn).
   container: {
     gap: spacing.md,
     paddingHorizontal: spacing.md,
-    maxWidth: 720,
     width: '100%',
   },
   moodGrid: {
