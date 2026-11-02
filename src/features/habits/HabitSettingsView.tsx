@@ -14,7 +14,7 @@ import { AreaGlyph } from '@/features/habits/HabitPicker';
 import { useHabitAreas, useHabitCatalog, useHabitScoreEnabled, useMyHabits } from '@/features/habits/useHabits';
 
 // Die Einstellungen des Tagebuchs im Vorschlag "Mondlicht Mobile"
-// (03.11.2026, nur Testsystem): Zeilen mit Zeichen statt Textkarten, echte
+// (02.11.2026, nur Testsystem): Zeilen mit Zeichen statt Textkarten, echte
 // Schalter, die Bereiche mit demselben Zeichen wie in der Habit-Auswahl.
 // Daten, Hooks und Regeln sind dieselben wie in app/habit-tracker/
 // einstellungen.tsx; im Livesystem bleibt die bisherige Darstellung.

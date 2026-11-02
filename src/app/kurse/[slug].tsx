@@ -32,7 +32,7 @@ export default function KursDetailScreen() {
 
   return (
     <QueryBoundary query={query}>
-      {/* Im Testsystem die Kursseite des Vorschlags "Mondlicht Mobile" (03.11.2026). */}
+      {/* Im Testsystem die Kursseite des Vorschlags "Mondlicht Mobile" (02.11.2026). */}
       {(course) =>
         course ? DESIGN_PREVIEW ? <CourseDetailView course={course} /> : <CourseDetail course={course} /> : <NotFound />
       }

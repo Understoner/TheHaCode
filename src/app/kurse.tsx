@@ -22,7 +22,7 @@ export default function KurseScreen() {
   const { buchung, zeitraum } = useLocalSearchParams<{ buchung?: string; zeitraum?: string }>();
   const period = parseCoursePeriod(zeitraum);
 
-  // Im Testsystem die Kurse des Vorschlags "Mondlicht Mobile" (03.11.2026):
+  // Im Testsystem die Kurse des Vorschlags "Mondlicht Mobile" (02.11.2026):
   // Art und Monat waehlt man direkt auf der Seite, die Filterseite entfaellt.
   if (DESIGN_PREVIEW) {
     return (

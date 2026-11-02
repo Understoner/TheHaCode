@@ -224,7 +224,7 @@ function WeekMoons({ today, logs, habitCount }: { today: IsoDate; logs: HabitLog
 
 /**
  * Kleine Aktion im Block des Habits: Session starten oder Messen. Steht seit
- * 03.11.2026 IM Block (Wunsch des Users) - vorher daneben, wo sie wie ein
+ * 02.11.2026 IM Block (Wunsch des Users) - vorher daneben, wo sie wie ein
  * eigenes Element wirkte. Sie ist ein eigener Link neben der Abhak-Flaeche,
  * nicht in ihr: ein Link in einer Checkbox waere ungueltiges Markup.
  */

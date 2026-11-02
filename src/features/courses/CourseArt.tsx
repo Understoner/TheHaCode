@@ -6,7 +6,7 @@ import { palettes, type Palette } from '@/design/tokens';
 import type { CourseKind, CourseTheme } from '@/features/courses/courseFacts';
 
 // Zeichen, Farben und Bild der Kurse im Vorschlag "Mondlicht Mobile"
-// (03.11.2026, nur Testsystem). Wie bei den News: keine Fotos, nur Formen aus
+// (02.11.2026, nur Testsystem). Wie bei den News: keine Fotos, nur Formen aus
 // der Palette. SVG-Farben als Hex (var() loest als SVG-Attribut nicht jeder
 // Browser auf, siehe Lotus.tsx).
 

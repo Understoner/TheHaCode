@@ -39,7 +39,7 @@ export default function EinstellungenScreen() {
       {loading ? (
         <SkeletonList />
       ) : session ? (
-        // Im Testsystem im Design des Vorschlags "Mondlicht Mobile" (03.11.2026).
+        // Im Testsystem im Design des Vorschlags "Mondlicht Mobile" (02.11.2026).
         DESIGN_PREVIEW ? (
           <HabitSettingsView />
         ) : (

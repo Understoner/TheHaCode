@@ -22,7 +22,7 @@ import {
 import { useCourseSeats } from '@/features/courses/useCourseBooking';
 import { useCoursesList, type Course } from '@/features/courses/useCoursesList';
 
-// Die Kurse im Vorschlag "Mondlicht Mobile" (03.11.2026, nur Testsystem):
+// Die Kurse im Vorschlag "Mondlicht Mobile" (02.11.2026, nur Testsystem):
 // Einstieg ueber "Wie willst du ueben?" (Online, Vor Ort, Fuer dich), Monate
 // als wischbare Leiste statt eigener Filterseite, oben der naechste Termin
 // gross mit Kalenderblatt, darunter kompakte Zeilen, "Atmung nach Mass" als

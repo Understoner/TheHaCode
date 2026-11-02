@@ -7,7 +7,7 @@ import type { NewsCategory } from '@/features/news/categories';
 
 // Bilder der News im Vorschlag "Mondlicht Mobile" (nur Testsystem).
 //
-// Seit 03.11.2026 ohne Fotos (Wunsch des User: die Fotos, auch als Duoton,
+// Seit 02.11.2026 ohne Fotos (Wunsch des Users: die Fotos, auch als Duoton,
 // passen nicht). Jeder Beitrag bekommt ein gezeichnetes Motiv je Kategorie,
 // der erste Beitrag im Feed die grosse Mondszene aus dem Vorschlag. Kein
 // Stockfoto, keine erfundene Illustration, nur Formen aus der Palette.

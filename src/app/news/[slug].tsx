@@ -59,7 +59,7 @@ function Article({ post }: { post: NewsPost }) {
         {t('news.detail.back')}
       </Link>
 
-      {/* Im Testsystem ohne Foto, mit dem Motiv der Kategorie (03.11.2026). */}
+      {/* Im Testsystem ohne Foto, mit dem Motiv der Kategorie (02.11.2026). */}
       {DESIGN_PREVIEW ? (
         <NewsCover category={post.category} label={post.title} style={styles.cover} />
       ) : (
