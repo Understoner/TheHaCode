@@ -1,4 +1,13 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type APIRequestContext } from '@playwright/test';
+
+// Im Testsystem laeuft der Vorschlag "Mondlicht Mobile" (02.11.2026, SAD
+// §6.1a): fuenf Tabs und die Rechtstexte im Blatt "Mehr" statt im
+// Fussstreifen. Welches System gerade antwortet, steht in build-info.json.
+async function isStaging(request: APIRequestContext): Promise<boolean> {
+  const res = await request.get('/build-info.json');
+  if (!res.ok()) return false;
+  return ((await res.json()) as { env?: string }).env === 'staging';
+}
 
 test('Startseite laedt und zeigt den Titel', async ({ page }) => {
   await page.goto('/');
@@ -49,15 +58,19 @@ test('Mobile: alle Eintraege der Tab-Leiste stehen gleich aufgebaut da', async (
 // numberOfLines={1} wuerde das stillschweigend mit overflow: hidden tun.
 // Geprueft auf /habit-tracker: dort ist "Tagebuch", die laengste
 // Beschriftung, der aktive Eintrag - fett gesetzt passte sie nicht mehr.
-test('Mobile: sechs Eintraege, keine Beschriftung abgeschnitten', async ({ page }) => {
+test('Mobile: alle Eintraege da, keine Beschriftung abgeschnitten', async ({ page, request }) => {
+  // Live sechs Eintraege, im Testsystem fuenf (Start, Atmen, Tagebuch, Kurse, Mehr).
+  const expected = (await isStaging(request)) ? 5 : 6;
   await page.setViewportSize({ width: 320, height: 700 });
   await page.goto('/habit-tracker');
 
   const items = page.getByRole('navigation').locator(':scope > *');
-  await expect(items).toHaveCount(6);
+  await expect(items).toHaveCount(expected);
 
-  for (let i = 0; i < 6; i += 1) {
-    const label = items.nth(i).locator(':scope > *').last();
+  for (let i = 0; i < expected; i += 1) {
+    // Im Testsystem ist das letzte Kind der Mond-Punkt, die Beschriftung
+    // steht davor; Live ist sie das letzte Kind.
+    const label = items.nth(i).locator(':scope > *').nth(1);
     const fits = await label.evaluate((el) => el.scrollWidth <= el.clientWidth);
     expect(fits, `Beschriftung "${await label.innerText()}" passt`).toBe(true);
   }
@@ -71,7 +84,23 @@ test('Mobile: sechs Eintraege, keine Beschriftung abgeschnitten', async ({ page 
 // Wie beim Test der Tab-Leiste geht das nur mit echtem Layout: in jsdom haben
 // alle Kaesten die Groesse null, ein Umbruch waere dort unsichtbar. 320 px ist
 // das schmalste Geraet, das noch vorkommt (iPhone SE der ersten Reihe).
-test('Mobile: die Pflichtlinks stehen auf einer Zeile', async ({ page }) => {
+// Im Testsystem stehen die Pflichtlinks auf dem Handy im Blatt "Mehr" - dort
+// muessen alle vier erreichbar und sichtbar sein.
+test('Mobile (Testsystem): die Pflichtlinks stehen im Blatt "Mehr"', async ({ page, request }) => {
+  test.skip(!(await isStaging(request)), 'nur im Testsystem');
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto('/');
+  await page.getByRole('navigation').getByRole('button').last().click();
+
+  const links = page.getByRole('dialog').locator(
+    'a[href="/impressum"], a[href="/datenschutz"], a[href="/agb"], a[href="/haftungsausschluss"]',
+  );
+  await expect(links).toHaveCount(4);
+  for (let i = 0; i < 4; i += 1) await expect(links.nth(i)).toBeVisible();
+});
+
+test('Mobile: die Pflichtlinks stehen auf einer Zeile', async ({ page, request }) => {
+  test.skip(await isStaging(request), 'im Testsystem im Blatt "Mehr", siehe oben');
   await page.setViewportSize({ width: 320, height: 700 });
   await page.goto('/');
 
