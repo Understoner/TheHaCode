@@ -149,6 +149,10 @@ values ('11111111-aaaa-0000-0000-000000000043', '11111111-aaaa-0000-0000-0000000
 insert into public.course_progress (user_id, course_id, block_id)
 values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000042',
         '11111111-aaaa-0000-0000-000000000043');
+-- Geplante Kurstermine (0044) haengen ebenfalls per cascade an auth.users.
+insert into public.course_plan_slots (user_id, course_id, block_id, planned_on)
+values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000042',
+        '11111111-aaaa-0000-0000-000000000043', current_date);
 
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
@@ -184,6 +188,8 @@ select is((
     select user_id from public.course_access where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.course_progress where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.course_plan_slots where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select is(

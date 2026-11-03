@@ -15,6 +15,7 @@ import { Markdown } from '@/features/news/Markdown';
 import { openExternalUrl } from '@/lib/externalLink';
 import { AudioPlayer } from './AudioPlayer';
 import { KindIcon } from './KindIcon';
+import { LaterPicker } from './LaterPicker';
 import { orderBlocks } from './courseLogic';
 import { courseHref } from './OnlineCourseCatalog';
 import { blockHref } from './OnlineCourseView';
@@ -111,6 +112,8 @@ export function OnlineBlockView({ data, blockId }: { data: CourseWithBlocks; blo
               </Link>
             </View>
           ) : null}
+
+          {open.data === true && loggedIn && !done ? <LaterPicker courseId={course.id} blockId={block.id} /> : null}
 
           <View style={styles.foot}>
             {open.data === true && loggedIn && block.kind !== 'quiz' ? (

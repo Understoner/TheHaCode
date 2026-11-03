@@ -93,3 +93,60 @@ export function activeUntil(rows: AccessRow[], now: Date = new Date()): Date | n
   }
   return best;
 }
+
+// ---------------------------------------------------------------------------
+// Einplanen im Tagebuch (Schritt 6, Migration 0044)
+// ---------------------------------------------------------------------------
+
+export type DayPart = 'morgens' | 'tagsueber' | 'abends';
+
+/** 0 = Montag ... 6 = Sonntag (wie im Tagebuch). */
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export type PlanRule =
+  | { mode: 'course' }
+  | { mode: 'weekdays'; weekdays: Weekday[] };
+
+function isoAddDays(iso: string, days: number): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d + days));
+  return date.toISOString().slice(0, 10);
+}
+
+function isoWeekday(iso: string): Weekday {
+  const [y, m, d] = iso.split('-').map(Number);
+  return (((new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7) as Weekday);
+}
+
+/**
+ * Termine fuer die noch offenen Bloecke, ab `start` (JJJJ-MM-TT).
+ *
+ *  - course:   jeder Block an seinem Vorschlagstag (Tag 1 = start).
+ *  - weekdays: ein Kurstag je gewaehltem Wochentag; Bloecke desselben
+ *              Vorschlagstags bleiben zusammen.
+ *
+ * Erledigte Bloecke bekommen keinen Termin. Ohne gewaehlten Wochentag gilt
+ * jeder Tag.
+ */
+export function planDates(
+  blocks: Pick<OutlineBlock, 'id' | 'day_offset' | 'sort_order'>[],
+  start: string,
+  rule: PlanRule,
+  done: ReadonlySet<string> = new Set(),
+): Map<string, string> {
+  const open = orderBlocks(blocks).filter((b) => !done.has(b.id));
+  const out = new Map<string, string>();
+  if (rule.mode === 'course') {
+    for (const b of open) out.set(b.id, isoAddDays(start, b.day_offset));
+    return out;
+  }
+  const allowed = new Set<Weekday>(rule.weekdays.length ? rule.weekdays : [0, 1, 2, 3, 4, 5, 6]);
+  const days = [...new Set(open.map((b) => b.day_offset))];
+  let cursor = start;
+  for (const day of days) {
+    while (!allowed.has(isoWeekday(cursor))) cursor = isoAddDays(cursor, 1);
+    for (const b of open.filter((x) => x.day_offset === day)) out.set(b.id, cursor);
+    cursor = isoAddDays(cursor, 1);
+  }
+  return out;
+}

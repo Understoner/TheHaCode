@@ -20,8 +20,10 @@ import {
   useCourseAccess,
   useCourseProgress,
   useOnlineCourseCheckout,
+  usePlanSlots,
   type CourseWithBlocks,
 } from './useOnlineCourses';
+import { formatPlanDate } from './PlanCourse';
 
 // Die Kursseite eines Onlinekurses (V1.2, SAD §11.2): Beschreibung,
 // Hinweis "on demand", Zeitverlauf und rechts (am Handy darunter) der Weg
@@ -35,6 +37,8 @@ export const blockHref = (slug: string, block: string) => ({
   params: { slug, block },
 });
 
+export const planHref = (slug: string) => ({ pathname: '/onlinekurse/[slug]/planen' as const, params: { slug } });
+
 export function OnlineCourseView({ data }: { data: CourseWithBlocks }) {
   const { t } = useTranslation();
   const { course, blocks } = data;
@@ -44,6 +48,7 @@ export function OnlineCourseView({ data }: { data: CourseWithBlocks }) {
 
   const open = useCanOpenCourse(course.id);
   const progress = useCourseProgress(course.id);
+  const plan = usePlanSlots(course.id);
   const done = progress.data ?? new Set<string>();
   const facts = courseProgress(blocks, done);
   const weeks = groupByWeek(blocks);
@@ -108,10 +113,18 @@ export function OnlineCourseView({ data }: { data: CourseWithBlocks }) {
                         <Text style={styles.rowTitle}>{block.title}</Text>
                         <Text style={styles.rowMeta}>{t(`onlineCourses.kind.${block.kind}`)}</Text>
                       </View>
-                      <Text style={[styles.rowState, done.has(block.id) && styles.rowDone]}>
+                      <Text
+                        style={[
+                          styles.rowState,
+                          done.has(block.id) && styles.rowDone,
+                          !done.has(block.id) && plan.data?.has(block.id) && styles.rowPlanned,
+                        ]}
+                      >
                         {done.has(block.id)
                           ? t('onlineCourses.done')
-                          : block.duration_sec
+                          : plan.data?.get(block.id)
+                            ? formatPlanDate(plan.data.get(block.id)!.planned_on)
+                            : block.duration_sec
                             ? t('onlineCourses.minutes', { count: Math.ceil(block.duration_sec / 60) })
                             : ''}
                       </Text>
@@ -188,6 +201,13 @@ function SidePanel({ data, open, openPending, loggedIn, contentDone, contentTota
         ) : (
           <Text style={styles.panelText}>{t('onlineCourses.panel.allDone')}</Text>
         )}
+        {next ? (
+          <Link href={planHref(course.slug)} asChild>
+            <PressableRing style={styles.secondary}>
+              <Text style={styles.secondaryText}>{t('onlineCourses.panel.plan')}</Text>
+            </PressableRing>
+          </Link>
+        ) : null}
         <Text style={styles.panelHint}>{t('onlineCourses.panel.certificateRule')}</Text>
       </View>
     );
@@ -334,6 +354,7 @@ const styles = StyleSheet.create({
   rowMeta: { fontSize: 13, color: colors.ink700 },
   rowState: { fontSize: 12, fontWeight: '700', color: colors.ink700 },
   rowDone: { color: colors.sage700 },
+  rowPlanned: { color: colors.ocean700 },
   panel: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -358,6 +379,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryText: { fontSize: 15, fontWeight: '700', color: colors.surface },
+  secondary: {
+    borderWidth: 1,
+    borderColor: colors.ocean700,
+    borderRadius: radius.full,
+    paddingVertical: 11,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  secondaryText: { fontSize: 15, fontWeight: '700', color: colors.ocean700 },
   link: { fontSize: 14, fontWeight: '600', color: colors.ocean700, marginTop: spacing.sm },
   priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
   strike: { fontSize: 18, color: colors.ink700, textDecorationLine: 'line-through' },

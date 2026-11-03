@@ -5,6 +5,7 @@ import {
   courseProgress,
   groupByWeek,
   orderBlocks,
+  planDates,
   plusPriceCents,
   totalMinutes,
   type OutlineBlock,
@@ -82,5 +83,41 @@ describe('activeUntil', () => {
 
   it('liefert null ohne laufenden Kauf', () => {
     expect(activeUntil([{ expires_at: '2026-10-01T00:00:00Z' }], now)).toBeNull();
+  });
+});
+
+describe('planDates', () => {
+  const plan = [
+    block('a', 'video', 0, 1),
+    block('b', 'text', 0, 2),
+    block('c', 'audio', 2, 3),
+    block('d', 'quiz', 6, 4),
+  ];
+
+  it('legt Bloecke an ihren Vorschlagstag', () => {
+    expect(Object.fromEntries(planDates(plan, '2026-11-04', { mode: 'course' }))).toEqual({
+      a: '2026-11-04',
+      b: '2026-11-04',
+      c: '2026-11-06',
+      d: '2026-11-10',
+    });
+  });
+
+  it('verteilt Kurstage auf feste Wochentage und haelt Tage zusammen', () => {
+    // 04.11.2026 ist ein Mittwoch; Mo/Mi/Fr = 0/2/4.
+    expect(Object.fromEntries(planDates(plan, '2026-11-04', { mode: 'weekdays', weekdays: [0, 2, 4] }))).toEqual({
+      a: '2026-11-04',
+      b: '2026-11-04',
+      c: '2026-11-06',
+      d: '2026-11-09',
+    });
+  });
+
+  it('plant Erledigtes nicht neu', () => {
+    expect([...planDates(plan, '2026-11-04', { mode: 'course' }, new Set(['a', 'b'])).keys()]).toEqual(['c', 'd']);
+  });
+
+  it('nimmt ohne Wochentage jeden Tag', () => {
+    expect(planDates(plan, '2026-11-04', { mode: 'weekdays', weekdays: [] }).get('d')).toBe('2026-11-06');
   });
 });

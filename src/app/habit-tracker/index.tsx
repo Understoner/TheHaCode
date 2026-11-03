@@ -14,6 +14,7 @@ import { usePlusAccess } from '@/features/configurator/useSequences';
 import { useConsents } from '@/features/consents/useConsents';
 import { addDays, monthDays, today as heute, weekStart, type IsoDate } from '@/features/habits/dates';
 import { DiaryConsent } from '@/features/habits/DiaryConsent';
+import { CourseAgenda } from '@/features/onlinecourses/CourseAgenda';
 import { DiaryGuest } from '@/features/habits/DiaryGuest';
 import { enabledCategoryIds } from '@/features/habits/habitAreas';
 import { DiaryHeader, DiaryHeaderMenu, parseDiaryView, type DiaryView } from '@/features/habits/DiaryHeader';
@@ -62,7 +63,12 @@ export default function TagebuchScreen() {
           // /habit-tracker/auswertung ohne Abfrage der Einwilligung.
           <InsightsForUser />
         ) : (
-          <DiaryForUser view={view} />
+          <>
+            {/* Kurstermine (V1.2) stehen neben den Habits und brauchen keine
+                Einwilligung - deshalb ausserhalb von DiaryForUser. */}
+            {view !== 'auswertung' ? <CourseAgenda /> : null}
+            <DiaryForUser view={view} />
+          </>
         )}
       </Column>
     </ScrollView>

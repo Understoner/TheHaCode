@@ -39,7 +39,8 @@ insert into public.online_course_blocks (id, course_id, kind, title) values
   ('b4200000-0000-0000-0000-000000000006', 'c4200000-0000-0000-0000-000000000004', 'quiz', 'Quiz');
 
 insert into public.online_course_block_contents (block_id, course_id, body_md)
-select id, course_id, 'Inhalt ' || title from public.online_course_blocks where kind = 'text';
+select id, course_id, 'Inhalt ' || title from public.online_course_blocks
+ where kind = 'text' and course_id::text like 'c4200000-%';
 
 insert into public.course_access (user_id, course_id, purchased_at, expires_at) values
   ('a4200000-0000-0000-0000-00000000000c', 'c4200000-0000-0000-0000-000000000004', now(), now() + interval '365 days'),
@@ -75,16 +76,16 @@ select is(
 
 -- ---------- Gast ----------
 set local role anon;
-select is((select count(*)::int from public.online_courses), 4,
+select is((select count(*)::int from public.online_courses where id::text like 'c4200000-%'), 4,
   'Gaeste sehen die vier veroeffentlichten Kurse, nicht den Entwurf');
-select is((select count(*)::int from public.online_course_blocks), 5,
+select is((select count(*)::int from public.online_course_blocks where course_id::text like 'c4200000-%'), 5,
   'Gaeste sehen die Gliederung veroeffentlichter Kurse, auch von Bezahlkursen');
-select is((select array_agg(body_md order by body_md) from public.online_course_block_contents),
+select is((select array_agg(body_md order by body_md) from public.online_course_block_contents where course_id::text like 'c4200000-%'),
   array['Inhalt T1'],
   'Gaeste lesen nur den Inhalt des Kurses fuer alle');
 select is(public.can_open_course('c4200000-0000-0000-0000-000000000002'), false,
   'Gaeste oeffnen keinen Konto-Kurs');
-select is((select array_agg(name) from storage.objects where bucket_id = 'course-media'),
+select is((select array_agg(name) from storage.objects where bucket_id = 'course-media' and name like 'c4200000-%'),
   array['c4200000-0000-0000-0000-000000000001/frei.pdf'],
   'Gaeste sehen im privaten Bucket nur Dateien des freien Kurses');
 select throws_ok(
@@ -96,7 +97,7 @@ reset role;
 -- ---------- Konto ohne Plus ----------
 select set_config('request.jwt.claim.sub', 'a4200000-0000-0000-0000-00000000000a', true);
 set local role authenticated;
-select is((select array_agg(body_md order by body_md) from public.online_course_block_contents),
+select is((select array_agg(body_md order by body_md) from public.online_course_block_contents where course_id::text like 'c4200000-%'),
   array['Inhalt T1', 'Inhalt T2'],
   'Mit Konto: frei und Konto-Kurs, nicht Plus und nicht Kauf');
 select is(public.can_open_course('c4200000-0000-0000-0000-000000000003'), false,
@@ -140,7 +141,7 @@ select set_config('request.jwt.claim.sub', 'a4200000-0000-0000-0000-00000000000c
 set local role authenticated;
 select is(public.can_open_course('c4200000-0000-0000-0000-000000000004'), true,
   'Mit gueltigem Kauf ist der Bezahlkurs offen');
-select ok((select 'Inhalt T4' = any(array_agg(body_md)) from public.online_course_block_contents),
+select ok((select 'Inhalt T4' = any(array_agg(body_md)) from public.online_course_block_contents where course_id::text like 'c4200000-%'),
   'und sein Inhalt lesbar');
 select is((select count(*)::int from storage.objects
             where bucket_id = 'course-media' and name like 'c4200000-0000-0000-0000-000000000004/%'), 1,
