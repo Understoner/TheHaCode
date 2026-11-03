@@ -1454,7 +1454,9 @@ export type Database = {
           created_at: string
           description_md: string | null
           id: string
+          is_featured: boolean
           is_published: boolean
+          level: string | null
           pass_percent: number
           price_cents: number | null
           slug: string
@@ -1472,7 +1474,9 @@ export type Database = {
           created_at?: string
           description_md?: string | null
           id?: string
+          is_featured?: boolean
           is_published?: boolean
+          level?: string | null
           pass_percent?: number
           price_cents?: number | null
           slug: string
@@ -1490,7 +1494,9 @@ export type Database = {
           created_at?: string
           description_md?: string | null
           id?: string
+          is_featured?: boolean
           is_published?: boolean
+          level?: string | null
           pass_percent?: number
           price_cents?: number | null
           slug?: string

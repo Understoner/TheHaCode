@@ -55,6 +55,8 @@ function data(access: 'public' | 'account' | 'plus' | 'paid'): CourseWithBlocks 
       pass_percent: 80,
       suggested_days: 14,
       is_published: true,
+      is_featured: false,
+      level: null,
       sort_order: 0,
       created_at: '',
       updated_at: '',

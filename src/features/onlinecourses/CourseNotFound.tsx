@@ -10,7 +10,7 @@ export function CourseNotFound() {
   return (
     <View style={styles.box}>
       <StateMessage title={t('onlineCourses.notFound.title')} body={t('onlineCourses.notFound.hint')} />
-      <Link href="/onlinekurse" style={styles.link}>
+      <Link href="/kurse?art=ondemand" style={styles.link}>
         {t('onlineCourses.back')}
       </Link>
     </View>

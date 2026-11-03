@@ -35,6 +35,24 @@ export function useOnlineCourses() {
   });
 }
 
+/** Fuer die Kurse-Seite: Kurs mit den Dauern seiner Bloecke (Gesamtdauer). */
+export type OnDemandCourse = OnlineCourse & { online_course_blocks: { duration_sec: number | null }[] | null };
+
+export function useOnDemandCourses() {
+  return useQuery({
+    queryKey: ['online-courses', 'feed'],
+    queryFn: async (): Promise<OnDemandCourse[]> => {
+      const { data, error } = await supabase
+        .from('online_courses')
+        .select('*, online_course_blocks(duration_sec)')
+        .order('sort_order', { ascending: true })
+        .order('title', { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as OnDemandCourse[];
+    },
+  });
+}
+
 export type CourseWithBlocks = { course: OnlineCourse; blocks: OnlineBlock[] };
 
 export function useOnlineCourse(slug: string | undefined) {

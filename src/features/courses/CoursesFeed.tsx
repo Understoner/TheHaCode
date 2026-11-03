@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -21,7 +21,10 @@ import {
 } from '@/features/courses/courseFacts';
 import { useCourseSeats } from '@/features/courses/useCourseBooking';
 import { useCoursesList, type Course } from '@/features/courses/useCoursesList';
-import { OnlineCoursesTeaser } from '@/features/onlinecourses/OnlineCoursesTeaser';
+import { usePlusAccess } from '@/features/configurator/useSequences';
+import { ONLINE_COURSES_ENABLED } from '@/features/onlinecourses/flag';
+import { FeaturedOnDemandCard, ON_DEMAND_ICON, OnDemandRow } from '@/features/onlinecourses/OnDemandCards';
+import { useOnDemandCourses } from '@/features/onlinecourses/useOnlineCourses';
 
 // Die Kurse im Vorschlag "Mondlicht Mobile" (02.11.2026, nur Testsystem):
 // Einstieg ueber "Wie willst du ueben?" (Online, Vor Ort, Fuer dich), Monate
@@ -33,6 +36,15 @@ import { OnlineCoursesTeaser } from '@/features/onlinecourses/OnlineCoursesTease
 
 const detailHref = (slug: string) => ({ pathname: '/kurse/[slug]' as const, params: { slug } });
 
+// Seit 03.11.2026 stehen hier auch die Onlinekurse on demand (V1.2): eine
+// vierte Karte "On Demand", neben dem naechsten Live-Termin der
+// hervorgehobene On-Demand-Kurs (is_featured, 0047) und darunter ein eigener
+// Block wie "Weitere Termine". In der Monatsleiste ist "On Demand" ein
+// eigener Eintrag. Ausgeblendet, solange flag.ts im Livesystem aus ist.
+type FilterKind = CourseKind | 'ondemand';
+const FILTER_KINDS: FilterKind[] = ONLINE_COURSES_ENABLED ? ['online', 'ondemand', 'vorort', 'mass'] : COURSE_KINDS;
+const ON_DEMAND_MONTH = 'ondemand';
+
 // Mehr Punkte passen nicht in die Zeile; darueber steht nur die Zahl.
 const MAX_SEAT_DOTS = 16;
 
@@ -41,8 +53,14 @@ export function CoursesFeed() {
   const palette = useThemePalette();
   const query = useCoursesList();
   const seats = useCourseSeats();
-  const [kind, setKind] = useState<CourseKind | null>(null);
+  const art = useLocalSearchParams<{ art?: string }>().art;
+  const [kind, setKind] = useState<FilterKind | null>(art === 'ondemand' && ONLINE_COURSES_ENABLED ? 'ondemand' : null);
   const [month, setMonth] = useState<string | null>(null);
+  const onDemand = useOnDemandCourses();
+  const plus = usePlusAccess();
+  const hasPlus = plus.data === true;
+  const onDemandList = ONLINE_COURSES_ENABLED ? (onDemand.data ?? []) : [];
+  const featured = onDemandList.find((c) => c.is_featured) ?? null;
 
   return (
     <View {...responsive('m-page')} style={styles.container}>
@@ -50,10 +68,9 @@ export function CoursesFeed() {
         {t('kurse.m.title')}
       </Text>
 
-      <OnlineCoursesTeaser />
 
       <View role="radiogroup" aria-label={t('kurse.m.kindLabel')} style={styles.kinds}>
-        {COURSE_KINDS.map((k) => {
+        {FILTER_KINDS.map((k) => {
           const active = kind === k;
           return (
             <PressableRing
@@ -63,8 +80,10 @@ export function CoursesFeed() {
               aria-checked={active}
               style={[styles.kind, active && styles.kindActive]}
             >
-              <Glyph d={KIND_ICON[k]} color={active ? palette.surface : palette.ink900} size={22} />
-              <Text style={[styles.kindText, active && styles.kindTextActive]}>{t(`kurse.m.kind.${k}`)}</Text>
+              <Glyph d={k === 'ondemand' ? ON_DEMAND_ICON : KIND_ICON[k]} color={active ? palette.surface : palette.ink900} size={22} />
+              <Text style={[styles.kindText, active && styles.kindTextActive]} numberOfLines={2}>
+                {k === 'ondemand' ? t('onlineCourses.feed.kindChip') : t(`kurse.m.kind.${k}`)}
+              </Text>
             </PressableRing>
           );
         })}
@@ -74,7 +93,8 @@ export function CoursesFeed() {
         {(all) => {
           const dated = all.filter((c) => courseKind(c) !== 'mass');
           const forYou = all.filter((c) => courseKind(c) === 'mass');
-          const byKind = kind === null || kind === 'mass' ? dated : dated.filter((c) => courseKind(c) === kind);
+          const byKind =
+            kind === null || kind === 'mass' ? dated : kind === 'ondemand' ? [] : dated.filter((c) => courseKind(c) === kind);
 
           // Die Monate kommen aus den Terminen selbst - kein leerer Monat in der Leiste.
           const months: { key: string; label: string }[] = [];
@@ -82,21 +102,38 @@ export function CoursesFeed() {
             const cal = courseCalendar(c.starts_at);
             if (cal && !months.some((m) => m.key === cal.monthKey)) months.push({ key: cal.monthKey, label: cal.monthLong });
           }
-          const activeMonth = month && months.some((m) => m.key === month) ? month : null;
-          const list = kind === 'mass' ? [] : byKind.filter((c) => !activeMonth || courseCalendar(c.starts_at)?.monthKey === activeMonth);
+          const onDemandChip = kind === null && onDemandList.length > 0;
+          const activeMonth =
+            month && (months.some((m) => m.key === month) || (onDemandChip && month === ON_DEMAND_MONTH)) ? month : null;
+          const onlyOnDemand = kind === 'ondemand' || activeMonth === ON_DEMAND_MONTH;
+          const list =
+            kind === 'mass' || onlyOnDemand
+              ? []
+              : byKind.filter((c) => !activeMonth || courseCalendar(c.starts_at)?.monthKey === activeMonth);
+          // Der On-Demand-Block: bei "Alle" (ohne Monat), bei "On Demand" und
+          // beim Monatseintrag "On Demand".
+          const showOnDemand = onDemandList.length > 0 && (onlyOnDemand || (kind === null && !activeMonth));
+          // Neben dem naechsten Termin steht der hervorgehobene Kurs - bei
+          // "Alle" und "Online"; bei "On Demand" steht er oben allein.
+          const showFeatured = featured !== null && (onlyOnDemand || ((kind === null || kind === 'online') && !activeMonth));
+          const onDemandRest = onDemandList.filter((c) => !showFeatured || c.id !== featured?.id);
           const [next, ...rest] = list;
           const seatsLeft = (c: Course) => seats.data?.get(c.id) ?? null;
 
           return (
             <View style={styles.body}>
-              {kind !== 'mass' && months.length > 1 ? (
+              {kind !== 'mass' && kind !== 'ondemand' && (months.length > 1 || onDemandChip) ? (
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.monthRow}
                   accessibilityLabel={t('kurse.m.monthLabel')}
                 >
-                  {[{ key: null, label: t('kurse.m.allMonths') }, ...months].map((m) => {
+                  {[
+                    { key: null, label: t('kurse.m.allMonths') },
+                    ...months,
+                    ...(onDemandChip ? [{ key: ON_DEMAND_MONTH, label: t('onlineCourses.feed.monthChip') }] : []),
+                  ].map((m) => {
                     const active = activeMonth === m.key;
                     return (
                       <PressableRing
@@ -113,9 +150,14 @@ export function CoursesFeed() {
                 </ScrollView>
               ) : null}
 
-              {next ? <NextCard course={next} seatsLeft={seatsLeft(next)} /> : null}
+              {next || showFeatured ? (
+                <View {...responsive('m-split')} style={styles.nextPair}>
+                  {next ? <NextCard course={next} seatsLeft={seatsLeft(next)} /> : null}
+                  {showFeatured && featured ? <FeaturedOnDemandCard course={featured} hasPlus={hasPlus} /> : null}
+                </View>
+              ) : null}
 
-              {kind !== 'mass' && list.length === 0 ? (
+              {kind !== 'mass' && !onlyOnDemand && list.length === 0 ? (
                 <StateMessage title={t('kurse.m.empty.title')} body={t('kurse.m.empty.hint')} />
               ) : null}
 
@@ -135,7 +177,24 @@ export function CoursesFeed() {
                 </>
               ) : null}
 
-              {(kind === null || kind === 'mass') && forYou.length > 0 ? (
+              {showOnDemand && onDemandRest.length > 0 ? (
+                <>
+                  <View style={styles.listHead}>
+                    <Text role="heading" aria-level={2} {...displayFont} style={styles.listTitle}>
+                      {t('onlineCourses.feed.blockTitle')}
+                    </Text>
+                    <Text style={styles.count}>{t('onlineCourses.feed.count', { count: onDemandList.length })}</Text>
+                  </View>
+                  <Text style={[styles.meta, styles.inset]}>{t('onlineCourses.feed.blockHint')}</Text>
+                  <View {...responsive('m-grid')} style={styles.gridRows}>
+                    {onDemandRest.map((c) => (
+                      <OnDemandRow key={c.id} course={c} hasPlus={hasPlus} />
+                    ))}
+                  </View>
+                </>
+              ) : null}
+
+              {(kind === null || kind === 'mass') && !onlyOnDemand && forYou.length > 0 ? (
                 <View style={styles.rows}>
                   {kind === 'mass' ? (
                     <Text role="heading" aria-level={2} {...displayFont} style={[styles.listTitle, styles.inset]}>
@@ -367,8 +426,13 @@ const styles = StyleSheet.create({
   cardLink: {
     display: 'flex',
     flexDirection: 'column',
-    marginHorizontal: spacing.md,
     textDecorationLine: 'none',
+  },
+  // Naechster Live-Termin und hervorgehobener On-Demand-Kurs: am Desktop
+  // nebeneinander, mobil untereinander (m-split).
+  nextPair: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   cardLinkFlat: {
     display: 'flex',

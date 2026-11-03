@@ -13,7 +13,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { addDays, fromIsoDate, today as heute, type IsoDate } from '@/features/habits/dates';
 import { KindIcon } from './KindIcon';
 import { orderBlocks, planDates, type DayPart, type Weekday } from './courseLogic';
-import { courseHref } from './OnlineCourseCatalog';
+import { courseHref } from './OnlineCourseView';
 import { useCanOpenCourse, useCourseProgress, useSavePlan, type CourseWithBlocks } from './useOnlineCourses';
 
 // Einen Onlinekurs im Tagebuch einplanen (V1.2, Schritt 6, Migration 0044).
