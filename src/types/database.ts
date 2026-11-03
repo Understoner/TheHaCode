@@ -296,6 +296,59 @@ export type Database = {
         }
         Relationships: []
       }
+      course_access: {
+        Row: {
+          amount_paid_cents: number | null
+          client_id: string | null
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          expires_at: string
+          id: string
+          purchased_at: string
+          source: string
+          stripe_checkout_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid_cents?: number | null
+          client_id?: string | null
+          course_id: string
+          created_at?: string
+          deleted_at?: string | null
+          expires_at: string
+          id?: string
+          purchased_at?: string
+          source?: string
+          stripe_checkout_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid_cents?: number | null
+          client_id?: string | null
+          course_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          expires_at?: string
+          id?: string
+          purchased_at?: string
+          source?: string
+          stripe_checkout_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_access_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_bookings: {
         Row: {
           agb_accepted_at: string | null
@@ -375,6 +428,57 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_progress: {
+        Row: {
+          block_id: string
+          client_id: string | null
+          completed_at: string
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          block_id: string
+          client_id?: string | null
+          completed_at?: string
+          course_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          block_id?: string
+          client_id?: string | null
+          completed_at?: string
+          course_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_progress_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "online_course_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
             referencedColumns: ["id"]
           },
         ]
@@ -1131,6 +1235,167 @@ export type Database = {
           },
         ]
       }
+      online_course_block_contents: {
+        Row: {
+          audio_path: string | null
+          block_id: string
+          body_md: string | null
+          course_id: string
+          created_at: string
+          image_path: string | null
+          pdf_path: string | null
+          updated_at: string
+          video_external_id: string | null
+          video_hash: string | null
+          video_provider: string | null
+        }
+        Insert: {
+          audio_path?: string | null
+          block_id: string
+          body_md?: string | null
+          course_id: string
+          created_at?: string
+          image_path?: string | null
+          pdf_path?: string | null
+          updated_at?: string
+          video_external_id?: string | null
+          video_hash?: string | null
+          video_provider?: string | null
+        }
+        Update: {
+          audio_path?: string | null
+          block_id?: string
+          body_md?: string | null
+          course_id?: string
+          created_at?: string
+          image_path?: string | null
+          pdf_path?: string | null
+          updated_at?: string
+          video_external_id?: string | null
+          video_hash?: string | null
+          video_provider?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_course_block_contents_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: true
+            referencedRelation: "online_course_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "online_course_block_contents_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      online_course_blocks: {
+        Row: {
+          course_id: string
+          created_at: string
+          day_offset: number
+          duration_sec: number | null
+          id: string
+          kind: Database["public"]["Enums"]["online_block_kind"]
+          sort_order: number
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          day_offset?: number
+          duration_sec?: number | null
+          id?: string
+          kind: Database["public"]["Enums"]["online_block_kind"]
+          sort_order?: number
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          day_offset?: number
+          duration_sec?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["online_block_kind"]
+          sort_order?: number
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_course_blocks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      online_courses: {
+        Row: {
+          access: Database["public"]["Enums"]["online_course_access"]
+          access_days: number
+          cover_path: string | null
+          created_at: string
+          description_md: string | null
+          id: string
+          is_published: boolean
+          pass_percent: number
+          price_cents: number | null
+          slug: string
+          sort_order: number
+          subtitle: string | null
+          suggested_days: number | null
+          summary_md: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          access?: Database["public"]["Enums"]["online_course_access"]
+          access_days?: number
+          cover_path?: string | null
+          created_at?: string
+          description_md?: string | null
+          id?: string
+          is_published?: boolean
+          pass_percent?: number
+          price_cents?: number | null
+          slug: string
+          sort_order?: number
+          subtitle?: string | null
+          suggested_days?: number | null
+          summary_md?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          access?: Database["public"]["Enums"]["online_course_access"]
+          access_days?: number
+          cover_path?: string | null
+          created_at?: string
+          description_md?: string | null
+          id?: string
+          is_published?: boolean
+          pass_percent?: number
+          price_cents?: number | null
+          slug?: string
+          sort_order?: number
+          subtitle?: string | null
+          suggested_days?: number | null
+          summary_md?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1425,6 +1690,8 @@ export type Database = {
       }
     }
     Functions: {
+      can_open_course: { Args: { p_course_id: string }; Returns: boolean }
+      can_open_course_media: { Args: { p_name: string }; Returns: boolean }
       can_plan_challenge: { Args: { p_challenge_id: string }; Returns: boolean }
       can_start_challenge: { Args: { p_template_id: string }; Returns: boolean }
       can_use_habit_template: {
@@ -1619,6 +1886,8 @@ export type Database = {
         | "text"
         | "done"
       news_category: "praxis" | "blog" | "kurs" | "allgemein"
+      online_block_kind: "video" | "audio" | "text" | "pdf" | "quiz"
+      online_course_access: "public" | "account" | "plus" | "paid"
       phase_kind:
         | "inhale"
         | "hold_in"
@@ -1780,6 +2049,8 @@ export const Constants = {
       exercise_type: ["paced", "general"],
       habit_tracking_type: ["number", "smiley_5", "slider_100", "text", "done"],
       news_category: ["praxis", "blog", "kurs", "allgemein"],
+      online_block_kind: ["video", "audio", "text", "pdf", "quiz"],
+      online_course_access: ["public", "account", "plus", "paid"],
       phase_kind: ["inhale", "hold_in", "exhale", "hold_out", "free_breathing"],
       playback_mode: ["timer", "audio_guided", "audio_only"],
       subscription_plan: ["monthly", "yearly"],

@@ -71,7 +71,16 @@ export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
     // Klingelschalter auf lautlos stumm, solange keine eigene Hintergrundmusik
     // der App spielt. Der Nutzer hat sich fuer die fremde Musik entschieden.
     // Nicht wieder "reparieren", ohne diese Abwaegung neu zu fuehren.
-    "media-src 'self'",
+    //
+    // Seit V1.2 (03.11.2026) zusaetzlich der Supabase-Host: gesprochene
+    // Aufnahmen der Onlinekurse kommen ueber signierte Adressen aus dem
+    // privaten Bucket course-media. Das ist eine echte Datei, die der Nutzer
+    // bewusst startet - nicht der Wachhalte-Ton, um den es oben geht. data:
+    // bleibt draussen.
+    liste('media-src', "'self'", http),
+    // Kursvideos laufen im eingebetteten Vimeo-Player (SAD §11.2). Nur dieser
+    // eine Host, sonst nichts einbettbar.
+    "frame-src https://player.vimeo.com",
     liste('img-src', "'self'", 'data:', 'blob:', http),
     liste('connect-src', "'self'", http, ws),
     'upgrade-insecure-requests',
