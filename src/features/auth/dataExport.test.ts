@@ -8,6 +8,7 @@ describe('EXPORT_TABLES', () => {
   // Erinnerung: kommt eine dazu, wird er rot und die Liste wird ergaenzt.
   it('enthaelt alle Nutzertabellen, die es heute gibt', () => {
     expect([...EXPORT_TABLES].sort()).toEqual([
+      'certificates',
       'challenge_items',
       'challenge_slots',
       'challenges',

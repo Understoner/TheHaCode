@@ -9,6 +9,59 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      certificates: {
+        Row: {
+          client_id: string | null
+          code: string
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          full_name: string
+          id: string
+          issued_at: string
+          score: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          code: string
+          course_id: string
+          created_at?: string
+          deleted_at?: string | null
+          full_name: string
+          id?: string
+          issued_at?: string
+          score: number
+          total: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          code?: string
+          course_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          full_name?: string
+          id?: string
+          issued_at?: string
+          score?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_items: {
         Row: {
           challenge_id: string
@@ -1904,6 +1957,29 @@ export type Database = {
       }
       has_plus_access: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      issue_certificate: {
+        Args: { p_course_id: string; p_full_name: string }
+        Returns: {
+          client_id: string | null
+          code: string
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          full_name: string
+          id: string
+          issued_at: string
+          score: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "certificates"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reserve_course_seat: {
         Args: {
           p_agb_accepted?: boolean
@@ -2056,6 +2132,14 @@ export type Database = {
       take_guest_booking_slot: {
         Args: { p_key_hash: string; p_limit?: number; p_window?: string }
         Returns: boolean
+      }
+      verify_certificate: {
+        Args: { p_code: string }
+        Returns: {
+          course_title: string
+          full_name: string
+          issued_at: string
+        }[]
       }
     }
     Enums: {

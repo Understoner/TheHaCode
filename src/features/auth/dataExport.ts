@@ -39,6 +39,7 @@ export const EXPORT_TABLES = [
   'course_progress',
   'course_plan_slots',
   'quiz_attempts',
+  'certificates',
 ] as const;
 
 /**
