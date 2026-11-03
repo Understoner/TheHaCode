@@ -56,7 +56,8 @@
     "@xmldom/xmldom": "^0.9.12",
     "fast-uri": "^3.1.7",
     "js-yaml": "^4.3.2",
-    "decode-uri-component": "$decode-uri-component"
+    "decode-uri-component": "$decode-uri-component",
+    "node-forge": "^1.4.2"
   },
   "allowScripts": {
     "unrs-resolver": false
