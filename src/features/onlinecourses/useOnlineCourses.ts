@@ -163,6 +163,7 @@ export function useMarkBlock(courseId: string) {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['online-course-progress', courseId] });
+      void queryClient.invalidateQueries({ queryKey: ['online-plan', 'agenda'] });
     },
   });
 }
@@ -200,6 +201,112 @@ export function useOnlineCourseCheckout() {
       if (error) throw error;
       if (!data?.url) throw new Error(data?.error ?? 'unknown');
       return data.url;
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Einplanen im Tagebuch (Schritt 6, Migration 0044)
+// ---------------------------------------------------------------------------
+
+export type PlanSlot = Database['public']['Tables']['course_plan_slots']['Row'];
+export type AgendaSlot = PlanSlot & {
+  online_course_blocks: { title: string; kind: OnlineBlock['kind'] } | null;
+  online_courses: { slug: string; title: string } | null;
+  /** Der Block ist schon erledigt (course_progress). */
+  done: boolean;
+};
+
+/** Geplante Termine eines Kurses (nur die eigenen, RLS). */
+export function usePlanSlots(courseId: string | undefined) {
+  const { session, loading } = useAuth();
+  const userId = session?.user.id ?? null;
+  return useQuery({
+    queryKey: ['online-plan', courseId, userId],
+    enabled: Boolean(courseId) && !loading,
+    queryFn: async (): Promise<Map<string, PlanSlot>> => {
+      if (!userId) return new Map();
+      const { data, error } = await supabase
+        .from('course_plan_slots')
+        .select('*')
+        .eq('course_id', courseId!)
+        .is('deleted_at', null);
+      if (error) throw error;
+      return new Map((data ?? []).map((row) => [row.block_id, row]));
+    },
+  });
+}
+
+/** Alle eigenen Kurstermine in einem Zeitraum, fuer das Tagebuch. */
+export function useAgenda(from: string, to: string) {
+  const { session, loading } = useAuth();
+  const userId = session?.user.id ?? null;
+  return useQuery({
+    queryKey: ['online-plan', 'agenda', from, to, userId],
+    enabled: !loading && userId !== null,
+    queryFn: async (): Promise<AgendaSlot[]> => {
+      const { data, error } = await supabase
+        .from('course_plan_slots')
+        .select('*, online_course_blocks(title, kind), online_courses(slug, title)')
+        .gte('planned_on', from)
+        .lte('planned_on', to)
+        .is('deleted_at', null)
+        .order('planned_on', { ascending: true });
+      if (error) throw error;
+      const slots = (data ?? []) as unknown as Omit<AgendaSlot, 'done'>[];
+      if (slots.length === 0) return [];
+
+      const { data: progress, error: progressError } = await supabase
+        .from('course_progress')
+        .select('block_id')
+        .in('block_id', slots.map((s) => s.block_id))
+        .is('deleted_at', null);
+      if (progressError) throw progressError;
+      const done = new Set((progress ?? []).map((p) => p.block_id));
+      return slots.map((s) => ({ ...s, done: done.has(s.block_id) }));
+    },
+  });
+}
+
+/** Termine setzen oder verschieben (einer je Block). */
+export function useSavePlan(courseId: string) {
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
+  const userId = session?.user.id ?? null;
+
+  return useMutation({
+    mutationFn: async (slots: { blockId: string; plannedOn: string; dayPart: string | null }[]) => {
+      if (!userId) throw new Error('login_required');
+      if (slots.length === 0) return;
+      // course_id setzt der Trigger aus dem Block (0044).
+      const { error } = await supabase.from('course_plan_slots').upsert(
+        slots.map((s) => ({
+          user_id: userId,
+          course_id: courseId,
+          block_id: s.blockId,
+          planned_on: s.plannedOn,
+          day_part: s.dayPart,
+        })),
+        { onConflict: 'user_id,block_id' },
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['online-plan'] });
+    },
+  });
+}
+
+/** Einen Termin wieder austragen. */
+export function useRemovePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (blockId: string) => {
+      const { error } = await supabase.from('course_plan_slots').delete().eq('block_id', blockId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['online-plan'] });
     },
   });
 }

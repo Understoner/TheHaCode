@@ -432,6 +432,60 @@ export type Database = {
           },
         ]
       }
+      course_plan_slots: {
+        Row: {
+          block_id: string
+          client_id: string | null
+          course_id: string
+          created_at: string
+          day_part: string | null
+          deleted_at: string | null
+          id: string
+          planned_on: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          block_id: string
+          client_id?: string | null
+          course_id: string
+          created_at?: string
+          day_part?: string | null
+          deleted_at?: string | null
+          id?: string
+          planned_on: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          block_id?: string
+          client_id?: string | null
+          course_id?: string
+          created_at?: string
+          day_part?: string | null
+          deleted_at?: string | null
+          id?: string
+          planned_on?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_plan_slots_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "online_course_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_plan_slots_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_progress: {
         Row: {
           block_id: string

@@ -34,6 +34,10 @@ export const EXPORT_TABLES = [
   'challenges',
   'challenge_items',
   'challenge_slots',
+  // Onlinekurse (V1.2, 0042-0044): Kaeufe, Fortschritt, geplante Termine.
+  'course_access',
+  'course_progress',
+  'course_plan_slots',
 ] as const;
 
 /**

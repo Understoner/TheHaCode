@@ -35,6 +35,7 @@ vi.mock('./useOnlineCourses', () => ({
   useCourseProgress: () => ({ data: state.done }),
   useCourseAccess: () => ({ data: [] }),
   useOnlineCourseCheckout: () => ({ mutate: vi.fn(), isPending: false, error: null }),
+  usePlanSlots: () => ({ data: new Map() }),
 }));
 
 function data(access: 'public' | 'account' | 'plus' | 'paid'): CourseWithBlocks {
