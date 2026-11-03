@@ -1450,6 +1450,82 @@ export type Database = {
         }
         Relationships: []
       }
+      online_quiz_options: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean
+          label: string
+          question_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          label: string
+          question_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          label?: string
+          question_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_quiz_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "online_quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      online_quiz_questions: {
+        Row: {
+          block_id: string
+          created_at: string
+          explanation: string | null
+          id: string
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          block_id: string
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          block_id?: string
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          question?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_quiz_questions_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "online_course_blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1503,6 +1579,66 @@ export type Database = {
           voice_enabled?: boolean
         }
         Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          answers: Json
+          block_id: string
+          client_id: string | null
+          course_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          passed: boolean
+          score: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers: Json
+          block_id: string
+          client_id?: string | null
+          course_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          passed: boolean
+          score: number
+          total: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          block_id?: string
+          client_id?: string | null
+          course_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          passed?: boolean
+          score?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "online_course_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stripe_events: {
         Row: {
@@ -1913,6 +2049,10 @@ export type Database = {
             }
             Returns: string
           }
+      submit_quiz: {
+        Args: { p_answers: Json; p_block_id: string }
+        Returns: Json
+      }
       take_guest_booking_slot: {
         Args: { p_key_hash: string; p_limit?: number; p_window?: string }
         Returns: boolean
