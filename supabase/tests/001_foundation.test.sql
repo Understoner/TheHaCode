@@ -136,6 +136,14 @@ insert into public.challenge_slots (user_id, challenge_id, item_id, starts_on, d
 values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000005',
         '11111111-aaaa-0000-0000-000000000006', current_date - 1, current_date - 1);
 
+-- Kaeufe von Onlinekursen (0042) haengen per cascade an auth.users; der Kurs
+-- selbst bleibt (restrict), nur der Kauf verschwindet mit dem Konto.
+insert into public.online_courses (id, slug, title, access, price_cents, is_published)
+values ('11111111-aaaa-0000-0000-000000000042', 'kaskade-kurs', 'Kaskade', 'paid', 100, true);
+insert into public.course_access (user_id, course_id, expires_at)
+values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000042',
+        now() + interval '1 year');
+
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
   select count(*) from (
@@ -166,6 +174,8 @@ select is((
     select user_id from public.challenge_items where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.challenge_slots where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.course_access where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select is(
