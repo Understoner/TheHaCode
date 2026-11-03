@@ -16,6 +16,7 @@ import { openExternalUrl } from '@/lib/externalLink';
 import { AudioPlayer } from './AudioPlayer';
 import { KindIcon } from './KindIcon';
 import { LaterPicker } from './LaterPicker';
+import { QuizBlock } from './QuizBlock';
 import { orderBlocks } from './courseLogic';
 import { courseHref } from './OnlineCourseCatalog';
 import { blockHref } from './OnlineCourseView';
@@ -92,6 +93,12 @@ export function OnlineBlockView({ data, blockId }: { data: CourseWithBlocks; blo
               title={t(`onlineCourses.block.locked.${course.access}`)}
               body={t('onlineCourses.block.lockedHint')}
             />
+          ) : block.kind === 'quiz' ? (
+            loggedIn ? (
+              <QuizBlock courseId={course.id} blockId={block.id} passPercent={course.pass_percent} passedBefore={done} />
+            ) : (
+              <StateMessage title={t('onlineCourses.quiz.loginTitle')} body={t('onlineCourses.quiz.loginHint')} />
+            )
           ) : (
             <QueryBoundary query={content}>
               {(c) =>
@@ -164,8 +171,6 @@ function BlockBody({
   content: OnlineBlockContent;
   onFinished: () => void;
 }) {
-  const { t } = useTranslation();
-
   switch (block.kind) {
     case 'text':
       return (
@@ -191,7 +196,8 @@ function BlockBody({
         </View>
       );
     case 'quiz':
-      return <StateMessage title={t('onlineCourses.block.quizSoonTitle')} body={t('onlineCourses.block.quizSoonHint')} />;
+      // Das Quiz rendert OnlineBlockView selbst (QuizBlock), ohne Inhaltszeile.
+      return null;
   }
 }
 

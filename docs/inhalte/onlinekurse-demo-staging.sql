@@ -26,7 +26,7 @@
 -- wird (update public.online_course_block_contents set video_provider =
 -- 'vimeo', video_external_id = '<ID>' where block_id = '<Block-ID>').
 --
--- Quizfragen kommen mit Schritt 7 (eigene Tabellen) dazu.
+-- Voraussetzung fuer die Quizfragen: Migration 0045 (Schritt 7).
 
 begin;
 
@@ -136,9 +136,46 @@ insert into public.online_course_block_contents (block_id, course_id, body_md, a
    'Nach einer Woche siehst du, welche Übung dir am meisten bringt.', null,
    'de000000-0000-4000-8000-000000000004/atemprotokoll-7-tage.pdf');
 
+-- ===================================================================
+-- Quizfragen (Migration 0045) - dieselben fuenf Fragen fuer jedes Demo-Quiz
+-- ===================================================================
+with fragen(n, frage, erklaerung, richtig, falsch1, falsch2) as (values
+  (1, 'Aus wie vielen gleich langen Phasen besteht die Box-Atmung?',
+      'Einatmen, halten, ausatmen, halten - jede Phase gleich lang. Daher das Bild der Box.',
+      'Vier: ein, halten, aus, halten', 'Zwei: ein und aus', 'Drei: ein, halten, aus'),
+  (2, 'Welcher Teil des Atemzugs wirkt am stärksten beruhigend?',
+      'Beim Ausatmen sinkt die Herzfrequenz leicht. Wird die Ausatmung länger, überwiegt dieser Effekt.',
+      'Eine verlängerte Ausatmung', 'Eine lange Einatmung', 'Möglichst langes Luftanhalten'),
+  (3, 'Wie lange atmest du bei der 4-7-8-Atmung aus?',
+      '4 ein, 7 halten, 8 aus. Die Ausatmung ist die längste Phase.',
+      '8 Zählzeiten', '4 Zählzeiten', '7 Zählzeiten'),
+  (4, 'Wie viele Atemzüge pro Minute sind beim gleichmäßigen (kohärenten) Atmen üblich?',
+      'Rund 5,5 Atemzüge pro Minute, also etwa 5,5 Sekunden ein und 5,5 Sekunden aus.',
+      'Etwa 5,5 bis 6', 'Etwa 2', 'Etwa 12 bis 16'),
+  (5, 'Was macht die Nase mit der Luft, bevor sie in die Lunge kommt?',
+      'Die Nasenschleimhaut wärmt, befeuchtet und filtert die Atemluft.',
+      'Sie wärmt, befeuchtet und filtert sie', 'Nichts, sie leitet nur weiter', 'Sie reichert sie mit Sauerstoff an')
+),
+quiz as (
+  select b.id as block_id from public.online_course_blocks b
+    join public.online_courses c on c.id = b.course_id
+   where c.slug like 'demo-%' and b.kind = 'quiz'
+),
+neu as (
+  insert into public.online_quiz_questions (block_id, sort_order, question, explanation)
+  select quiz.block_id, f.n, f.frage, f.erklaerung from quiz cross join fragen f
+  returning id, sort_order, question
+)
+insert into public.online_quiz_options (question_id, sort_order, label, is_correct)
+select neu.id, o.sort_order, o.label, o.is_correct
+  from neu join fragen f on f.n = neu.sort_order
+ cross join lateral (values (2, f.richtig, true), (1, f.falsch1, false), (3, f.falsch2, false))
+       as o(sort_order, label, is_correct);
+
 commit;
 
--- Kontrolle: vier Kurse, fünfzehn Blöcke, elf Inhalte.
+-- Kontrolle: vier Kurse, fünfzehn Blöcke, elf Inhalte, zwanzig Quizfragen.
 select (select count(*) from public.online_courses where slug like 'demo-%') as kurse,
        (select count(*) from public.online_course_blocks b join public.online_courses c on c.id = b.course_id where c.slug like 'demo-%') as bloecke,
-       (select count(*) from public.online_course_block_contents x join public.online_courses c on c.id = x.course_id where c.slug like 'demo-%') as inhalte;
+       (select count(*) from public.online_course_block_contents x join public.online_courses c on c.id = x.course_id where c.slug like 'demo-%') as inhalte,
+       (select count(*) from public.online_quiz_questions q join public.online_course_blocks b on b.id = q.block_id join public.online_courses c on c.id = b.course_id where c.slug like 'demo-%') as quizfragen;

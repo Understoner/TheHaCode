@@ -22,6 +22,7 @@ describe('EXPORT_TABLES', () => {
       'habit_logs',
       'habit_templates',
       'profiles',
+      'quiz_attempts',
       'subscriptions',
       'user_consents',
       'user_habits',
