@@ -143,6 +143,12 @@ values ('11111111-aaaa-0000-0000-000000000042', 'kaskade-kurs', 'Kaskade', 'paid
 insert into public.course_access (user_id, course_id, expires_at)
 values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000042',
         now() + interval '1 year');
+-- Fortschritt (0043) haengt ebenfalls per cascade an auth.users.
+insert into public.online_course_blocks (id, course_id, kind, title)
+values ('11111111-aaaa-0000-0000-000000000043', '11111111-aaaa-0000-0000-000000000042', 'text', 'Kaskade');
+insert into public.course_progress (user_id, course_id, block_id)
+values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000042',
+        '11111111-aaaa-0000-0000-000000000043');
 
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
@@ -176,6 +182,8 @@ select is((
     select user_id from public.challenge_slots where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.course_access where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.course_progress where user_id = '11111111-1111-1111-1111-111111111111'
   ) x), 0::bigint, 'Loeschkaskade hinterlaesst keine Datenreste');
 
 select is(
