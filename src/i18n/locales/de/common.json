@@ -1134,7 +1134,7 @@
   "onlineCourses.verify.hint": "Prüfcode {{code}} · DER ATEMCODE",
   "onlineCourses.verify.unknownTitle": "Kein Zertifikat zu diesem Code",
   "onlineCourses.verify.unknownHint": "Prüf bitte, ob der Code vollständig ist, zum Beispiel AC-1A2B-3C4D.",
-  "onlineCourses.feed.kindChip": "Online On Demand",
+  "onlineCourses.feed.kindChip": "On Demand",
   "onlineCourses.feed.monthChip": "On Demand",
   "onlineCourses.feed.onDemand": "Online On Demand",
   "onlineCourses.feed.featured": "Empfohlen",
