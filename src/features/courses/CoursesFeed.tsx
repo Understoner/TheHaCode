@@ -167,22 +167,7 @@ export function CoursesFeed() {
                 <StateMessage title={t('kurse.m.empty.title')} body={t('kurse.m.empty.hint')} />
               ) : null}
 
-              {rest.length > 0 ? (
-                <>
-                  <View style={styles.listHead}>
-                    <Text role="heading" aria-level={2} {...displayFont} style={styles.listTitle}>
-                      {activeMonth ? months.find((m) => m.key === activeMonth)?.label : t('kurse.m.more')}
-                    </Text>
-                    <Text style={styles.count}>{t('kurse.m.count', { count: list.length })}</Text>
-                  </View>
-                  <View {...responsive('m-grid')} style={styles.gridRows}>
-                    {rest.map((c) => (
-                      <CourseRow key={c.id} course={c} seatsLeft={seatsLeft(c)} />
-                    ))}
-                  </View>
-                </>
-              ) : null}
-
+              {/* On Demand vor den weiteren Live-Terminen (Wunsch des Teams 03.11.2026). */}
               {showOnDemand && onDemandRest.length > 0 ? (
                 <>
                   <View style={styles.listHead}>
@@ -199,6 +184,23 @@ export function CoursesFeed() {
                   </View>
                 </>
               ) : null}
+
+              {rest.length > 0 ? (
+                <>
+                  <View style={styles.listHead}>
+                    <Text role="heading" aria-level={2} {...displayFont} style={styles.listTitle}>
+                      {activeMonth ? months.find((m) => m.key === activeMonth)?.label : t('kurse.m.more')}
+                    </Text>
+                    <Text style={styles.count}>{t('kurse.m.count', { count: list.length })}</Text>
+                  </View>
+                  <View {...responsive('m-grid')} style={styles.gridRows}>
+                    {rest.map((c) => (
+                      <CourseRow key={c.id} course={c} seatsLeft={seatsLeft(c)} />
+                    ))}
+                  </View>
+                </>
+              ) : null}
+
 
               {kind === 'mass' && forYou.length > 0 ? (
                 <View style={styles.rows}>
