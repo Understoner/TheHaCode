@@ -20,17 +20,17 @@ select is(
   '2806eee48899169d264bfd7b874b2d3958fe27997f456ff2669c51ffb88d8ef1',
   'Einwilligung Tagebuch v4 ist veroeffentlicht, im freigegebenen Wortlaut');
 
-select is(
-  (select version from public.consent_definitions
-    where kind = 'privacy' and published_at is not null order by version desc limit 1),
-  6,
-  'Fassung 6 ist die juengste - neue Konten stimmen ihr zu');
+-- Seit 0040 sind Fassung 7 und v5 die juengsten; hier zaehlt nur noch, dass
+-- 6 und v4 stehen.
+select ok(
+  exists (select 1 from public.consent_definitions
+    where kind = 'privacy' and version = 6 and published_at is not null),
+  'Fassung 6 bleibt als Nachweis veroeffentlicht');
 
-select is(
-  (select version from public.consent_definitions
-    where kind = 'health_data' and published_at is not null order by version desc limit 1),
-  4,
-  'v4 ist die juengste Einwilligung Tagebuch');
+select ok(
+  exists (select 1 from public.consent_definitions
+    where kind = 'health_data' and version = 4 and published_at is not null),
+  'v4 bleibt als Nachweis veroeffentlicht');
 
 -- Wer v3 zugestimmt hat, bleibt eingewilligt.
 insert into auth.users (id, email) values ('a3800000-0000-0000-0000-000000000001', 'v3@example.at');

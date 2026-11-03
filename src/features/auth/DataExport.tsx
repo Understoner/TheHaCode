@@ -23,6 +23,34 @@ import { PressableRing } from '@/components/PressableRing';
 // zu bleiben.
 export function DataExport({ session }: { session: Session }) {
   const { t } = useTranslation();
+  const { run, pending, error } = useDataExport(session);
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.heading}>{t('konto.export.titel')}</Text>
+      <Text style={styles.body}>{t('konto.export.text')}</Text>
+
+      {error ? (
+        <Text role="alert" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
+
+      <PressableRing onPress={() => void run()} disabled={pending} style={styles.action}>
+        <Text style={styles.actionText}>
+          {pending ? t('konto.export.pending') : t('konto.export.aktion')}
+        </Text>
+      </PressableRing>
+    </View>
+  );
+}
+
+/**
+ * Der Download selbst, auch fuer den Widerruf der Tagebuch-Einwilligung
+ * (HealthDataRevoke, 03.11.2026): dort laedt man vor dem Loeschen eine Kopie.
+ */
+export function useDataExport(session: Session) {
+  const { t } = useTranslation();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,24 +88,7 @@ export function DataExport({ session }: { session: Session }) {
     }
   };
 
-  return (
-    <View style={styles.section}>
-      <Text style={styles.heading}>{t('konto.export.titel')}</Text>
-      <Text style={styles.body}>{t('konto.export.text')}</Text>
-
-      {error ? (
-        <Text role="alert" style={styles.error}>
-          {error}
-        </Text>
-      ) : null}
-
-      <PressableRing onPress={() => void run()} disabled={pending} style={styles.action}>
-        <Text style={styles.actionText}>
-          {pending ? t('konto.export.pending') : t('konto.export.aktion')}
-        </Text>
-      </PressableRing>
-    </View>
-  );
+  return { run, pending, error };
 }
 
 const styles = StyleSheet.create({

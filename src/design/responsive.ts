@@ -67,7 +67,15 @@ export type ResponsiveTarget =
   // Zwei Bloecke, mobil untereinander, am Desktop gleich breit nebeneinander.
   | 'm-split'
   // Die Titelkarte der News: am Desktop Bild links, Text rechts.
-  | 'm-feature';
+  | 'm-feature'
+  // Listen mit Bedienelementen (Habit-Auswahl, Habit-Bereiche, 03.11.2026):
+  // am Desktop hoechstens zwei Spalten, auch ab 1100 px - bei einem Drittel
+  // Breite brechen Titel und Knoepfe um. Aufgeklappte Zeilen ziehen die
+  // Nachbarzeile nicht mit in die Hoehe.
+  | 'm-grid2'
+  // Nur mobil sichtbar, z. B. die Trennlinie ueber dem zweiten Eintrag einer
+  // Liste, der am Desktop oben in der rechten Spalte steht.
+  | 'm-mobile-only';
 
 // Nur die Mindestbreiten unterscheiden sich. Teamkarten tragen seit dem
 // Umbau auf die News-Anatomie (Bild oben ueber die volle Breite) dieselbe
@@ -133,6 +141,9 @@ ${gridRules}
   [data-thc="m-split"] > * { flex: 1 1 0 !important; min-width: 0 !important; }
   [data-thc="m-feature"] { flex-direction: row !important; align-items: center !important; }
   [data-thc="m-feature"] > * { flex: 1 1 0 !important; min-width: 0 !important; }
+  [data-thc="m-grid2"] { flex-direction: row !important; flex-wrap: wrap !important; align-items: flex-start !important; column-gap: 12px !important; }
+  [data-thc="m-grid2"] > * { flex: 0 0 calc(50% - 6px) !important; min-width: 0 !important; }
+  [data-thc="m-mobile-only"] { display: none !important; }
 }
 @media (min-width: 1100px) {
   [data-thc="m-grid"] > * { flex-basis: calc(33.333% - 8px) !important; }

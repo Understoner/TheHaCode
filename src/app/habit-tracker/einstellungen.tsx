@@ -1,10 +1,12 @@
 import { Link } from 'expo-router';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
+import { PageColumn } from '@/design/PageColumn';
 import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { displayFont } from '@/design/responsive';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -28,7 +30,8 @@ export default function EinstellungenScreen() {
   const { session, loading } = useAuth();
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={DESIGN_PREVIEW ? styles.containerWide : styles.container}>
+      <Column>
       <Link href="/habit-tracker" style={styles.back}>
         {t('diary.back')}
       </Link>
@@ -54,8 +57,16 @@ export default function EinstellungenScreen() {
           </Link>
         </View>
       )}
+      </Column>
     </ScrollView>
   );
+}
+
+// Im Mondlicht-Design (03.11.2026) in der zentrierten Seitenspalte wie
+// Sessions und Kurse - am Desktop 1120 px, die Gruppen zu zweit
+// (HabitSettingsView). Ohne Mondlicht bleibt die schmale Formularseite.
+function Column({ children }: { children: ReactNode }) {
+  return DESIGN_PREVIEW ? <PageColumn gap={spacing.md}>{children}</PageColumn> : <>{children}</>;
 }
 
 function Settings() {
@@ -196,6 +207,12 @@ const styles = StyleSheet.create({
     // Formularseite: lesbar schmal wie die BOLT-Messung.
     maxWidth: 720,
     alignSelf: 'center',
+  },
+  containerWide: {
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.background,
+    width: '100%',
   },
   back: {
     fontSize: 14,

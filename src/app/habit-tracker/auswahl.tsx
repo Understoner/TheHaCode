@@ -1,5 +1,6 @@
 import { Link, useLocalSearchParams } from 'expo-router';
 import type { TFunction } from 'i18next';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -8,6 +9,7 @@ import { FilterGlyph, HEADER_ICON_SIZE, HeaderIconLink } from '@/components/Head
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
+import { PageColumn } from '@/design/PageColumn';
 import { colors, DESIGN_PREVIEW, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
@@ -41,6 +43,7 @@ export default function HabitsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Column>
       <Link href={DESIGN_PREVIEW ? '/habit-tracker' : '/habit-tracker/einstellungen'} style={styles.back}>
         {DESIGN_PREVIEW ? t('diary.back') : t('habits.back')}
       </Link>
@@ -73,8 +76,16 @@ export default function HabitsScreen() {
       ) : (
         <StateMessage title={t('diary.login.title')} body={t('diary.login.text')} />
       )}
+      </Column>
     </ScrollView>
   );
+}
+
+// Im Mondlicht-Design (03.11.2026) in der zentrierten Seitenspalte wie
+// Sessions und Kurse; am Desktop stehen die Habits dort in zwei Spalten
+// (HabitPicker). Ohne Mondlicht bleibt die Seite wie bisher.
+function Column({ children }: { children: ReactNode }) {
+  return DESIGN_PREVIEW ? <PageColumn gap={spacing.md}>{children}</PageColumn> : <>{children}</>;
 }
 
 function HabitsForUser({ filter }: { filter: HabitFilter }) {

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -11,7 +11,9 @@ import { QueryBoundary } from '@/components/QueryBoundary';
 import { SkeletonList } from '@/components/SkeletonList';
 import { StateMessage } from '@/components/StateMessage';
 import { TextField } from '@/components/TextField';
-import { colors, radius, spacing } from '@/design/tokens';
+import { PageColumn } from '@/design/PageColumn';
+import { responsive } from '@/design/responsive';
+import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { usePlusAccess } from '@/features/configurator/useSequences';
 import { useConsents } from '@/features/consents/useConsents';
@@ -40,7 +42,8 @@ export default function OwnHabitScreen() {
   const { session, loading } = useAuth();
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={DESIGN_PREVIEW ? styles.containerWide : styles.container}>
+      <Column>
       {/* Angelegt wird aus den Einstellungen, bearbeitet aus der Auswahl
           (30.10.2026) - der Weg zurueck fuehrt dorthin, woher man kam. */}
       <Link href={id ? '/habit-tracker/auswahl' : '/habit-tracker/einstellungen'} style={styles.back}>
@@ -55,8 +58,16 @@ export default function OwnHabitScreen() {
       ) : (
         <StateMessage title={t('diary.login.title')} body={t('diary.login.text')} />
       )}
+      </Column>
     </ScrollView>
   );
+}
+
+// Im Mondlicht-Design (03.11.2026) in der zentrierten Seitenspalte wie
+// Sessions und Kurse; am Desktop steht das Formular in zwei Spalten
+// (OwnHabitForm). Ohne Mondlicht bleibt die schmale Formularseite.
+function Column({ children }: { children: ReactNode }) {
+  return DESIGN_PREVIEW ? <PageColumn gap={spacing.md}>{children}</PageColumn> : <>{children}</>;
 }
 
 function OwnHabitLoader({ id }: { id: string | null }) {
@@ -173,6 +184,11 @@ function OwnHabitForm({
   return (
     <View style={styles.stack}>
       {!canEdit ? <Text style={styles.notice}>{t('habits.own.readOnly')}</Text> : null}
+
+      {/* Am Desktop (03.11.2026) zwei Spalten: links, was das Habit ist,
+          rechts, wie es zaehlt - samt Speichern. Mobil untereinander. */}
+      <View {...responsive('m-split')} style={styles.split}>
+      <View style={styles.stack}>
 
       <Controller
         control={control}
@@ -328,6 +344,9 @@ function OwnHabitForm({
           </View>
         )}
       />
+      </View>
+
+      <View style={styles.stack}>
 
       <Controller
         control={control}
@@ -467,6 +486,8 @@ function OwnHabitForm({
           onPress={handleSubmit(onSubmit)}
         />
       ) : null}
+      </View>
+      </View>
 
       {existing ? (
         <View style={styles.deleteBox}>
@@ -537,6 +558,15 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 620,
     alignSelf: 'center',
+  },
+  containerWide: {
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.background,
+    width: '100%',
+  },
+  split: {
+    gap: spacing.lg,
   },
   back: {
     fontSize: 14,

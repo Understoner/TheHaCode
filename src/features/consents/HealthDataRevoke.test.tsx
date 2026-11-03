@@ -54,30 +54,33 @@ describe('HealthDataRevoke', () => {
     rpc.mockReset().mockResolvedValue({ error: null });
   });
 
-  it('widerruft ohne zu loeschen, wenn die Daten bleiben sollen', async () => {
+  // Seit 03.11.2026 heisst Widerruf Loeschen: ohne Einwilligung gibt es fuer
+  // Gesundheitsdaten keine Rechtsgrundlage mehr. Eine Wahl "Daten behalten"
+  // darf es nicht mehr geben, eine Kopie vorher schon.
+  it('bietet kein Widerrufen ohne Loeschen mehr an, aber vorher eine Kopie', () => {
     renderPanel();
-    fireEvent.click(screen.getByText('Widerrufen, Daten behalten'));
 
-    await screen.findByText(/Deine bisherigen Einträge bleiben/);
-    expect(calls).toEqual(['widerruf']);
-    expect(insert.mock.calls[0][0]).toMatchObject({ kind: 'health_data', granted_at: null });
+    expect(screen.queryByText(/Daten behalten/)).toBeNull();
+    expect(screen.getByText('Vorher Daten herunterladen')).toBeTruthy();
+    expect(calls).toEqual([]);
   });
 
   // Reihenfolge ist Absicht: scheitert das Loeschen, ist der Widerruf schon
   // wirksam. Andersherum waeren die Daten weg und die Einwilligung noch da.
   it('widerruft zuerst und loescht danach', async () => {
     renderPanel();
-    fireEvent.click(screen.getByText('Widerrufen und alles löschen'));
+    fireEvent.click(screen.getByText('Widerrufen und löschen'));
 
     await screen.findByText('Widerrufen. Dein Tagebuch ist gelöscht.');
     expect(calls).toEqual(['widerruf', 'loeschen']);
+    expect(insert.mock.calls[0][0]).toMatchObject({ kind: 'health_data', granted_at: null });
     expect(rpc).toHaveBeenCalledWith('delete_my_diary_data');
   });
 
   it('loescht nicht, wenn schon der Widerruf scheitert', async () => {
     insert.mockResolvedValue({ error: { message: 'kaputt' } });
     renderPanel();
-    fireEvent.click(screen.getByText('Widerrufen und alles löschen'));
+    fireEvent.click(screen.getByText('Widerrufen und löschen'));
 
     await screen.findByText('Das ließ sich nicht speichern. Versuch es bitte noch einmal.');
     expect(rpc).not.toHaveBeenCalled();
@@ -86,7 +89,7 @@ describe('HealthDataRevoke', () => {
   it('bietet nach einem gescheiterten Loeschen einen neuen Versuch an', async () => {
     rpc.mockResolvedValueOnce({ error: { message: 'kaputt' } });
     renderPanel();
-    fireEvent.click(screen.getByText('Widerrufen und alles löschen'));
+    fireEvent.click(screen.getByText('Widerrufen und löschen'));
 
     await screen.findByText(/Deine Einwilligung ist widerrufen, aber das Tagebuch/);
     fireEvent.click(screen.getByText('Noch einmal löschen'));
@@ -107,7 +110,7 @@ describe('HealthDataRevoke', () => {
     let resolve: (v: { error: null }) => void = () => {};
     insert.mockReturnValue(new Promise((r) => (resolve = r)));
     renderPanel();
-    fireEvent.click(screen.getByText('Widerrufen und alles löschen'));
+    fireEvent.click(screen.getByText('Widerrufen und löschen'));
 
     await screen.findByText('Wird ausgeführt …');
     resolve({ error: null });

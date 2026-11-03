@@ -6,6 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { PressableRing } from '@/components/PressableRing';
 import { StateMessage } from '@/components/StateMessage';
+import { responsive } from '@/design/responsive';
 import { useThemePalette } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
 
@@ -204,6 +205,8 @@ export function HabitPicker({
         groups.map(({ category, templates: list }) => (
           <View key={category.id} style={styles.rows}>
             {searching || area === null ? <Text style={styles.groupLabel}>{category.title}</Text> : null}
+            {/* Am Desktop zwei Spalten (03.11.2026), mobil eine. */}
+            <View {...responsive('m-grid2')} style={styles.rows}>
             {list.map((template) => (
               <PickerRow
                 key={template.id}
@@ -221,6 +224,7 @@ export function HabitPicker({
                 }
               />
             ))}
+            </View>
           </View>
         ))
       )}
@@ -360,9 +364,10 @@ function PickerRow({
 }
 
 const styles = StyleSheet.create({
+  // Die Breite gibt die Seitenspalte vor (PageColumn in auswahl.tsx):
+  // mobil 720 px, am Desktop 1120 px.
   stack: {
     gap: spacing.md,
-    maxWidth: 720,
     width: '100%',
   },
   search: {
