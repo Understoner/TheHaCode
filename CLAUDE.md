@@ -20,7 +20,7 @@ optimale Einzellösungen.
 2. Vorkonfigurierte Box-Sequenzen und Videos — kostenlos, dauerhaft
 3. Der Sequenz-Konfigurator — die bezahlte Funktion
 
-## V1.1 — in Arbeit seit 25.10.2026 (SAD §3.14)
+## V1.1 — abgeschlossen am 03.11.2026 (SAD §3.14, §11.1)
 
 Habit Tracker (bis 25.10.2026 „Atem-Tagebuch“) mit Micro Habits, eigenen Habits,
 Habit Score Tracker und Session-Protokoll.
@@ -28,12 +28,33 @@ Gesundheitsdaten nach Art. 9: Schreiben in `habit_logs` nur mit Einwilligung
 `health_data` und über `can_use_habit_template()` (Vorschau oder Plus). Eigene
 Habits anlegen: Plus und Einwilligung (Migration 0025).
 Seit 01.11.2026 dazu: Wertgrenzen für Zahlen-Habits (0035, nie für BOLT) und
-Challenges (0036, Plus oder Vorschau-Vorlage; Abhaken = `habit_logs`; vergangene
-Termine sind fest). Details SAD §3.14.
+Challenges, in der UI „Übungswege“ (0036, Plus oder Vorschau-Vorlage; Abhaken =
+`habit_logs`; vergangene Termine sind fest). Widerruf der Einwilligung heißt
+Löschen (0040). Details SAD §3.14.
 
-**Nicht in V1/V1.1:** geführte Aufnahmen, Hintergrundmusik, Sprachansagen,
-Testzeitraum, Lifetime-Tarif, native Apps, Offline-Betrieb, Erinnerungen,
-In-App-Redaktionsoberfläche (Studio reicht).
+## V1.2 — Aufnahmen und Onlinekurse, freigegeben am 03.11.2026 (SAD §11.2)
+
+On-Demand-**Onlinekurse** aus Blöcken (Erklärvideo, gesprochene Aufnahme, Text
+mit Bild, PDF, genau ein Quiz am Ende) mit Zertifikat als PDF. Verbindlich:
+
+- **Zugang** je Kurs `public` · `account` · `plus` · `paid`, geprüft **nur** über
+  `can_open_course()`. Plus darin **nur** über `has_plus_access()`.
+- **`course_access`** (Kauf, 1 Jahr, keine Verlängerung) schreibt **nur** der
+  Stripe-Webhook. Der Preis inkl. 15 % Plus-Rabatt entsteht **nur** im Server.
+- **Quizlösungen** (`is_correct`) sind für den Client nie lesbar; Auswertung über
+  `submit_quiz()`, Zertifikat nur über `issue_certificate()` (alle Blöcke
+  erledigt **und** Quiz ≥ 80 %).
+- Kurstermine erscheinen im Tagebuch, schreiben aber **nie** in `habit_logs`.
+- Aufnahmen halten den Bildschirm wach (Wake Lock + Hinweis): Das iPhone bricht
+  sie in der PWA beim Sperren ab (SAD §7.7).
+- Medien im **privaten** Bucket `course-media`, Lesen nur über signierte URLs.
+  Kursvideos über Vimeo; Bezahl- und Plus-Kurse erst mit bezahltem Vimeo-Tarif.
+- Freigegebene neue Bibliothek: **`pdf-lib`** (MIT), nur in der Edge Function
+  für das Zertifikat.
+
+**Nicht in V1 bis V1.2:** Marker-Synchronisation geführter Aufnahmen,
+Hintergrundmusik, Sprachansagen als Cues, Testzeitraum, Lifetime-Tarif, native
+Apps, Offline-Betrieb, Erinnerungen, In-App-Redaktionsoberfläche (Studio reicht).
 Wenn eine Aufgabe eines
 dieser Themen berührt: nicht anfangen, sondern melden.
 
@@ -49,7 +70,7 @@ dieser Themen berührt: nicht anfangen, sondern melden.
 | Client State | Zustand |
 | Styling | NativeWind v4 + `src/design/tokens.ts` |
 | Animation | Reanimated 3 |
-| Audio | Web Audio API, synthetische Töne über `OscillatorNode` — keine Dateien |
+| Audio | Web Audio API, synthetische Töne über `OscillatorNode`; Dateien nur als gesprochene Aufnahmen in Onlinekursen (V1.2) |
 | Formulare | React Hook Form + Zod |
 | Backend | Supabase — Auth, Postgres, Storage, Edge Functions |
 | Hosting | Hostinger Business, Node.js Web App (statisch ausgeliefert), GitHub-Integration |
@@ -88,7 +109,8 @@ Google- und Apple-Anmeldung, Kontoverknüpfung und Löschung kommen aus Supabase
 - **`setInterval` für Zeitkritisches.** Timer driften kumulativ (SAD §7.1).
 - **`localStorage` für fachliche Daten.**
 - **Audiodateien für Cues oder Musik.** Töne kommen aus dem Oszillator; Musik
-  bringt der Nutzer in seiner eigenen App mit.
+  bringt der Nutzer in seiner eigenen App mit. Gesprochene Aufnahmen gibt es
+  nur als Inhalt von Onlinekursen (V1.2).
 - **Deutsche Strings im Code.** Alles über i18next.
 - **Schemaänderungen im Supabase Studio.** Nur als Migration im Repo.
 - **`service_role`-Key im Client-Bundle, in hPanel oder in einer lokalen `.env`.**

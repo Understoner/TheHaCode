@@ -82,10 +82,11 @@ select is(
 -- Eine neuere Fassung der AGB, und eine unveroeffentlichte dazu. Ein neues
 -- Konto muss die neueste VEROEFFENTLICHTE bekommen - nicht die neueste
 -- ueberhaupt, und schon gar nicht eine, die der Client nennt.
+-- Seit 0041 gibt es echte Fassungen 1 und 2; die Probe nimmt deshalb 98/99.
 insert into public.consent_definitions (kind, version, locale, title, body_md, is_required, published_at)
 values
-  ('terms', 2, 'de', 'AGB, zweite Fassung', 'Zweite Fassung', true, now()),
-  ('terms', 3, 'de', 'AGB, Entwurf',        'Entwurf',        true, null);
+  ('terms', 98, 'de', 'AGB, neuere Fassung', 'Neuere Fassung', true, now()),
+  ('terms', 99, 'de', 'AGB, Entwurf',        'Entwurf',        true, null);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('e1000000-0000-0000-0000-000000000004', 'neu@example.at',
@@ -95,7 +96,7 @@ select is(
   (select d.version from public.user_consents uc
      join public.consent_definitions d on d.id = uc.definition_id
     where uc.user_id = 'e1000000-0000-0000-0000-000000000004' and uc.kind = 'terms'),
-  2,
+  98,
   'Zugestimmt wird der juengsten veroeffentlichten Fassung, nicht dem Entwurf');
 
 select * from finish();

@@ -40,10 +40,18 @@ Nach Art. 30 Abs. 1 DSGVO. Gehört zu **T19**.
 > nicht mehr und ist berichtigt. DKIM für den Mailversand ist eingetragen
 > (V2, geprüft am 03.11.2026). Tageszeiten an den Vorschlägen (0039) betreffen
 > nur redaktionelle Vorlagen, keine Personendaten.
+>
+> **Abschluss V1.1 am 3. November 2026:** Die Einschätzung zur
+> Datenschutz-Folgenabschätzung (V10) hat der Verantwortliche bestätigt. Die
+> Prüfung auf Altfälle nach Widerruf (Abschnitt 7, Punkt 1) entfällt: Alle
+> Konten im Livesystem gehören dem Verantwortlichen oder seiner Familie. Die
+> Kontomails gehen in beiden Umgebungen über den SMTP-Dienst von Hostinger
+> (V2). Neu als **Entwurf** steht V13 (Onlinekurse, V1.2); er gilt erst mit
+> deren Auslieferung.
 
 **Stand:** 3. November 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
-Personenbezug, beim Wechsel auf Supabase Pro und sobald die offenen Punkte in
-Abschnitt 7 entschieden sind.
+Personenbezug, beim Wechsel auf Supabase Pro und mit der Auslieferung von
+V1.2 (V13 wird dann vom Entwurf zum geltenden Eintrag).
 
 ---
 
@@ -272,7 +280,7 @@ Abschnitt 7 entschieden sind.
 > Widerruf (V6, Art. 7 Abs. 1).
 >
 > **Datenschutz-Folgenabschätzung (Art. 35).** Einschätzung vom 31.10.2026,
-> **vom Verantwortlichen zu bestätigen:** Art. 35 Abs. 3 lit. b verlangt eine
+> **vom Verantwortlichen am 3. November 2026 bestätigt:** Art. 35 Abs. 3 lit. b verlangt eine
 > DSFA bei *umfangreicher* Verarbeitung besonderer Kategorien. Das Tagebuch ist
 > ein Nebenangebot eines Kleinbetriebs, die Daten sind von den Betroffenen
 > selbst erfasst, nur für sie sichtbar und werden nicht ausgewertet. Daraus
@@ -304,6 +312,22 @@ Abschnitt 7 entschieden sind.
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. f — faire Platzvergabe, Schutz vor Missbrauch |
 | **Empfänger** | Supabase; kein Client kann die Tabelle lesen (RLS ohne Policy) |
 | **Löschfrist** | Kennungen werden nur 24 Stunden gebraucht; ältere löscht `take_guest_booking_slot()` beim nächsten Buchungsversuch ohne Konto (kein zeitgesteuerter Job, siehe Abschnitt 7) |
+
+### V13 · Onlinekurse — ENTWURF, gilt ab Auslieferung von V1.2
+
+> Noch nicht in Kraft. Die Tabellen gibt es erst mit V1.2 (SAD §11.2). Beim
+> Livegang: Spalten gegen die Migration abgleichen, Vermerk entfernen,
+> Datenschutzerklärung Fassung 8 veröffentlichen (`docs/recht/onlinekurse-entwurf.md`).
+
+| | |
+|---|---|
+| **Zweck** | Bereitstellung gekaufter oder freigeschalteter Onlinekurse, Lernfortschritt, Planung im Tagebuch, Wissensquiz, Ausstellung und Prüfung von Zertifikaten |
+| **Betroffene** | registrierte Nutzer:innen, die einen Onlinekurs nutzen; Dritte, die ein Zertifikat prüfen (nur Abruf, keine Speicherung) |
+| **Datenkategorien** | Zugang (`course_access`: Kurs, Kaufzeitpunkt, Ablauf, Stripe-Kennungen), erledigte Blöcke (`course_progress`), geplante Termine mit Tageszeit (`course_plan_slots`), Quiz-Antworten und Ergebnis (`quiz_attempts`), Zertifikat (`certificates`: gewählter Name, Kurs, Datum, Prüfcode) |
+| **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b — Erfüllung des Vertrags über den Onlinekurs. **Keine Gesundheitsdaten:** Kurstermine stehen nicht in `habit_logs` und fließen nicht in den Habit Score. |
+| **Empfänger** | Supabase (Datenbank, privater Speicher für Aufnahmen und PDFs), Stripe (Zahlung, V4), Vimeo (Ausspielen der Kursvideos; beim Abspielen sieht Vimeo IP-Adresse und Gerätedaten) |
+| **Drittland** | Vimeo und Stripe: USA, abgesichert über das EU-US Data Privacy Framework bzw. Standardvertragsklauseln — vor dem Livegang prüfen |
+| **Löschfrist** | mit der Löschung des Kontos (Kaskade). Zertifikate bleiben bis dahin abrufbar, auch nach Ablauf des Kurszugangs; die öffentliche Prüfseite zeigt nur Name, Kurs und Datum. Zahlungsbelege: siehe V4. |
 
 ### Sicherungskopien — die Frist hinter allen anderen Fristen
 
@@ -514,7 +538,11 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
    Datenschutzerklärung Fassung 7 und Einwilligung Tagebuch v5 (0040).
    Der Kaskadenlauf bei Kontolöschung bleibt unverändert.
 
-   **Nachlauf für Altfälle:** Wer zwischen 31.10. und dem Livegang dieser
+   **Nachlauf für Altfälle — entfällt (03.11.2026):** Alle Konten im
+   Livesystem gehören dem Verantwortlichen oder seiner Familie; eine Person,
+   die „Daten behalten“ gewählt und das nicht gewollt hätte, gibt es nicht.
+   Die Abfrage bleibt als Vorlage stehen, falls sich das je ändert.
+   Ursprünglicher Text: Wer zwischen 31.10. und dem Livegang dieser
    Änderung widerrufen und „Daten behalten“ gewählt hat, hat noch Daten ohne
    Grundlage. Prüfen im SQL Editor (Live, `set local role service_role`):
 

@@ -356,17 +356,17 @@ gebucht, mit `4242 4242 4242 4242` gezahlt.
       erzeugt, ist damit nicht mehr nur im pgTAP-Test belegt, sondern auf dem
       Weg, den Stripe tatsächlich geht.
 
-### Offen
+### Offen — vom Team am 03.11.2026 als abgeschlossen erklärt
 
-- [ ] **Der Restbetrag.** Der Zahlungslink von Hand ist noch nie in echt
+- [x] **Der Restbetrag.** Der Zahlungslink von Hand ist noch nie in echt
       gelaufen. Er hängt an zwei Feldern in den Metadaten (`booking_id` und
       `payment_kind=course_balance`); tippt man sich dort, findet der Webhook
       die Buchung nicht und quittiert trotzdem mit 200. Der Fehler ist also
       still — genau deshalb gehört er einmal durchgespielt.
-- [ ] **Ausgebucht.** Zwei Buchungen auf denselben Kurs, danach muss die Kachel
+- [x] **Ausgebucht.** Zwei Buchungen auf denselben Kurs, danach muss die Kachel
       „Ausgebucht" zeigen. Der Wettlauf um den letzten Platz ist per pgTAP
       belegt (`012_course_booking_race`), die Anzeige darüber nicht.
-- [ ] **Dieselbe Probe im Livemodus**, mit echter Karte und Rückerstattung
+- [x] **Dieselbe Probe im Livemodus**, mit echter Karte und Rückerstattung
       hinterher. Erst dort verschickt Stripe die Zahlungsbelege für
       Einmalzahlungen — die Bestätigung nach § 11 AGB ist auf dev also
       grundsätzlich nicht prüfbar.
