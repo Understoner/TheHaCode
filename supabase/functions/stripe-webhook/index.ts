@@ -31,6 +31,14 @@
 // Umstaenden eine Zeile in subscriptions und verschafft niemandem Plus. Sie
 // haelt an genau dieser Stelle - und in 011_course_bookings.test.sql steht der
 // Test dazu.
+//
+// DRITTER ZWEIG: ONLINEKURSE (V1.2, seit 03.11.2026)
+// --------------------------------------------------
+//   payment_kind = 'online_course' -> Onlinekurszweig. Schreibt genau eine
+//   Zeile in public.course_access, sonst nichts - kein Abo, kein Plus, keine
+//   Kursbuchung. Er kommt zuerst dran; seine Kennzeichnung ist eindeutig.
+//   Idempotent ueber stripe_checkout_session_id (unique): eine zweite
+//   Zustellung derselben Zahlung legt keinen zweiten Zugang an.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
 import Stripe from 'npm:stripe@18.5.0';
@@ -41,6 +49,7 @@ import {
   type BookingRow,
   type StripeCourseSessionLike,
 } from '../_shared/course-bookings.ts';
+import { courseAccessRowFor, onlineCoursePaymentFacts } from '../_shared/online-courses.ts';
 import {
   checkoutFacts,
   isRelevantEvent,
@@ -128,9 +137,10 @@ Deno.serve(async (request) => {
   }
 
   try {
-    // Erst der Kurszweig. Er meldet, ob das Ereignis ihm gehoert; nur wenn
-    // nicht, ist der Abozweig ueberhaupt gefragt.
-    const handledAsCourse = await handleCourseEvent(admin, event);
+    // Erst die Onlinekurse, dann der Kurszweig. Jeder meldet, ob das Ereignis
+    // ihm gehoert; nur wenn keiner, ist der Abozweig ueberhaupt gefragt.
+    const handledAsCourse =
+      (await handleOnlineCourseEvent(admin, event)) || (await handleCourseEvent(admin, event));
 
     const row = handledAsCourse ? null : await rowForEvent(stripe, event);
 
@@ -174,6 +184,65 @@ async function markProcessed(
   // Upsert macht das gefahrlos. Ein 500 an dieser Stelle wuerde Stripe dagegen
   // einen echten Fehlschlag melden, den es nicht gab.
   if (error) console.error('processed_at nicht gesetzt', error.message);
+}
+
+/**
+ * Der Onlinekurszweig. true heisst: das Ereignis war ein Onlinekurs-Kauf und
+ * ist erledigt. Schreibt nur public.course_access.
+ */
+async function handleOnlineCourseEvent(
+  admin: ReturnType<typeof createClient>,
+  event: Stripe.Event,
+): Promise<boolean> {
+  if (
+    event.type !== 'checkout.session.completed' &&
+    event.type !== 'checkout.session.async_payment_succeeded' &&
+    event.type !== 'checkout.session.expired'
+  ) {
+    return false;
+  }
+
+  const session = event.data.object as unknown as Stripe.Checkout.Session;
+  const facts = onlineCoursePaymentFacts({
+    id: session.id,
+    mode: session.mode,
+    payment_status: session.payment_status,
+    amount_total: session.amount_total,
+    client_reference_id: session.client_reference_id,
+    metadata: (session.metadata ?? null) as Record<string, string> | null,
+  });
+  if (!facts) return false;
+
+  // Verfallen: es wurde nichts reserviert, also ist nichts freizugeben.
+  if (event.type === 'checkout.session.expired') return true;
+
+  // Wie beim Kurszweig: erst mit payment_status = 'paid' freischalten.
+  if (session.payment_status !== 'paid') {
+    console.warn(`Onlinekurs-Sitzung ${facts.checkoutSessionId} ist noch nicht bezahlt (${session.payment_status})`);
+    return true;
+  }
+
+  // Die Laufzeit steht am Kurs, nicht in den Metadaten.
+  const { data: course, error: courseError } = await admin
+    .from('online_courses')
+    .select('id, access_days')
+    .eq('id', facts.courseId)
+    .maybeSingle();
+  if (courseError) throw new Error(`Onlinekurs nicht gelesen: ${courseError.message}`);
+  if (!course) throw new Error(`Onlinekurs ${facts.courseId} gibt es nicht`);
+
+  // Ab dem Zeitpunkt des Ereignisses, nicht ab der Verarbeitung: liefert
+  // Stripe nach einem Ausfall erst Tage spaeter erneut aus, verschiebt das
+  // nicht das Ende des Zugangs.
+  const paidAt = new Date(event.created * 1000);
+  const row = courseAccessRowFor(facts, (course as { access_days: number }).access_days, paidAt);
+
+  const { error: writeError } = await admin
+    .from('course_access')
+    .upsert(row, { onConflict: 'stripe_checkout_session_id', ignoreDuplicates: true });
+  if (writeError) throw new Error(`Zugang nicht gespeichert: ${writeError.message}`);
+
+  return true;
 }
 
 /**
