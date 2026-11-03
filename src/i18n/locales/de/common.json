@@ -948,5 +948,18 @@
   "guest.diary.own.title": "Eigene Habits",
   "guest.diary.own.text": "Was dir fehlt, legst du selbst an – mit eigenem Ziel und eigenen Punkten.",
   "guest.diary.auto.title": "Trägt sich selbst ein",
-  "guest.diary.auto.text": "Hängt ein Habit an einer Session, hakt es sich nach dem Atmen von selbst ab."
+  "guest.diary.auto.text": "Hängt ein Habit an einer Session, hakt es sich nach dem Atmen von selbst ab.",
+  "onlineCourses.audio.kicker": "Gesprochene Anleitung",
+  "onlineCourses.audio.play": "Abspielen",
+  "onlineCourses.audio.pause": "Pause",
+  "onlineCourses.audio.back": "{{seconds}} Sekunden zurück",
+  "onlineCourses.audio.forward": "{{seconds}} Sekunden vor",
+  "onlineCourses.audio.progress": "Fortschritt der Aufnahme",
+  "onlineCourses.audio.keepAwake": "Der Bildschirm bleibt an. Bitte sperr dein Handy nicht, sonst stoppt die Anleitung.",
+  "onlineCourses.audio.keepAwakeHint": "Während der Anleitung bleibt der Bildschirm an. Auf dem iPhone stoppt sie, sobald es gesperrt wird.",
+  "onlineCourses.audio.missingTitle": "Die Aufnahme ist noch nicht da",
+  "onlineCourses.audio.missingHint": "Sie wird gerade geladen oder ist noch nicht hochgeladen. Schau gleich noch einmal vorbei.",
+  "onlineCourses.audio.failedTitle": "Die Aufnahme lässt sich gerade nicht abspielen",
+  "onlineCourses.audio.failedHint": "Prüf bitte deine Verbindung und versuch es noch einmal.",
+  "onlineCourses.audio.retry": "Noch einmal laden"
 }
