@@ -396,6 +396,6 @@ Kein automatischer Rollback. In hPanel unter **Deployments** liegt die vorherige
 - [x] GitHub Environments `staging`/`production` mit Secrets und Variables befüllt, `production` hat einen Required Reviewer
 - [x] Branch Protection — **am 23.08.2026 eingerichtet und per API gegengeprüft**, asymmetrisch (siehe §3): `develop` mit PR-Zwang und Status-Check `verify`, `main` nur gegen Force-Push und Löschen, damit die Beförderung nicht bricht. Beide Regeln gelten auch für Admins.
 - [x] Ein vollständiger Durchlauf feature → develop → main erfolgreich — seit 16.08.2026 mehrfach, zuletzt mit T17 am 21.08.2026
-- [ ] Supabase Production auf Pro (spätestens am Tag der ersten Zahlung) — hängt mit T17a zusammen: mit Pro kommen auch die deutschen E-Mail-Vorlagen
+- [ ] Supabase Production auf Pro — **Entscheidung 03.11.2026:** sobald der erste zahlende Kunde außerhalb der Familie da ist (bis dahin bewusst ohne tägliche Sicherung, SAD §10). Hängt mit T17a zusammen: mit Pro kommen auch die deutschen E-Mail-Vorlagen. Speicher und Datenvolumen werden erst erhöht, wenn der Free-Tarif nicht mehr reicht.
 - [x] Auftragsverarbeitungsverträge: Supabase, Hostinger, Stripe — bei allen dreien Anhang der Nutzungsbedingungen, mit deren Annahme geschlossen; nichts anzufordern. Fassungen und Drittlandgrundlage in `docs/VERARBEITUNGSVERZEICHNIS.md` Abschnitt 4
 - [x] Impressum und Datenschutzerklärung online — seit 21.08.2026, dazu AGB und Haftungsausschluss

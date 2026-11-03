@@ -1,23 +1,28 @@
+import type { Session } from '@supabase/supabase-js';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { PressableRing } from '@/components/PressableRing';
 import { colors, radius, spacing } from '@/design/tokens';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { useDataExport } from '@/features/auth/DataExport';
 import { useSetConsent, type ConsentDefinition } from '@/features/consents/useConsents';
 import { useDeleteDiaryData } from '@/features/habits/useDeleteDiaryData';
 
 // Widerruf der Einwilligung health_data (Tagebuch).
 //
-// Entscheidung des Users vom 31.10.2026: Beim Widerruf wird angeboten, alles
-// aus dem Tagebuch sofort zu loeschen (Art. 17 Abs. 1 lit. b DSGVO). Wer die
-// Daten behalten will, widerruft nur - Ansehen, Exportieren und einzelnes
-// Loeschen bleiben dann wie bisher moeglich.
+// Seit 03.11.2026 (Verarbeitungsverzeichnis Abschnitt 7, Punkt 1): Widerruf
+// heisst Loeschen. Gesundheitsdaten nach Art. 9 duerfen nur mit Einwilligung
+// gespeichert werden - nach dem Widerruf gibt es fuer sie keine
+// Rechtsgrundlage mehr (Art. 17 Abs. 1 lit. b DSGVO). Die Wahl "Widerrufen,
+// Daten behalten" (31.10.2026) entfaellt deshalb. Wer eine Kopie will, laedt
+// sie im selben Dialog vorher herunter (Art. 20).
 //
 // Erst widerrufen, dann loeschen: scheitert das Loeschen, ist wenigstens der
 // Widerruf wirksam, und der Knopf "Noch einmal loeschen" bleibt stehen. Andersherum
 // waeren die Daten weg, die Einwilligung aber noch erteilt.
-type Phase = 'choose' | 'deleteFailed' | 'kept' | 'deleted';
+type Phase = 'choose' | 'deleteFailed' | 'deleted';
 
 export function HealthDataRevoke({
   definition,
@@ -27,6 +32,7 @@ export function HealthDataRevoke({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const { session } = useAuth();
   const setConsent = useSetConsent();
   const deleteDiary = useDeleteDiaryData();
   const [phase, setPhase] = useState<Phase>('choose');
@@ -34,16 +40,12 @@ export function HealthDataRevoke({
 
   const pending = setConsent.isPending || deleteDiary.isPending;
 
-  const revoke = async (alsoDelete: boolean) => {
+  const revoke = async () => {
     setRevokeFailed(false);
     try {
       await setConsent.mutateAsync({ definition, granted: false });
     } catch {
       setRevokeFailed(true);
-      return;
-    }
-    if (!alsoDelete) {
-      setPhase('kept');
       return;
     }
     await removeDiary();
@@ -58,11 +60,11 @@ export function HealthDataRevoke({
     }
   };
 
-  if (phase === 'kept' || phase === 'deleted') {
+  if (phase === 'deleted') {
     return (
       <View style={styles.panel}>
         <Text role="status" style={styles.done}>
-          {t(phase === 'deleted' ? 'konto.healthRevoke.doneDeleted' : 'konto.healthRevoke.doneKept')}
+          {t('konto.healthRevoke.doneDeleted')}
         </Text>
         <PressableRing onPress={onClose} style={styles.cancel}>
           <Text style={styles.cancelText}>{t('konto.healthRevoke.close')}</Text>
@@ -101,6 +103,8 @@ export function HealthDataRevoke({
       <Text style={styles.body}>{t('konto.healthRevoke.body')}</Text>
       <Text style={styles.body}>{t('konto.healthRevoke.deleteHint')}</Text>
 
+      {session ? <ExportFirst session={session} disabled={pending} /> : null}
+
       {revokeFailed ? (
         <Text role="alert" style={styles.error}>
           {t('errors:konto.consent')}
@@ -110,15 +114,12 @@ export function HealthDataRevoke({
       <View style={styles.row}>
         <PressableRing
           disabled={pending}
-          onPress={() => void revoke(true)}
+          onPress={() => void revoke()}
           style={[styles.confirm, pending && styles.confirmPending]}
         >
           <Text style={[styles.confirmText, pending && styles.confirmTextPending]}>
             {pending ? t('konto.healthRevoke.pending') : t('konto.healthRevoke.revokeAndDelete')}
           </Text>
-        </PressableRing>
-        <PressableRing disabled={pending} onPress={() => void revoke(false)} style={styles.keep}>
-          <Text style={styles.keepText}>{t('konto.healthRevoke.revokeAndKeep')}</Text>
         </PressableRing>
         <PressableRing disabled={pending} onPress={onClose} style={styles.cancel}>
           <Text style={styles.cancelText}>{t('konto.healthRevoke.cancel')}</Text>
@@ -128,7 +129,32 @@ export function HealthDataRevoke({
   );
 }
 
+/** "Vorher herunterladen" - dieselbe Datei wie unter "Deine Daten". */
+function ExportFirst({ session, disabled }: { session: Session; disabled: boolean }) {
+  const { t } = useTranslation();
+  const { run, pending, error } = useDataExport(session);
+
+  return (
+    <View style={styles.exportBox}>
+      {error ? (
+        <Text role="alert" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
+      <PressableRing disabled={disabled || pending} onPress={() => void run()} style={styles.keep}>
+        <Text style={styles.keepText}>
+          {pending ? t('konto.export.pending') : t('konto.healthRevoke.exportFirst')}
+        </Text>
+      </PressableRing>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  exportBox: {
+    gap: spacing.sm,
+    alignItems: 'flex-start',
+  },
   panel: {
     flexBasis: '100%',
     gap: spacing.sm,

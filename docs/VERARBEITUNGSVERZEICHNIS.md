@@ -29,10 +29,29 @@ Nach Art. 30 Abs. 1 DSGVO. Gehört zu **T19**.
 > Tagebuch-Score (0035) in V10; Datenschutzerklärung Fassung 6 und
 > Einwilligung Tagebuch Version 4 (0038), die die Challenges ausdrücklich
 > nennt. Wer Version 3 zugestimmt hat, bleibt eingewilligt.
+>
+> **Ergänzt am 3. November 2026:** Widerruf der Einwilligung `health_data`
+> heißt jetzt **Löschen** (Abschnitt 7, Punkt 1, neu entschieden). Die Wahl
+> „Widerrufen, Daten behalten“ entfällt; vorher lässt sich im Widerrufsdialog
+> eine Kopie herunterladen. Challenges heißen in der App seit 02.11.2026
+> **Übungswege** (Tabellen bleiben `challenge*`). Dazu Datenschutzerklärung
+> Fassung 7 und Einwilligung Tagebuch Version 5 (0040), ohne erneute
+> Zustimmung. Der Satz zu Punkten und Messwerten in V10 stimmte seit 0035
+> nicht mehr und ist berichtigt. DKIM für den Mailversand ist eingetragen
+> (V2, geprüft am 03.11.2026). Tageszeiten an den Vorschlägen (0039) betreffen
+> nur redaktionelle Vorlagen, keine Personendaten.
+>
+> **Abschluss V1.1 am 3. November 2026:** Die Einschätzung zur
+> Datenschutz-Folgenabschätzung (V10) hat der Verantwortliche bestätigt. Die
+> Prüfung auf Altfälle nach Widerruf (Abschnitt 7, Punkt 1) entfällt: Alle
+> Konten im Livesystem gehören dem Verantwortlichen oder seiner Familie. Die
+> Kontomails gehen in beiden Umgebungen über den SMTP-Dienst von Hostinger
+> (V2). Neu als **Entwurf** steht V13 (Onlinekurse, V1.2); er gilt erst mit
+> deren Auslieferung.
 
-**Stand:** 1. November 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
-Personenbezug, beim Wechsel auf Supabase Pro und sobald die offenen Punkte in
-Abschnitt 7 entschieden sind.
+**Stand:** 3. November 2026 · **Nächste Prüfung:** bei jeder neuen Tabelle mit
+Personenbezug, beim Wechsel auf Supabase Pro und mit der Auslieferung von
+V1.2 (V13 wird dann vom Entwurf zum geltenden Eintrag).
 
 ---
 
@@ -197,7 +216,7 @@ Abschnitt 7 entschieden sind.
 |---|---|
 | **Zweck** | Auskunft (Art. 15), Löschung (Art. 17), Datenübertragbarkeit (Art. 20) |
 | **Betroffene** | registrierte Nutzer:innen |
-| **Datenkategorien** | alle zum Konto gehörenden Zeilen; die Auskunft wird im Browser unter RLS zusammengestellt und als JSON-Datei ausgegeben. Seit V1.1 gehören dazu auch `exercise_favorites`, `user_habits`, `habit_logs`, `habit_templates` (nur eigene), `habit_favorites`, `exercise_sessions` und seit 0036 `challenges`, `challenge_items`, `challenge_slots` (Liste `EXPORT_TABLES` in `src/features/auth/dataExport.ts`) — auch nach einem Widerruf der Einwilligung |
+| **Datenkategorien** | alle zum Konto gehörenden Zeilen; die Auskunft wird im Browser unter RLS zusammengestellt und als JSON-Datei ausgegeben. Seit V1.1 gehören dazu auch `exercise_favorites`, `user_habits`, `habit_logs`, `habit_templates` (nur eigene), `habit_favorites`, `exercise_sessions` und seit 0036 `challenges`, `challenge_items`, `challenge_slots` (Liste `EXPORT_TABLES` in `src/features/auth/dataExport.ts`). Seit 03.11.2026 auch direkt im Widerrufsdialog der Einwilligung Tagebuch, **vor** der Löschung (V10) |
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. c |
 | **Empfänger** | keine — die Daten verlassen den Verantwortungsbereich nicht |
 | **Löschfrist** | entfällt; es entsteht keine eigene Aufzeichnung über die Ausübung |
@@ -224,11 +243,11 @@ Abschnitt 7 entschieden sind.
 |---|---|
 | **Zweck** | Den Nutzer:innen ihre eigenen Gewohnheiten, Einträge und Auswertungen anzeigen (Kalender, Serien, Verläufe, Übungsminuten, auf Wunsch Tagebuch-Score). Kein anderer Zweck. |
 | **Betroffene** | registrierte Nutzer:innen, die das Tagebuch nutzen |
-| **Datenkategorien** | **Gesundheitsdaten:** Einträge je Kalendertag — erledigt, Messwert (z. B. BOLT-Sekunden, Schritte), Text, Notiz (`habit_logs`); selbst angelegte Gewohnheiten mit Titel, Beschreibung, Kategorie, Erfassungsart, Einheit, Wertebereich, Punkten, Vorzeichen, Link (`habit_templates` mit `owner_id`). **Keine Gesundheitsdaten im engeren Sinn, aber im selben Zusammenhang:** gewählte Vorschläge, seit wann, Zielwert, Archivierung (`user_habits`); Habit-Favoriten (`habit_favorites`); seit 0036 Challenges mit Titel, Zeitraum, geplanten Habits und Terminen (`challenges`, `challenge_items`, `challenge_slots`) – welche Habits jemand plant („3 Tage Fasten“), ist selbst eine Gesundheitsangabe |
+| **Datenkategorien** | **Gesundheitsdaten:** Einträge je Kalendertag — erledigt, Messwert (z. B. BOLT-Sekunden, Schritte), Text, Notiz (`habit_logs`); selbst angelegte Gewohnheiten mit Titel, Beschreibung, Kategorie, Erfassungsart, Einheit, Wertebereich, Punkten, Vorzeichen, Link (`habit_templates` mit `owner_id`). **Keine Gesundheitsdaten im engeren Sinn, aber im selben Zusammenhang:** gewählte Vorschläge, seit wann, Zielwert, Archivierung (`user_habits`); Habit-Favoriten (`habit_favorites`); seit 0036 Übungswege (bis 02.11.2026 „Challenges“) mit Titel, Zeitraum, geplanten Habits und Terminen (`challenges`, `challenge_items`, `challenge_slots`) – welche Habits jemand plant („3 Tage Fasten“), ist selbst eine Gesundheitsangabe. **Nicht** hierher gehört die Tageszeit an den Vorschlägen (`habit_templates.day_part`, 0039): sie steht an redaktionellen Vorlagen, nicht an Personen |
 | **Rechtsgrundlage** | Einträge und eigene Gewohnheiten: **Art. 9 Abs. 2 lit. a in Verbindung mit Art. 6 Abs. 1 lit. a** — ausdrückliche, gesonderte Einwilligung `health_data` vor dem ersten Eintrag, freiwillig und keine Voraussetzung für Konto oder Abonnement. Auswahl und Favoriten: Art. 6 Abs. 1 lit. b. Nachweis der Einwilligung: V6. |
 | **Empfänger** | Supabase (Frankfurt). Keine Weitergabe, keine Werbung, keine Profilbildung, keine Forschung, keine Statistik über die Nutzer:innen. |
 | **Drittland** | möglich über Unterauftragsverarbeiter von Supabase, abgesichert über Standardvertragsklauseln |
-| **Löschfrist** | Einzelne Einträge: sofort beim Entfernen (echtes `DELETE`, Policy `habit_logs_delete_own`). Eigene Gewohnheit: verschwindet beim Löschen aus der Auswahl (`deleted_at`), bleibt mit ihren Einträgen für die Auswertungen bis zur Kontolöschung; auf Anfrage vorher vollständig (SQL in `docs/INHALTE.md`). Konto: alles sofort über `on delete cascade`. **Beim Widerruf** fragt die App, ob alles gelöscht werden soll; wer zustimmt, verliert sofort Einträge, Auswahl, Habit-Favoriten, eigene Habits und seit 0036 auch die Challenges (`delete_my_diary_data()`, 0033/0036). Eine einzelne Challenge löscht die Person jederzeit selbst (echtes `DELETE`). Wer ablehnt, behält die Daten bis zur eigenen Löschung oder Kontolöschung. |
+| **Löschfrist** | Einzelne Einträge: sofort beim Entfernen (echtes `DELETE`, Policy `habit_logs_delete_own`). Eigene Gewohnheit: verschwindet beim Löschen aus der Auswahl (`deleted_at`), bleibt mit ihren Einträgen für die Auswertungen bis zur Kontolöschung; auf Anfrage vorher vollständig (SQL in `docs/INHALTE.md`). Konto: alles sofort über `on delete cascade`. **Beim Widerruf: sofort alles** (seit 03.11.2026, Art. 17 Abs. 1 lit. b) — Einträge, Auswahl, Habit-Favoriten, eigene Habits und Übungswege (`delete_my_diary_data()`, 0033/0036). Eine Wahl, die Daten zu behalten, gibt es nicht mehr; vorher kann die Person im Widerrufsdialog eine Kopie herunterladen (V8). Einen einzelnen Übungsweg löscht die Person jederzeit selbst (echtes `DELETE`). |
 
 > **Wie die Einwilligung technisch durchgesetzt wird.** Schreiben in
 > `habit_logs` erlaubt die Datenbank nur mit gültiger Einwilligung
@@ -239,12 +258,29 @@ Abschnitt 7 entschieden sind.
 > nutzbar.
 >
 > **Keine Auswertung durch uns.** Score und Auswertungen werden in der App aus
-> den eigenen Einträgen berechnet. Punkte gibt es für das Durchführen, nicht
-> für die Höhe eines Messwerts. Wir ordnen keine Werte ein und treffen keine
-> Entscheidungen auf ihrer Grundlage.
+> den eigenen Einträgen berechnet. Punkte gibt es grundsätzlich für das
+> Durchführen. Seit 0035 kann eine Gewohnheit mit Zahlenwert (etwa Schlafdauer)
+> Grenzen haben, ab denen es Punkte gibt oder abgezogen werden — die Grenzen
+> legt die Redaktion an der Vorlage oder die Person an ihrem eigenen Habit
+> fest, bei Messwerten wie dem BOLT-Wert gibt es sie nie. Wir ordnen keine
+> Werte ein und treffen keine Entscheidungen auf ihrer Grundlage.
+>
+> **Ablauf beim Widerruf** (`src/features/consents/HealthDataRevoke.tsx`).
+> Erst wird widerrufen (neue Zeile in `user_consents` mit `revoked_at`, V6),
+> dann gelöscht. Scheitert das Löschen, ist der Widerruf trotzdem wirksam —
+> neue Einträge sperrt die Datenbank ab da ohnehin — und der Dialog bietet
+> einen neuen Versuch an. Andersherum wären die Daten weg und die
+> Einwilligung noch erteilt. Bleibt nach einem gescheiterten Versuch etwas
+> liegen, löschen wir es auf Anfrage oder bei der nächsten Prüfung dieses
+> Verzeichnisses (SQL unten in Abschnitt 7, Punkt 1).
+>
+> **Was beim Widerruf bleibt:** das Übungsprotokoll (V11, kein
+> Gesundheitsdatum, Art. 6 Abs. 1 lit. b), die Einstellungen im Profil
+> (Score an/aus, eingeschaltete Bereiche) und der Nachweis von Erteilung und
+> Widerruf (V6, Art. 7 Abs. 1).
 >
 > **Datenschutz-Folgenabschätzung (Art. 35).** Einschätzung vom 31.10.2026,
-> **vom Verantwortlichen zu bestätigen:** Art. 35 Abs. 3 lit. b verlangt eine
+> **vom Verantwortlichen am 3. November 2026 bestätigt:** Art. 35 Abs. 3 lit. b verlangt eine
 > DSFA bei *umfangreicher* Verarbeitung besonderer Kategorien. Das Tagebuch ist
 > ein Nebenangebot eines Kleinbetriebs, die Daten sind von den Betroffenen
 > selbst erfasst, nur für sie sichtbar und werden nicht ausgewertet. Daraus
@@ -276,6 +312,22 @@ Abschnitt 7 entschieden sind.
 | **Rechtsgrundlage** | Art. 6 Abs. 1 lit. f — faire Platzvergabe, Schutz vor Missbrauch |
 | **Empfänger** | Supabase; kein Client kann die Tabelle lesen (RLS ohne Policy) |
 | **Löschfrist** | Kennungen werden nur 24 Stunden gebraucht; ältere löscht `take_guest_booking_slot()` beim nächsten Buchungsversuch ohne Konto (kein zeitgesteuerter Job, siehe Abschnitt 7) |
+
+### V13 · Onlinekurse — ENTWURF, gilt ab Auslieferung von V1.2
+
+> Noch nicht in Kraft. Die Tabellen gibt es erst mit V1.2 (SAD §11.2). Beim
+> Livegang: Spalten gegen die Migration abgleichen, Vermerk entfernen,
+> Datenschutzerklärung Fassung 8 veröffentlichen (`docs/recht/onlinekurse-entwurf.md`).
+
+| | |
+|---|---|
+| **Zweck** | Bereitstellung gekaufter oder freigeschalteter Onlinekurse, Lernfortschritt, Planung im Tagebuch, Wissensquiz, Ausstellung und Prüfung von Zertifikaten |
+| **Betroffene** | registrierte Nutzer:innen, die einen Onlinekurs nutzen; Dritte, die ein Zertifikat prüfen (nur Abruf, keine Speicherung) |
+| **Datenkategorien** | Zugang (`course_access`: Kurs, Kaufzeitpunkt, Ablauf, Stripe-Kennungen), erledigte Blöcke (`course_progress`), geplante Termine mit Tageszeit (`course_plan_slots`), Quiz-Antworten und Ergebnis (`quiz_attempts`), Zertifikat (`certificates`: gewählter Name, Kurs, Datum, Prüfcode) |
+| **Rechtsgrundlage** | Art. 6 Abs. 1 lit. b — Erfüllung des Vertrags über den Onlinekurs. **Keine Gesundheitsdaten:** Kurstermine stehen nicht in `habit_logs` und fließen nicht in den Habit Score. |
+| **Empfänger** | Supabase (Datenbank, privater Speicher für Aufnahmen und PDFs), Stripe (Zahlung, V4), Vimeo (Ausspielen der Kursvideos; beim Abspielen sieht Vimeo IP-Adresse und Gerätedaten) |
+| **Drittland** | Vimeo und Stripe: USA, abgesichert über das EU-US Data Privacy Framework bzw. Standardvertragsklauseln — vor dem Livegang prüfen |
+| **Löschfrist** | mit der Löschung des Kontos (Kaskade). Zertifikate bleiben bis dahin abrufbar, auch nach Ablauf des Kurszugangs; die öffentliche Prüfseite zeigt nur Name, Kurs und Datum. Zahlungsbelege: siehe V4. |
 
 ### Sicherungskopien — die Frist hinter allen anderen Fristen
 
@@ -469,16 +521,55 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
 
 ---
 
-## 7. Offene Punkte (Stand 31.10.2026)
+## 7. Offene Punkte (Stand 3. November 2026)
 
-1. ~~**Löschung nach Widerruf der Einwilligung `health_data`.**~~ **Entschieden
-   am 31.10.2026:** Beim Widerruf bietet die App an, alles aus dem Tagebuch
-   sofort zu löschen (Art. 17 Abs. 1 lit. b). Umgesetzt mit Migration 0033
-   (`delete_my_diary_data()`, löscht nur Zeilen von `auth.uid()`) und dem
-   Widerrufsdialog auf der Kontoseite. Erst wird widerrufen, dann gelöscht;
-   scheitert das Löschen, bleibt ein Knopf für den neuen Versuch. Das
-   Übungsprotokoll (V11) und der Nachweis des Widerrufs (V6) bleiben. Die
-   Datenschutzerklärung sagt das seit Fassung 5 (0037).
+1. ~~**Löschung nach Widerruf der Einwilligung `health_data`.**~~ **Neu
+   entschieden am 03.11.2026: Widerruf heißt Löschen.** Am 31.10.2026 war
+   entschieden worden, die Löschung beim Widerruf nur *anzubieten* (0033);
+   wer ablehnte, behielt die Daten. Das ist aufgegeben, weil für
+   Gesundheitsdaten nach dem Widerruf keine Rechtsgrundlage mehr bleibt: Art.
+   9 Abs. 2 lit. a trägt nur, solange die Einwilligung besteht, und eine
+   andere Grundlage aus Art. 9 Abs. 2 passt nicht. Das Speichern ist selbst
+   Verarbeitung — „behalten“ wäre damit Verarbeitung ohne Grundlage, auch
+   wenn die Person es wünscht. Den berechtigten Wunsch, nichts zu verlieren,
+   erfüllt die Kopie (Art. 20), die der Dialog jetzt vor dem Löschen anbietet.
+   Wer das Tagebuch nur eine Weile nicht nutzen will, muss nicht widerrufen.
+   Umgesetzt in `HealthDataRevoke.tsx` (ein Weg: widerrufen und löschen),
+   Datenschutzerklärung Fassung 7 und Einwilligung Tagebuch v5 (0040).
+   Der Kaskadenlauf bei Kontolöschung bleibt unverändert.
+
+   **Nachlauf für Altfälle — entfällt (03.11.2026):** Alle Konten im
+   Livesystem gehören dem Verantwortlichen oder seiner Familie; eine Person,
+   die „Daten behalten“ gewählt und das nicht gewollt hätte, gibt es nicht.
+   Die Abfrage bleibt als Vorlage stehen, falls sich das je ändert.
+   Ursprünglicher Text: Wer zwischen 31.10. und dem Livegang dieser
+   Änderung widerrufen und „Daten behalten“ gewählt hat, hat noch Daten ohne
+   Grundlage. Prüfen im SQL Editor (Live, `set local role service_role`):
+
+   ```sql
+   -- Konten, deren letzte Erklärung zu health_data ein Widerruf ist
+   -- und die noch Tagebuch-Daten haben
+   with letzte as (
+     select distinct on (user_id) user_id, revoked_at
+       from public.user_consents
+      where kind = 'health_data'
+      order by user_id, seq desc
+   )
+   select l.user_id,
+          (select count(*) from public.habit_logs h where h.user_id = l.user_id) as eintraege,
+          (select count(*) from public.challenges c where c.user_id = l.user_id) as uebungswege
+     from letzte l
+    where l.revoked_at is not null
+      and (exists (select 1 from public.habit_logs h where h.user_id = l.user_id)
+        or exists (select 1 from public.user_habits u where u.user_id = l.user_id)
+        or exists (select 1 from public.habit_templates t where t.owner_id = l.user_id)
+        or exists (select 1 from public.challenges c where c.user_id = l.user_id));
+   ```
+
+   Gibt es Treffer, die Person per E-Mail informieren (Kopie anbieten, Frist
+   14 Tage) und danach dieselben Löschungen wie `delete_my_diary_data()` für
+   diese `user_id` ausführen. Nicht per Migration — Datenlöschung ist keine
+   Schemaänderung.
 2. ~~**24-Stunden-Frist bei Gastbuchungs-Kennungen (V12).**~~ **Entschieden am
    31.10.2026: Satz angepasst** (Fassung 5, 0037). Die Erklärung sagt jetzt, dass
    ältere Kennungen beim nächsten Buchungsversuch ohne Konto gelöscht werden.
@@ -491,10 +582,14 @@ Allgemeine Beschreibung, wie sie Art. 30 Abs. 1 lit. g verlangt:
    entsprechend länger liegen. Der Personenbezug ist gering (HMAC, keine IP),
    die Aussage ist aber nicht genau. **Zu entscheiden:** Aufräumen zusätzlich
    an einer regelmäßig aufgerufenen Stelle einbauen oder den Satz in der
-   Datenschutzerklärung anpassen.3. ~~**Datenschutzerklärung: Versand der Kontomails.**~~ **Erledigt mit Fassung 5
-   (0037).** Offen bleibt nur der DKIM-Eintrag. Bisheriger Befund: Abschnitt „Empfänger und
+   Datenschutzerklärung anpassen.
+3. ~~**Datenschutzerklärung: Versand der Kontomails.**~~ **Erledigt mit Fassung 5
+   (0037).** ~~Offen bleibt nur der DKIM-Eintrag.~~ **DKIM steht** (geprüft
+   am 03.11.2026): `hostingermail-a._domainkey.deratemcode.at` zeigt per CNAME
+   auf den aktiven Schlüssel von Hostinger, `-b` und `-c` sind die leeren
+   Reserveschlüssel für den Wechsel. SPF (`include:_spf.mail.hostinger.com`)
+   und DMARC (`p=none`) waren schon da. Bisheriger Befund: Abschnitt „Empfänger und
    Auftragsverarbeiter“ nennt Supabase für den „Versand der Kontomails“. Seit
    31.10.2026 verschickt sie Hostinger (V2). Mit der nächsten Fassung
    (`privacy` Version 5 per Migration, neues Datum in `legal.json`) anpassen,
-   am besten zusammen mit den Entscheidungen zu Punkt 1 und 2. Außerdem fehlt
-   im DNS von `deratemcode.at` noch der DKIM-Eintrag für den Hostinger-Versand.
+   am besten zusammen mit den Entscheidungen zu Punkt 1 und 2.

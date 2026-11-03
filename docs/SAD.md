@@ -1,8 +1,8 @@
 # System Architecture Document (SAD) — Atem-App MVP
 
 **Projekt:** TheHaCode Breathwork App
-**Version:** 0.7 (Homepage-Ablösung vorgezogen: Kurse, Team, Navigation, Rechtliches sofort statt in Block 6)
-**Datum:** 10.08.2026
+**Version:** 0.8 (V1 und V1.1 abgeschlossen, V1.2 neu geschnitten: Aufnahmen und Onlinekurse)
+**Datum:** 03.11.2026 (Fassung 0.7 vom 10.08.2026)
 **Team:** 2 Personen, Teilzeit, **20 Std./Woche gemeinsam**, KI-gestützte Entwicklung
 **Leitprinzip:** *Boring Technology.* Jede Komponente, die kein Kundenproblem löst, ist Wartungslast.
 
@@ -15,6 +15,8 @@
 3. **Der Sequenz-Konfigurator** — die bezahlte Funktion: eigene Box-Atemsequenzen bauen, mit Musik und gesprochener Anleitung
 
 **Alles andere ist verschoben** (§11): Atem-Tagebuch und Micro Habits nach V1.1 · geführte Aufnahmen mit Marker-Synchronisation nach V1.2 · Session-Protokoll nach V1.1 · Programme, Coach-Sicht, native Apps, Offline nach V2.
+
+**Neu in 0.8 (03.11.2026):** **V1 und V1.1 sind abgeschlossen** und live (§11.1). Die offenen V1-Punkte (Gerätetests, Beta, Kursbuchung im Livemodus) hat das Team als erledigt erklärt. **V1.2 ist neu geschnitten und freigegeben:** gesprochene Aufnahmen und **Onlinekurse** (§11.2), die mehrtägigen Programme aus V2 werden dafür vorgezogen. Die Marker-Synchronisation geführter Aufnahmen rückt nach hinten (§11.6). Der iOS-Test T01a ist entschieden: Aufnahmen brauchen einen entsperrten Bildschirm (§7.7).
 
 **Neu in 0.7 gegenüber 0.6:** Homepage-Ablösung vorgezogen — Kostenersparnis (ein Hosting-Vertrag statt zwei) wiegt schwerer als das ursprünglich in §2.4/§11.3/§12.2 zurückgestellte SEO-Risiko. Kurse- und Team-Seite kommen als eigene Inhaltstypen dazu (§3.13), dazu ein projektweites Navigationsmenü und ein rechtliches Minimum (Impressum/Datenschutzerklärung), alles noch vor der Breathing Engine (§12.2). Redaktion läuft bewusst über Supabase Studio statt einer eigenen Admin-Oberfläche — Letztere bleibt vorgemerkt (§11.6).
 
@@ -438,7 +440,7 @@ create index on public.exercises (category_id);
 | `audio_guided` | **Position der Stimmspur** | ja, Phasen als Marker auf der Aufnahme | „Ich zähle dich durch" — geführte Sessions |
 | `audio_only` | Audioplayer | nein | Erklärungen, Meditationen über freier Atmung |
 
-Bei `audio_guided` sind die Phasendauern keine freien Parameter mehr, sondern müssen zur Aufnahme passen. Gesetzt werden sie mit dem Marker-Werkzeug — **das kommt erst in V1.2** (§11.3). V1 nutzt ausschließlich `timer`, ergänzt um Cue-Samples (§7.5).
+Bei `audio_guided` sind die Phasendauern keine freien Parameter mehr, sondern müssen zur Aufnahme passen. Gesetzt werden sie mit dem Marker-Werkzeug — **das kommt nach V1.2** (§11.2, §11.6). V1.2 nutzt für Onlinekurse nur Aufnahmen ohne Marker, die von Anfang bis Ende laufen. V1 nutzt ausschließlich `timer`, ergänzt um Cue-Samples (§7.5).
 
 #### Der Sequenz-Konfigurator — die bezahlte Funktion
 
@@ -1215,7 +1217,7 @@ Der Ordner-Check in der Insert-Policy ist keine bloße Namenskonvention,
 sondern erzwungen: Ein Admin kann nur in die drei vorgesehenen virtuellen
 Ordner hochladen, `update`/`delete` folgen demselben `is_admin()`-Muster.
 
-### 3.14 Habit Tracker (vormals Atem-Tagebuch) und Habit Score Tracker (V1.1, Stand 25.10.2026)
+### 3.14 Habit Tracker (vormals Atem-Tagebuch) und Habit Score Tracker (V1.1, begonnen 25.10.2026, abgeschlossen 03.11.2026)
 
 > **Umbenannt am 25.10.2026:** Aus dem Atem-Tagebuch wird der *Habit Tracker*,
 > weil künftig nicht nur Atem-Gewohnheiten geführt werden. Route `/habit-tracker`,
@@ -1531,6 +1533,8 @@ Ohne diesen vorgesehenen Pfad bastelt beim ersten Supportfall jemand direkt an d
 
 ## 5. Datenschutz & Privacy by Design (DSGVO)
 
+> **Stand seit V1.1 (live seit 31.10.2026):** Das Tagebuch verarbeitet Gesundheitsdaten nach Art. 9 Abs. 2 lit. a DSGVO, nur mit der Einwilligung `health_data` (§3.10, §3.14). Widerruf heißt seit 03.11.2026 Löschen (Datenschutz Fassung 7, Migration 0040). Die Einschätzung, dass keine Datenschutz-Folgenabschätzung nach Art. 35 nötig ist, hat der Verantwortliche am 03.11.2026 bestätigt (Verarbeitungsverzeichnis V10). Der folgende Kasten beschreibt den Stand von V1 und bleibt als Begründung stehen.
+>
 > **Der Neuschnitt entlastet hier am stärksten.** Weil das Atem-Tagebuch nach V1.1 verschoben ist, verarbeitet V1 **keine Gesundheitsdaten nach Art. 9 DSGVO**. Kein BOLT-Wert, keine Schlafqualität, kein Stresslevel. Damit entfällt die restriktivste Anforderung des gesamten Projekts — und mit ihr die separate Einwilligung, die gekoppelte RLS-Prüfung und der größte Teil der Dokumentationslast.
 >
 > Was bleibt, sind gewöhnliche Bestandsdaten und Zahlungsbezüge: Art. 6 Abs. 1 lit. b, wie bei jedem Abo-Produkt.
@@ -1733,7 +1737,7 @@ export const tokens = {
 * **Buttons ohne Fläche, wo möglich:** primär gefüllt in `ocean500`, sekundär nur mit Linie, tertiär reiner Text.
 * **Icons:** ausschließlich Strichicons mit 1,5 px Strichstärke (`lucide-react-native`), niemals gefüllt.
 
-### 6.1a Darstellung „Mondlicht" und Startseite (nur Testsystem, seit 01.11.2026)
+### 6.1a Darstellung „Mondlicht" und Startseite (seit 02.11.2026 in beiden Umgebungen)
 
 **Seit 02.11.2026 auch im Livesystem** (Freigabe des Users): `DESIGN_PREVIEW` ist `true`. Wo unten „nur Testsystem“ steht, gilt das für die Zeit bis dahin. Zurück auf nur Testsystem: den Schalter wieder auf `EXPO_PUBLIC_APP_ENV === 'staging'` setzen.
 
@@ -1749,7 +1753,7 @@ Ein Versuch, ob eine verspielte, spirituelle Darstellung trägt. Er läuft **nur
 
 Rückbau: PR revertieren. Danach bleibt allenfalls `thehacode.theme` im Browser liegen; ohne `theme-init.js` liest ihn niemand mehr.
 
-#### Vorschlag „Mondlicht Mobile" (nur Testsystem, seit 02.11.2026)
+#### Vorschlag „Mondlicht Mobile" (seit 02.11.2026 auch Live)
 
 Umbau der Handy-Ansichten nach dem Design-Vorschlag gleichen Namens, ebenfalls hinter `DESIGN_PREVIEW`. Live bleibt unverändert.
 
@@ -1836,7 +1840,7 @@ Schicht 3 — Darstellung (Reanimated, UI-Thread): Kreis-Skalierung, Farbüberga
 
 Schicht 1 ist vollständig unit-testbar (§8.1). Schicht 3 enthält keine Fachlogik. Schicht 2 ist der Grund, warum geführte Aufnahmen und getaktete Übungen dieselbe Engine benutzen können.
 
-> **Für V1 braucht ihr nur die Ankeruhr.** Geführte Aufnahmen mit Marker-Synchronisation kommen in V1.2. Die Schnittstelle in §7.2 wird trotzdem jetzt eingezogen — sie ist zehn Zeilen und verhindert, dass die Timeline-Logik später aufgebrochen werden muss. Die gesprochene Anleitung in V1 läuft über Cue-Samples (§7.5), nicht über eine zweite Zeitachse.
+> **Für V1 braucht ihr nur die Ankeruhr.** Geführte Aufnahmen mit Marker-Synchronisation kommen nach V1.2 (§11.6); V1.2 spielt Kurs-Aufnahmen ohne Marker ab. Die Schnittstelle in §7.2 wird trotzdem jetzt eingezogen — sie ist zehn Zeilen und verhindert, dass die Timeline-Logik später aufgebrochen werden muss. Die gesprochene Anleitung in V1 läuft über Cue-Samples (§7.5), nicht über eine zweite Zeitachse.
 
 ### 7.1 Warum kein `setInterval` — und warum nicht immer die eigene Uhr
 
@@ -2161,6 +2165,8 @@ export function BreathCircle({ phase }: { phase: TimelineSegment }) {
 2. **Funktioniert es nicht** — drei Auswege, in dieser Reihenfolge zu bewerten: die langen Meditationen bewusst als Safari-Tab-Erlebnis ausweisen (kostet nichts, ist aber erklärungsbedürftig); Wake Lock plus Hinweis „Bildschirm bleibt an" (funktioniert sicher, kostet Akku); natives iOS aus V2 vorziehen (löst es endgültig, bringt aber Store-Review und das Apple-Thema aus §11 zurück).
 
 Das Ergebnis dieses Spikes ist die einzige offene Frage, die die Roadmap noch verschieben kann. Deshalb steht er in Sprint 1 und nicht später.
+
+**Ergebnis (03.11.2026, T01a):** **Nein.** In der installierten PWA bricht eine Aufnahme ab, sobald das iPhone gesperrt wird. Gewählt ist **Ausweg 2**: Aufnahmen und Sessions halten den Bildschirm über die Wake Lock API wach und sagen das an („Bildschirm bleibt an, bitte nicht sperren“). Das iPhone bleibt während Kursen und Sessions entsperrt. Hören bei gesperrtem Bildschirm gibt es erst mit nativen Apps (§11.5).
 
 ---
 
@@ -2496,8 +2502,11 @@ Der zweite Gegenpunkt — Firebase hat reifere native SDKs und Push-Infrastruktu
 | USt./OSS bei EU-Kunden | Mittel | Käuferland ab Tag 1 mitschreiben (§4.5), Steuerberatung |
 | Trial-Mehrfachnutzung über neue Konten | Niedrig | Bewusst akzeptiert (§3.3) |
 | Timer-Genauigkeit der Engine | Niedrig — gelöst | Ankeruhr (§7.1), abgesichert durch Unit-Tests (§8.1) |
-| Fremde Musik wird auf dem iPhone vom Ton unterbrochen | Mittel | In T10 auf echtem Gerät prüfen; nativ ab V2 lösbar (§7.5) |
-| Gesundheitsdaten nach Art. 9 DSGVO | **Entfällt in V1** | Kommt mit dem Tagebuch in V1.1 zurück (§5) |
+| Fremde Musik wird auf dem iPhone vom Ton unterbrochen | Mittel | T10 vom Team am 03.11.2026 abgeschlossen; nativ ab V2 lösbar (§7.5) |
+| Gesundheitsdaten nach Art. 9 DSGVO | **Seit V1.1 aktiv** | Einwilligung `health_data`, Widerruf heißt Löschen, keine DSFA-Pflicht (bestätigt 03.11.2026, §5) |
+| Kein Backup im Supabase-Free-Tier (Live) | Mittel, bewusst getragen | Pro wird gebucht, sobald der erste zahlende Kunde außerhalb der Familie da ist (Entscheidung 03.11.2026) |
+| Aufnahmen brechen bei gesperrtem iPhone ab | Mittel | Wake Lock und Hinweis (§7.7); nativ ab V2 |
+| Bezahlte Kursvideos frei abrufbar | Mittel | Bezahl- und Plus-Kurse erst mit bezahltem Vimeo-Tarif (Hide from Vimeo, Domain-Beschränkung, §11.2) |
 | Apple Guideline 3.1.1 | **Entfällt in V1** | Kein Store-Release; erst mit nativen Apps relevant (§11.5) |
 
 ### 10.1 Apple und Google — erst ab V2 relevant
@@ -2526,9 +2535,120 @@ Weil die Schemastruktur schon steht, ist V1.1 überwiegend UI-Arbeit — der Tei
 
 **Begonnen am 25.10.2026** mit zwei Atem-Habits und dem Habit Score Tracker — Zuschnitt und Entscheidungen in §3.14.
 
-### 11.2 V1.2 — Geführte Aufnahmen
+**Abgeschlossen am 03.11.2026.** Live sind Habit Tracker mit Vorlagen, eigenen Habits, Bereichen, Wertgrenzen, Übungswegen und Habit Score, das Session-Protokoll, die Einwilligung `health_data` (v5) und die Darstellung Mondlicht. Zum Abschluss gehören:
 
-Vollständige Sessions mit deiner Stimme, phasengenau synchronisiert. Dafür kommen zurück: `playback_mode = 'audio_guided'`, die Audio-Zeitquelle aus §7.2, das Marker-Werkzeug und der iOS-Spike aus §7.8 — denn *hier* wird das Hören mit gesperrtem Bildschirm plötzlich zum Kernszenario.
+- Datenschutzerklärung Fassung 7 und Widerruf heißt Löschen (0040). Die Einwilligungslogik hat das Team geprüft. Die SQL für Altfälle (Verzeichnis §7) ist nicht nötig: Alle Live-Konten gehören dem Team oder der Familie.
+- AGB Fassung vom 03.11.2026 (0041): § 14 beschreibt den Leistungsumfang von Plus, wie er seit V1.1 ist.
+- Datenschutz-Folgenabschätzung: keine Pflicht, vom Verantwortlichen am 03.11.2026 bestätigt.
+- Kontomails über Hostinger-SMTP in beiden Umgebungen, DKIM aktiv.
+- **Offen beim Team:** zwei Speicherfristen im Verarbeitungsverzeichnis (Server-Protokolle beim Hoster, eigener E-Mail-Verkehr). Supabase Pro wird gebucht, sobald der erste zahlende Kunde außerhalb der Familie da ist (§10).
+
+### 11.2 V1.2 — Aufnahmen und Onlinekurse (freigegeben am 03.11.2026)
+
+> **Neu geschnitten am 03.11.2026.** Ursprünglich hieß V1.2 „Geführte Aufnahmen“
+> mit Marker-Synchronisation, und mehrtägige Programme standen bei V2 (§11.5).
+> Onlinekurse brauchen von beidem nur einen Teil: Aufnahmen, die von Anfang bis
+> Ende laufen, und Programme mit Blöcken im Zeitverlauf. V1.2 bringt genau das.
+> Die **phasengenaue Synchronisation** einer Aufnahme mit dem Atemkreis
+> (`audio_guided`, Quelle B aus §7.2, Marker-Werkzeug) kommt später (§11.6).
+> Der Scope ist vom Team freigegeben, CLAUDE.md ist angepasst. Ein klickbarer
+> Prototyp mit Umsetzungsplan liegt als Artefakt vor (privat):
+> https://claude.ai/artifact/K77h3zkngPTDPjPQ4nitYM
+
+#### Entscheidungen des Teams (03.11.2026)
+
+| Thema | Entscheidung |
+|---|---|
+| Name | **Onlinekurse**. Jeder Kurs sagt ausdrücklich: on demand, aufgezeichnet, **kein Live-Unterricht**. Präsenzkurse bleiben unter „Kurse“ (§3.13). |
+| Blöcke | Erklärvideo · **gesprochene Aufnahme** · Text mit Bild · PDF zum Herunterladen · **genau ein Quiz am Ende** (Multiple Choice) |
+| Zeitverlauf | Jeder Block hat einen Vorschlagstag (`day_offset`). **Alle Blöcke sind sofort offen**, die Reihenfolge ist nur ein Vorschlag. |
+| Zugang | je Kurs einstellbar: `public` (für alle, ansehen ohne Konto) · `account` (mit kostenlosem Konto) · `plus` (in Plus enthalten) · `paid` (einzeln zu kaufen) |
+| Preis | Einzelkauf als Einmalzahlung. **Plus-Kunden erhalten 15 % Rabatt** auf `paid`-Kurse. |
+| Laufzeit | `paid`: **1 Jahr ab Kauf, keine Verlängerung** |
+| Fortschritt | nur mit Konto. Gäste werden zur Anmeldung geführt. |
+| Planung | sofort starten oder einzelne Blöcke bzw. den ganzen Kurs im Tagebuch einplanen. **Keine Erinnerungen.** |
+| Zertifikat | als **echte PDF-Datei**, wenn **alle Blöcke erledigt** sind **und** das Quiz mit **mindestens 80 %** bestanden ist |
+| Start | ein kostenloser Basiskurs für alle (Atmung und ihre Vorteile), danach regelmäßig neue Kurse |
+| Videos | freie Kurse über den kostenlosen Vimeo-Tarif. Bezahl- und Plus-Kurse erst mit einem bezahlten Vimeo-Tarif („Hide from Vimeo“, Einbetten nur auf der eigenen Domain). |
+| Speicher | Aufnahmen, Bilder und PDFs im privaten Supabase-Bucket; **Free-Tarif, solange er reicht**. Erhöht wird erst bei Bedarf. |
+| iPhone | Test T01a ergab: In der PWA bricht eine Aufnahme ab, sobald das iPhone gesperrt wird. **Ausweg 2 aus §7.7**: Wake Lock plus Hinweis „Bildschirm bleibt an“. |
+
+**Noch zu bestätigen** (Annahmen bis zur Antwort des Teams): Gäste können einen
+`public`-Kurs ansehen, Speichern erst mit Konto · ein `plus`-Kurs ist offen,
+solange Plus läuft; Fortschritt und Zertifikat bleiben · nach Ablauf darf ein
+`paid`-Kurs neu gekauft werden (keine *automatische* Verlängerung).
+
+#### Datenmodell (alles additiv, §2.6)
+
+| Tabelle | Inhalt | Wer schreibt |
+|---|---|---|
+| `online_courses` | slug, Titel, Texte, `access` (Enum), `price_cents`, `access_days` (365), `pass_percent` (80), `is_published` | Redaktion (Studio) |
+| `online_course_blocks` | Kurs, `sort_order`, `day_offset`, `kind` (`video`, `audio`, `text`, `pdf`, `quiz`), `body_md`, `image_path`, `audio_path`, `pdf_path`, `video_provider`/`video_external_id`, `duration_sec` | Redaktion |
+| `online_quiz_questions`, `online_quiz_options` | Fragen, Antworten, Erklärung; **`is_correct` ist für `anon`/`authenticated` per Spaltenrecht nicht lesbar** | Redaktion |
+| `course_access` | Kauf: `user_id`, Kurs, `purchased_at`, `expires_at` = Kauf + `access_days`, Stripe-IDs | **nur Webhook** (`service_role`) |
+| `course_progress` | erledigte Blöcke | Nutzer (eigene Zeilen) |
+| `course_plan_slots` | geplante Blöcke: Datum, `day_part` (wie 0039) — Muster `challenge_slots` (0036) | Nutzer |
+| `quiz_attempts` | Antworten, Ergebnis, bestanden | nur `submit_quiz()` |
+| `certificates` | Name (einmal gewählt), Kurs, Datum, Prüfcode; unveränderlich | nur `issue_certificate()` |
+
+Nutzertabellen bekommen wie immer `user_id`, `updated_at`, `deleted_at`,
+`client_id`, `on delete cascade` und den Eintrag in
+`supabase/tests/001_foundation.test.sql`. Medien liegen im **privaten** Bucket
+`course-media`; Lesen über signierte URLs, Storage-Policy über
+`can_open_course()`.
+
+**Zugriff in genau einer Funktion:** `can_open_course(course_id)` liest
+`access`, fragt Plus **nur** über `has_plus_access()` und Käufe nur über
+`course_access` (`expires_at > now()`). Keine Policy fragt die Spalten direkt —
+dasselbe Prinzip wie §4.6.
+
+**Quiz und Zertifikat serverseitig:** `submit_quiz(course_id, answers)`
+(security definer) wertet aus und schreibt `quiz_attempts`; die Lösung erreicht
+den Browser nie. `issue_certificate(course_id, name)` prüft in der Datenbank,
+dass alle Nicht-Quiz-Blöcke in `course_progress` stehen und ein bestandener
+Versuch existiert. Die Edge Function `certificate-pdf` erzeugt die PDF mit
+**`pdf-lib`** (MIT; vom Team am 03.11.2026 freigegeben). Die öffentliche Seite
+`/zertifikat/[code]` zeigt über `verify_certificate(code)` nur Name, Kurs und
+Datum.
+
+**Gesundheitsdaten:** keine. Fortschritt, Planung, Quiz und Zertifikat sind
+Vertragsdaten (Art. 6 Abs. 1 lit. b). Die Termine erscheinen im Tagebuch,
+werden aber **nicht** in `habit_logs` geschrieben und zählen nicht in den
+Habit Score — deshalb keine `health_data`-Einwilligung.
+
+#### Bezahlung
+
+`create-course-checkout` bekommt `payment_kind = 'online_course'`
+(`mode: 'payment'`). Der Preis kommt aus `online_courses`, nie vom Client. Hat
+das Konto Plus (`has_plus_access()` serverseitig), hängt die Function einen
+Stripe-Gutschein über 15 % an (`discounts`). Der Webhook schreibt
+`course_access`. Im Kaufdialog: ausdrückliches Verlangen des sofortigen Beginns
+und Bestätigung des Verlusts des Rücktrittsrechts (§ 18 Abs. 1 Z 11 FAGG);
+die Bestätigung gehört auf den Beleg (§ 18 Abs. 2 FAGG, siehe §4.5).
+
+#### Recht
+
+Vorbereitet unter `docs/recht/onlinekurse-entwurf.md` und veröffentlicht erst
+mit der Auslieferung von V1.2 (vorher würden sie etwas beschreiben, das es
+nicht gibt): AGB Teil E „Onlinekurse“ (terms v3), Datenschutzerklärung
+Fassung 8 (privacy v8), Verarbeitungsverzeichnis V13.
+
+#### Umsetzung in neun Schritten (je ein PR nach `develop`)
+
+1. **Datenbank, Inhalte, Zugang** — Tabellen, Bucket, `can_open_course()`; pgTAP mit Missbrauchsfällen (fremden Kurs öffnen, Zugang selbst eintragen, abgelaufener Kauf, `is_correct` lesen) · 10–12 h
+2. **Fortschritt** — `course_progress`; erledigt bei Video- und Aufnahme-Ende, Download oder Knopf · 4 h
+3. **Kauf mit Plus-Rabatt** — Checkout, Gutschein, Webhook, FAGG-Häkchen · 10–12 h
+4. **Aufnahmen abspielen** — Player mit signierter URL, Wake Lock, Hinweis (§7.7) · 8 h
+5. **Kursseiten** — `/onlinekurse`, `/onlinekurse/[slug]`, Blockseiten, `QueryBoundary`, `PageColumn` · 14–18 h
+6. **Einplanen im Tagebuch** — `course_plan_slots`, Anzeige und „+ Kursblock“ · 12–16 h
+7. **Quiz** — Tabellen, `submit_quiz()` · 8–10 h
+8. **Zertifikat** — `issue_certificate()`, `certificate-pdf` mit `pdf-lib`, Prüfseite · 10–12 h
+9. **Recht, Inhalte, Auslieferung** — Entwürfe per Migration veröffentlichen, Basiskurs einspielen (`docs/inhalte/`), Staging, Live · 8–10 h
+
+Zusammen rund 85–100 Stunden, bei 20 Stunden pro Woche etwa fünf bis sechs
+Wochen. Ab Schritt 5 ist jede Stufe für sich auslieferbar. Die Produktion des
+Basiskurses (Videos, Aufnahmen, Texte, PDFs, Quizfragen) liegt beim Team und
+dauert vermutlich länger als der Code.
 
 ### 11.3 Umzug auf die Hauptdomain — vorgezogen in V1 (war V1.3)
 
@@ -2556,13 +2676,13 @@ Was **nicht** jetzt gebaut wird: lokale DB, Sync-Engine, Queue, Konfliktdialoge.
 
 Dieselbe Codebasis plus EAS Build. Neu hinzu kommen Store-Assets, native SSO-Konfiguration, das Thema aus §10.1 und Review-Runden.
 
-Mehrtägige Programme („14 Tage funktionale Atmung") sind eine rein additive Schicht — `programs` → `program_days` → Verweis auf `exercises`, plus eine nullable Spalte in `exercise_sessions`. Der Bestand bleibt unangetastet.
+~~Mehrtägige Programme („14 Tage funktionale Atmung")~~ — **vorgezogen in V1.2 als Onlinekurse** (§11.2), mit Blöcken statt `program_days`.
 
 Die Coach-Sicht auf Klientendaten ist technisch eine Verknüpfungstabelle plus erweiterte Policies. Der Aufwand liegt im Rechtlichen: ein neuer Verarbeitungszweck mit eigener, pro Klient widerrufbarer Einwilligung (§5.5).
 
 ### 11.6 Weitere vorgemerkte Themen
 
-Erinnerungen als lokale Benachrichtigungen (kein Server nötig) · englische Sprachfassung inklusive zweitem Cue-Set (§7.5) · Admin-UI für die Redaktion (Policies stehen bereits, §3.8) · Produktanalytik EU-gehostet.
+Marker-Synchronisation geführter Aufnahmen (`audio_guided`, Quelle B aus §7.2, Marker-Werkzeug; aus V1.2 herausgelöst am 03.11.2026) · Erinnerungen als lokale Benachrichtigungen (kein Server nötig) · englische Sprachfassung inklusive zweitem Cue-Set (§7.5) · Admin-UI für die Redaktion (Policies stehen bereits, §3.8) · Produktanalytik EU-gehostet.
 
 ---
 

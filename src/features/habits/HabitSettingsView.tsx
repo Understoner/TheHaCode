@@ -6,6 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
+import { responsive } from '@/design/responsive';
 import { useThemePalette } from '@/design/theme';
 import { colors, radius, spacing } from '@/design/tokens';
 import { usePlusAccess } from '@/features/configurator/useSequences';
@@ -82,6 +83,10 @@ export function HabitSettingsView() {
 
   return (
     <View style={styles.stack}>
+      {/* Am Desktop (03.11.2026) stehen "Habits" und "Score" nebeneinander,
+          die Bereiche darunter in zwei Spalten. */}
+      <View {...responsive('m-split')} style={styles.split}>
+      <View style={styles.stack}>
       <Text style={styles.kicker}>{t('diary.settings.m.habits')}</Text>
       <View style={styles.group}>
         <Link href="/habit-tracker/auswahl" style={styles.rowLink}>
@@ -133,7 +138,9 @@ export function HabitSettingsView() {
           }
         </QueryBoundary>
       </View>
+      </View>
 
+      <View style={styles.stack}>
       <Text style={styles.kicker}>{t('diary.settings.m.score')}</Text>
       <View style={styles.group}>
         <Row
@@ -143,6 +150,8 @@ export function HabitSettingsView() {
           right={<Switch on={scoreOn} label={t('diary.score.toggle')} onToggle={() => setScoreOn(!scoreOn)} />}
         />
       </View>
+      </View>
+      </View>
 
       <Text style={styles.kicker}>{t('diary.settings.areas.title')}</Text>
       <Text style={styles.text}>{t('diary.settings.areas.text')}</Text>
@@ -150,13 +159,19 @@ export function HabitSettingsView() {
         {({ categories }) => (
           <QueryBoundary query={areas.query}>
             {(enabled) => (
-              <View style={styles.group}>
+              <View {...responsive('m-grid2')} style={styles.group}>
                 {categories.map((category, i) => {
                   const core = category.slug === CORE_AREA;
                   const on = isAreaEnabled(category.slug, enabled);
                   return (
                     <View key={category.id}>
-                      {i > 0 ? <View style={styles.divider} /> : null}
+                      {/* Am Desktop steht der zweite Bereich oben rechts -
+                          ohne Linie darueber. */}
+                      {i === 1 ? (
+                        <View {...responsive('m-mobile-only')} style={styles.divider} />
+                      ) : i > 1 ? (
+                        <View style={styles.divider} />
+                      ) : null}
                       <Row
                         icon={<AreaGlyph slug={category.slug} color={on ? palette.ocean700 : palette.ink700} size={20} />}
                         title={category.title}
@@ -184,6 +199,9 @@ export function HabitSettingsView() {
 
 const styles = StyleSheet.create({
   stack: {
+    gap: spacing.sm,
+  },
+  split: {
     gap: spacing.sm,
   },
   kicker: {

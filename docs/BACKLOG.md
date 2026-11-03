@@ -6,6 +6,13 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 
 **Legende:** 🔒 = nicht an einen Assistenten delegieren (SAD §13.2) · ⏱ = grobe Stundenschätzung
 
+> **V1 abgeschlossen am 03.11.2026.** Die letzten offenen Punkte (Gerätetests
+> T09/T10, Beta T14, Kursbuchung im Livemodus) hat das Team als erledigt
+> erklärt. Der iOS-Test T01a ist entschieden (SAD §7.7). Offen bleibt bewusst
+> nur T17a: Er hängt an Supabase Pro, das gebucht wird, sobald der erste
+> zahlende Kunde außerhalb der Familie da ist. V1.1 ist ebenfalls
+> abgeschlossen (SAD §11.1), V1.2 steht in SAD §11.2.
+
 ---
 
 ## Block 1 — Fundament (Wochen 1–2)
@@ -26,8 +33,8 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Ziel:** Die einzige offene Frage beantworten, die die Roadmap noch verschieben könnte (SAD §7.7, §10).
 **Vorgehen:** Minimale PWA mit Audio-Element und Media Session API bauen, auf einem echten iPhone installieren, Bildschirm sperren, zwölf Minuten warten.
 **Abnahme:**
-- [ ] Ergebnis dokumentiert: Audio läuft bei gesperrtem Bildschirm weiter — ja/nein
-- [ ] Bei „nein": Entscheidung getroffen und in SAD §7.7 nachgetragen, welcher der drei dort genannten Auswege gilt
+- [x] Ergebnis dokumentiert: Audio läuft bei gesperrtem Bildschirm weiter — **nein** (03.11.2026, iPhone, installierte PWA)
+- [x] Bei „nein": Entscheidung getroffen und in SAD §7.7 nachgetragen — Ausweg 2, Wake Lock plus Hinweis „Bildschirm bleibt an“
 
 > **Nicht mehr dringend, aber offen.** V1 spielt keine Audiodateien ab — die Töne
 > kommen aus dem Oszillator und nur bei sichtbarem Bildschirm. Die Frage wird
@@ -294,7 +301,7 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - Ankeruhr statt `setInterval`; App im Hintergrund pausiert
 **Abnahme:**
 - [x] Ein Re-Render je Phasenwechsel, nicht je Frame
-- [ ] Auf einem Mittelklasse-Android flüssig
+- [x] Auf einem Mittelklasse-Android flüssig — vom Team am 03.11.2026 als abgeschlossen erklärt
       — nur an einem echten Gerät feststellbar
 - [x] `prefers-reduced-motion`: fester Radius, Marke und Zähler laufen weiter
 - [x] Bildschirm bleibt während der Übung wach
@@ -315,7 +322,7 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 - [x] Abschaltbar über `profiles.sound_enabled`
       — die Einstellung überlebt jetzt Gerät und Sitzung. Ohne Anmeldung gilt
       sie für den Besuch; `localStorage` ist für fachliche Daten verboten.
-- [ ] Auf einem echten iPhone prüfen, ob fremde Musik weiterläuft — Ergebnis notieren
+- [x] Auf einem echten iPhone prüfen, ob fremde Musik weiterläuft — vom Team am 03.11.2026 als abgeschlossen erklärt
 
 ### T11 · Player-Screen ⏱10
 **Ziel:** Vollbild, ohne Ablenkung.
@@ -366,8 +373,8 @@ Jede Aufgabe ist so geschnitten, dass sie in einer Claude-Code-Sitzung erledigt 
 **Ziel:** Die Frage beantworten, ob der Konfigurator zahlungswürdig ist.
 **Vorgehen:** 10–15 Bestandskunden manuell freischalten (`provider = 'manual'`, SAD §4.6), zwei Wochen nutzen lassen, dann fragen.
 **Abnahme:**
-- [ ] Mindestens 10 Personen haben eine eigene Sequenz gebaut
-- [ ] Ergebnis schriftlich festgehalten, inklusive der Absagen
+- [x] Mindestens 10 Personen haben eine eigene Sequenz gebaut — vom Team am 03.11.2026 als abgeschlossen erklärt
+- [x] Ergebnis schriftlich festgehalten, inklusive der Absagen — vom Team am 03.11.2026 als abgeschlossen erklärt
 
 > Kein Puffer. Fällt das Ergebnis negativ aus, ist es billiger, jetzt umzudenken als nach Block 6.
 
@@ -425,6 +432,11 @@ Dashboard erst ab Pro änderbar, der freie Plan zeigt sie nur an.
 **Vorgehen:** Supabase → Projekt → Authentication → Emails → Templates. Betreff und
 HTML je Vorlage ersetzen, **in beiden Projekten** (Staging und Live). Zuordnung und
 Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
+> **Verschoben bis Supabase Pro (Entscheidung 03.11.2026):** Pro wird gebucht,
+> sobald der erste zahlende Kunde außerhalb der Familie da ist. Seit 31.10.2026
+> laufen die Kontomails über den eigenen SMTP von Hostinger; ob das Dashboard
+> damit die Vorlagen schon im Free-Tarif annimmt, ist einen Blick wert.
+
 **Abnahme:**
 - [ ] „Confirm signup", „Reset Password", „Change Email Address" in Staging ersetzt
 - [ ] Dieselben drei in Live ersetzt
@@ -473,7 +485,7 @@ Betreffzeilen stehen in `supabase/templates/_HINWEIS.md`.
       also nichts anzufordern und nichts zu unterschreiben. Fassungen,
       Drittlandgrundlage und was daraus noch folgt: Abschnitt 4 des
       Verzeichnisses.
-- [ ] Checkliste aus `docs/DEPLOYMENT.md` Abschnitt 5 abgehakt
+- [x] Checkliste aus `docs/DEPLOYMENT.md` Abschnitt 5 abgehakt — bis auf Pro und deutsche Vorlagen, beide bewusst an den ersten zahlenden Kunden außerhalb der Familie geknüpft (03.11.2026)
 
 ### T19a · Zustimmung zu AGB und Rücktrittsrecht im Bezahlvorgang 🔒 ⏱3
 **Ziel:** Die AGB werden Vertragsbestandteil, und das Rücktrittsrecht ist sauber

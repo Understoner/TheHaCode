@@ -87,12 +87,6 @@
       "reason": "Wie GHSA-5p2g-fcmc-qvqq: nur im Build, nur eigene Assets."
     },
     {
-      "id": "GHSA-86w9-cpqp-85rv",
-      "package": "node-forge",
-      "until": "2027-01-31",
-      "reason": "Nur im Expo CLI (Code-Signing fuer native Updates, das die Web-App nicht nutzt). Noch kein Fix verfuegbar."
-    },
-    {
       "id": "GHSA-mrhx-c7xc-m3w5",
       "package": "zod",
       "until": "2027-01-31",
