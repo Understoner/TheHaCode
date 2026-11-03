@@ -397,6 +397,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     color: colors.ink900,
+    // Mittig, auch wenn eine Beschriftung umbricht.
+    textAlign: 'center',
   },
   kindTextActive: {
     color: colors.surface,
