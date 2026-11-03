@@ -81,11 +81,7 @@ export function FeaturedOnDemandCard({ course, hasPlus }: { course: OnDemandCour
           <Text {...displayFont} style={styles.featuredTitle}>
             {course.title}
           </Text>
-          {course.summary_md ? (
-            <Text style={styles.oneLiner} numberOfLines={2}>
-              {course.summary_md}
-            </Text>
-          ) : null}
+          {/* Ohne Beschreibung: gleich hoch wie der Live-Termin daneben. */}
           <Text style={styles.meta}>{metaLine(course, t, hasPlus)}</Text>
           <View style={styles.foot}>
             <Text style={styles.pill}>{cta(course, t)}</Text>
@@ -138,6 +134,7 @@ export function OnDemandRow({ course, hasPlus }: { course: OnDemandCourse; hasPl
 const styles = StyleSheet.create({
   cardLink: { display: 'flex', flexDirection: 'column', textDecorationLine: 'none' },
   featured: {
+    flexGrow: 1,
     flexDirection: 'row',
     gap: 14,
     padding: 14,
@@ -159,7 +156,7 @@ const styles = StyleSheet.create({
   featuredTitle: { fontSize: 20, lineHeight: 24, color: colors.ink900 },
   oneLiner: { fontSize: 13, lineHeight: 18, color: colors.ink700 },
   meta: { fontSize: 12, lineHeight: 17, color: colors.ink700 },
-  foot: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 6 },
+  foot: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 'auto', paddingTop: 6 },
   pill: {
     minHeight: 36,
     paddingHorizontal: 14,

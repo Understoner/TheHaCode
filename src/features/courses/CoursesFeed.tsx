@@ -117,6 +117,9 @@ export function CoursesFeed() {
           // "Alle" und "Online"; bei "On Demand" steht er oben allein.
           const showFeatured = featured !== null && (onlyOnDemand || ((kind === null || kind === 'online') && !activeMonth));
           const onDemandRest = onDemandList.filter((c) => !showFeatured || c.id !== featured?.id);
+          // "Atmung nach Mass" steht bei "Alle Termine" in der ersten Zeile,
+          // nicht mehr unter den On-Demand-Kursen; bei "Fuer dich" als Liste.
+          const forYouInRow = kind === null && !onlyOnDemand ? forYou : [];
           const [next, ...rest] = list;
           const seatsLeft = (c: Course) => seats.data?.get(c.id) ?? null;
 
@@ -150,10 +153,13 @@ export function CoursesFeed() {
                 </ScrollView>
               ) : null}
 
-              {next || showFeatured ? (
-                <View {...responsive('m-split')} style={styles.nextPair}>
+              {next || showFeatured || forYouInRow.length > 0 ? (
+                <View {...responsive('m-row3')} style={styles.nextPair}>
                   {next ? <NextCard course={next} seatsLeft={seatsLeft(next)} /> : null}
                   {showFeatured && featured ? <FeaturedOnDemandCard course={featured} hasPlus={hasPlus} /> : null}
+                  {forYouInRow.map((c) => (
+                    <ForYouCard key={c.id} course={c} inRow />
+                  ))}
                 </View>
               ) : null}
 
@@ -194,7 +200,7 @@ export function CoursesFeed() {
                 </>
               ) : null}
 
-              {(kind === null || kind === 'mass') && !onlyOnDemand && forYou.length > 0 ? (
+              {kind === 'mass' && forYou.length > 0 ? (
                 <View style={styles.rows}>
                   {kind === 'mass' ? (
                     <Text role="heading" aria-level={2} {...displayFont} style={[styles.listTitle, styles.inset]}>
@@ -333,12 +339,12 @@ function CourseRow({ course, seatsLeft }: { course: Course; seatsLeft: number | 
   );
 }
 
-function ForYouCard({ course }: { course: Course }) {
+function ForYouCard({ course, inRow = false }: { course: Course; inRow?: boolean }) {
   const { t } = useTranslation();
   const palette = useThemePalette();
   return (
     <Link href={detailHref(course.slug)} style={styles.cardLinkFlat}>
-      <View style={styles.forYou}>
+      <View style={[styles.forYou, inRow && styles.forYouInRow]}>
         <View style={styles.forYouIcon}>
           <Glyph d={KIND_ICON.mass} color={palette.blossom} size={20} />
         </View>
@@ -440,6 +446,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'none',
   },
   next: {
+    flexGrow: 1,
     flexDirection: 'row',
     gap: 14,
     padding: 14,
@@ -507,7 +514,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
-    marginTop: 6,
+    marginTop: 'auto',
+    paddingTop: 6,
   },
   seats: {
     flexDirection: 'row',
@@ -637,6 +645,7 @@ const styles = StyleSheet.create({
     borderColor: colors.lineStrong,
     color: colors.ink700,
   },
+  // Eigene Rahmenfarbe statt gestrichelt (Wunsch des Teams 03.11.2026).
   forYou: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -645,8 +654,15 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 22,
     borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.lineStrong,
+    borderColor: colors.blossom,
+    backgroundColor: colors.surface,
+  },
+  // In der ersten Zeile: wie die Karten daneben, gleich hoch.
+  forYouInRow: {
+    flexGrow: 1,
+    marginTop: 0,
+    borderRadius: 26,
+    alignItems: 'flex-start',
   },
   forYouIcon: {
     width: 40,
