@@ -6,8 +6,8 @@
 -- sich Zugang, Kauf, Fortschritt und Zertifikat im Testsystem durchspielen
 -- lassen. Alle Titel beginnen mit "Demo:".
 --
--- Voraussetzung: Migration 0042 ist auf Staging ausgerollt (passiert mit dem
--- Merge nach develop).
+-- Voraussetzung: Migrationen 0042 bis 0047 sind auf Staging ausgerollt
+-- (passiert mit dem Merge nach develop).
 --
 -- Ausfuehren: Supabase Studio -> Projekt Staging -> SQL Editor -> diese Datei
 -- einfuegen -> Run. Laeuft mehrfach ohne Schaden (ersetzt die Demo-Kurse).
@@ -43,9 +43,11 @@ begin
 end;
 $$;
 
--- Vorherige Demo-Fassung entfernen (Kaeufe von Demo-Kursen zuerst, wegen
--- on delete restrict).
+-- Vorherige Demo-Fassung entfernen (Kaeufe und Zertifikate von Demo-Kursen
+-- zuerst, wegen on delete restrict).
 delete from public.course_access
+ where course_id in (select id from public.online_courses where slug like 'demo-%');
+delete from public.certificates
  where course_id in (select id from public.online_courses where slug like 'demo-%');
 delete from public.online_courses where slug like 'demo-%';
 
@@ -171,6 +173,14 @@ select neu.id, o.sort_order, o.label, o.is_correct
   from neu join fragen f on f.n = neu.sort_order
  cross join lateral (values (2, f.richtig, true), (1, f.falsch1, false), (3, f.falsch2, false))
        as o(sort_order, label, is_correct);
+
+-- Stufe und Hervorhebung (0047): der Basiskurs steht auf /kurse neben dem
+-- naechsten Live-Termin.
+update public.online_courses set is_featured = false where is_featured;
+update public.online_courses set level = 'einsteiger', is_featured = true where slug = 'demo-atmung-verstehen';
+update public.online_courses set level = 'einsteiger' where slug = 'demo-atempausen';
+update public.online_courses set level = 'fortgeschritten' where slug = 'demo-besser-einschlafen';
+update public.online_courses set level = 'experten' where slug = 'demo-ruhig-atmen';
 
 commit;
 

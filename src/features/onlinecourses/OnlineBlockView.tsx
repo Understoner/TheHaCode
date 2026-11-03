@@ -18,8 +18,7 @@ import { KindIcon } from './KindIcon';
 import { LaterPicker } from './LaterPicker';
 import { QuizBlock } from './QuizBlock';
 import { orderBlocks } from './courseLogic';
-import { courseHref } from './OnlineCourseCatalog';
-import { blockHref } from './OnlineCourseView';
+import { blockHref, courseHref } from './OnlineCourseView';
 import {
   useBlockContent,
   useCanOpenCourse,

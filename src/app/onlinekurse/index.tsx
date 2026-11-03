@@ -1,11 +1,8 @@
-import { OnlineCourseCatalog } from '@/features/onlinecourses/OnlineCourseCatalog';
-import { OnlineCoursesGate } from '@/features/onlinecourses/OnlineCoursesGate';
+import { Redirect } from 'expo-router';
 
-// Onlinekurse on demand (V1.2, SAD §11.2).
+// Die Onlinekurse stehen seit 03.11.2026 auf der Kurse-Seite (Filter
+// "On Demand"), nicht mehr auf einer eigenen Seite. Die alte Adresse fuehrt
+// dorthin.
 export default function OnlinekurseScreen() {
-  return (
-    <OnlineCoursesGate>
-      <OnlineCourseCatalog />
-    </OnlineCoursesGate>
-  );
+  return <Redirect href="/kurse?art=ondemand" />;
 }

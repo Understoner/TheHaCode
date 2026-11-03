@@ -38,6 +38,8 @@ export const blockHref = (slug: string, block: string) => ({
   params: { slug, block },
 });
 
+export const courseHref = (slug: string) => ({ pathname: '/onlinekurse/[slug]' as const, params: { slug } });
+
 export const planHref = (slug: string) => ({ pathname: '/onlinekurse/[slug]/planen' as const, params: { slug } });
 
 export function OnlineCourseView({ data }: { data: CourseWithBlocks }) {
@@ -59,7 +61,7 @@ export function OnlineCourseView({ data }: { data: CourseWithBlocks }) {
   return (
     <ScrollView contentContainerStyle={styles.scroll}>
       <PageColumn gap={spacing.lg}>
-        <Link href="/onlinekurse" style={styles.back}>
+        <Link href="/kurse?art=ondemand" style={styles.back}>
           {t('onlineCourses.back')}
         </Link>
 
