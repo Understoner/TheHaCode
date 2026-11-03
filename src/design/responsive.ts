@@ -66,6 +66,10 @@ export type ResponsiveTarget =
   | 'm-grid'
   // Zwei Bloecke, mobil untereinander, am Desktop gleich breit nebeneinander.
   | 'm-split'
+  // Die erste Zeile der Kurse-Seite (03.11.2026): naechster Live-Termin,
+  // hervorgehobener On-Demand-Kurs, Atmung nach Mass - am Desktop
+  // nebeneinander und gleich hoch, mobil untereinander.
+  | 'm-row3'
   // Die Titelkarte der News: am Desktop Bild links, Text rechts.
   | 'm-feature'
   // Listen mit Bedienelementen (Habit-Auswahl, Habit-Bereiche, 03.11.2026):
@@ -139,6 +143,8 @@ ${gridRules}
   [data-thc="m-grid"] > * { flex: 0 0 calc(50% - 6px) !important; min-width: 0 !important; }
   [data-thc="m-split"] { flex-direction: row !important; align-items: flex-start !important; }
   [data-thc="m-split"] > * { flex: 1 1 0 !important; min-width: 0 !important; }
+  [data-thc="m-row3"] { flex-direction: row !important; align-items: stretch !important; }
+  [data-thc="m-row3"] > * { flex: 1 1 0 !important; min-width: 0 !important; }
   [data-thc="m-feature"] { flex-direction: row !important; align-items: center !important; }
   [data-thc="m-feature"] > * { flex: 1 1 0 !important; min-width: 0 !important; }
   [data-thc="m-grid2"] { flex-direction: row !important; flex-wrap: wrap !important; align-items: flex-start !important; column-gap: 12px !important; }
