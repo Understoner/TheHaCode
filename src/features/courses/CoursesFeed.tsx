@@ -21,6 +21,7 @@ import {
 } from '@/features/courses/courseFacts';
 import { useCourseSeats } from '@/features/courses/useCourseBooking';
 import { useCoursesList, type Course } from '@/features/courses/useCoursesList';
+import { OnlineCoursesTeaser } from '@/features/onlinecourses/OnlineCoursesTeaser';
 
 // Die Kurse im Vorschlag "Mondlicht Mobile" (02.11.2026, nur Testsystem):
 // Einstieg ueber "Wie willst du ueben?" (Online, Vor Ort, Fuer dich), Monate
@@ -48,6 +49,8 @@ export function CoursesFeed() {
       <Text role="heading" aria-level={1} {...displayFont} style={styles.title}>
         {t('kurse.m.title')}
       </Text>
+
+      <OnlineCoursesTeaser />
 
       <View role="radiogroup" aria-label={t('kurse.m.kindLabel')} style={styles.kinds}>
         {COURSE_KINDS.map((k) => {

@@ -48,7 +48,15 @@ describe('contentSecurityPolicy', () => {
   it('laesst Audio als data-Adresse bewusst NICHT zu', () => {
     const csp = contentSecurityPolicy('https://abc.supabase.co');
 
-    expect(direktive(csp, 'media-src')).toEqual(["'self'"]);
+    expect(direktive(csp, 'media-src')).toEqual(["'self'", 'https://abc.supabase.co']);
+    expect(direktive(csp, 'media-src')).not.toContain('data:');
+  });
+
+  // V1.2: Kursvideos nur aus dem Vimeo-Player, nichts sonst einbettbar.
+  it('erlaubt als Rahmen nur den Vimeo-Player', () => {
+    expect(direktive(contentSecurityPolicy('https://abc.supabase.co'), 'frame-src')).toEqual([
+      'https://player.vimeo.com',
+    ]);
   });
 
   it('bleibt ohne gueltige Adresse bei der eigenen Domain', () => {
