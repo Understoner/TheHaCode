@@ -13,6 +13,7 @@ import { usePlusAccess } from '@/features/configurator/useSequences';
 import { Markdown } from '@/features/news/Markdown';
 import { openExternalUrl } from '@/lib/externalLink';
 import { AccessBadge } from './AccessBadge';
+import { CertificatePanel } from './CertificatePanel';
 import { KindIcon } from './KindIcon';
 import { activeUntil, courseProgress, formatEuro, groupByWeek, plusPriceCents, totalMinutes } from './courseLogic';
 import {
@@ -170,6 +171,9 @@ function SidePanel({ data, open, openPending, loggedIn, contentDone, contentTota
   const plus = usePlusAccess();
   const access = useCourseAccess(course.access === 'paid' ? course.id : undefined);
   const checkout = useOnlineCourseCheckout();
+  const { session } = useAuth();
+  const meta = session?.user.user_metadata as { full_name?: string; display_name?: string } | undefined;
+  const displayName = meta?.full_name ?? meta?.display_name ?? '';
   const first = next ?? blocks[0]?.id ?? null;
 
   if (openPending) return <View style={styles.panel} />;
@@ -208,6 +212,13 @@ function SidePanel({ data, open, openPending, loggedIn, contentDone, contentTota
             </PressableRing>
           </Link>
         ) : null}
+        <CertificatePanel
+          courseId={course.id}
+          contentDone={contentDone}
+          contentTotal={contentTotal}
+          quizPassed={quizPassed}
+          defaultName={displayName}
+        />
         <Text style={styles.panelHint}>{t('onlineCourses.panel.certificateRule')}</Text>
       </View>
     );

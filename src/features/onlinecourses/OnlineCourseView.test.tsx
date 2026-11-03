@@ -20,6 +20,7 @@ const state = vi.hoisted(() => ({
 vi.mock('@/lib/supabase', () => ({ supabase: {} }));
 // react-native-svg laeuft in jsdom nicht (wie MoonMark im NavBar-Test).
 vi.mock('./KindIcon', () => ({ KindIcon: () => null }));
+vi.mock('./CertificatePanel', () => ({ CertificatePanel: () => null }));
 vi.mock('@/features/auth/AuthProvider', () => ({
   useAuth: () => ({ session: state.session, loading: false }),
 }));
