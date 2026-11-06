@@ -72,6 +72,7 @@ function habit(tracking: 'done' | 'number', overrides: Partial<MyHabit['habit_te
       penalty_from: null,
       penalty_points: null,
       is_health_measure: false,
+      partial_points: null,
       icon: null,
       sort_order: 0,
       is_published: true,

@@ -8,6 +8,7 @@ import { QueryBoundary } from '@/components/QueryBoundary';
 import { VolumeSlider } from '@/components/VolumeSlider';
 import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
 import { BreathCircle } from '@/features/breathing/BreathCircle';
+import { createClipPlayer, outroOffsetSeconds, type ClipPlayer } from '@/features/breathing/clips';
 import { createMusicPlayer, TRACKS, type TrackId } from '@/features/breathing/music';
 import { createSessionKeepAlive, type SessionKeepAlive } from '@/features/breathing/audioSession';
 import { createAudioContext, createToneBus, type ToneBus } from '@/features/breathing/tones';
@@ -25,7 +26,7 @@ import { PlaylistLinks } from '@/features/sessions/PlaylistLinks';
 import { sessionKind } from '@/features/sessions/moods';
 import { SessionIntro } from '@/features/sessions/SessionIntro';
 import { useSessionProtocol } from '@/features/habits/useSessionProtocol';
-import { useSession } from '@/features/sessions/useSessions';
+import { sessionAudioUrl, useSession } from '@/features/sessions/useSessions';
 import type { PlayableExercise } from '@/types/breathing';
 import { PressableRing } from '@/components/PressableRing';
 import { useSoundPreference } from '@/features/settings/useSoundPreference';
@@ -75,7 +76,11 @@ function Player({ session }: { session: PlayableExercise }) {
 
   // Ohne das schlaeft der Bildschirm mitten in der Uebung ein - zehn Minuten
   // ohne Beruehrung sind fuer das Betriebssystem Leerlauf (Backlog T09).
-  useWakeLock(clock.isRunning);
+  // Der Einstieg laeuft vor der Uhr (clips.ts). Fuer Bildschirm, Musik und
+  // Wachhaltung zaehlt er wie die laufende Session.
+  const [introPlaying, setIntroPlaying] = useState(false);
+  const running = clock.isRunning || introPlaying;
+  useWakeLock(running);
   const [segIndex, setSegIndex] = useState(-1);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -105,6 +110,15 @@ function Player({ session }: { session: PlayableExercise }) {
   const audioRef = useRef<AudioContext | null>(null);
   const busRef = useRef<ToneBus | null>(null);
   const voiceRef = useRef<VoicePlayer | null>(null);
+  const clipsRef = useRef<ClipPlayer | null>(null);
+  const introUrl = useMemo(() => sessionAudioUrl(session.intro_audio_path), [session.intro_audio_path]);
+  const outroUrl = useMemo(() => sessionAudioUrl(session.outro_audio_path), [session.outro_audio_path]);
+  // Jeder Einstieg bekommt eine Nummer: Ueberspringen oder Verlassen macht
+  // einen noch ladenden Einstieg ungueltig.
+  const introRunRef = useRef(0);
+  const outroDoneRef = useRef(false);
+  // Wer Ton und Stimme aus hat, will eine stille Session, auch ohne Aufnahmen.
+  const clipsAllowedRef = useRef(true);
   const lastCuedRef = useRef(-1);
   const endCuedRef = useRef(false);
   const musicRef = useRef<ReturnType<typeof createMusicPlayer> | null>(null);
@@ -134,6 +148,18 @@ function Player({ session }: { session: PlayableExercise }) {
       setSegIndex((prev) => (prev === idx ? prev : idx));
       setElapsedMs((prev) => (Math.floor(prev / 250) === Math.floor(now / 250) ? prev : now));
 
+      // Der Ausklang endet mit der letzten Atemphase, auch nach "Anhalten".
+      const clips = clipsRef.current;
+      if (outroUrl && clips && clipsAllowedRef.current && !outroDoneRef.current && !clips.isPlaying()) {
+        const clipMs = clips.durationMs(outroUrl);
+        const offset = clipMs === null ? null : outroOffsetSeconds(now, totalMs, clipMs);
+        if (offset !== null) {
+          clips.play(outroUrl, offset, () => {
+            outroDoneRef.current = true;
+          });
+        }
+      }
+
       if (idx === -1 && now >= totalMs) {
         clock.pause();
         setFinished(true);
@@ -144,7 +170,18 @@ function Player({ session }: { session: PlayableExercise }) {
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [clock, timeline, totalMs]);
+  }, [clock, timeline, totalMs, outroUrl]);
+
+  useEffect(() => {
+    clipsAllowedRef.current = soundOn || voiceOn;
+    if (!soundOn && !voiceOn) clipsRef.current?.stop();
+  }, [soundOn, voiceOn]);
+
+  // Angehalten verstummt der Ausklang; die Anzeigeschleife holt ihn beim
+  // Fortsetzen an der richtigen Stelle zurueck.
+  useEffect(() => {
+    if (!running) clipsRef.current?.stop();
+  }, [running]);
 
   // Ton und Ansage am Phasenbeginn, genau einmal je Segment. Beide haengen an
   // derselben Sperre (lastCuedRef), aber an getrennten Schaltern - wer nur die
@@ -157,7 +194,9 @@ function Player({ session }: { session: PlayableExercise }) {
     if (segment.kind === 'rest') return;
 
     if (soundOn) busRef.current?.strike(segment.kind, segment.durationMs);
-    if (voiceOn) voiceRef.current?.speak(segment.kind);
+    // Waehrend der Ausklang spricht, schweigt die Phasenansage - zwei Stimmen
+    // zugleich versteht niemand. Der Ton bleibt.
+    if (voiceOn && !clipsRef.current?.isPlaying()) voiceRef.current?.speak(segment.kind);
   }, [segIndex, segment, soundOn, voiceOn]);
 
   // Das Ende hoerbar machen. Nach dem letzten Phasenwechsel wurde es bisher
@@ -197,6 +236,7 @@ function Player({ session }: { session: PlayableExercise }) {
 
   useEffect(() => {
     voiceRef.current?.setVolume(voiceVolume);
+    clipsRef.current?.setVolume(voiceVolume);
   }, [voiceVolume]);
 
   // Die Aufnahmen werden beim EINSCHALTEN geholt, nicht beim ersten Wechsel -
@@ -213,9 +253,9 @@ function Player({ session }: { session: PlayableExercise }) {
     if (!keepAliveRef.current) keepAliveRef.current = createSessionKeepAlive();
     const keepAlive = keepAliveRef.current;
 
-    if (!musicTrack && (clock.isRunning || endAudible)) keepAlive.start(audioRef.current);
+    if (!musicTrack && (running || endAudible)) keepAlive.start(audioRef.current);
     else keepAlive.stop();
-  }, [musicTrack, clock.isRunning, endAudible]);
+  }, [musicTrack, running, endAudible]);
 
   // Musik folgt zwei Dingen: der Auswahl und dem Laufzustand. Pausiert die
   // Uebung, pausiert auch die Musik - sonst laeuft sie weiter, waehrend
@@ -233,9 +273,9 @@ function Player({ session }: { session: PlayableExercise }) {
     music.setVolume(musicVolume);
     // Die Musik traegt den Abschluss noch mit - auf dem iPhone haelt sie dabei
     // die Audiositzung offen, sonst bliebe er dort bei Lautlos stumm.
-    if (clock.isRunning || endAudible) music.play(musicTrack);
+    if (running || endAudible) music.play(musicTrack);
     else music.pause();
-  }, [musicTrack, clock.isRunning, musicVolume, endAudible]);
+  }, [musicTrack, running, musicVolume, endAudible]);
 
   // Beim Ausbauen verstummt die Musik - ein Stueck, das nach dem Zurueckgehen
   // weiterlaeuft, waere das Aergerlichste an der Funktion. Und erst hier wird
@@ -249,6 +289,7 @@ function Player({ session }: { session: PlayableExercise }) {
       audioRef.current = null;
       busRef.current = null;
       voiceRef.current = null;
+      clipsRef.current = null;
       void audio?.close?.().catch(() => undefined);
     },
     [],
@@ -291,12 +332,23 @@ function Player({ session }: { session: PlayableExercise }) {
         // wird beim Ausbauen der Komponente, eine Ebene weiter oben.
         busRef.current?.silence();
         voiceRef.current?.silence();
+        introRunRef.current += 1;
+        setIntroPlaying(false);
+        clipsRef.current?.stop();
         keepAliveRef.current?.stop();
         void audioRef.current?.suspend?.().catch(() => undefined);
       },
       [pauseClock]
     )
   );
+
+  const beginBreathing = useCallback(() => {
+    setIntroPlaying(false);
+    // Beim Fortsetzen nach "Anhalten" ist der Durchgang noch offen - dann
+    // tut begin() nichts.
+    protokollBeginn();
+    clock.start();
+  }, [clock, protokollBeginn]);
 
   const start = useCallback(() => {
     // Der AudioContext darf erst auf eine Nutzergeste entstehen - ein Aufruf
@@ -305,21 +357,45 @@ function Player({ session }: { session: PlayableExercise }) {
     const ctx = audioRef.current;
     if (ctx && !busRef.current) busRef.current = createToneBus(ctx, toneVolume);
     if (ctx && !voiceRef.current) voiceRef.current = createVoicePlayer(ctx, voiceVolume);
+    if (ctx && !clipsRef.current) clipsRef.current = createClipPlayer(ctx, voiceVolume);
     if (voiceOn) voiceRef.current?.preload();
     void ctx?.resume?.();
     setFinished(false);
     setEndAudioDone(false);
-    // Beim Fortsetzen nach "Anhalten" ist der Durchgang noch offen - dann
-    // tut begin() nichts.
-    protokollBeginn();
-    clock.start();
-  }, [clock, toneVolume, voiceVolume, voiceOn, protokollBeginn]);
+
+    const clips = clipsRef.current;
+    const withClips = soundOn || voiceOn;
+    if (clips && withClips && outroUrl) void clips.load(outroUrl);
+
+    // Nur vor dem allerersten Atemzug, nicht beim Fortsetzen.
+    if (clips && withClips && introUrl && clock.elapsed() === 0) {
+      introRunRef.current += 1;
+      const run = introRunRef.current;
+      setIntroPlaying(true);
+      void clips.load(introUrl).then((loaded) => {
+        if (run !== introRunRef.current) return;
+        if (!loaded || !clips.play(introUrl, 0, () => run === introRunRef.current && beginBreathing())) {
+          beginBreathing();
+        }
+      });
+      return;
+    }
+    beginBreathing();
+  }, [toneVolume, voiceVolume, voiceOn, soundOn, introUrl, outroUrl, clock, beginBreathing]);
+
+  const skipIntro = useCallback(() => {
+    introRunRef.current += 1;
+    clipsRef.current?.stop();
+    beginBreathing();
+  }, [beginBreathing]);
 
   const restart = useCallback(() => {
     protokollVerwerfen();
     clock.reset();
     lastCuedRef.current = -1;
     endCuedRef.current = false;
+    outroDoneRef.current = false;
+    clipsRef.current?.stop();
     setSegIndex(-1);
     setElapsedMs(0);
     setFinished(false);
@@ -415,7 +491,7 @@ function Player({ session }: { session: PlayableExercise }) {
   // Testsystem (02.11.2026): vor dem ersten Start die Seite des Vorschlags
   // "Mondlicht Mobile"; ab "Starten" der Player wie bisher. Audio- und
   // Video-Sessions bleiben auf dieser Seite - abspielen laesst sich noch nichts.
-  const notStarted = !clock.isRunning && elapsedMs === 0 && !finished;
+  const notStarted = !clock.isRunning && !introPlaying && elapsedMs === 0 && !finished;
   if (DESIGN_PREVIEW && (notStarted || sessionKind(session) !== 'box')) {
     return (
       <SessionIntro
@@ -492,6 +568,11 @@ function Player({ session }: { session: PlayableExercise }) {
               <Text style={styles.cue}>{t('player.done.diary')}</Text>
             ) : null}
           </>
+        ) : introPlaying ? (
+          <>
+            <Text style={styles.phase}>{t('player.intro.title')}</Text>
+            <Text style={styles.cue}>{t('player.intro.hint')}</Text>
+          </>
         ) : segment?.kind === 'rest' ? (
           <>
             <Text style={styles.cue}>{t('player.restCue')}</Text>
@@ -534,6 +615,10 @@ function Player({ session }: { session: PlayableExercise }) {
           <PressableRing onPress={restart} style={styles.primary}>
             <Text style={styles.primaryText}>{t('player.restart')}</Text>
           </PressableRing>
+        ) : introPlaying ? (
+          <PressableRing onPress={skipIntro} role="button" style={styles.primary}>
+            <Text style={styles.primaryText}>{t('player.intro.skip')}</Text>
+          </PressableRing>
         ) : clock.isRunning ? (
           <PressableRing onPress={clock.pause} style={styles.secondary}>
             <Text style={styles.secondaryText}>{t('player.pause')}</Text>
@@ -551,7 +636,7 @@ function Player({ session }: { session: PlayableExercise }) {
             Hauptknopf. clock.isRunning mit abgefragt, weil elapsedMs erst
             nach einer Viertelsekunde nachzieht: sonst sprang der Knopf
             verspaetet in die Reihe. */}
-        {!finished && (clock.isRunning || elapsedMs > 0) ? (
+        {!finished && !introPlaying && (clock.isRunning || elapsedMs > 0) ? (
           <PressableRing onPress={restart} role="button" style={styles.secondary}>
             <Text style={styles.secondaryText}>{t('player.restart')}</Text>
           </PressableRing>

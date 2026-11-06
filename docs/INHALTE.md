@@ -688,3 +688,20 @@ insert into public.subscriptions (user_id, provider, plan, status, current_perio
 values ('<user-uuid>', 'manual', 'yearly', 'active', now() + interval '10 years');
 commit;
 ```
+
+---
+
+## Einstieg und Ausklang einer Session (seit 0048)
+
+Je Session gibt es zwei optionale Aufnahmen. Der **Einstieg** läuft vor der
+ersten Atemphase und lässt sich überspringen. Der **Ausklang** setzt so ein, dass
+er mit der letzten Atemphase endet. Die Dauer der Session ändert sich dadurch nicht.
+
+1. Datei in Supabase Studio → Storage → Bucket `session-audio` hochladen, zum
+   Beispiel `einstieg/ankommen.mp3` oder `ausklang/ruhe.mp3` (MP3, M4A oder WAV,
+   bis 25 MB, im Dateinamen nur Buchstaben, Ziffern, `.`, `_`, `-`).
+2. In `exercises` den Pfad eintragen: `intro_audio_path` bzw. `outro_audio_path`.
+   Dieselbe Datei darf an beliebig vielen Sessions hängen.
+
+Mit ausgeschaltetem Ton **und** ausgeschalteter Stimme bleiben beide still. Die
+Lautstärke hängt am Regler „Stimme“.

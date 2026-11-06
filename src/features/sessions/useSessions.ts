@@ -10,6 +10,11 @@ import type { PlayableExercise } from '@/types/breathing';
 // (007_exercises.test.sql prueft die Datenbankseite).
 const TREE = '*, exercise_steps(*, exercise_phases(*))';
 
+/** Oeffentliche Adresse einer Aufnahme aus dem Bucket session-audio (0048). */
+export function sessionAudioUrl(path: string | null | undefined): string | null {
+  return path ? supabase.storage.from('session-audio').getPublicUrl(path).data.publicUrl : null;
+}
+
 export function useSessionsList(effect?: ExerciseEffect) {
   return useQuery({
     queryKey: ['exercises', effect ?? 'all'],

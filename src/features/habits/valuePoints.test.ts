@@ -101,3 +101,36 @@ describe('meetsGoal - fuer Challenges', () => {
     expect(meetsGoal({ ...schlaf, tracking_type: 'done' }, 1)).toBe(true);
   });
 });
+
+describe('drei Stufen (0048)', () => {
+  const schlaf = {
+    tracking_type: 'number',
+    points: 8,
+    is_negative: false,
+    higher_is_better: true,
+    points_from: 7,
+    penalty_from: 6,
+    penalty_points: 8,
+    partial_points: 4,
+  };
+
+  it('rechnet Abzug, kleine und volle Punkte', () => {
+    expect(pointsForEntry(schlaf, 5.5)).toEqual({ points: 8, isNegative: true });
+    expect(pointsForEntry(schlaf, 6)).toEqual({ points: 4, isNegative: false });
+    expect(pointsForEntry(schlaf, 6.5)).toEqual({ points: 4, isNegative: false });
+    expect(pointsForEntry(schlaf, 7)).toEqual({ points: 8, isNegative: false });
+  });
+
+  it('bleibt ohne kleine Punkte neutral', () => {
+    const schritte = { ...schlaf, points: 6, points_from: 5000, penalty_from: 3000, penalty_points: 4, partial_points: null };
+    expect(pointsForEntry(schritte, 2999)).toEqual({ points: 4, isNegative: true });
+    expect(pointsForEntry(schritte, 3000)).toEqual({ points: 0, isNegative: false });
+    expect(pointsForEntry(schritte, 5000)).toEqual({ points: 6, isNegative: false });
+    expect(meetsGoal(schritte, 4000)).toBe(false);
+  });
+
+  it('zaehlt kleine Punkte in einer Challenge als erfuellt', () => {
+    expect(meetsGoal(schlaf, 6.5)).toBe(true);
+    expect(meetsGoal(schlaf, 5)).toBe(false);
+  });
+});

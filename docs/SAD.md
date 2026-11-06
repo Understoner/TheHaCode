@@ -1276,9 +1276,12 @@ für Plus — Vorschau-Nutzer sehen so, dass ihr Tageslimit nicht voll wird.
   Beispiel Schlafdauer: ab 7 Stunden `+points` (`points_from`), unter 6
   Stunden `−penalty_points` (`penalty_from`), dazwischen 0; bei
   `higher_is_better = false` drehen sich die Vergleiche um. Beide Grenzen sind
-  freiwillig. Erlaubt nur an Zahlen-Habits ohne eigenes Vorzeichen und **nie**
-  an Gesundheits-Messwerten (`is_health_measure`: BOLT-Wert, Schlafwert der
-  Uhr) – dort sperrt die Datenbank sie (§5.7). Eigene Habits dürfen Grenzen
+  freiwillig. Seit 0048 kann die Redaktion dem Bereich dazwischen kleine Punkte
+  geben (`partial_points`, Schlafdauer: +8 / +4 / −8). Erlaubt nur an
+  Zahlen-Habits ohne eigenes Vorzeichen und **nie** an Gesundheits-Messwerten
+  (`is_health_measure`: BOLT-Wert, CO2 Walk) – dort sperrt die Datenbank sie
+  (§5.7). Der Schlafwert der Uhr ist seit 0048 auf Entscheidung des Users
+  (06.11.2026) davon ausgenommen. Eigene Habits dürfen Grenzen
   setzen, Minuspunkte 0 bis 10. Gerechnet in
   `src/features/habits/valuePoints.ts`. Mehr als ein Eintrag je Habit und Tag
   ist durch den Unique-Index ausgeschlossen.
@@ -1666,7 +1669,10 @@ Die App darf keine Diagnose stellen, keine Therapie empfehlen und keine Krankhei
 * Wertgrenzen im Habit Score (0035, Entscheidung 01.11.2026) nur für
   Lebensstil-Werte (Schlafdauer, Schritte, Bildschirmzeit) und eigene Habits,
   deren Grenzen sich die Person selbst setzt. **Nie** für Messwerte mit
-  Gesundheitsbezug (`is_health_measure`: BOLT-Wert, Schlafwert der Uhr). Die
+  Gesundheitsbezug (`is_health_measure`: BOLT-Wert, CO2 Walk). Der Schlafwert
+  der Uhr hat seit 0048 Wertgrenzen (Entscheidung des Users vom 06.11.2026,
+  bewusste Abweichung von der früheren Regel; die Einordnung nach MDR ist
+  damit neu zu prüfen). Die
   App nennt dabei nur Punkte, keine Bewertung wie „zu wenig“.
 * `contraindications_md` ist Pflichtfeld für alle Retention- und High-Frequency-Übungen (Schwangerschaft, Epilepsie, Herz-Kreislauf-Erkrankungen, Nutzung im Wasser)
 * Einmaliger Disclaimer im Onboarding mit Zeitstempel, gespeichert als `consent_kind = 'terms'`
