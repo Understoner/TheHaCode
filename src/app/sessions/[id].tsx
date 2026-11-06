@@ -12,7 +12,13 @@ import { createClipPlayer, outroOffsetSeconds, type ClipPlayer } from '@/feature
 import { createMusicPlayer, TRACKS, type TrackId } from '@/features/breathing/music';
 import { createSessionKeepAlive, type SessionKeepAlive } from '@/features/breathing/audioSession';
 import { createAudioContext, createToneBus, type ToneBus } from '@/features/breathing/tones';
-import { createVoicePlayer, type VoicePlayer } from '@/features/breathing/voice';
+import {
+  createVoicePlayer,
+  VOICE_IDS,
+  VOICES,
+  voiceRepeatOffsetsMs,
+  type VoicePlayer,
+} from '@/features/breathing/voice';
 import {
   buildTimeline,
   segmentIndexAt,
@@ -27,9 +33,10 @@ import { sessionKind } from '@/features/sessions/moods';
 import { SessionIntro } from '@/features/sessions/SessionIntro';
 import { useSessionProtocol } from '@/features/habits/useSessionProtocol';
 import { sessionAudioUrl, useSession } from '@/features/sessions/useSessions';
-import type { PlayableExercise } from '@/types/breathing';
+import type { PhaseKind, PlayableExercise } from '@/types/breathing';
 import { PressableRing } from '@/components/PressableRing';
 import { useSoundPreference } from '@/features/settings/useSoundPreference';
+import { useVoiceChoice } from '@/features/settings/useVoiceChoice';
 import { useVoicePreference } from '@/features/settings/useVoicePreference';
 import { useWakeLock } from '@/features/breathing/useWakeLock';
 
@@ -92,6 +99,7 @@ function Player({ session }: { session: PlayableExercise }) {
   // Die gesprochene Ansage ebenso, in profiles.voice_enabled (Migration 0016).
   // Vorgabe an seit Migration 0018.
   const { voiceOn, setVoiceOn } = useVoicePreference();
+  const { voiceId, setVoiceId } = useVoiceChoice();
 
   // Alles Einstellbare steht in einem eingeklappten Block. Ausgeklappt schob
   // es die Beschreibung auf dem Telefon unter den ersten Bildschirm - und die
@@ -111,13 +119,31 @@ function Player({ session }: { session: PlayableExercise }) {
   const busRef = useRef<ToneBus | null>(null);
   const voiceRef = useRef<VoicePlayer | null>(null);
   const clipsRef = useRef<ClipPlayer | null>(null);
-  const introUrl = useMemo(() => sessionAudioUrl(session.intro_audio_path), [session.intro_audio_path]);
-  const outroUrl = useMemo(() => sessionAudioUrl(session.outro_audio_path), [session.outro_audio_path]);
+  // Jede Session hat Intro und Outro der gewaehlten Stimme. Eine eigene Aufnahme
+  // der Redaktion (0048) hat Vorrang.
+  const voice = VOICES[voiceId];
+  const introUrl = useMemo(
+    () => sessionAudioUrl(session.intro_audio_path) ?? voice.intro,
+    [session.intro_audio_path, voice],
+  );
+  const outroUrl = useMemo(
+    () => sessionAudioUrl(session.outro_audio_path) ?? voice.outro,
+    [session.outro_audio_path, voice],
+  );
+  // Lange Phasen werden wiederholt angesagt: je Segment ein fester Plan.
+  const repeats = useMemo(
+    () =>
+      timeline.map((seg, index) =>
+        seg.kind === 'rest' || seg.openEnded ? [] : voiceRepeatOffsetsMs(seg.durationMs, index),
+      ),
+    [timeline],
+  );
+  const repeatRef = useRef({ segment: -1, next: 0 });
   // Jeder Einstieg bekommt eine Nummer: Ueberspringen oder Verlassen macht
   // einen noch ladenden Einstieg ungueltig.
   const introRunRef = useRef(0);
   const outroDoneRef = useRef(false);
-  // Wer Ton und Stimme aus hat, will eine stille Session, auch ohne Aufnahmen.
+  // Intro und Outro sind Sprache: Stimme aus heisst, auch sie schweigen.
   const clipsAllowedRef = useRef(true);
   const lastCuedRef = useRef(-1);
   const endCuedRef = useRef(false);
@@ -148,6 +174,25 @@ function Player({ session }: { session: PlayableExercise }) {
       setSegIndex((prev) => (prev === idx ? prev : idx));
       setElapsedMs((prev) => (Math.floor(prev / 250) === Math.floor(now / 250) ? prev : now));
 
+      // Noch einmal ansagen, was gerade dran ist. Ein Termin, der mehr als einen
+      // Moment zurueckliegt (nach "Anhalten"), wird uebersprungen, nicht nachgeholt.
+      if (idx >= 0) {
+        const plan = repeatRef.current;
+        if (plan.segment !== idx) {
+          plan.segment = idx;
+          plan.next = 0;
+        }
+        const offsets = repeats[idx];
+        const inSegment = now - timeline[idx].startMs;
+        while (plan.next < offsets.length && offsets[plan.next] <= inSegment) {
+          const late = inSegment - offsets[plan.next];
+          plan.next += 1;
+          if (late < 400 && clipsAllowedRef.current && !clipsRef.current?.isPlaying()) {
+            voiceRef.current?.speak(timeline[idx].kind as PhaseKind);
+          }
+        }
+      }
+
       // Der Ausklang endet mit der letzten Atemphase, auch nach "Anhalten".
       const clips = clipsRef.current;
       if (outroUrl && clips && clipsAllowedRef.current && !outroDoneRef.current && !clips.isPlaying()) {
@@ -170,12 +215,18 @@ function Player({ session }: { session: PlayableExercise }) {
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [clock, timeline, totalMs, outroUrl]);
+  }, [clock, timeline, totalMs, outroUrl, repeats]);
 
   useEffect(() => {
-    clipsAllowedRef.current = soundOn || voiceOn;
-    if (!soundOn && !voiceOn) clipsRef.current?.stop();
-  }, [soundOn, voiceOn]);
+    clipsAllowedRef.current = voiceOn;
+    if (!voiceOn) clipsRef.current?.stop();
+  }, [voiceOn]);
+
+  // Eine andere Stimme gilt ab der naechsten Ansage.
+  useEffect(() => {
+    voiceRef.current?.setVoice(voice);
+    if (voiceOn) void clipsRef.current?.load(outroUrl);
+  }, [voice, voiceOn, outroUrl]);
 
   // Angehalten verstummt der Ausklang; die Anzeigeschleife holt ihn beim
   // Fortsetzen an der richtigen Stelle zurueck.
@@ -356,7 +407,7 @@ function Player({ session }: { session: PlayableExercise }) {
     if (!audioRef.current) audioRef.current = createAudioContext();
     const ctx = audioRef.current;
     if (ctx && !busRef.current) busRef.current = createToneBus(ctx, toneVolume);
-    if (ctx && !voiceRef.current) voiceRef.current = createVoicePlayer(ctx, voiceVolume);
+    if (ctx && !voiceRef.current) voiceRef.current = createVoicePlayer(ctx, voiceVolume, voice);
     if (ctx && !clipsRef.current) clipsRef.current = createClipPlayer(ctx, voiceVolume);
     if (voiceOn) voiceRef.current?.preload();
     void ctx?.resume?.();
@@ -364,11 +415,10 @@ function Player({ session }: { session: PlayableExercise }) {
     setEndAudioDone(false);
 
     const clips = clipsRef.current;
-    const withClips = soundOn || voiceOn;
-    if (clips && withClips && outroUrl) void clips.load(outroUrl);
+    if (clips && voiceOn) void clips.load(outroUrl);
 
     // Nur vor dem allerersten Atemzug, nicht beim Fortsetzen.
-    if (clips && withClips && introUrl && clock.elapsed() === 0) {
+    if (clips && voiceOn && clock.elapsed() === 0) {
       introRunRef.current += 1;
       const run = introRunRef.current;
       setIntroPlaying(true);
@@ -381,7 +431,7 @@ function Player({ session }: { session: PlayableExercise }) {
       return;
     }
     beginBreathing();
-  }, [toneVolume, voiceVolume, voiceOn, soundOn, introUrl, outroUrl, clock, beginBreathing]);
+  }, [toneVolume, voiceVolume, voiceOn, voice, introUrl, outroUrl, clock, beginBreathing]);
 
   const skipIntro = useCallback(() => {
     introRunRef.current += 1;
@@ -395,6 +445,7 @@ function Player({ session }: { session: PlayableExercise }) {
     lastCuedRef.current = -1;
     endCuedRef.current = false;
     outroDoneRef.current = false;
+    repeatRef.current = { segment: -1, next: 0 };
     clipsRef.current?.stop();
     setSegIndex(-1);
     setElapsedMs(0);
@@ -429,6 +480,28 @@ function Player({ session }: { session: PlayableExercise }) {
               </Text>
             </PressableRing>
           </View>
+
+          {/* Wer spricht: gilt fuer Ansagen, Intro, Outro und Ende. */}
+          {voiceOn ? (
+            <View style={styles.musicRow}>
+              <Text style={styles.musicLabel}>{t('player.voiceChoice')}</Text>
+              <View style={styles.musicChoices}>
+                {VOICE_IDS.map((id) => (
+                  <PressableRing
+                    key={id}
+                    onPress={() => setVoiceId(id)}
+                    role="radio"
+                    aria-checked={voiceId === id}
+                    style={[styles.chip, voiceId === id && styles.chipActive]}
+                  >
+                    <Text style={[styles.chipText, voiceId === id && styles.chipTextActive]}>
+                      {t(`player.voiceName.${id}`)}
+                    </Text>
+                  </PressableRing>
+                ))}
+              </View>
+            </View>
+          ) : null}
 
           {/* Die passende Playlist beim Nutzer selbst - Spotify oder Apple
               Music. Sie laeuft dort, nicht hier; deshalb steht sie ueber der

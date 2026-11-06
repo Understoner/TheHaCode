@@ -1,5 +1,6 @@
 // Einstieg und Ausklang einer Session (Migration 0048, Entscheidung des Users
-// vom 06.11.2026): je eine optionale Aufnahme aus dem Bucket session-audio.
+// vom 06.11.2026): Sie kommen von der gewaehlten Stimme (voice.ts). Eine Aufnahme
+// aus dem Bucket session-audio hat fuer ihre Session Vorrang.
 //
 // ACHTUNG, Abweichung von CLAUDE.md, dieselbe Machart wie voice.ts und
 // music.ts: eine bewusste Entscheidung gegen "Audiodateien fuer Cues", keine
@@ -30,10 +31,12 @@ export type ClipPlayer = {
  * Ab welcher Stelle der Aufnahme der Ausklang jetzt laufen muss; null = es ist
  * noch zu frueh. Ueber den Abstand statt ueber einen festen Startmoment: so
  * steigt er nach "Anhalten" oder einer spaet geladenen Datei an der richtigen
- * Stelle wieder ein. Ist er laenger als die Session, beginnt er mit ihr.
+ * Stelle wieder ein. Braeuchte er mehr als die halbe Session, entfaellt er: Er
+ * uebertoent die Phasenansagen, und bei kurzen Sessions bliebe davon zu wenig.
  */
 export function outroOffsetSeconds(elapsedMs: number, totalMs: number, clipMs: number): number | null {
-  const startMs = Math.max(0, totalMs - clipMs);
+  if (clipMs * 2 > totalMs) return null;
+  const startMs = totalMs - clipMs;
   if (elapsedMs < startMs || elapsedMs >= totalMs) return null;
   return (elapsedMs - startMs) / 1000;
 }

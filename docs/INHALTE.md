@@ -703,8 +703,9 @@ er mit der letzten Atemphase endet. Die Dauer der Session ändert sich dadurch n
 2. In `exercises` den Pfad eintragen: `intro_audio_path` bzw. `outro_audio_path`.
    Dieselbe Datei darf an beliebig vielen Sessions hängen.
 
-Mit ausgeschaltetem Ton **und** ausgeschalteter Stimme bleiben beide still. Die
-Lautstärke hängt am Regler „Stimme“.
+Das ist optional: Ohne Eintrag läuft seit dem 06.11.2026 Intro und Outro der
+gewählten Stimme (`public/stimme/`), bei jeder Session. Mit ausgeschalteter Stimme
+bleiben beide still. Die Lautstärke hängt am Regler „Stimme“.
 
 ---
 
