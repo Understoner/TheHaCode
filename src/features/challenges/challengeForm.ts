@@ -25,7 +25,7 @@ export const challengeSchema = z
       .trim()
       .min(1, { error: 'errors:challenges.titleRequired' })
       .max(80, { error: 'errors:challenges.titleLong' }),
-    description: z.string().trim().max(500, { error: 'errors:challenges.descriptionLong' }),
+    description: z.string().trim().max(2000, { error: 'errors:challenges.descriptionLong' }),
     startsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { error: 'errors:challenges.start' }),
     durationDays: z
       .number()

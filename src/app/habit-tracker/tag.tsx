@@ -21,6 +21,8 @@ import {
   useHabitScoreEnabled,
   useMyHabits,
 } from '@/features/habits/useHabits';
+import { habitsPlannedOn } from '@/features/habits/plannedDays';
+import { useChallengeSlots } from '@/features/challenges/useChallenges';
 
 /**
  * Ein einzelner Tag, geoeffnet aus der Monatsuebersicht (30.10.2026): was an
@@ -95,6 +97,7 @@ function DayContent({ date, today }: { date: IsoDate; today: IsoDate }) {
   const plus = usePlusAccess();
   const logs = useHabitLogs(date, date);
   const areas = useHabitAreas();
+  const slots = useChallengeSlots();
 
   return (
     <QueryBoundary query={catalog}>
@@ -105,27 +108,31 @@ function DayContent({ date, today }: { date: IsoDate; today: IsoDate }) {
               {(plusAccess) => (
                 <QueryBoundary query={logs}>
                   {(entries) => (
-                    <QueryBoundary query={areas.query}>
-                      {(enabledAreas) => {
-                        const shown = enabledCategoryIds(categories, enabledAreas);
-                        return (
-                          <HabitDay
-                            date={date}
-                            today={today}
-                            // Blaettern bleibt auf dieser Seite und haelt den Tag
-                            // in der Adresse - Zurueck im Browser fuehrt dann ins
-                            // Tagebuch, nicht durch jeden einzelnen Tag.
-                            onChangeDate={(d) => router.setParams({ datum: d > today ? today : d })}
-                            habits={habitsForDay(habits, entries, date).filter((h) =>
-                              shown.has(h.habit_templates.category_id),
-                            )}
-                            logs={entries}
-                            categories={categories}
-                            plusAccess={plusAccess}
-                            scoreOn={scoreOn}
-                          />
-                        );
-                      }}
+                    <QueryBoundary query={slots}>
+                      {(slotList) => (
+                        <QueryBoundary query={areas.query}>
+                          {(enabledAreas) => {
+                            const shown = enabledCategoryIds(categories, enabledAreas);
+                            return (
+                              <HabitDay
+                                date={date}
+                                today={today}
+                                // Blaettern bleibt auf dieser Seite und haelt den Tag
+                                // in der Adresse - Zurueck im Browser fuehrt dann ins
+                                // Tagebuch, nicht durch jeden einzelnen Tag.
+                                onChangeDate={(d) => router.setParams({ datum: d > today ? today : d })}
+                                habits={habitsPlannedOn(habitsForDay(habits, entries, date), slotList, entries, date).filter((h) =>
+                                  shown.has(h.habit_templates.category_id),
+                                )}
+                                logs={entries}
+                                categories={categories}
+                                plusAccess={plusAccess}
+                                scoreOn={scoreOn}
+                              />
+                            );
+                          }}
+                        </QueryBoundary>
+                      )}
                     </QueryBoundary>
                   )}
                 </QueryBoundary>

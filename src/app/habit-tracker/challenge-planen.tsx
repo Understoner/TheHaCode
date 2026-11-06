@@ -281,6 +281,8 @@ function ChallengeEditor({
         render={({ field, fieldState }) => (
           <TextField
             label={t('challenges.editor.fieldDescription')}
+            multiline
+            numberOfLines={4}
             value={field.value}
             onChangeText={field.onChange}
             onBlur={field.onBlur}

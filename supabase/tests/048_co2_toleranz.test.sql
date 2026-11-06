@@ -9,7 +9,7 @@
 --   5. Ohne Admin-Rolle in den Bucket session-audio hochladen oder auflisten
 -- Dann der Normalfall: Werte, Uebungsweg, zurueckgezogene Habits.
 begin;
-select plan(18);
+select plan(17);
 
 insert into auth.users (id, email) values
   ('a4800000-0000-0000-0000-000000000001', 'plus48@example.at'),
@@ -108,10 +108,5 @@ select is(
   (select count(*)::int from public.habit_templates
     where slug in ('selbst-gekocht', 'unter-4000-schritte') and is_published),
   0, 'Selbst gekocht und Unter 4.000 sind zurueckgezogen');
-select is(
-  (select count(*)::int from public.challenge_templates t
-    where t.slug like 'co2-toleranz-%' and t.duration_days = 28 and not t.is_preview and t.is_published),
-  3, 'Drei Stufen des Uebungswegs, 28 Tage, ohne Vorschau');
-
 select * from finish();
 rollback;

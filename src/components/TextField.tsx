@@ -12,7 +12,14 @@ type Props = {
   error?: string;
 } & Pick<
   TextInputProps,
-  'secureTextEntry' | 'autoComplete' | 'inputMode' | 'autoCapitalize' | 'autoCorrect' | 'placeholder'
+  | 'secureTextEntry'
+  | 'autoComplete'
+  | 'inputMode'
+  | 'autoCapitalize'
+  | 'autoCorrect'
+  | 'placeholder'
+  | 'multiline'
+  | 'numberOfLines'
 >;
 
 // Ein Eingabefeld nach den Tokens: Abgrenzung ueber eine 1-px-Linie, kein
@@ -34,7 +41,12 @@ export function TextField({ label, error, ...input }: Props) {
         aria-label={label}
         aria-invalid={Boolean(error)}
         placeholderTextColor={colors.ink500}
-        style={[styles.input, focused && styles.inputFocused, Boolean(error) && styles.inputError]}
+        style={[
+          styles.input,
+          input.multiline && styles.inputMultiline,
+          focused && styles.inputFocused,
+          Boolean(error) && styles.inputError,
+        ]}
       />
       {error ? (
         <Text role="alert" style={styles.error}>
@@ -71,6 +83,9 @@ const styles = StyleSheet.create({
     // Der Browser-Fokusring passt nicht zu den uebrigen Bedienelementen; der
     // eigene steht unten in inputFocused (gleiche Form wie in Button.tsx).
     outlineWidth: 0,
+  },
+  inputMultiline: {
+    textAlignVertical: 'top',
   },
   inputFocused: {
     borderColor: colors.ocean700,

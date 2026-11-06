@@ -1174,6 +1174,7 @@ export type Database = {
           partial_points: number | null
           penalty_from: number | null
           penalty_points: number | null
+          planned_days_only: boolean
           points: number
           points_from: number | null
           slug: string
@@ -1207,6 +1208,7 @@ export type Database = {
           partial_points?: number | null
           penalty_from?: number | null
           penalty_points?: number | null
+          planned_days_only?: boolean
           points?: number
           points_from?: number | null
           slug?: string
@@ -1240,6 +1242,7 @@ export type Database = {
           partial_points?: number | null
           penalty_from?: number | null
           penalty_points?: number | null
+          planned_days_only?: boolean
           points?: number
           points_from?: number | null
           slug?: string
