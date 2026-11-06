@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase';
  *
  * Eine eigene Abfrage statt in useProfileFlag: Laeuft die neue App kurz gegen
  * das alte Schema (SAD §2.6), scheitert so nur die Stimmwahl, und es bleibt
- * Michael. Die Schalter fuer Ton und Stimme laufen weiter.
+ * die Vorgabe. Die Schalter fuer Ton und Stimme laufen weiter.
  */
 export function useVoiceChoice() {
   const { session, loading } = useAuth();

@@ -284,9 +284,9 @@ describe('Stimmen', () => {
     }
   });
 
-  it('macht aus Unbekanntem Michael', () => {
+  it('macht aus Unbekanntem die Vorgabe Alexander', () => {
     expect(parseVoiceId('louisa')).toBe('louisa');
-    expect(parseVoiceId('peter')).toBe('michael');
-    expect(parseVoiceId(null)).toBe('michael');
+    expect(parseVoiceId('peter')).toBe('alexander');
+    expect(parseVoiceId(null)).toBe('alexander');
   });
 });

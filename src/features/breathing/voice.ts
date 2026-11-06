@@ -94,9 +94,9 @@ export const VOICES: Record<VoiceId, VoiceFiles> = {
 };
 
 export const VOICE_IDS: VoiceId[] = ['michael', 'louisa', 'alexander'];
-export const DEFAULT_VOICE: VoiceId = 'michael';
+export const DEFAULT_VOICE: VoiceId = 'alexander';
 
-/** Ein Wert aus der Datenbank als bekannte Stimme; Unbekanntes wird Michael. */
+/** Ein Wert aus der Datenbank als bekannte Stimme; Unbekanntes wird die Vorgabe. */
 export function parseVoiceId(value: unknown): VoiceId {
   return VOICE_IDS.includes(value as VoiceId) ? (value as VoiceId) : DEFAULT_VOICE;
 }
