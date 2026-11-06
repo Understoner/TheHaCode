@@ -10,7 +10,8 @@ export function useNewsList(category?: NewsCategory) {
   return useQuery({
     queryKey: ['news_posts', category ?? 'all'],
     queryFn: async () => {
-      let query = supabase.from('news_posts').select('*');
+      // Admins duerfen auch Entwuerfe lesen; die Liste zeigt nur, was erschienen ist.
+      let query = supabase.from('news_posts').select('*').lte('published_at', new Date().toISOString());
       if (category) {
         query = query.eq('category', category);
       }

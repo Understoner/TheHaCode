@@ -48,6 +48,8 @@ export function useChallengeTemplates() {
       const { data, error } = await supabase
         .from('challenge_templates')
         .select('*, challenge_template_items(*, habit_templates(*))')
+        // Admins duerfen auch Zurueckgezogenes lesen; in der Liste hat es nichts zu suchen.
+        .eq('is_published', true)
         .order('sort_order')
         .order('title');
       if (error) throw error;

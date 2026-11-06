@@ -39,9 +39,10 @@ function mockNewsQuery(result: { data: unknown; error: unknown }) {
   const orderPublished = vi.fn().mockResolvedValue(result);
   const orderPinned = vi.fn(() => ({ order: orderPublished }));
   const eq = vi.fn(() => ({ order: orderPinned }));
-  const select = vi.fn(() => ({ order: orderPinned, eq }));
+  const lte = vi.fn(() => ({ order: orderPinned, eq }));
+  const select = vi.fn(() => ({ lte }));
   fromMock.mockReturnValue({ select });
-  return { select, eq, orderPinned, orderPublished };
+  return { select, lte, eq, orderPinned, orderPublished };
 }
 
 function post(overrides: Record<string, unknown>) {

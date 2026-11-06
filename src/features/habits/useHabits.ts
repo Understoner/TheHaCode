@@ -42,6 +42,8 @@ export function useHabitCatalog() {
           .from('habit_templates')
           .select('*')
           .is('deleted_at', null)
+          // Admins duerfen auch Zurueckgezogenes lesen. Eigene Habits sind immer veroeffentlicht.
+          .eq('is_published', true)
           .order('sort_order')
           .order('title'),
       ]);

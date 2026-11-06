@@ -694,8 +694,9 @@ commit;
 ## Einstieg und Ausklang einer Session (seit 0048)
 
 Je Session gibt es zwei optionale Aufnahmen. Der **Einstieg** läuft vor der
-ersten Atemphase und lässt sich überspringen. Der **Ausklang** setzt so ein, dass
-er mit der letzten Atemphase endet. Die Dauer der Session ändert sich dadurch nicht.
+ersten Atemphase und lässt sich überspringen. Der **Ausklang** endet 25 Sekunden
+vor der letzten Atemphase, danach kommt das Ende. Die Dauer der Session ändert sich
+dadurch nicht. Müsste er vor der Hälfte der Session beginnen, entfällt er.
 
 1. Datei in Supabase Studio → Storage → Bucket `session-audio` hochladen, zum
    Beispiel `einstieg/ankommen.mp3` oder `ausklang/ruhe.mp3` (MP3, M4A oder WAV,
