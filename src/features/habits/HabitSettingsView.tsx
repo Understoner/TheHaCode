@@ -23,6 +23,7 @@ import { useHabitAreas, useHabitCatalog, useHabitScoreEnabled, useMyHabits } fro
 const CHEVRON = 'M9 6l6 6-6 6';
 const LIST = 'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01';
 const PLUS = 'M12 5v14M5 12h14';
+const ROUTE = 'M6 19a2 2 0 1 0 0-4a2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4a2 2 0 0 0 0 4zM8 17h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7';
 const STAR = 'M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z';
 
 function Icon({ d, color }: { d: string; color: string }) {
@@ -151,6 +152,19 @@ export function HabitSettingsView() {
         />
       </View>
       </View>
+      </View>
+
+      {/* Der Weg zu den Uebungswegen (06.11.2026). */}
+      <Text style={styles.kicker}>{t('diary.settings.challenges.title')}</Text>
+      <View style={styles.group}>
+        <Link href="/habit-tracker/challenges" style={styles.rowLink}>
+          <Row
+            icon={<Icon d={ROUTE} color={palette.ocean700} />}
+            title={t('diary.settings.challenges.action')}
+            hint={t('diary.settings.challenges.text')}
+            right={<Icon d={CHEVRON} color={palette.ink700} />}
+          />
+        </Link>
       </View>
 
       <Text style={styles.kicker}>{t('diary.settings.areas.title')}</Text>

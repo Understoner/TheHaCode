@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '@/lib/supabase';
+import type { NewsValues } from '@/features/news/newsForm';
 import type { NewsPost } from '@/features/news/useNewsList';
 
 // Ein einzelner Beitrag ueber seinen slug - die Adresse in der Leiste ist
@@ -25,6 +26,31 @@ export function useNewsPost(slug: string | undefined) {
 
       if (error) throw error;
       return data;
+    },
+  });
+}
+
+/**
+ * Titel, Anriss und Text speichern. Ohne Admin-Rolle aendert RLS still keine
+ * Zeile. Darum wird die Zeile zurueckgelesen: "nichts geaendert" ist ein Fehler.
+ */
+export function useUpdateNewsPost(post: Pick<NewsPost, 'id' | 'slug'>) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (values: NewsValues) => {
+      const { data, error } = await supabase
+        .from('news_posts')
+        .update({ title: values.title, excerpt: values.excerpt || null, body_md: values.body })
+        .eq('id', post.id)
+        .select('id')
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error('news_post_not_updated');
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['news_post', post.slug] });
+      void queryClient.invalidateQueries({ queryKey: ['news_posts'] });
     },
   });
 }

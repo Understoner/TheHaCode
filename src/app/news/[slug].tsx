@@ -1,12 +1,17 @@
 import { Link, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { CoverImage } from '@/components/CoverImage';
+import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { StateMessage } from '@/components/StateMessage';
 import { colors, DESIGN_PREVIEW, radius, spacing } from '@/design/tokens';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { isAdminSession } from '@/features/auth/isAdmin';
 import { Markdown } from '@/features/news/Markdown';
+import { NewsEditor } from '@/features/news/NewsEditor';
 import { NewsCover } from '@/features/news/NewsArt';
 import { newsCategoryColors } from '@/features/news/categories';
 import { estimateReadingMinutes } from '@/features/news/readingTime';
@@ -52,12 +57,22 @@ function NotFound() {
 function Article({ post }: { post: NewsPost }) {
   const { t } = useTranslation();
   const tone = newsCategoryColors(post.category);
+  const { session } = useAuth();
+  const [editing, setEditing] = useState(false);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Link href={DESIGN_PREVIEW ? '/news' : '/'} style={styles.back}>
-        {t('news.detail.back')}
-      </Link>
+      <View style={styles.topRow}>
+        <Link href={DESIGN_PREVIEW ? '/news' : '/'} style={styles.back}>
+          {t('news.detail.back')}
+        </Link>
+        {/* Nur die Anzeige. Ob gespeichert wird, entscheidet die Datenbank. */}
+        {isAdminSession(session) && !editing ? (
+          <PressableRing onPress={() => setEditing(true)} role="button" style={styles.edit}>
+            <Text style={styles.editText}>{t('news.edit.action')}</Text>
+          </PressableRing>
+        ) : null}
+      </View>
 
       {/* Im Testsystem ohne Foto, mit dem Motiv der Kategorie (02.11.2026). */}
       {DESIGN_PREVIEW ? (
@@ -77,24 +92,30 @@ function Article({ post }: { post: NewsPost }) {
         </Text>
       </View>
 
-      <Text style={styles.title} role="heading" aria-level={1}>
-        {post.title}
-      </Text>
+      {editing ? (
+        <NewsEditor post={post} onClose={() => setEditing(false)} />
+      ) : (
+        <>
+          <Text style={styles.title} role="heading" aria-level={1}>
+            {post.title}
+          </Text>
 
-      {/* Der Anriss steht auch hier, als Vorspann - er ist der Satz, mit dem
-          der Beitrag auf der Startseite geworben hat, und wer geklickt hat,
-          sucht ihn zuerst. */}
-      {post.excerpt ? <Text style={styles.lead}>{post.excerpt}</Text> : null}
+          {/* Der Anriss steht auch hier, als Vorspann - er ist der Satz, mit dem
+              der Beitrag auf der Startseite geworben hat, und wer geklickt hat,
+              sucht ihn zuerst. */}
+          {post.excerpt ? <Text style={styles.lead}>{post.excerpt}</Text> : null}
 
-      <View style={styles.rule} />
+          <View style={styles.rule} />
 
-      <Markdown source={post.body_md} />
+          <Markdown source={post.body_md} />
 
-      <View style={styles.rule} />
+          <View style={styles.rule} />
 
-      <Link href={DESIGN_PREVIEW ? '/news' : '/'} style={styles.back}>
-        {t('news.detail.back')}
-      </Link>
+          <Link href={DESIGN_PREVIEW ? '/news' : '/'} style={styles.back}>
+            {t('news.detail.back')}
+          </Link>
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -114,6 +135,24 @@ const styles = StyleSheet.create({
   notFound: {
     padding: spacing.xl,
     gap: spacing.md,
+  },
+  topRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  edit: {
+    paddingVertical: 6,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.lineStrong,
+    borderRadius: radius.full,
+  },
+  editText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.ocean700,
   },
   back: {
     fontSize: 15,

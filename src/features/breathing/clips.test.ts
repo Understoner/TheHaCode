@@ -13,8 +13,10 @@ describe('outroOffsetSeconds', () => {
   it('ist nach dem Ende null', () => {
     expect(outroOffsetSeconds(90_000, 90_000, 30_000)).toBeNull();
   });
-  it('beginnt bei einer zu langen Aufnahme mit der Session', () => {
-    expect(outroOffsetSeconds(0, 20_000, 30_000)).toBe(0);
+  it('entfaellt, wenn er mehr als die halbe Session braeuchte', () => {
+    expect(outroOffsetSeconds(10_000, 20_000, 30_000)).toBeNull();
+    expect(outroOffsetSeconds(10_000, 59_000, 30_000)).toBeNull();
+    expect(outroOffsetSeconds(30_000, 60_000, 30_000)).toBe(0);
   });
 });
 

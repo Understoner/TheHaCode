@@ -42,3 +42,27 @@ zwischen den beiden Saetzen bleibt).
 Neue Aufnahmen: dieselbe Aufbereitung wieder anwenden, sonst springt der Pegel
 zwischen den Phasen. Die Zuordnung Phase -> Datei steht in voice.ts unter
 VOICE_FILES.
+
+
+STIMMEN SEIT 06.11.2026
+-----------------------
+Michael liegt weiter direkt hier in stimme/ (alte App-Versionen laden ihn von
+dort), nur Intro und Outro in michael/. Louisa und Alexander liegen je in einem
+eigenen Ordner. Die Zuordnung steht in voice.ts unter VOICES.
+
+Neue Aufnahmen werden so angeliefert, "Name" ist die Stimme:
+
+  Name Ein.mp3         ->  name/ein.wav          inhale
+  Name Halten.mp3      ->  name/halten.wav       hold_in
+  Name Aus.mp3         ->  name/aus.wav          exhale
+  Name Aus Halten.mp3  ->  name/aus-halten.wav   hold_out
+  Name Ende.mp3        ->  name/ende.wav         Ende der Session
+  Name Intro.mp3       ->  name/intro.mp3        vor der ersten Atemphase
+  Name Outro.mp3       ->  name/outro.mp3        endet mit der letzten Atemphase
+
+Die kurzen Dateien aufbereiten wie oben (auf den Worteinsatz geschnitten, mono,
+48 kHz, 16 Bit, -3 dBFS). Am 06.11.2026 lagen die Quellen 2 bis 11 dB auseinander.
+Intro und Outro bleiben MP3 (mono, 80 kbit/s) mit gleichem Spitzenpegel.
+
+Noch nicht verwendet, Zweck offen: "Alexander Ein Ein", "Alexander Aus Aus",
+"Louisa Ein Ein", "Louisa Halten Halten".

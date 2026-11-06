@@ -703,5 +703,23 @@ er mit der letzten Atemphase endet. Die Dauer der Session ändert sich dadurch n
 2. In `exercises` den Pfad eintragen: `intro_audio_path` bzw. `outro_audio_path`.
    Dieselbe Datei darf an beliebig vielen Sessions hängen.
 
-Mit ausgeschaltetem Ton **und** ausgeschalteter Stimme bleiben beide still. Die
-Lautstärke hängt am Regler „Stimme“.
+Das ist optional: Ohne Eintrag läuft seit dem 06.11.2026 Intro und Outro der
+gewählten Stimme (`public/stimme/`), bei jeder Session. Mit ausgeschalteter Stimme
+bleiben beide still. Die Lautstärke hängt am Regler „Stimme“.
+
+---
+
+## Admin-Kennzeichen und News bearbeiten (seit 0050)
+
+Admins sehen bei einem News-Beitrag neben „Alle Beiträge“ den Knopf **Bearbeiten**
+und können Titel, Anriss und Text ändern. Gesetzt wird das Kennzeichen im
+SQL Editor des jeweiligen Supabase-Projekts, Testsystem und Live getrennt:
+
+```sql
+select public.set_user_admin('name@example.at', true);   -- setzen
+select public.set_user_admin('name@example.at', false);  -- entfernen
+```
+
+Wirksam wird es nach erneuter Anmeldung. Das Kennzeichen ist
+`app_metadata.role = 'admin'` und gilt für alle Admin-Schreibrechte, also auch für
+Kurse, Team und Bilder, nicht nur für News.

@@ -18,6 +18,15 @@ export const page = StyleSheet.create({
     fontSize: 14,
     color: colors.ink700,
   },
+  // Ueberschrift mit Knopf daneben; passt beides nicht in eine Zeile (Telefon),
+  // rutscht der Knopf direkt darunter.
+  titleRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
   title: {
     fontSize: 28,
     fontWeight: '600',

@@ -1,6 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createVoicePlayer, END_VOICE_FILE, VOICE_FILES } from './voice';
+import {
+  createVoicePlayer,
+  END_VOICE_FILE,
+  parseVoiceId,
+  VOICE_FILES,
+  VOICE_IDS,
+  VOICES,
+  voiceRepeatOffsetsMs,
+} from './voice';
 
 // jsdom hat weder Web Audio noch fetch mit echten Dateien. Der Stub zeichnet
 // auf, statt zu klingen: welche Aufnahme geholt wurde, welche abgespielt wird,
@@ -223,5 +231,62 @@ describe('createVoicePlayer', () => {
 
     expect(() => stimme.speak('inhale')).not.toThrow();
     expect(auf.gespielt).toEqual([]);
+  });
+});
+
+describe('voiceRepeatOffsetsMs', () => {
+  it('wiederholt nichts bis einschliesslich 5 Sekunden', () => {
+    expect(voiceRepeatOffsetsMs(4000, 1)).toEqual([]);
+    expect(voiceRepeatOffsetsMs(5000, 1)).toEqual([]);
+  });
+
+  it('beginnt bei einer laengeren Phase ab der 5. Sekunde', () => {
+    expect(voiceRepeatOffsetsMs(6000, 1)).toEqual([5000]);
+    expect(voiceRepeatOffsetsMs(41000, 7)[0]).toBe(5000);
+  });
+
+  it('haelt 1 bis 6 Sekunden Abstand und endet vor der naechsten Phase', () => {
+    for (let seed = 0; seed < 200; seed += 1) {
+      const offsets = voiceRepeatOffsetsMs(41000, seed);
+      offsets.slice(1).forEach((at, i) => {
+        const gap = at - offsets[i];
+        expect(gap).toBeGreaterThanOrEqual(1000);
+        expect(gap).toBeLessThanOrEqual(6000);
+      });
+      expect(offsets[offsets.length - 1]).toBeLessThanOrEqual(40000);
+    }
+  });
+
+  it('ist unregelmaessig, aber je Segment fest', () => {
+    const gaps = new Set<number>();
+    for (let seed = 0; seed < 50; seed += 1) {
+      const offsets = voiceRepeatOffsetsMs(60000, seed);
+      offsets.slice(1).forEach((at, i) => gaps.add(at - offsets[i]));
+    }
+    expect(gaps.size).toBe(6);
+    expect(voiceRepeatOffsetsMs(41000, 3)).toEqual(voiceRepeatOffsetsMs(41000, 3));
+  });
+});
+
+describe('Stimmen', () => {
+  it('Michael behaelt seine bisherigen Dateien', () => {
+    expect(VOICES.michael.phases).toBe(VOICE_FILES);
+    expect(VOICES.michael.end).toBe(END_VOICE_FILE);
+  });
+
+  it('jede Stimme hat alle vier Phasen, Ende, Intro und Outro', () => {
+    for (const id of VOICE_IDS) {
+      const voice = VOICES[id];
+      for (const kind of ['inhale', 'hold_in', 'exhale', 'hold_out'] as const) {
+        expect(voice.phases[kind]).toBeTruthy();
+      }
+      expect(voice.end && voice.intro && voice.outro).toBeTruthy();
+    }
+  });
+
+  it('macht aus Unbekanntem die Vorgabe Alexander', () => {
+    expect(parseVoiceId('louisa')).toBe('louisa');
+    expect(parseVoiceId('peter')).toBe('alexander');
+    expect(parseVoiceId(null)).toBe('alexander');
   });
 });

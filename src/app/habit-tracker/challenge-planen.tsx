@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm, useWatch, type Control } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Text, View } from 'react-native';
@@ -62,6 +62,10 @@ export default function ChallengePlanScreen() {
     vorlage?: string;
   }>();
   const { session, loading } = useAuth();
+  // Der Knopf neben der Ueberschrift (06.11.2026): wer eine fertige Vorlage
+  // startet, muss nicht durch das ganze Formular scrollen. Das Formular meldet
+  // ihn hier an, weil die Ueberschrift auch ohne Formular dastehen muss.
+  const [headerAction, setHeaderAction] = useState<HeaderAction | null>(null);
 
   return (
     <ScrollView contentContainerStyle={page.container}>
@@ -71,13 +75,18 @@ export default function ChallengePlanScreen() {
       >
         {t('challenges.back')}
       </Link>
-      <Text role="heading" style={page.title}>
-        {t(id ? 'challenges.editor.editTitle' : 'challenges.editor.newTitle')}
-      </Text>
+      <View style={page.titleRow}>
+        <Text role="heading" style={page.title}>
+          {t(id ? 'challenges.editor.editTitle' : 'challenges.editor.newTitle')}
+        </Text>
+        {headerAction ? (
+          <Button label={headerAction.label} disabled={headerAction.disabled} onPress={headerAction.onPress} />
+        ) : null}
+      </View>
       {loading ? (
         <SkeletonList />
       ) : session ? (
-        <EditorLoader id={id ?? null} templateId={vorlage ?? null} />
+        <EditorLoader id={id ?? null} templateId={vorlage ?? null} onHeaderAction={setHeaderAction} />
       ) : (
         <StateMessage title={t('diary.login.title')} body={t('challenges.login')} />
       )}
@@ -85,7 +94,17 @@ export default function ChallengePlanScreen() {
   );
 }
 
-function EditorLoader({ id, templateId }: { id: string | null; templateId: string | null }) {
+type HeaderAction = { label: string; disabled: boolean; onPress: () => void };
+
+function EditorLoader({
+  id,
+  templateId,
+  onHeaderAction,
+}: {
+  id: string | null;
+  templateId: string | null;
+  onHeaderAction: (action: HeaderAction | null) => void;
+}) {
   const { t } = useTranslation();
   const catalog = useHabitCatalog();
   const templates = useChallengeTemplates();
@@ -143,6 +162,7 @@ function EditorLoader({ id, templateId }: { id: string | null; templateId: strin
                             existing={existing}
                             template={template}
                             habits={usable}
+                            onHeaderAction={onHeaderAction}
                             categories={categories}
                           />
                         );
@@ -206,11 +226,13 @@ function ChallengeEditor({
   template,
   habits,
   categories,
+  onHeaderAction,
 }: {
   existing: Challenge | null;
   template: ChallengeTemplate | null;
   habits: HabitTemplate[];
   categories: HabitCategory[];
+  onHeaderAction: (action: HeaderAction | null) => void;
 }) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -255,12 +277,29 @@ function ChallengeEditor({
     );
   };
 
+  const submit = handleSubmit(onSubmit);
+  const submitRef = useRef(submit);
+  useEffect(() => {
+    submitRef.current = submit;
+  });
+  const submitLabel = t(existing ? 'challenges.editor.save' : 'challenges.editor.create');
+  useEffect(() => {
+    onHeaderAction({
+      label: submitLabel,
+      disabled: save.isPending,
+      onPress: () => void submitRef.current(),
+    });
+    return () => onHeaderAction(null);
+  }, [onHeaderAction, submitLabel, save.isPending]);
+
   const titleOf = (habitTemplateId: string) =>
     habits.find((h) => h.id === habitTemplateId)?.title ?? t('challenges.editor.unknownHabit');
   const itemsError = formState.errors.items?.message ?? formState.errors.items?.root?.message;
 
   return (
     <View style={page.stack}>
+      {/* Auch oben: wer den Knopf neben der Ueberschrift drueckt, sieht unten nichts. */}
+      {save.error ? <Text style={page.error}>{t(challengeErrorKey(save.error))}</Text> : null}
       <Controller
         control={control}
         name="title"
@@ -383,11 +422,7 @@ function ChallengeEditor({
           {t(challengeErrorKey(save.error))}
         </Text>
       ) : null}
-      <Button
-        label={t(existing ? 'challenges.editor.save' : 'challenges.editor.create')}
-        disabled={save.isPending}
-        onPress={handleSubmit(onSubmit)}
-      />
+      <Button label={submitLabel} disabled={save.isPending} onPress={submit} />
     </View>
   );
 }

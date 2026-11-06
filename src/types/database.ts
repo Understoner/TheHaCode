@@ -1614,6 +1614,7 @@ export type Database = {
           timezone: string
           updated_at: string
           voice_enabled: boolean
+          voice_id: string
         }
         Insert: {
           avatar_url?: string | null
@@ -1631,6 +1632,7 @@ export type Database = {
           timezone?: string
           updated_at?: string
           voice_enabled?: boolean
+          voice_id?: string
         }
         Update: {
           avatar_url?: string | null
@@ -1648,6 +1650,7 @@ export type Database = {
           timezone?: string
           updated_at?: string
           voice_enabled?: boolean
+          voice_id?: string
         }
         Relationships: []
       }
@@ -2143,6 +2146,10 @@ export type Database = {
             }
             Returns: string
           }
+      set_user_admin: {
+        Args: { p_email: string; p_is_admin: boolean }
+        Returns: boolean
+      }
       submit_quiz: {
         Args: { p_answers: Json; p_block_id: string }
         Returns: Json

@@ -51,6 +51,81 @@ export const VOICE_FILES: Partial<Record<PhaseKind, string>> = {
  */
 export const END_VOICE_FILE = '/stimme/abschluss.wav';
 
+/**
+ * Die Stimmen (06.11.2026). Michael bleibt, wo seine Dateien schon liegen;
+ * alte App-Versionen laden sie von dort. Quelle, Namensschema und Aufbereitung
+ * stehen in public/stimme/LIESMICH.txt.
+ */
+export type VoiceId = 'michael' | 'louisa' | 'alexander';
+
+export type VoiceFiles = {
+  phases: Partial<Record<PhaseKind, string>>;
+  end: string;
+  /** Vor der ersten Atemphase, immer wenn die Stimme an ist. */
+  intro: string;
+  /** Setzt so ein, dass es mit der letzten Atemphase endet (clips.ts). */
+  outro: string;
+};
+
+function newVoice(folder: VoiceId): VoiceFiles {
+  const base = `/stimme/${folder}`;
+  return {
+    phases: {
+      inhale: `${base}/ein.wav`,
+      hold_in: `${base}/halten.wav`,
+      exhale: `${base}/aus.wav`,
+      hold_out: `${base}/aus-halten.wav`,
+    },
+    end: `${base}/ende.wav`,
+    intro: `${base}/intro.mp3`,
+    outro: `${base}/outro.mp3`,
+  };
+}
+
+export const VOICES: Record<VoiceId, VoiceFiles> = {
+  michael: {
+    phases: VOICE_FILES,
+    end: END_VOICE_FILE,
+    intro: '/stimme/michael/intro.mp3',
+    outro: '/stimme/michael/outro.mp3',
+  },
+  louisa: newVoice('louisa'),
+  alexander: newVoice('alexander'),
+};
+
+export const VOICE_IDS: VoiceId[] = ['michael', 'louisa', 'alexander'];
+export const DEFAULT_VOICE: VoiceId = 'alexander';
+
+/** Ein Wert aus der Datenbank als bekannte Stimme; Unbekanntes wird die Vorgabe. */
+export function parseVoiceId(value: unknown): VoiceId {
+  return VOICE_IDS.includes(value as VoiceId) ? (value as VoiceId) : DEFAULT_VOICE;
+}
+
+const REPEAT_FROM_MS = 5000;
+const REPEAT_MIN_GAP_S = 1;
+const REPEAT_MAX_GAP_S = 6;
+/** So lange braucht das laengste Wort. Spaeter ginge es in die naechste Phase hinein. */
+const REPEAT_LAST_MS = 1000;
+
+/**
+ * Wann eine lange Phase noch einmal angesagt wird, in ms ab ihrem Beginn:
+ * ab der 5. Sekunde, dann in unregelmaessigen Abstaenden von 1 bis 6 Sekunden.
+ *
+ * Unregelmaessig, aber fest je Segment (`seed`): Anhalten und Fortsetzen darf
+ * den Plan nicht neu wuerfeln, und Tests brauchen kein Math.random.
+ */
+export function voiceRepeatOffsetsMs(durationMs: number, seed: number): number[] {
+  const offsets: number[] = [];
+  let state = (Math.abs(Math.trunc(seed)) * 2654435761 + 1) >>> 0;
+  for (let at = REPEAT_FROM_MS; at <= durationMs - REPEAT_LAST_MS; ) {
+    offsets.push(at);
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const spread = REPEAT_MAX_GAP_S - REPEAT_MIN_GAP_S + 1;
+    at += (REPEAT_MIN_GAP_S + Math.floor((state / 2 ** 32) * spread)) * 1000;
+  }
+  return offsets;
+}
+
 /** Kurze Rampe statt Sprung - ein Sprung im Verstaerkungswert knackt. */
 const RAMP_S = 0.02;
 
@@ -61,6 +136,8 @@ export type VoicePlayer = {
   speakEnd: (delaySeconds?: number) => void;
   /** Holt und dekodiert alle Aufnahmen samt Schlussansage. Mehrfach aufrufbar. */
   preload: () => void;
+  /** Wechselt die Stimme ab der naechsten Ansage und laedt sie. */
+  setVoice: (voice: VoiceFiles) => void;
   /** Wirkt sofort, auch auf eine laufende Ansage. 0 bis 1. */
   setVolume: (value: number) => void;
   /** Bricht ab, was gerade gesprochen wird - beim Verlassen des Players. */
@@ -77,8 +154,9 @@ function clamp01(value: number): number {
  * dem der Musik. Drei Regler, drei Wege - eine Ansage soll sich ueber die
  * Musik legen koennen, ohne dass der Phasenton mitwandert.
  */
-export function createVoicePlayer(ctx: AudioContext, volume = 0.7): VoicePlayer {
+export function createVoicePlayer(ctx: AudioContext, volume = 0.7, initial: VoiceFiles = VOICES.michael): VoicePlayer {
   let level = clamp01(volume);
+  let voice = initial;
 
   const master = ctx.createGain();
   master.gain.value = level;
@@ -158,19 +236,25 @@ export function createVoicePlayer(ctx: AudioContext, volume = 0.7): VoicePlayer 
 
   return {
     preload: () => {
-      for (const url of Object.values(VOICE_FILES)) load(url);
-      load(END_VOICE_FILE);
+      for (const url of Object.values(voice.phases)) load(url);
+      load(voice.end);
+    },
+
+    setVoice: (next) => {
+      voice = next;
+      for (const url of Object.values(voice.phases)) load(url);
+      load(voice.end);
     },
 
     speak: (kind: PhaseKind) => {
-      const url = VOICE_FILES[kind];
+      const url = voice.phases[kind];
       if (url) play(url, 0);
     },
 
     // Eine verzoegerte Ansage ist "current" ab dem Aufruf, nicht erst ab dem
     // Einsatz: silence() und die erste Ansage einer neuen Session brechen sie
     // auch dann ab, wenn sie noch gar nicht angefangen hat.
-    speakEnd: (delaySeconds = 0) => play(END_VOICE_FILE, delaySeconds),
+    speakEnd: (delaySeconds = 0) => play(voice.end, delaySeconds),
 
     setVolume: (value: number) => {
       level = clamp01(value);
