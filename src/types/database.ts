@@ -2143,6 +2143,10 @@ export type Database = {
             }
             Returns: string
           }
+      set_user_admin: {
+        Args: { p_email: string; p_is_admin: boolean }
+        Returns: boolean
+      }
       submit_quiz: {
         Args: { p_answers: Json; p_block_id: string }
         Returns: Json

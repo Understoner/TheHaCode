@@ -131,6 +131,14 @@ function Settings() {
       </View>
 
       <View style={styles.card}>
+        <Text style={styles.cardTitle}>{t('diary.settings.challenges.title')}</Text>
+        <Text style={styles.text}>{t('diary.settings.challenges.text')}</Text>
+        <Link href="/habit-tracker/challenges" style={styles.primary}>
+          {t('diary.settings.challenges.action')}
+        </Link>
+      </View>
+
+      <View style={styles.card}>
         <View style={styles.cardHead}>
           <Text style={[styles.cardTitle, styles.grow]}>{t('diary.score.toggle')}</Text>
           <PressableRing
