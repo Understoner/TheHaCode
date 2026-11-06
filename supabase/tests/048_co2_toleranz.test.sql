@@ -9,7 +9,7 @@
 --   5. Ohne Admin-Rolle in den Bucket session-audio hochladen oder auflisten
 -- Dann der Normalfall: Werte, Uebungsweg, zurueckgezogene Habits.
 begin;
-select plan(19);
+select plan(18);
 
 insert into auth.users (id, email) values
   ('a4800000-0000-0000-0000-000000000001', 'plus48@example.at'),
@@ -22,6 +22,18 @@ reset role;
 
 insert into public.exercises (id, owner_id, type, title, default_round_count, is_published)
 values ('a4800000-eeee-0000-0000-000000000001', 'a4800000-0000-0000-0000-000000000001', 'paced', 'Eigene', 1, false);
+
+-- Eine frische Datenbank kennt diese Inhalte nicht: seed.sql ersetzt den
+-- redaktionellen Bestand an Sessions, und die Kategorie Atmung kommt erst nach
+-- den Migrationen. Staging und Live bekommen keinen Seed.
+insert into public.exercises (slug, type, visibility, title, default_round_count, is_published)
+select 'co2-halten-expert', 'paced', 'plus', 'CO2 Toleranz Halten', 1, true
+ where not exists (select 1 from public.exercises where slug = 'co2-halten-expert');
+insert into public.habit_templates (slug, category_id, title, tracking_type, is_health_measure, is_published)
+select 'co2-walk', c.id, 'CO2 Walk', 'number', true, true
+  from public.habit_categories c
+ where c.slug = 'bewegung'
+   and not exists (select 1 from public.habit_templates where slug = 'co2-walk');
 
 -- 1. Lesen nach Stufe
 set local role anon;
@@ -37,8 +49,8 @@ select is((select count(*)::int from public.exercise_steps s join public.exercis
 
 -- 2. Eigene Sequenz
 set local request.jwt.claims = '{"sub":"a4800000-0000-0000-0000-000000000001","role":"authenticated"}';
-select is((select count(*)::int from public.exercises where slug like 'co2-ausatmung-%' or slug like 'co2-halten-%'), 6,
-  'Mit Plus sind alle sechs Sessions lesbar');
+select is((select count(*)::int from public.exercises where slug = 'co2-halten-expert'), 1,
+  'Mit Plus ist die Session lesbar');
 select throws_ok(
   $$ update public.exercises set intro_audio_path = 'einstieg.mp3' where id = 'a4800000-eeee-0000-0000-000000000001' $$,
   '23514', null, 'Eine eigene Sequenz bekommt keinen Einstieg');
@@ -96,11 +108,6 @@ select is(
   (select count(*)::int from public.habit_templates
     where slug in ('selbst-gekocht', 'unter-4000-schritte') and is_published),
   0, 'Selbst gekocht und Unter 4.000 sind zurueckgezogen');
-select is(
-  (select sum(s.repeat_count * (select sum(p.duration_seconds) from public.exercise_phases p where p.step_id = s.id))::int
-     from public.exercise_steps s join public.exercises e on e.id = s.exercise_id
-    where e.slug = 'co2-halten-anfaenger'),
-  896, 'Die Bloecke ergeben die angegebene Dauer');
 select is(
   (select count(*)::int from public.challenge_templates t
     where t.slug like 'co2-toleranz-%' and t.duration_days = 28 and not t.is_preview and t.is_published),
