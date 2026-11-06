@@ -134,8 +134,8 @@ export function CoursesFeed() {
                 >
                   {[
                     { key: null, label: t('kurse.m.allMonths') },
-                    ...months,
                     ...(onDemandChip ? [{ key: ON_DEMAND_MONTH, label: t('onlineCourses.feed.monthChip') }] : []),
+                    ...months,
                   ].map((m) => {
                     const active = activeMonth === m.key;
                     return (

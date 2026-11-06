@@ -45,7 +45,7 @@ import { addDays, today as heute, weekdayIndex, type IsoDate } from '@/features/
 import { formatDay, formatShort } from '@/features/habits/format';
 import { useHabitCatalog, type HabitCategory, type HabitTemplate } from '@/features/habits/useHabits';
 
-const DURATIONS = [7, 14, 21, 30, 60, 90];
+const DURATIONS = [7, 14, 21, 28, 30, 60, 90];
 const BLOCK_LENGTHS = [2, 3, 4, 5, 7];
 const WEEKDAYS = ['mo', 'di', 'mi', 'do', 'fr', 'sa', 'so'] as const;
 

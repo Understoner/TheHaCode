@@ -2,6 +2,9 @@
 begin;
 select plan(6);
 
+-- Beitraege aus Migrationen (0048) zaehlen hier nicht mit; rollback stellt sie wieder her.
+delete from public.news_posts;
+
 insert into public.news_posts (id, slug, title, body_md, visibility, published_at) values
   ('22222222-2222-2222-2222-222222222222', 'ueber-mich', 'Über mich',       'Text', 'free', now() - interval '1 day'),
   ('33333333-3333-3333-3333-333333333333', 'entwurf',    'Entwurf',         'Text', 'free', null),

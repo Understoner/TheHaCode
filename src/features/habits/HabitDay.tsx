@@ -250,6 +250,15 @@ function ValuePointsLine({ template, log }: { template: HabitTemplate; log: Habi
       }),
     );
   }
+  if (template.penalty_from !== null && (template.partial_points ?? 0) > 0) {
+    rule.push(
+      t(higher ? 'diary.entry.rule.plusFrom' : 'diary.entry.rule.plusUpTo', {
+        points: template.partial_points,
+        value: formatValue(template.penalty_from),
+        unit,
+      }),
+    );
+  }
   if (template.penalty_from !== null && (template.penalty_points ?? 0) > 0) {
     rule.push(
       t(higher ? 'diary.entry.rule.minusBelow' : 'diary.entry.rule.minusAbove', {

@@ -20,6 +20,13 @@ umformuliert; maßgeblich ist die Migration bzw. danach das Studio.
 > Schlaf: neu „Schlafqualität von Smartwatch oder Ring“ (Messwert 0–100).
 > Wegfallende Habits sind zurückgezogen, nicht gelöscht.
 
+> **Geändert mit Migration 0048 (06.11.2026, Vorgabe des Users).** Selbst
+> gekocht und Unter 4.000 Schritten zurückgezogen, „In Ruhe gegessen“ heißt
+> „Bewusst gegessen“, neu „Proteinreiches Frühstück“ (+6) und „CO2 Walk“ (+8)
+> samt sechs Session-Habits. Schritte: −4 unter 3.000, 0 darunter bis 5.000,
+> +6 ab 5.000. Schlafdauer: −8 / +4 ab 6 h / +8 ab 7 h. Schlafwert der Uhr:
+> −6 unter 65 / +3 ab 65 / +6 ab 75.
+
 ## Wie bewertet wurde
 
 **Blickwinkel:** Peter Attia (*Outlive*, „Medicine 3.0“). Er ist der

@@ -7,7 +7,7 @@
 //
 //   Wert >= points_from   -> +points
 //   Wert <  penalty_from  -> -penalty_points
-//   dazwischen            -> 0
+//   dazwischen            -> partial_points (seit 0048, ohne Angabe 0)
 //
 // Ist weniger besser (higher_is_better = false, etwa Bildschirmzeit), drehen
 // sich die Vergleiche um: <= points_from bringt Punkte, > penalty_from zieht ab.
@@ -30,6 +30,8 @@ export type ValueRule = {
   points_from: number | null;
   penalty_from: number | null;
   penalty_points: number | null;
+  /** Kleine Punkte zwischen den Grenzen (0048), nur bei gesetzten Grenzen. */
+  partial_points?: number | null;
 };
 
 /** Ergebnis eines Eintrags: Betrag und Richtung, wie ScoreEntry sie erwartet. */
@@ -64,16 +66,17 @@ export function pointsForEntry(rule: ValueRule, value: number | null): EntryPoin
   const zone = zoneOf(rule, value);
   if (zone === 'minus') return { points: Math.max(0, rule.penalty_points ?? 0), isNegative: true };
   if (zone === 'plus') return { points: rule.points, isNegative: false };
-  return { points: 0, isNegative: false };
+  return { points: Math.max(0, rule.partial_points ?? 0), isNegative: false };
 }
 
 /**
  * Hat ein Eintrag das Ziel erreicht? Fuer Challenges (0036): ein Zahlen-Habit
- * mit Grenzen zaehlt erst in der Plus-Zone, alles andere mit dem Eintrag
- * selbst.
+ * mit Grenzen zaehlt erst, wenn es Punkte bringt (Plus-Zone oder die kleinen
+ * Punkte aus 0048), alles andere mit dem Eintrag selbst.
  */
 export function meetsGoal(rule: ValueRule, value: number | null): boolean {
   if (!hasValueRule(rule)) return true;
   if (value === null || !Number.isFinite(value)) return false;
-  return zoneOf(rule, value) === 'plus';
+  const zone = zoneOf(rule, value);
+  return zone === 'plus' || (zone === 'neutral' && (rule.partial_points ?? 0) > 0);
 }

@@ -2,6 +2,9 @@
 begin;
 select plan(3);
 
+-- Beitraege aus Migrationen (0048) zaehlen hier nicht mit; rollback stellt sie wieder her.
+delete from public.news_posts;
+
 insert into public.news_posts (id, slug, title, body_md, visibility, published_at, category) values
   ('55555555-5555-5555-5555-555555555555', 'atmung-im-alltag', 'Atmung im Alltag', 'Text', 'free', now() - interval '1 day', 'praxis'),
   ('66666666-6666-6666-6666-666666666666', 'ohne-kategorie',   'Ohne Kategorie',   'Text', 'free', now() - interval '1 day', default);

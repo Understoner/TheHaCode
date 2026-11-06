@@ -901,7 +901,9 @@ export type Database = {
           estimated_seconds: number | null
           has_metronome: boolean
           id: string
+          intro_audio_path: string | null
           is_published: boolean
+          outro_audio_path: string | null
           owner_id: string | null
           playback_mode: Database["public"]["Enums"]["playback_mode"]
           slug: string | null
@@ -933,7 +935,9 @@ export type Database = {
           estimated_seconds?: number | null
           has_metronome?: boolean
           id?: string
+          intro_audio_path?: string | null
           is_published?: boolean
+          outro_audio_path?: string | null
           owner_id?: string | null
           playback_mode?: Database["public"]["Enums"]["playback_mode"]
           slug?: string | null
@@ -965,7 +969,9 @@ export type Database = {
           estimated_seconds?: number | null
           has_metronome?: boolean
           id?: string
+          intro_audio_path?: string | null
           is_published?: boolean
+          outro_audio_path?: string | null
           owner_id?: string | null
           playback_mode?: Database["public"]["Enums"]["playback_mode"]
           slug?: string | null
@@ -1165,6 +1171,7 @@ export type Database = {
           max_value: number | null
           min_value: number | null
           owner_id: string | null
+          partial_points: number | null
           penalty_from: number | null
           penalty_points: number | null
           points: number
@@ -1197,6 +1204,7 @@ export type Database = {
           max_value?: number | null
           min_value?: number | null
           owner_id?: string | null
+          partial_points?: number | null
           penalty_from?: number | null
           penalty_points?: number | null
           points?: number
@@ -1229,6 +1237,7 @@ export type Database = {
           max_value?: number | null
           min_value?: number | null
           owner_id?: string | null
+          partial_points?: number | null
           penalty_from?: number | null
           penalty_points?: number | null
           points?: number
