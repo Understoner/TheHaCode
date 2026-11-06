@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/AuthProvider';
 import type { IsoDate } from '@/features/habits/dates';
+import type { HabitSlot } from '@/features/habits/plannedDays';
 import type { HabitTemplate, UserHabit } from '@/features/habits/useHabits';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
@@ -82,6 +83,42 @@ export function useMyChallenges() {
         challenge_items: [...c.challenge_items].sort((a, b) => a.sort_order - b.sort_order),
         challenge_slots: [...c.challenge_slots].sort((a, b) => (a.due_on < b.due_on ? -1 : 1)),
       }));
+    },
+  });
+}
+
+/**
+ * Die Termine aller eigenen Challenges, knapp fuer das Tagebuch: welches Habit
+ * ist an welchem Tag dran (plannedDays.ts). Eine abgebrochene oder geloeschte
+ * Challenge zaehlt als nicht mehr laufend.
+ */
+export function useChallengeSlots() {
+  const { session, loading } = useAuth();
+  const userId = session?.user.id ?? null;
+
+  return useQuery({
+    // Unter ['challenges']: Speichern, Abbrechen und Loeschen laden das mit.
+    queryKey: ['challenges', userId, 'slots'],
+    enabled: !loading && userId !== null,
+    queryFn: async (): Promise<HabitSlot[]> => {
+      const { data, error } = await supabase
+        .from('challenge_slots')
+        .select('starts_on, due_on, challenge_items(user_habit_id), challenges(cancelled_at, deleted_at)')
+        .eq('user_id', userId!)
+        .is('deleted_at', null);
+      if (error) throw error;
+      return (data ?? []).flatMap((slot) =>
+        slot.challenge_items
+          ? [
+              {
+                userHabitId: slot.challenge_items.user_habit_id,
+                startsOn: slot.starts_on,
+                dueOn: slot.due_on,
+                running: slot.challenges !== null && !slot.challenges.cancelled_at && !slot.challenges.deleted_at,
+              },
+            ]
+          : [],
+      );
     },
   });
 }

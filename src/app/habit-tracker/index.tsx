@@ -29,6 +29,8 @@ import {
   useHabitScoreEnabled,
   useMyHabits,
 } from '@/features/habits/useHabits';
+import { habitsPlannedOn } from '@/features/habits/plannedDays';
+import { useChallengeSlots } from '@/features/challenges/useChallenges';
 
 export default function TagebuchScreen() {
   const { session, loading } = useAuth();
@@ -165,6 +167,7 @@ function DiaryContent({ view }: { view: DiaryView }) {
   const plus = usePlusAccess();
   const logs = useHabitLogs(from, to);
   const areas = useHabitAreas();
+  const slots = useChallengeSlots();
 
   return (
     <QueryBoundary query={catalog}>
@@ -175,84 +178,90 @@ function DiaryContent({ view }: { view: DiaryView }) {
               {(plusAccess) => (
                 <QueryBoundary query={logs}>
                   {(allEntries) => (
-                    <QueryBoundary query={areas.query}>
-                      {(enabledAreas) => {
-                        // Nur eingeschaltete Bereiche (0032) - fuer Habits wie fuer
-                        // die Eintraege, damit Woche und Monat dazu passen.
-                        const shown = enabledCategoryIds(categories, enabledAreas);
-                        const active = habits.filter(
-                          (h) => h.is_active && shown.has(h.habit_templates.category_id),
-                        );
-                        const visibleIds = new Set(
-                          habits.filter((h) => shown.has(h.habit_templates.category_id)).map((h) => h.id),
-                        );
-                        const entries = allEntries.filter((l) => visibleIds.has(l.user_habit_id));
-                        if (DESIGN_PREVIEW && view === 'heute') {
-                          return (
-                            <DiaryToday
-                              today={today}
-                              habits={active}
-                              allHabits={habits}
-                              logs={entries}
-                              categories={categories}
-                              plusAccess={plusAccess}
-                              scoreOn={scoreOn}
-                            />
-                          );
-                        }
-                        if (DESIGN_PREVIEW && view === 'woche') {
-                          return (
-                            <View style={styles.stack}>
-                              <DiaryWeek
-                                today={today}
-                                week={week}
-                                onChangeWeek={(w) => setWeek(w > today ? today : w)}
-                                logs={entries}
-                                activeCount={active.length}
-                              />
-                              <DiaryMonth
-                                today={today}
-                                month={month}
-                                onChangeMonth={setMonth}
-                                logs={entries}
-                                activeCount={active.length}
-                              />
-                            </View>
-                          );
-                        }
-                        return (
-                          // Reihenfolge nach Wunsch vom 30.10.2026: die Woche
-                          // zuerst, dann der Tag, darunter der Monat.
-                          <View style={styles.stack}>
-                            <DiaryWeek
-                              today={today}
-                              week={week}
-                              onChangeWeek={(w) => setWeek(w > today ? today : w)}
-                              logs={entries}
-                              activeCount={active.length}
-                            />
+                    <QueryBoundary query={slots}>
+                      {(slotList) => (
+                        <QueryBoundary query={areas.query}>
+                          {(enabledAreas) => {
+                            // Nur eingeschaltete Bereiche (0032) - fuer Habits wie fuer
+                            // die Eintraege, damit Woche und Monat dazu passen.
+                            const shown = enabledCategoryIds(categories, enabledAreas);
+                            const active = habits.filter(
+                              (h) => h.is_active && shown.has(h.habit_templates.category_id),
+                            );
+                            const visibleIds = new Set(
+                              habits.filter((h) => shown.has(h.habit_templates.category_id)).map((h) => h.id),
+                            );
+                            const entries = allEntries.filter((l) => visibleIds.has(l.user_habit_id));
+                            // Manche Habits stehen nur an ihren Terminen da (0049).
+                            const activeToday = habitsPlannedOn(active, slotList, entries, today);
+                            if (DESIGN_PREVIEW && view === 'heute') {
+                              return (
+                                <DiaryToday
+                                  today={today}
+                                  habits={activeToday}
+                                  allHabits={habits}
+                                  logs={entries}
+                                  categories={categories}
+                                  plusAccess={plusAccess}
+                                  scoreOn={scoreOn}
+                                />
+                              );
+                            }
+                            if (DESIGN_PREVIEW && view === 'woche') {
+                              return (
+                                <View style={styles.stack}>
+                                  <DiaryWeek
+                                    today={today}
+                                    week={week}
+                                    onChangeWeek={(w) => setWeek(w > today ? today : w)}
+                                    logs={entries}
+                                    activeCount={activeToday.length}
+                                  />
+                                  <DiaryMonth
+                                    today={today}
+                                    month={month}
+                                    onChangeMonth={setMonth}
+                                    logs={entries}
+                                    activeCount={activeToday.length}
+                                  />
+                                </View>
+                              );
+                            }
+                            return (
+                              // Reihenfolge nach Wunsch vom 30.10.2026: die Woche
+                              // zuerst, dann der Tag, darunter der Monat.
+                              <View style={styles.stack}>
+                                <DiaryWeek
+                                  today={today}
+                                  week={week}
+                                  onChangeWeek={(w) => setWeek(w > today ? today : w)}
+                                  logs={entries}
+                                  activeCount={activeToday.length}
+                                />
 
-                            <HabitDay
-                              date={date}
-                              today={today}
-                              onChangeDate={(d) => setDate(d > today ? today : d)}
-                              habits={active}
-                              logs={entries}
-                              categories={categories}
-                              plusAccess={plusAccess}
-                              scoreOn={scoreOn}
-                            />
+                                <HabitDay
+                                  date={date}
+                                  today={today}
+                                  onChangeDate={(d) => setDate(d > today ? today : d)}
+                                  habits={habitsPlannedOn(active, slotList, entries, date)}
+                                  logs={entries}
+                                  categories={categories}
+                                  plusAccess={plusAccess}
+                                  scoreOn={scoreOn}
+                                />
 
-                            <DiaryMonth
-                              today={today}
-                              month={month}
-                              onChangeMonth={setMonth}
-                              logs={entries}
-                              activeCount={active.length}
-                            />
-                          </View>
-                        );
-                      }}
+                                <DiaryMonth
+                                  today={today}
+                                  month={month}
+                                  onChangeMonth={setMonth}
+                                  logs={entries}
+                                  activeCount={activeToday.length}
+                                />
+                              </View>
+                            );
+                          }}
+                        </QueryBoundary>
+                      )}
                     </QueryBoundary>
                   )}
                 </QueryBoundary>

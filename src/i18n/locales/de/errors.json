@@ -75,7 +75,7 @@
   "habits.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal.",
   "challenges.titleRequired": "Bitte gib dem Übungsweg einen Titel.",
   "challenges.titleLong": "Der Titel darf höchstens 80 Zeichen haben.",
-  "challenges.descriptionLong": "Die Beschreibung darf höchstens 500 Zeichen haben.",
+  "challenges.descriptionLong": "Die Beschreibung darf höchstens 2000 Zeichen haben.",
   "challenges.start": "Bitte wähl einen Starttag.",
   "challenges.duration": "Ein Übungsweg dauert 1 bis 365 Tage.",
   "challenges.noHabits": "Füg mindestens ein Habit hinzu.",
