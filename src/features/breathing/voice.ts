@@ -63,7 +63,7 @@ export type VoiceFiles = {
   end: string;
   /** Vor der ersten Atemphase, immer wenn die Stimme an ist. */
   intro: string;
-  /** Setzt so ein, dass es mit der letzten Atemphase endet (clips.ts). */
+  /** Endet mit Abstand vor der letzten Atemphase, dann folgt das Ende (clips.ts). */
   outro: string;
 };
 
@@ -102,14 +102,14 @@ export function parseVoiceId(value: unknown): VoiceId {
 }
 
 const REPEAT_FROM_MS = 5000;
-const REPEAT_MIN_GAP_S = 1;
+const REPEAT_MIN_GAP_S = 2;
 const REPEAT_MAX_GAP_S = 6;
 /** So lange braucht das laengste Wort. Spaeter ginge es in die naechste Phase hinein. */
 const REPEAT_LAST_MS = 1000;
 
 /**
  * Wann eine lange Phase noch einmal angesagt wird, in ms ab ihrem Beginn:
- * ab der 5. Sekunde, dann in unregelmaessigen Abstaenden von 1 bis 6 Sekunden.
+ * ab der 5. Sekunde, dann in unregelmaessigen Abstaenden von 2 bis 6 Sekunden.
  *
  * Unregelmaessig, aber fest je Segment (`seed`): Anhalten und Fortsetzen darf
  * den Plan nicht neu wuerfeln, und Tests brauchen kein Math.random.

@@ -245,12 +245,12 @@ describe('voiceRepeatOffsetsMs', () => {
     expect(voiceRepeatOffsetsMs(41000, 7)[0]).toBe(5000);
   });
 
-  it('haelt 1 bis 6 Sekunden Abstand und endet vor der naechsten Phase', () => {
+  it('haelt 2 bis 6 Sekunden Abstand und endet vor der naechsten Phase', () => {
     for (let seed = 0; seed < 200; seed += 1) {
       const offsets = voiceRepeatOffsetsMs(41000, seed);
       offsets.slice(1).forEach((at, i) => {
         const gap = at - offsets[i];
-        expect(gap).toBeGreaterThanOrEqual(1000);
+        expect(gap).toBeGreaterThanOrEqual(2000);
         expect(gap).toBeLessThanOrEqual(6000);
       });
       expect(offsets[offsets.length - 1]).toBeLessThanOrEqual(40000);
@@ -263,7 +263,7 @@ describe('voiceRepeatOffsetsMs', () => {
       const offsets = voiceRepeatOffsetsMs(60000, seed);
       offsets.slice(1).forEach((at, i) => gaps.add(at - offsets[i]));
     }
-    expect(gaps.size).toBe(6);
+    expect(gaps.size).toBe(5);
     expect(voiceRepeatOffsetsMs(41000, 3)).toEqual(voiceRepeatOffsetsMs(41000, 3));
   });
 });

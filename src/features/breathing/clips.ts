@@ -8,7 +8,8 @@
 // sich an sie, ohne die Zeitachse aus timeline.ts zu veraendern:
 //
 //   Einstieg: laeuft VOR dem Start der Uhr, ihr Ende startet die Uhr.
-//   Ausklang: setzt so ein, dass er mit der letzten Atemphase endet.
+//   Ausklang: endet mindestens 25 Sekunden vor der letzten Atemphase, damit
+//             vor dem Ende noch geatmet wird.
 //
 // Neben den Ansagen ein eigener Weg: eine Phasenansage bricht die vorige ab,
 // ein Ausklang darf davon nicht abgeschnitten werden. Er laeuft auf demselben
@@ -27,17 +28,20 @@ export type ClipPlayer = {
   setVolume: (value: number) => void;
 };
 
+/** So lange wird nach dem Ausklang noch geatmet, bis das Ende kommt (06.11.2026). */
+export const OUTRO_TO_END_MS = 25_000;
+
 /**
- * Ab welcher Stelle der Aufnahme der Ausklang jetzt laufen muss; null = es ist
- * noch zu frueh. Ueber den Abstand statt ueber einen festen Startmoment: so
+ * Ab welcher Stelle der Aufnahme der Ausklang jetzt laufen muss; null = nicht
+ * jetzt. Ueber den Abstand statt ueber einen festen Startmoment: so
  * steigt er nach "Anhalten" oder einer spaet geladenen Datei an der richtigen
- * Stelle wieder ein. Braeuchte er mehr als die halbe Session, entfaellt er: Er
- * uebertoent die Phasenansagen, und bei kurzen Sessions bliebe davon zu wenig.
+ * Stelle wieder ein. Muesste er vor der Haelfte der Session beginnen, entfaellt
+ * er: Ein Ausklang in der ersten Haelfte wuerde die Uebung zu frueh beenden.
  */
 export function outroOffsetSeconds(elapsedMs: number, totalMs: number, clipMs: number): number | null {
-  if (clipMs * 2 > totalMs) return null;
-  const startMs = totalMs - clipMs;
-  if (elapsedMs < startMs || elapsedMs >= totalMs) return null;
+  const startMs = totalMs - OUTRO_TO_END_MS - clipMs;
+  if (startMs * 2 < totalMs) return null;
+  if (elapsedMs < startMs || elapsedMs >= startMs + clipMs) return null;
   return (elapsedMs - startMs) / 1000;
 }
 

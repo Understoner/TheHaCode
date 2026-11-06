@@ -1,22 +1,28 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createClipPlayer, outroOffsetSeconds } from './clips';
+import { createClipPlayer, OUTRO_TO_END_MS, outroOffsetSeconds } from './clips';
 
 describe('outroOffsetSeconds', () => {
+  // 15 Minuten, 15 Sekunden Ausklang: Er laeuft von 860 s bis 875 s, 25 s vor dem Ende.
+  const total = 900_000;
+  const clip = 15_000;
+
   it('ist vor dem Einsatz null', () => {
-    expect(outroOffsetSeconds(59_999, 90_000, 30_000)).toBeNull();
+    expect(outroOffsetSeconds(859_999, total, clip)).toBeNull();
   });
-  it('setzt so ein, dass die Aufnahme mit der letzten Phase endet', () => {
-    expect(outroOffsetSeconds(60_000, 90_000, 30_000)).toBe(0);
-    expect(outroOffsetSeconds(75_000, 90_000, 30_000)).toBe(15);
+  it('endet 25 Sekunden vor der letzten Atemphase', () => {
+    expect(OUTRO_TO_END_MS).toBe(25_000);
+    expect(outroOffsetSeconds(860_000, total, clip)).toBe(0);
+    expect(outroOffsetSeconds(870_000, total, clip)).toBe(10);
   });
-  it('ist nach dem Ende null', () => {
-    expect(outroOffsetSeconds(90_000, 90_000, 30_000)).toBeNull();
+  it('startet danach nicht noch einmal', () => {
+    expect(outroOffsetSeconds(875_000, total, clip)).toBeNull();
+    expect(outroOffsetSeconds(899_000, total, clip)).toBeNull();
   });
-  it('entfaellt, wenn er mehr als die halbe Session braeuchte', () => {
-    expect(outroOffsetSeconds(10_000, 20_000, 30_000)).toBeNull();
-    expect(outroOffsetSeconds(10_000, 59_000, 30_000)).toBeNull();
-    expect(outroOffsetSeconds(30_000, 60_000, 30_000)).toBe(0);
+  it('entfaellt, wenn er vor der Haelfte der Session beginnen muesste', () => {
+    expect(outroOffsetSeconds(21_000, 60_000, clip)).toBeNull();
+    expect(outroOffsetSeconds(40_000, 80_000, clip)).toBe(0);
+    expect(outroOffsetSeconds(39_000, 79_000, clip)).toBeNull();
   });
 });
 

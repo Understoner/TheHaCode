@@ -5,7 +5,7 @@
 --   1. Den Schalter planned_days_only selbst setzen
 --   2. Die neue Vorlage ohne Admin-Rolle aendern
 --   3. Eine Challenge-Beschreibung ueber die neue Grenze hinaus
--- Dann der Normalfall: ein Weg, drei alte Vorlagen zurueckgezogen.
+-- Dann der Normalfall: ein Weg, die drei alten Vorlagen sind weg.
 begin;
 select plan(6);
 
@@ -37,8 +37,8 @@ select is(
   1, 'Ein Uebungsweg, 28 Tage, ohne Vorschau');
 select is(
   (select count(*)::int from public.challenge_templates
-    where slug in ('co2-toleranz-anfaenger', 'co2-toleranz-fortgeschritten', 'co2-toleranz-expert') and is_published),
-  0, 'Die drei Vorlagen je Stufe sind zurueckgezogen');
+    where slug in ('co2-toleranz-anfaenger', 'co2-toleranz-fortgeschritten', 'co2-toleranz-expert')),
+  0, 'Die drei Vorlagen je Stufe sind entfernt (0052)');
 
 select * from finish();
 rollback;

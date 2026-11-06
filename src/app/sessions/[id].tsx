@@ -193,7 +193,7 @@ function Player({ session }: { session: PlayableExercise }) {
         }
       }
 
-      // Der Ausklang endet mit der letzten Atemphase, auch nach "Anhalten".
+      // Der Ausklang liegt fest vor dem Ende, auch nach "Anhalten".
       const clips = clipsRef.current;
       if (outroUrl && clips && clipsAllowedRef.current && !outroDoneRef.current && !clips.isPlaying()) {
         const clipMs = clips.durationMs(outroUrl);
