@@ -110,6 +110,29 @@ folgenlos.
    gegen echte Daten. Sie sind nach bestem Wissen gesetzt, aber noch nicht
    gegen echte Antworten getestet.
 
+### 2a. Garmin mit persönlichem Schlüssel (Test, erster Import)
+
+Auf der Garmin-Karte unter „Geräte“: Die Person fügt ihren **Personal API
+Key** ein (Garmin Connect im Browser → Einstellungen → Personal API Token,
+am besten 30 Tage Laufzeit). Die Funktion `wearables` (`action:
+"garmin_personal"`) tauscht ihn gegen ein Zugriffstoken, lädt die letzten
+30 Tage in 10-Tage-Stücken und speichert sie über `save_wearable_days()`.
+**Der Schlüssel wird nicht gespeichert und nicht geloggt.** Gibt es noch
+keine Garmin-Verbindung, legt der Import eine ohne Schlüssel an; „Trennen“
+löscht die Werte wie gewohnt.
+
+- Braucht **keine** Garmin-Secrets, nur `WEARABLES_ENABLED`, `WEARABLE_TOKEN_KEY`
+  und die Einwilligung `health_data`.
+- Adressen aus Garmins Beispiel-Client
+  (<https://github.com/garmin/connect-personal-api-python>); die
+  **Antwortformate sind nicht veröffentlicht**. `garminPersonalToDays()`
+  versucht deshalb mehrere Feldnamen. Das Log der Funktion
+  (`garmin-personal shapes`, nur Feldnamen) zeigt, was wirklich kommt –
+  danach nachschärfen.
+- **Bedingungen:** Garmin schreibt zur Personal API „not intended for
+  commercial applications serving multiple end users“. Für Tests mit eigenen
+  Daten unproblematisch; für Endnutzer vor einem Livegang mit Garmin klären.
+
 ### 3. Function Secrets (nur Staging)
 
 ```bash

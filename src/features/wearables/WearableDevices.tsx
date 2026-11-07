@@ -1,7 +1,7 @@
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { PressableRing } from '@/components/PressableRing';
 import { QueryBoundary } from '@/components/QueryBoundary';
@@ -12,11 +12,12 @@ import { formatShort } from '@/features/habits/format';
 import { toIsoDate } from '@/features/habits/dates';
 import { useHabitCatalog, useMyHabits } from '@/features/habits/useHabits';
 
-import type { WearableProvider } from './series';
+import { METRICS, type WearableProvider } from './series';
 import {
   useConnectWearable,
   useDisconnectWearable,
   useFinishWearable,
+  useGarminPersonalImport,
   useSyncWearables,
   useWearableConnections,
   wearableErrorKey,
@@ -191,6 +192,52 @@ function ProviderCard({ provider, connection }: { provider: WearableProvider; co
         </View>
       )}
       {error ? <Text style={styles.errorText}>{t(wearableErrorKey(error))}</Text> : null}
+      {provider === 'garmin' ? <GarminPersonalImport /> : null}
+    </View>
+  );
+}
+
+/**
+ * Letzte 30 Tage mit dem persoenlichen Garmin-Schluessel (Test, erster
+ * Import). Der Schluessel bleibt nur im Feld und wird nach dem Laden geleert.
+ */
+function GarminPersonalImport() {
+  const { t } = useTranslation();
+  const load = useGarminPersonalImport();
+  const [apiKey, setApiKey] = useState('');
+  const trimmed = apiKey.trim();
+
+  const done = load.data
+    ? METRICS.filter((m) => (load.data.imported[m] ?? 0) > 0)
+        .map((m) => t('wearables.devices.personal.item', { metric: t(`wearables.metric.${m}`), count: load.data.imported[m] }))
+        .join(', ')
+    : null;
+
+  return (
+    <View style={styles.personal}>
+      <Text style={styles.subTitle}>{t('wearables.devices.personal.title')}</Text>
+      <Text style={styles.meta}>{t('wearables.devices.personal.text')}</Text>
+      <TextInput
+        value={apiKey}
+        onChangeText={setApiKey}
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="off"
+        aria-label={t('wearables.devices.personal.label')}
+        placeholder={t('wearables.devices.personal.placeholder')}
+        placeholderTextColor={colors.ink500}
+        style={styles.input}
+      />
+      <View style={styles.actions}>
+        <Button
+          label={load.isPending ? t('wearables.devices.personal.loading') : t('wearables.devices.personal.action')}
+          disabled={load.isPending || trimmed.length < 8}
+          onPress={() => load.mutate(trimmed, { onSettled: () => setApiKey('') })}
+        />
+      </View>
+      {done ? <Text style={styles.text}>{t('wearables.devices.personal.done', { list: done })}</Text> : null}
+      {load.error ? <Text style={styles.errorText}>{t(wearableErrorKey(load.error))}</Text> : null}
     </View>
   );
 }
@@ -286,6 +333,27 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 6,
+  },
+  personal: {
+    gap: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+  },
+  subTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.ink900,
+  },
+  input: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.lineStrong,
+    backgroundColor: colors.surface,
+    fontSize: 14,
+    color: colors.ink900,
   },
   cardTitle: {
     fontSize: 16,

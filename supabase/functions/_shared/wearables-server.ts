@@ -14,7 +14,13 @@ import {
   dedupeDays,
   GARMIN,
   GARMIN_SUMMARY_TYPES,
+  garminPersonalPath,
+  garminPersonalToDays,
+  garminPersonalToken,
   garminToDays,
+  GARMIN_PERSONAL,
+  shapeOf,
+  type GarminPersonalEndpoint,
   isGarminCallback,
   splitGarminNotification,
   OURA,
@@ -276,4 +282,94 @@ export async function requestGarminBackfill(token: string) {
       }).catch(() => null),
     ),
   );
+}
+
+// ===================================================================
+// Garmin mit persoenlichem Schluessel: einmaliger Import (07.11.2026)
+// ===================================================================
+
+const PERSONAL_ENDPOINTS: GarminPersonalEndpoint[] = ['steps', 'stress', 'summaries', 'sleeps', 'bodyBattery', 'weight'];
+/** Garmin nennt keine Hoechstspanne je Abfrage - lieber in kleinen Stuecken. */
+const PERSONAL_CHUNK_DAYS = 10;
+
+/**
+ * Laedt mit dem persoenlichen Garmin-Schluessel der Person die letzten 30
+ * Tage. Der Schluessel wird NICHT gespeichert und nie geloggt: er tauscht
+ * sich gegen ein Zugriffstoken (24 h), das nur fuer diese Anfrage lebt.
+ *
+ * Gedacht fuer Tests und den ersten Import. Garmin schreibt zur Personal API:
+ * "not intended for commercial applications serving multiple end users" -
+ * vor einem Livegang mit Garmin klaeren (docs/WEARABLES.md).
+ */
+export async function importGarminPersonal(admin: SupabaseClient, userId: string, apiKey: string) {
+  const tokenResponse = await fetch(GARMIN_PERSONAL.token, {
+    method: 'POST',
+    headers: { Authorization: `ApiKey ${apiKey}`, Accept: 'application/json' },
+  });
+  if (tokenResponse.status === 401 || tokenResponse.status === 403) throw new WearableError('garmin_key_invalid');
+  if (!tokenResponse.ok) throw new WearableError(`garmin_token_${tokenResponse.status}`);
+  const text = await tokenResponse.text();
+  let parsed: unknown = text;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    // reine Zeichenkette - garminPersonalToken prueft, ob es ein JWT ist
+  }
+  const token = garminPersonalToken(parsed);
+  if (!token) throw new WearableError('garmin_key_invalid');
+
+  // Zeitraum in Stuecken: [heute-29 .. heute]
+  const chunks: { from: string; to: string }[] = [];
+  for (let end = 0; end < FIRST_SYNC_DAYS; end += PERSONAL_CHUNK_DAYS) {
+    chunks.push({ from: daysAgo(Math.min(end + PERSONAL_CHUNK_DAYS, FIRST_SYNC_DAYS) - 1), to: daysAgo(end) });
+  }
+
+  const raw: Partial<Record<GarminPersonalEndpoint, unknown[]>> = {};
+  const failed: string[] = [];
+  await Promise.all(
+    PERSONAL_ENDPOINTS.map(async (endpoint) => {
+      const parts: unknown[] = [];
+      for (const { from, to } of chunks) {
+        try {
+          const response = await fetch(`${GARMIN_PERSONAL.api}${garminPersonalPath(endpoint, from, to)}`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+          });
+          if (!response.ok) {
+            failed.push(`${endpoint}:${response.status}`);
+            continue;
+          }
+          parts.push(await response.json());
+        } catch {
+          failed.push(`${endpoint}:fetch`);
+        }
+      }
+      raw[endpoint] = parts;
+    }),
+  );
+
+  // Fuer das Nachschaerfen der Feldnamen: nur Namen, nie Werte.
+  console.log(
+    'garmin-personal shapes',
+    JSON.stringify(Object.fromEntries(PERSONAL_ENDPOINTS.map((e) => [e, shapeOf(raw[e]?.[0])]))),
+    'failed',
+    failed.join(','),
+  );
+
+  const values = garminPersonalToDays(raw);
+  if (values.length === 0) {
+    throw new WearableError(failed.length >= PERSONAL_ENDPOINTS.length * chunks.length ? 'garmin_personal_failed' : 'garmin_personal_empty');
+  }
+
+  // save_wearable_days verlangt eine Verbindung. Ohne OAuth-Zugang steht
+  // sie ohne Schluessel da; "Trennen" loescht die Werte wie gewohnt.
+  const { error } = await admin
+    .from('wearable_connections')
+    .upsert({ user_id: userId, provider: 'garmin', last_error: null, deleted_at: null }, { onConflict: 'user_id,provider' });
+  if (error) throw new WearableError('store_failed');
+
+  await save(admin, userId, 'garmin', values);
+
+  const counts: Record<string, number> = {};
+  for (const v of values) counts[v.metric] = (counts[v.metric] ?? 0) + 1;
+  return { imported: counts };
 }

@@ -98,5 +98,8 @@
   "wearables.oura_membership": "Oura gibt die Werte nur mit aktiver Oura-Mitgliedschaft heraus. Prüfe deine Mitgliedschaft in der Oura-App und gleiche danach noch einmal ab.",
   "wearables.token_expired": "Der Zugriff auf dein Gerät ist abgelaufen. Trenne die Verbindung und verbinde das Gerät noch einmal.",
   "wearables.denied": "Die Verbindung wurde nicht erlaubt. Du kannst es jederzeit noch einmal versuchen.",
+  "wearables.garmin_key_invalid": "Garmin hat den Schlüssel nicht angenommen. Prüfe, ob du ihn vollständig eingefügt hast und ob er noch gültig ist, oder erstelle in Garmin Connect einen neuen.",
+  "wearables.garmin_personal_empty": "Garmin hat für die letzten 30 Tage keine Werte geliefert. Gleiche deine Uhr mit Garmin Connect ab und versuch es danach noch einmal.",
+  "wearables.garmin_personal_failed": "Garmin war gerade nicht erreichbar. Bitte versuch es in ein paar Minuten noch einmal.",
   "wearables.failed": "Das hat leider nicht geklappt. Bitte versuch es in ein paar Minuten noch einmal."
 }
