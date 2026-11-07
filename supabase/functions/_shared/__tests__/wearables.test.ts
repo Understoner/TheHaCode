@@ -12,6 +12,7 @@ import {
   openState,
   ouraToDays,
   pkcePair,
+  splitGarminNotification,
   redirectUriFor,
   seal,
   sealState,
@@ -199,5 +200,34 @@ describe('Verschluesselung', () => {
 
   it('verlangt einen 32-Byte-Schluessel', async () => {
     await expect(importKey(btoa('kurz'))).rejects.toThrow();
+  });
+});
+
+describe('splitGarminNotification', () => {
+  it('trennt Push-Daten je Garmin-Nutzer von Pings', () => {
+    const { pings, pushed } = splitGarminNotification([
+      { userId: 'g1', calendarDate: '2026-11-06', steps: 9000 },
+      { userId: 'g1', calendarDate: '2026-11-05', steps: 7000 },
+      { userId: 'g2', calendarDate: '2026-11-06', steps: 100 },
+      { userId: 'g3', callbackURL: 'https://apis.garmin.com/wellness-api/rest/dailies?x=1' },
+    ]);
+    expect(pushed.get('g1')).toHaveLength(2);
+    expect(pushed.get('g2')).toHaveLength(1);
+    expect(pings).toEqual([{ userId: 'g3', callbackURL: 'https://apis.garmin.com/wellness-api/rest/dailies?x=1' }]);
+  });
+
+  it('liest einen Eintrag mit fremder callbackURL nie als Daten', () => {
+    const { pings, pushed } = splitGarminNotification([
+      { userId: 'g1', callbackURL: 'https://evil.example/x', steps: 99999 },
+    ]);
+    expect(pushed.size).toBe(0);
+    expect(pings).toHaveLength(1);
+  });
+
+  it('verwirft Eintraege ohne userId und Unsinn', () => {
+    const { pings, pushed } = splitGarminNotification([null, 'x', { steps: 1 }, { userId: '' }]);
+    expect(pings).toHaveLength(0);
+    expect(pushed.size).toBe(0);
+    expect(splitGarminNotification(undefined).pushed.size).toBe(0);
   });
 });

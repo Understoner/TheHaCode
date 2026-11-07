@@ -1,14 +1,20 @@
-// Benachrichtigungen von Garmin (0053, nur Testsystem).
+// Benachrichtigungen von Garmin (0053, nur Testsystem; Push seit 07.11.2026).
 //
-// Garmin meldet neue Tageswerte per "Ping" mit einer Abhol-Adresse; abgeholt
-// wird mit dem Schluessel der Person bei apis.garmin.com (wearables-server.ts).
+// Zwei Arten, je nach Zugangsstufe im Garmin Developer Program:
+// - Push (Starter, kostenlos): die Tageszusammenfassungen stehen direkt im
+//   Koerper und werden fuer bekannte Garmin-Nutzer-IDs gespeichert.
+// - Ping (Enterprise): nur eine Abhol-Adresse; abgeholt wird mit dem Token
+//   der Person bei apis.garmin.com (wearables-server.ts).
+//
 // Garmin schickt kein Supabase-JWT, deshalb verify_jwt = false (config.toml).
 // Wer hier anruft, muss stattdessen den vereinbarten Schluessel in der
 // Adresse tragen: ?key=<GARMIN_WEBHOOK_KEY> - so im Garmin-Portal eingetragen.
 //
-// Selbst ein gefaelschter Ping mit gueltigem Schluessel bringt keine falschen
-// Daten ins Tagebuch: abgeholt wird nur von apis.garmin.com, mit dem Token
-// der Person, und nur fuer bekannte Garmin-Nutzer-IDs.
+// ACHTUNG: Bei Push ist dieser Schluessel der einzige Schutz. Wer ihn kennt
+// und eine Garmin-Nutzer-ID errät, kann Tageswerte fuer diese Person
+// einschleusen (nur innerhalb der Wertgrenzen der Habits; manuelle Eintraege
+// bleiben unberuehrt). Schluessel daher nie weitergeben; bei Verdacht neu
+// erzeugen und im Garmin-Portal tauschen.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
 

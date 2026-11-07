@@ -253,6 +253,37 @@ export function isGarminCallback(url: unknown): url is string {
   }
 }
 
+/**
+ * Eine Benachrichtigung von Garmin aufteilen (Push, seit 07.11.2026).
+ *
+ * - Ping (Enterprise): der Eintrag hat eine callbackURL - die Daten werden
+ *   dort abgeholt. Auch eine ungueltige callbackURL bleibt ein Ping und wird
+ *   damit verworfen, nie als Daten gelesen.
+ * - Push (Starter): der Eintrag IST die Tageszusammenfassung, mit userId.
+ *
+ * Push-Eintraege werden je Garmin-Nutzer gesammelt, damit pro Person nur
+ * einmal gespeichert wird.
+ */
+export function splitGarminNotification(items: unknown): {
+  pings: { userId: string; callbackURL: unknown }[];
+  pushed: Map<string, unknown[]>;
+} {
+  const pings: { userId: string; callbackURL: unknown }[] = [];
+  const pushed = new Map<string, unknown[]>();
+  if (!Array.isArray(items)) return { pings, pushed };
+  for (const item of items) {
+    if (typeof item !== 'object' || item === null) continue;
+    const userId = (item as { userId?: unknown }).userId;
+    if (typeof userId !== 'string' || userId.length === 0) continue;
+    if ('callbackURL' in item) {
+      pings.push({ userId, callbackURL: (item as { callbackURL?: unknown }).callbackURL });
+    } else {
+      pushed.set(userId, [...(pushed.get(userId) ?? []), item]);
+    }
+  }
+  return { pings, pushed };
+}
+
 // ===================================================================
 // Mehrere Tage zusammenfassen
 // ===================================================================

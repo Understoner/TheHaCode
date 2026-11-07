@@ -16,6 +16,7 @@ import {
   GARMIN_SUMMARY_TYPES,
   garminToDays,
   isGarminCallback,
+  splitGarminNotification,
   OURA,
   ouraToDays,
   seal,
@@ -216,8 +217,21 @@ export async function handleGarminPing(admin: SupabaseClient, key: CryptoKey, bo
   }
 
   for (const type of GARMIN_SUMMARY_TYPES) {
-    const items = Array.isArray(body[type]) ? (body[type] as { userId?: string; callbackURL?: string }[]) : [];
-    for (const item of items) {
+    const { pings, pushed } = splitGarminNotification(body[type]);
+
+    // Push (Starter): die Zusammenfassungen stehen schon im Koerper.
+    for (const [garminUserId, summaries] of pushed) {
+      const owner = await garminOwner(admin, garminUserId);
+      if (!owner) continue;
+      try {
+        await save(admin, owner.user_id, 'garmin', garminToDays(type as GarminSummaryType, summaries));
+      } catch (error) {
+        await markError(admin, owner.user_id, 'garmin', error instanceof WearableError ? error.message : 'sync_failed');
+      }
+    }
+
+    // Ping (Enterprise): bei Garmin abholen, mit dem Token der Person.
+    for (const item of pings) {
       if (!isGarminCallback(item.callbackURL)) continue;
       const owner = await garminOwner(admin, item.userId);
       if (!owner) continue;
@@ -247,7 +261,11 @@ export async function garminOwner(admin: SupabaseClient, garminUserId: unknown):
   return (data as Secret | null) ?? null;
 }
 
-/** Nach dem Verbinden: Garmin um die letzten 30 Tage bitten (kommt per Ping). */
+/**
+ * Nach dem Verbinden: Garmin um die letzten 30 Tage bitten. Nur mit
+ * Enterprise-Zugang - beim Starter-Zugang (keine Rueckschau) lehnt Garmin
+ * ab, das bleibt folgenlos: Werte kommen dann ab dem Tag des Verbindens.
+ */
 export async function requestGarminBackfill(token: string) {
   const end = Math.floor(Date.now() / 1000);
   const start = end - FIRST_SYNC_DAYS * 86400;

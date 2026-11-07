@@ -55,7 +55,9 @@ Edge Function wearables ──► wearable_secrets (Tokens AES-GCM-verschlüssel
   ▼
 save_wearable_days() ──► wearable_daily ──► apply_wearable_days() ──► habit_logs
 
-Garmin ── Ping ──► Edge Function wearables-garmin (?key=…)
+Garmin ── Push ──► Edge Function wearables-garmin (?key=…)   Starter-Zugang
+                    └─ Daten stehen im Körper, gespeichert für bekannte Garmin-IDs
+Garmin ── Ping ──► dieselbe Funktion                         Enterprise-Zugang
                     └─ holt bei apis.garmin.com mit dem Token der Person ab
 ```
 
@@ -74,17 +76,39 @@ Ohne sie zeigt die App „Oura gibt die Werte nur mit aktiver Mitgliedschaft her
 
 ### 2. Garmin
 
-1. Zugang zum **Garmin Connect Developer Program** (Health API) beantragen:
-   <https://developer.garmin.com/gc-developer-program/>. Die Freischaltung
-   prüft Garmin von Hand und dauert erfahrungsgemäß einige Tage bis Wochen.
+Garmin hat das Developer Program im Oktober 2026 neu geordnet (Stand 07.11.2026):
+
+| Stufe | Für | Lieferung | Rückschau | Kosten |
+|---|---|---|---|---|
+| Personal | eigene Daten einer Person | nur Pull | – | frei |
+| **Starter** | Firmen, Einstieg | **nur Push** | **keine** | frei (laut Fachpresse) |
+| Enterprise | Firmen im großen Stil | Push oder Ping/Pull | ab 1 Monat | nach Vereinbarung |
+
+**Personal scheidet aus:** laut Garmin-FAQ „not intended for commercial
+applications serving multiple end users“; Schlüssel laufen nach höchstens
+einem Jahr ab. Nur zum Prüfen der Feldnamen mit den eigenen Daten nutzbar.
+
+**Wir nutzen Starter.** Die Funktion `wearables-garmin` nimmt Push und Ping an
+(`splitGarminNotification`), so passt sie ohne Umbau auch zu Enterprise.
+Ohne Rückschau stehen Garmin-Werte erst ab dem Tag des Verbindens im
+Tagebuch; die Rückschau-Anfrage nach dem Verbinden lehnt Garmin bei Starter ab,
+folgenlos.
+
+1. Beim **Garmin Connect Developer Program** eine App mit **Starter Access**
+   beantragen: <https://developer.garmin.com/gc-developer-program/>. Nötig sind
+   eine öffentliche Website und eine veröffentlichte Datenschutzerklärung.
 2. Im Portal OAuth 2.0 (PKCE) wählen, Redirect URI wie bei Oura.
-3. Summary-Typen **Dailies, Sleeps, Stress Details, Body Compositions** sowie
-   **Deregistrations** und **User Permissions** im Modus **Ping** auf diese Adresse stellen:
+3. Summary-Typen **Dailies, Sleeps, Stress Details, Body Compositions** im
+   Modus **Push** sowie **Deregistrations** und **User Permissions** auf diese
+   Adresse stellen:
    `https://tlhjtkmfdzylzpkqdkrn.supabase.co/functions/v1/wearables-garmin?key=<GARMIN_WEBHOOK_KEY>`
-4. **Nach der Freischaltung prüfen:** Adressen (`GARMIN` in
-   `supabase/functions/_shared/wearables.ts`) und Feldnamen gegen die aktuelle
-   Garmin-Dokumentation. Sie sind nach bestem Wissen gesetzt, aber mangels
-   Zugang noch nicht gegen echte Antworten getestet.
+4. **Schlüssel schützen:** Bei Push ist `GARMIN_WEBHOOK_KEY` der einzige Schutz
+   gegen eingeschleuste Werte. Nie weitergeben; bei Verdacht neu erzeugen und
+   im Portal tauschen.
+5. **Nach der Freischaltung prüfen:** Adressen (`GARMIN` in
+   `supabase/functions/_shared/wearables.ts`), Feldnamen und das Push-Format
+   gegen echte Daten. Sie sind nach bestem Wissen gesetzt, aber noch nicht
+   gegen echte Antworten getestet.
 
 ### 3. Function Secrets (nur Staging)
 
