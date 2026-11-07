@@ -11,6 +11,7 @@ import { useConsents } from '@/features/consents/useConsents';
 import { formatShort } from '@/features/habits/format';
 import { toIsoDate } from '@/features/habits/dates';
 import { useHabitCatalog, useMyHabits } from '@/features/habits/useHabits';
+import { openExternalUrl } from '@/lib/externalLink';
 
 import { METRICS, type WearableProvider } from './series';
 import {
@@ -26,6 +27,9 @@ import {
 } from './useWearables';
 
 const PROVIDERS: WearableProvider[] = ['oura', 'garmin'];
+
+/** Hier erstellt man in Garmin Connect den persoenlichen Schluessel (Anmeldung noetig). */
+const GARMIN_PERSONAL_TOKEN_PAGE = 'https://connect.garmin.com/app/settings/personalApiToken';
 
 /**
  * Geraete verbinden und trennen (0053, nur Testsystem). Hierher springt auch
@@ -217,6 +221,13 @@ function GarminPersonalImport() {
     <View style={styles.personal}>
       <Text style={styles.subTitle}>{t('wearables.devices.personal.title')}</Text>
       <Text style={styles.meta}>{t('wearables.devices.personal.text')}</Text>
+      <Text
+        role="link"
+        style={styles.link}
+        onPress={() => openExternalUrl(GARMIN_PERSONAL_TOKEN_PAGE)}
+      >
+        {t('wearables.devices.personal.create')}
+      </Text>
       <TextInput
         value={apiKey}
         onChangeText={setApiKey}
