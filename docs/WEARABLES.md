@@ -124,11 +124,12 @@ löscht die Werte wie gewohnt.
 - Braucht **keine** Garmin-Secrets, nur `WEARABLES_ENABLED`, `WEARABLE_TOKEN_KEY`
   und die Einwilligung `health_data`.
 - Adressen aus Garmins Beispiel-Client
-  (<https://github.com/garmin/connect-personal-api-python>); die
-  **Antwortformate sind nicht veröffentlicht**. `garminPersonalToDays()`
-  versucht deshalb mehrere Feldnamen. Das Log der Funktion
-  (`garmin-personal shapes`, nur Feldnamen) zeigt, was wirklich kommt –
-  danach nachschärfen.
+  (<https://github.com/garmin/connect-personal-api-python>). Die Formate sind
+  am 07.11.2026 gegen echte Antworten geprüft (Kommentar in
+  `garminPersonalToDays()`): Das Token kommt als reiner Text, und Garmin
+  lehnt `Accept: application/json` dort mit 406 ab. Alle zehn Werte kommen an.
+  Ändert Garmin etwas, zeigt das Log der Funktion
+  (`garmin-personal shapes`, nur Feldnamen), was stattdessen kommt.
 - **Bedingungen:** Garmin schreibt zur Personal API „not intended for
   commercial applications serving multiple end users“. Für Tests mit eigenen
   Daten unproblematisch; für Endnutzer vor einem Livegang mit Garmin klären.

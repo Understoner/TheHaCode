@@ -304,7 +304,9 @@ const PERSONAL_CHUNK_DAYS = 10;
 export async function importGarminPersonal(admin: SupabaseClient, userId: string, apiKey: string) {
   const tokenResponse = await fetch(GARMIN_PERSONAL.token, {
     method: 'POST',
-    headers: { Authorization: `ApiKey ${apiKey}`, Accept: 'application/json' },
+    // Garmin antwortet mit dem Token als reinem Text und lehnt
+    // "Accept: application/json" mit 406 ab (geprueft 07.11.2026).
+    headers: { Authorization: `ApiKey ${apiKey}` },
   });
   if (tokenResponse.status === 401 || tokenResponse.status === 403) throw new WearableError('garmin_key_invalid');
   if (!tokenResponse.ok) throw new WearableError(`garmin_token_${tokenResponse.status}`);

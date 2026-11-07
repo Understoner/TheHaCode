@@ -282,6 +282,52 @@ describe('Garmin Personal API', () => {
     expect(pick(days, 'weight')).toBe(72.35);
   });
 
+  it('liest die echten Formate der Personal API (Struktur vom 07.11.2026, Werte erfunden)', () => {
+    const days = garminPersonalToDays({
+      summaries: [
+        {
+          data: [
+            {
+              calendarDate: '2026-11-06',
+              movement: { steps: { goal: 5000, value: 8800 }, floorsAscended: { goal: 10, value: 14 } },
+              heartRate: { minValue: 50, maxValue: 150, restingValue: 58 },
+              intensityMinutes: { goal: 150, moderate: 12, vigorous: 6 },
+              stress: { avgLevel: 31, maxLevel: 90 },
+              bodyBattery: { minValue: 10, maxValue: 70 },
+            },
+          ],
+        },
+      ],
+      sleeps: [
+        [
+          {
+            calendarDate: '2026-11-06',
+            sleepTimeSeconds: 25200,
+            sleepScores: { overall: { value: 77, qualifierKey: 'FAIR' } },
+            averageRespirationValue: 13,
+          },
+        ],
+      ],
+      bodyBattery: [[{ date: '2026-11-06', bodyBatteryValuesArray: [[1, 20], [2, 60]] }]],
+      weight: [
+        {
+          dailyWeightSummaries: [{ summaryDate: '2026-11-06', latestWeight: { calendarDate: '2026-11-06', weight: 70500 } }],
+          totalAverage: { weight: 71000 },
+        },
+      ],
+    });
+    expect(pick(days, 'steps')).toBe(8800);
+    expect(pick(days, 'floors')).toBe(14);
+    expect(pick(days, 'intensity_minutes')).toBe(24);
+    expect(pick(days, 'resting_hr')).toBe(58);
+    expect(pick(days, 'stress_level')).toBe(31);
+    expect(pick(days, 'sleep_hours')).toBe(7);
+    expect(pick(days, 'sleep_score')).toBe(77);
+    expect(pick(days, 'respiration')).toBe(13);
+    expect(pick(days, 'body_battery')).toBe(40);
+    expect(pick(days, 'weight')).toBe(70.5);
+  });
+
   it('nimmt Health-API-Schreibweisen und die Statistik als Ersatz', () => {
     const days = garminPersonalToDays({
       steps: [[{ calendarDate: '2026-11-06', totalSteps: 500 }, { calendarDate: '2026-11-04', totalSteps: 4000 }]],
