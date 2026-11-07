@@ -288,12 +288,19 @@ export function splitGarminNotification(items: unknown): {
 // Garmin mit persoenlichem Schluessel (Personal API, 07.11.2026)
 // ===================================================================
 //
-// Fuer Tests und den ersten Import der letzten 30 Tage. Garmin hat die
-// Antwortformate der Personal API nicht veroeffentlicht; die Adressen stammen
-// aus Garmins Beispiel-Client (github.com/garmin/connect-personal-api-python).
-// Die Feldnamen sind deshalb bewusst mehrfach versucht (Garmin-Connect- und
-// Health-API-Schreibweise). Was davon wirklich kommt, zeigt das Log der
-// Funktion (nur Feldnamen, nie Werte) - danach hier nachschaerfen.
+// Fuer Tests und den ersten Import der letzten 30 Tage. Adressen aus Garmins
+// Beispiel-Client (github.com/garmin/connect-personal-api-python); die
+// Formate am 07.11.2026 gegen echte Antworten geprueft:
+// - Token: reiner Text (JWT), kein JSON
+// - dailysummaries: {data:[{calendarDate, movement.steps.value,
+//   movement.floorsAscended.value, intensityMinutes.moderate/vigorous,
+//   heartRate.restingValue, stress.avgLevel, ...}]}
+// - Schlaf: flache Liste mit sleepTimeSeconds, sleepScores.overall.value,
+//   averageRespirationValue; Tag = Morgen nach der Nacht
+// - Body Battery: [{date, bodyBatteryValuesArray:[[ms, level], ...]}]
+// - Gewicht: {dailyWeightSummaries:[{summaryDate, latestWeight.weight (g)}]}
+// Die alten Schreibweisen bleiben als Ersatz stehen; das Log der Funktion
+// zeigt weiter nur Feldnamen, falls Garmin etwas aendert.
 
 export const GARMIN_PERSONAL = {
   token: 'https://personal.connectapi.garmin.com/personalapitoken-service/personal-api/personal-api-key/token',
@@ -388,10 +395,17 @@ export function garminPersonalToDays(raw: Partial<Record<GarminPersonalEndpoint,
 
   for (const d of (raw.summaries ?? []).flatMap(listOf)) {
     const day = dayOf(d);
-    push(out, 'steps', day, first(d, ['totalSteps', 'steps']));
-    push(out, 'floors', day, first(d, ['floorsAscended', 'floorsClimbed']));
-    const moderateMin = first(d, ['moderateIntensityMinutes']);
-    const vigorousMin = first(d, ['vigorousIntensityMinutes']);
+    const movement = isObj(d.movement) ? d.movement : undefined;
+    const stepsOf = movement && isObj(movement.steps) ? movement.steps : undefined;
+    const floorsOf = movement && isObj(movement.floorsAscended) ? movement.floorsAscended : undefined;
+    const intensity = isObj(d.intensityMinutes) ? d.intensityMinutes : undefined;
+    const heart = isObj(d.heartRate) ? d.heartRate : undefined;
+    const stressOf = isObj(d.stress) ? d.stress : undefined;
+
+    push(out, 'steps', day, first(stepsOf, ['value']) ?? first(d, ['totalSteps', 'steps']));
+    push(out, 'floors', day, first(floorsOf, ['value']) ?? first(d, ['floorsAscended', 'floorsClimbed']));
+    const moderateMin = first(intensity, ['moderate']) ?? first(d, ['moderateIntensityMinutes']);
+    const vigorousMin = first(intensity, ['vigorous']) ?? first(d, ['vigorousIntensityMinutes']);
     const moderateSec = first(d, ['moderateIntensityDurationInSeconds']);
     const vigorousSec = first(d, ['vigorousIntensityDurationInSeconds']);
     if (moderateMin !== null || vigorousMin !== null) {
@@ -399,8 +413,8 @@ export function garminPersonalToDays(raw: Partial<Record<GarminPersonalEndpoint,
     } else if (moderateSec !== null || vigorousSec !== null) {
       push(out, 'intensity_minutes', day, ((moderateSec ?? 0) + 2 * (vigorousSec ?? 0)) / 60);
     }
-    push(out, 'resting_hr', day, first(d, ['restingHeartRate', 'restingHeartRateInBeatsPerMinute']));
-    const stress = first(d, ['averageStressLevel']);
+    push(out, 'resting_hr', day, first(heart, ['restingValue']) ?? first(d, ['restingHeartRate', 'restingHeartRateInBeatsPerMinute']));
+    const stress = first(stressOf, ['avgLevel']) ?? first(d, ['averageStressLevel']);
     if (stress !== null && stress >= 0) push(out, 'stress_level', day, stress);
   }
 

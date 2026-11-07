@@ -45,6 +45,9 @@ export function wearableErrorKey(error: unknown): string {
 /** Den Fehlercode aus der Antwort lesen - supabase-js liefert sie bei 4xx/5xx nur als Response. */
 async function codeOf(error: unknown): Promise<string> {
   if (error instanceof FunctionsHttpError) {
+    // 404 ohne JSON: Funktion auf dieser Umgebung ausgeschaltet
+    // (Secret WEARABLES_ENABLED fehlt) - nicht die allgemeine Meldung zeigen.
+    if ((error.context as Response).status === 404) return 'not_configured';
     try {
       const body = (await (error.context as Response).json()) as { error?: string };
       if (typeof body.error === 'string') return body.error;
