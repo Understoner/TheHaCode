@@ -50,6 +50,9 @@ const END_VOICE_AFTER_TONE_S = 1.2;
 // Wachhaltung gehen. Nicht zeitkritisch - deshalb reicht ein setTimeout.
 const END_AUDIO_MS = 8000;
 
+/** Stille zwischen dem Ende des Intros und dem ersten Atemzug (06.11.2026). */
+const INTRO_GAP_MS = 2000;
+
 function mmss(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
@@ -424,7 +427,16 @@ function Player({ session }: { session: PlayableExercise }) {
       setIntroPlaying(true);
       void clips.load(introUrl).then((loaded) => {
         if (run !== introRunRef.current) return;
-        if (!loaded || !clips.play(introUrl, 0, () => run === introRunRef.current && beginBreathing())) {
+        // Nach dem Intro 2 s Stille, dann der erste Atemzug (Wunsch des
+        // Users, 06.11.2026). Ein einmaliger Abstand, kein Takt - deshalb
+        // setTimeout und keine Uhr. Wer in der Pause "Ueberspringen" drueckt
+        // oder die Seite verlaesst, erhoeht introRunRef: dann startet die
+        // Pause nichts mehr.
+        const afterIntro = () => {
+          if (run !== introRunRef.current) return;
+          setTimeout(() => run === introRunRef.current && beginBreathing(), INTRO_GAP_MS);
+        };
+        if (!loaded || !clips.play(introUrl, 0, afterIntro)) {
           beginBreathing();
         }
       });
