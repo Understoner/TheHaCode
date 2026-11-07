@@ -252,6 +252,8 @@ export function useSaveLog() {
           updated_at: now,
           deleted_at: null,
           client_id: null,
+          // Selbst eingetragen - auch eine Korrektur eines Geraetewerts (0053).
+          source: null,
         };
         queryClient.setQueryData<HabitLog[]>(key, [...without, optimistic]);
       }

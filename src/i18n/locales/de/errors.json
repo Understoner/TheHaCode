@@ -91,5 +91,12 @@
   "challenges.past": "Vergangene Tage lassen sich nicht mehr planen. Wähl einen Tag ab heute.",
   "challenges.startPast": "Ein Übungsweg beginnt heute oder später. Wähl einen anderen Starttag.",
   "challenges.range": "Ein Termin liegt außerhalb des Übungswegs. Prüf Start und Dauer noch einmal.",
-  "challenges.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal."
+  "challenges.save": "Das ließ sich nicht speichern. Versuch es bitte noch einmal.",
+  "wearables.consent_required": "Dafür brauchen wir zuerst deine Einwilligung für das Tagebuch. Du findest sie, wenn du das Tagebuch öffnest.",
+  "wearables.not_configured": "Die Verbindung zu diesem Gerät ist gerade nicht eingerichtet. Bitte versuch es später noch einmal.",
+  "wearables.state_invalid": "Die Verbindung ist abgelaufen oder gehört zu einem anderen Konto. Bitte starte sie hier noch einmal.",
+  "wearables.oura_membership": "Oura gibt die Werte nur mit aktiver Oura-Mitgliedschaft heraus. Prüfe deine Mitgliedschaft in der Oura-App und gleiche danach noch einmal ab.",
+  "wearables.token_expired": "Der Zugriff auf dein Gerät ist abgelaufen. Trenne die Verbindung und verbinde das Gerät noch einmal.",
+  "wearables.denied": "Die Verbindung wurde nicht erlaubt. Du kannst es jederzeit noch einmal versuchen.",
+  "wearables.failed": "Das hat leider nicht geklappt. Bitte versuch es in ein paar Minuten noch einmal."
 }

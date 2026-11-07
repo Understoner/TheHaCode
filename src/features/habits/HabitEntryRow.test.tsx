@@ -74,6 +74,7 @@ function habit(tracking: 'done' | 'number', overrides: Partial<MyHabit['habit_te
       is_health_measure: false,
       partial_points: null,
       planned_days_only: false,
+      wearable_metric: null,
       icon: null,
       sort_order: 0,
       is_published: true,
@@ -99,6 +100,7 @@ const eintrag: HabitLog = {
   updated_at: DATUM,
   deleted_at: null,
   client_id: null,
+  source: null,
 };
 
 function zeige(props: Partial<Parameters<typeof HabitEntryRow>[0]> & { habit: MyHabit }) {

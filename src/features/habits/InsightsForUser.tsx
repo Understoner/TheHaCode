@@ -1,5 +1,8 @@
+import { StyleSheet, View as RNView } from 'react-native';
+
 import { QueryBoundary } from '@/components/QueryBoundary';
-import { DESIGN_PREVIEW } from '@/design/tokens';
+import { DESIGN_PREVIEW, spacing } from '@/design/tokens';
+import { WearableInsights } from '@/features/wearables/WearableInsights';
 
 import { addDays, today as heute } from './dates';
 import { DiaryInsights } from './DiaryInsights';
@@ -37,14 +40,18 @@ export function InsightsForUser() {
                     // Im Testsystem die Auswertung als Erlebnis (DiaryJourney, 02.11.2026).
                     const View = DESIGN_PREVIEW ? DiaryJourney : DiaryInsights;
                     return (
-                    <View
-                      today={today}
-                      habits={habits}
-                      logs={entries}
-                      sessions={sessionList}
-                      categories={categories}
-                      scoreOn={scoreOn}
-                    />
+                    <RNView style={styles.stack}>
+                      <View
+                        today={today}
+                        habits={habits}
+                        logs={entries}
+                        sessions={sessionList}
+                        categories={categories}
+                        scoreOn={scoreOn}
+                      />
+                      {/* Werte der Geraete (0053, nur Testsystem, nur mit Verbindung). */}
+                      <WearableInsights today={today} />
+                    </RNView>
                     );
                   }}
                 </QueryBoundary>
@@ -56,3 +63,9 @@ export function InsightsForUser() {
     </QueryBoundary>
   );
 }
+
+const styles = StyleSheet.create({
+  stack: {
+    gap: spacing.md,
+  },
+});

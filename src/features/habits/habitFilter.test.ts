@@ -56,6 +56,7 @@ function template(id: string, overrides: Partial<HabitTemplate> = {}): HabitTemp
     is_health_measure: false,
     partial_points: null,
     planned_days_only: false,
+    wearable_metric: null,
     icon: null,
     sort_order: 0,
     is_published: true,

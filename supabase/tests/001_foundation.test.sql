@@ -162,6 +162,15 @@ insert into public.certificates (user_id, course_id, code, full_name, score, tot
 values ('11111111-1111-1111-1111-111111111111', '11111111-aaaa-0000-0000-000000000042',
         'AC-0001-0001', 'Kaskade', 1, 1);
 
+-- Geraete-Anbindung (0053): Verbindung, Schluessel und Tageswerte haengen
+-- per cascade an auth.users.
+insert into public.wearable_connections (id, user_id, provider)
+values ('11111111-aaaa-0000-0000-000000000053', '11111111-1111-1111-1111-111111111111', 'oura');
+insert into public.wearable_secrets (connection_id, user_id, provider, access_token)
+values ('11111111-aaaa-0000-0000-000000000053', '11111111-1111-1111-1111-111111111111', 'oura', 'x');
+insert into public.wearable_daily (user_id, provider, metric, day, value)
+values ('11111111-1111-1111-1111-111111111111', 'oura', 'steps', current_date, 1);
+
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select is((
   select count(*) from (
@@ -198,6 +207,12 @@ select is((
     select user_id from public.course_progress where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.course_plan_slots where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.wearable_connections where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.wearable_secrets where user_id = '11111111-1111-1111-1111-111111111111'
+    union all
+    select user_id from public.wearable_daily where user_id = '11111111-1111-1111-1111-111111111111'
     union all
     select user_id from public.quiz_attempts where user_id = '11111111-1111-1111-1111-111111111111'
     union all

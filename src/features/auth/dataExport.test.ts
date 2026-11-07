@@ -27,6 +27,8 @@ describe('EXPORT_TABLES', () => {
       'subscriptions',
       'user_consents',
       'user_habits',
+      'wearable_connections',
+      'wearable_daily',
     ]);
   });
 });

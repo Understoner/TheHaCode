@@ -1108,6 +1108,7 @@ export type Database = {
           id: string
           log_date: string
           note: string | null
+          source: string | null
           updated_at: string
           user_habit_id: string
           user_id: string
@@ -1121,6 +1122,7 @@ export type Database = {
           id?: string
           log_date: string
           note?: string | null
+          source?: string | null
           updated_at?: string
           user_habit_id: string
           user_id: string
@@ -1134,6 +1136,7 @@ export type Database = {
           id?: string
           log_date?: string
           note?: string | null
+          source?: string | null
           updated_at?: string
           user_habit_id?: string
           user_id?: string
@@ -1184,6 +1187,7 @@ export type Database = {
           tracking_type: Database["public"]["Enums"]["habit_tracking_type"]
           unit: string | null
           updated_at: string
+          wearable_metric: string | null
         }
         Insert: {
           category_id: string
@@ -1218,6 +1222,7 @@ export type Database = {
           tracking_type: Database["public"]["Enums"]["habit_tracking_type"]
           unit?: string | null
           updated_at?: string
+          wearable_metric?: string | null
         }
         Update: {
           category_id?: string
@@ -1252,6 +1257,7 @@ export type Database = {
           tracking_type?: Database["public"]["Enums"]["habit_tracking_type"]
           unit?: string | null
           updated_at?: string
+          wearable_metric?: string | null
         }
         Relationships: [
           {
@@ -1943,6 +1949,134 @@ export type Database = {
           },
         ]
       }
+      wearable_connections: {
+        Row: {
+          client_id: string | null
+          connected_at: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          last_error: string | null
+          last_synced_at: string | null
+          provider: Database["public"]["Enums"]["wearable_provider"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          connected_at?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          provider: Database["public"]["Enums"]["wearable_provider"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          connected_at?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          provider?: Database["public"]["Enums"]["wearable_provider"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wearable_daily: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          day: string
+          deleted_at: string | null
+          id: string
+          metric: string
+          provider: Database["public"]["Enums"]["wearable_provider"]
+          updated_at: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          day: string
+          deleted_at?: string | null
+          id?: string
+          metric: string
+          provider: Database["public"]["Enums"]["wearable_provider"]
+          updated_at?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          day?: string
+          deleted_at?: string | null
+          id?: string
+          metric?: string
+          provider?: Database["public"]["Enums"]["wearable_provider"]
+          updated_at?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      wearable_secrets: {
+        Row: {
+          access_token: string
+          client_id: string | null
+          connection_id: string
+          created_at: string
+          deleted_at: string | null
+          expires_at: string | null
+          provider: Database["public"]["Enums"]["wearable_provider"]
+          provider_user_id: string | null
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          client_id?: string | null
+          connection_id: string
+          created_at?: string
+          deleted_at?: string | null
+          expires_at?: string | null
+          provider: Database["public"]["Enums"]["wearable_provider"]
+          provider_user_id?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          client_id?: string | null
+          connection_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          expires_at?: string | null
+          provider?: Database["public"]["Enums"]["wearable_provider"]
+          provider_user_id?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wearable_secrets_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: true
+            referencedRelation: "wearable_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       v_exercise_duration: {
@@ -1954,6 +2088,10 @@ export type Database = {
       }
     }
     Functions: {
+      apply_wearable_days: {
+        Args: { p_from: string; p_to: string; p_user_id: string }
+        Returns: number
+      }
       can_open_course: { Args: { p_course_id: string }; Returns: boolean }
       can_open_course_media: { Args: { p_name: string }; Returns: boolean }
       can_plan_challenge: { Args: { p_challenge_id: string }; Returns: boolean }
@@ -1978,6 +2116,7 @@ export type Database = {
       }
       has_plus_access: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      is_wearable_metric: { Args: { p_metric: string }; Returns: boolean }
       issue_certificate: {
         Args: { p_course_id: string; p_full_name: string }
         Returns: {
@@ -2000,6 +2139,13 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      remove_wearable: {
+        Args: {
+          p_provider: Database["public"]["Enums"]["wearable_provider"]
+          p_user_id: string
+        }
+        Returns: undefined
       }
       reserve_course_seat: {
         Args: {
@@ -2146,6 +2292,14 @@ export type Database = {
             }
             Returns: string
           }
+      save_wearable_days: {
+        Args: {
+          p_provider: Database["public"]["Enums"]["wearable_provider"]
+          p_user_id: string
+          p_values: Json
+        }
+        Returns: number
+      }
       set_user_admin: {
         Args: { p_email: string; p_is_admin: boolean }
         Returns: boolean
@@ -2207,6 +2361,7 @@ export type Database = {
         | "incomplete"
         | "expired"
       visibility_level: "free" | "registered" | "plus"
+      wearable_provider: "oura" | "garmin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2366,6 +2521,7 @@ export const Constants = {
         "expired",
       ],
       visibility_level: ["free", "registered", "plus"],
+      wearable_provider: ["oura", "garmin"],
     },
   },
 } as const

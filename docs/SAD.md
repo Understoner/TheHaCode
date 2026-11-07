@@ -1407,6 +1407,25 @@ Zeitraum und plant sie auf Tage. Seiten: `/habit-tracker/challenges`
 
 ---
 
+### 3.15 Geräte-Anbindung Oura und Garmin (Erprobung, nur Testsystem, 07.11.2026)
+
+Auf Wunsch des Users als Erprobung gebaut, **nicht** Teil von V1 bis V1.2 und
+auf Live per Schalter aus. Wer mag, verbindet Oura und/oder Garmin. Tageswerte
+landen in `wearable_daily` (je Anbieter), die Datenbank füllt daraus die
+gewählten Lebensstil-Habits (Schritte, Schlafdauer, Schlafwert, Etagen,
+Intensitätsminuten) mit dem Durchschnitt der Anbieter. Weitere Tageswerte
+(Ruhepuls, Body Battery, Stress, Atemfrequenz) stehen nur in der Auswertung.
+Nur Tageswerte, keine Verläufe. HealthKit, Health Connect und KI-Auswertung
+sind ausdrücklich nicht Teil davon.
+
+Schreiben nur über `save_wearable_days()` / `remove_wearable()` (service_role,
+Einwilligung `health_data` und `can_use_habit_template()` in der Datenbank).
+Was die Person selbst einträgt, gewinnt (`habit_logs.source`). Tokens
+AES-GCM-verschlüsselt in `wearable_secrets` (nur service_role). Einrichtung,
+Rücknahme und offene Punkte: `docs/WEARABLES.md`.
+
+---
+
 ## 4. Auth & Payment Flow
 
 ### 4.1 Auth
