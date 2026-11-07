@@ -5,6 +5,8 @@
 //   POST {action:"finish", code, state}           -> Code einloesen, verbinden
 //   POST {action:"sync"}                          -> Oura abholen
 //   POST {action:"disconnect", provider}          -> widerrufen und loeschen
+//   POST {action:"garmin_personal", apiKey}        -> letzte 30 Tage mit dem
+//        persoenlichen Garmin-Schluessel laden (wird nicht gespeichert)
 //
 // Garmin liefert seine Daten selbst, ueber die Funktion wearables-garmin.
 //
@@ -37,6 +39,7 @@ import {
 import {
   clientFor,
   env,
+  importGarminPersonal,
   isProvider,
   requestGarminBackfill,
   requestToken,
@@ -200,7 +203,7 @@ Deno.serve(async (request) => {
   if (error || !data.user) return json({ error: 'unauthorized' }, 401, origin);
   const userId = data.user.id;
 
-  let body: { action?: unknown; provider?: unknown; code?: unknown; state?: unknown };
+  let body: { action?: unknown; provider?: unknown; code?: unknown; state?: unknown; apiKey?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -218,13 +221,25 @@ Deno.serve(async (request) => {
         return json(await sync(admin, key, userId), 200, origin);
       case 'disconnect':
         return json(await disconnect(admin, key, userId, body.provider), 200, origin);
+      case 'garmin_personal': {
+        const apiKey = typeof body.apiKey === 'string' ? body.apiKey.trim() : '';
+        if (apiKey.length < 8 || apiKey.length > 2000) return json({ error: 'garmin_key_invalid' }, 400, origin);
+        const { data: consent } = await userClient.rpc('has_consent', { p_kind: 'health_data' });
+        if (consent !== true) throw new WearableError('consent_required');
+        return json(await importGarminPersonal(admin, userId, apiKey), 200, origin);
+      }
       default:
         return json({ error: 'bad_request' }, 400, origin);
     }
   } catch (caught) {
     const code = caught instanceof WearableError ? caught.message : 'failed';
     console.error('wearables', body.action, code);
-    const status = code === 'consent_required' || code === 'state_invalid' ? 403 : code === 'bad_request' ? 400 : 502;
+    const status =
+      code === 'consent_required' || code === 'state_invalid'
+        ? 403
+        : code === 'bad_request' || code === 'garmin_key_invalid'
+          ? 400
+          : 502;
     // Nur der Code geht an die App; sie zeigt dazu eine deutsche Meldung.
     return json({ error: code }, status, origin);
   }

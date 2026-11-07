@@ -25,6 +25,9 @@ const KNOWN_ERRORS = [
   'oura_membership',
   'token_expired',
   'denied',
+  'garmin_key_invalid',
+  'garmin_personal_empty',
+  'garmin_personal_failed',
 ] as const;
 
 export class WearableActionError extends Error {
@@ -56,7 +59,8 @@ type Action =
   | { action: 'start'; provider: WearableProvider }
   | { action: 'finish'; code: string; state: string }
   | { action: 'sync' }
-  | { action: 'disconnect'; provider: WearableProvider };
+  | { action: 'disconnect'; provider: WearableProvider }
+  | { action: 'garmin_personal'; apiKey: string };
 
 async function invoke<T>(body: Action): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>('wearables', { method: 'POST', body });
@@ -149,6 +153,20 @@ export function useDisconnectWearable() {
   return useMutation({
     mutationFn: (provider: WearableProvider) => invoke<{ disconnected: WearableProvider }>({ action: 'disconnect', provider }),
     onSuccess: () => invalidate(),
+  });
+}
+
+/**
+ * Die letzten 30 Tage mit dem persoenlichen Garmin-Schluessel laden (Test und
+ * erster Import). Der Schluessel geht nur an die Edge Function und wird dort
+ * nicht gespeichert; im Client liegt er nur im Eingabefeld.
+ */
+export function useGarminPersonalImport() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (apiKey: string) =>
+      invoke<{ imported: Record<string, number> }>({ action: 'garmin_personal', apiKey }),
+    onSettled: () => invalidate(),
   });
 }
 

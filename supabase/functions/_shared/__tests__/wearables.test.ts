@@ -4,6 +4,11 @@ import {
   authorizeUrl,
   dedupeDays,
   garminBodyCompsToDays,
+  garminPersonalPath,
+  garminPersonalToDays,
+  garminPersonalToken,
+  listOf,
+  shapeOf,
   garminDailiesToDays,
   garminSleepsToDays,
   garminStressToDays,
@@ -229,5 +234,96 @@ describe('splitGarminNotification', () => {
     expect(pings).toHaveLength(0);
     expect(pushed.size).toBe(0);
     expect(splitGarminNotification(undefined).pushed.size).toBe(0);
+  });
+});
+
+describe('Garmin Personal API', () => {
+  it('liest Tageszusammenfassung, Schlaf, Body Battery und Gewicht', () => {
+    const days = garminPersonalToDays({
+      summaries: [
+        [
+          {
+            calendarDate: '2026-11-06',
+            totalSteps: 9100,
+            floorsAscended: 12,
+            moderateIntensityMinutes: 20,
+            vigorousIntensityMinutes: 10,
+            restingHeartRate: 51,
+            averageStressLevel: 28,
+          },
+          { calendarDate: '2026-11-05', averageStressLevel: -1 },
+        ],
+      ],
+      sleeps: [
+        [
+          {
+            dailySleepDTO: {
+              calendarDate: '2026-11-06',
+              sleepTimeSeconds: 27000,
+              sleepScores: { overall: { value: 83 } },
+              averageRespirationValue: 14.5,
+            },
+          },
+        ],
+      ],
+      bodyBattery: [[{ date: '2026-11-06', bodyBatteryValuesArray: [[1, 40], [2, 60], [3, null]] }]],
+      weight: [{ dailyWeightSummaries: [{ summaryDate: '2026-11-06', latestWeight: { weight: 72350 } }] }],
+    });
+    expect(pick(days, 'steps')).toBe(9100);
+    expect(pick(days, 'floors')).toBe(12);
+    expect(pick(days, 'intensity_minutes')).toBe(40);
+    expect(pick(days, 'resting_hr')).toBe(51);
+    expect(pick(days, 'stress_level')).toBe(28);
+    expect(pick(days, 'stress_level', '2026-11-05')).toBeUndefined();
+    expect(pick(days, 'sleep_hours')).toBe(7.5);
+    expect(pick(days, 'sleep_score')).toBe(83);
+    expect(pick(days, 'respiration')).toBe(14.5);
+    expect(pick(days, 'body_battery')).toBe(50);
+    expect(pick(days, 'weight')).toBe(72.35);
+  });
+
+  it('nimmt Health-API-Schreibweisen und die Statistik als Ersatz', () => {
+    const days = garminPersonalToDays({
+      steps: [[{ calendarDate: '2026-11-06', totalSteps: 500 }, { calendarDate: '2026-11-04', totalSteps: 4000 }]],
+      summaries: [[{ calendarDate: '2026-11-06', steps: 9000, floorsClimbed: 3, moderateIntensityDurationInSeconds: 600 }]],
+      sleeps: [[{ calendarDate: '2026-11-06', deepSleepSeconds: 3600, lightSleepSeconds: 7200, overallSleepScore: { value: 70 } }]],
+      stress: [[{ calendarDate: '2026-11-04', values: { overallStressLevel: 33 } }]],
+    });
+    // Die Zusammenfassung gewinnt gegen die Statistik am selben Tag.
+    expect(pick(days, 'steps')).toBe(9000);
+    expect(pick(days, 'steps', '2026-11-04')).toBe(4000);
+    expect(pick(days, 'floors')).toBe(3);
+    expect(pick(days, 'intensity_minutes')).toBe(10);
+    expect(pick(days, 'sleep_hours')).toBe(3);
+    expect(pick(days, 'sleep_score')).toBe(70);
+    expect(pick(days, 'stress_level', '2026-11-04')).toBe(33);
+  });
+
+  it('ignoriert Unsinn ohne Absturz', () => {
+    expect(garminPersonalToDays({ summaries: [null, 'x', { calendarDate: 'gestern', totalSteps: 5 }] })).toEqual([]);
+    expect(listOf(null)).toEqual([]);
+  });
+
+  it('findet das Token in verschiedenen Antworten', () => {
+    expect(garminPersonalToken({ access_token: 'abc' })).toBe('abc');
+    expect(garminPersonalToken({ accessToken: 'def' })).toBe('def');
+    expect(garminPersonalToken('aaa.bbb.ccc')).toBe('aaa.bbb.ccc');
+    expect(garminPersonalToken('kein token')).toBeNull();
+    expect(garminPersonalToken({})).toBeNull();
+  });
+
+  it('baut die Adressen mit beiden Tagen', () => {
+    expect(garminPersonalPath('summaries', '2026-10-08', '2026-10-17')).toBe(
+      '/usersummary-service/v2/dailysummaries?startDate=2026-10-08&endDate=2026-10-17',
+    );
+    expect(garminPersonalPath('weight', '2026-10-08', '2026-10-17')).toBe(
+      '/weight-service/weight/range/2026-10-08/2026-10-17?includeAll=true',
+    );
+  });
+
+  it('gibt fuers Log nur Feldnamen weiter, keine Werte', () => {
+    const shape = shapeOf([{ calendarDate: '2026-11-06', totalSteps: 9100, latestWeight: { weight: 72350 } }]);
+    expect(shape).toEqual(['calendarDate', 'totalSteps', 'latestWeight', 'latestWeight.weight']);
+    expect(JSON.stringify(shape)).not.toContain('9100');
   });
 });

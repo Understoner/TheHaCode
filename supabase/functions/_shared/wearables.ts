@@ -285,6 +285,158 @@ export function splitGarminNotification(items: unknown): {
 }
 
 // ===================================================================
+// Garmin mit persoenlichem Schluessel (Personal API, 07.11.2026)
+// ===================================================================
+//
+// Fuer Tests und den ersten Import der letzten 30 Tage. Garmin hat die
+// Antwortformate der Personal API nicht veroeffentlicht; die Adressen stammen
+// aus Garmins Beispiel-Client (github.com/garmin/connect-personal-api-python).
+// Die Feldnamen sind deshalb bewusst mehrfach versucht (Garmin-Connect- und
+// Health-API-Schreibweise). Was davon wirklich kommt, zeigt das Log der
+// Funktion (nur Feldnamen, nie Werte) - danach hier nachschaerfen.
+
+export const GARMIN_PERSONAL = {
+  token: 'https://personal.connectapi.garmin.com/personalapitoken-service/personal-api/personal-api-key/token',
+  api: 'https://personal.connectapi.garmin.com',
+} as const;
+
+export type GarminPersonalEndpoint = 'summaries' | 'steps' | 'stress' | 'sleeps' | 'bodyBattery' | 'weight';
+
+/** Pfad je Endpunkt fuer einen Zeitraum (beide Tage einschliesslich). */
+export function garminPersonalPath(endpoint: GarminPersonalEndpoint, from: string, to: string): string {
+  const range = `startDate=${from}&endDate=${to}`;
+  switch (endpoint) {
+    case 'summaries':
+      return `/usersummary-service/v2/dailysummaries?${range}`;
+    case 'steps':
+      return `/usersummary-service/stats/steps/daily/${from}/${to}`;
+    case 'stress':
+      return `/usersummary-service/stats/stress/daily/${from}/${to}`;
+    case 'sleeps':
+      return `/sleep-service/sleep/dailySleepSummariesByDate?${range}`;
+    case 'bodyBattery':
+      return `/wellness-service/wellness/bodyBattery/reports/daily?${range}`;
+    case 'weight':
+      return `/weight-service/weight/range/${from}/${to}?includeAll=true`;
+  }
+}
+
+/** Zugriffsschluessel aus der Token-Antwort - Feldname nicht dokumentiert. */
+export function garminPersonalToken(body: unknown): string | null {
+  if (typeof body === 'string') return body.trim().split('.').length === 3 ? body.trim() : null;
+  if (typeof body !== 'object' || body === null) return null;
+  for (const name of ['access_token', 'accessToken', 'token', 'bearerToken']) {
+    const value = (body as Record<string, unknown>)[name];
+    if (typeof value === 'string' && value.length > 0) return value;
+  }
+  return null;
+}
+
+type Obj = Record<string, unknown>;
+
+function isObj(value: unknown): value is Obj {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** Eine Liste aus der Antwort: das Array selbst oder das erste Array darin. */
+export function listOf(raw: unknown): Obj[] {
+  if (Array.isArray(raw)) return raw.filter(isObj);
+  if (isObj(raw)) {
+    for (const value of Object.values(raw)) {
+      if (Array.isArray(value) && value.some(isObj)) return value.filter(isObj);
+    }
+    return [raw];
+  }
+  return [];
+}
+
+function first(obj: Obj | undefined, names: string[]): number | null {
+  if (!obj) return null;
+  for (const name of names) {
+    const value = num(obj[name]);
+    if (value !== null) return value;
+  }
+  return null;
+}
+
+function dayOf(obj: Obj): unknown {
+  return obj.calendarDate ?? obj.summaryDate ?? obj.date;
+}
+
+/** Nur die Feldnamen des ersten Eintrags - fuers Log, ohne Werte. */
+export function shapeOf(raw: unknown): string[] {
+  const item = listOf(raw)[0];
+  if (!item) return [];
+  return Object.entries(item).flatMap(([key, value]) =>
+    isObj(value) ? [key, ...Object.keys(value).map((inner) => `${key}.${inner}`)] : [key],
+  );
+}
+
+export function garminPersonalToDays(raw: Partial<Record<GarminPersonalEndpoint, unknown[]>>): DayValue[] {
+  const out: DayValue[] = [];
+
+  // Zuerst die schmalen Statistiken, danach die Tageszusammenfassung: beim
+  // Zusammenfassen gewinnt der spaetere Wert (dedupeDays).
+  for (const item of (raw.steps ?? []).flatMap(listOf)) {
+    push(out, 'steps', dayOf(item), first(item, ['totalSteps', 'steps']));
+  }
+  for (const item of (raw.stress ?? []).flatMap(listOf)) {
+    const values = isObj(item.values) ? item.values : item;
+    const level = first(values, ['overallStressLevel', 'averageStressLevel']);
+    if (level !== null && level >= 0) push(out, 'stress_level', dayOf(item), level);
+  }
+
+  for (const d of (raw.summaries ?? []).flatMap(listOf)) {
+    const day = dayOf(d);
+    push(out, 'steps', day, first(d, ['totalSteps', 'steps']));
+    push(out, 'floors', day, first(d, ['floorsAscended', 'floorsClimbed']));
+    const moderateMin = first(d, ['moderateIntensityMinutes']);
+    const vigorousMin = first(d, ['vigorousIntensityMinutes']);
+    const moderateSec = first(d, ['moderateIntensityDurationInSeconds']);
+    const vigorousSec = first(d, ['vigorousIntensityDurationInSeconds']);
+    if (moderateMin !== null || vigorousMin !== null) {
+      push(out, 'intensity_minutes', day, (moderateMin ?? 0) + 2 * (vigorousMin ?? 0));
+    } else if (moderateSec !== null || vigorousSec !== null) {
+      push(out, 'intensity_minutes', day, ((moderateSec ?? 0) + 2 * (vigorousSec ?? 0)) / 60);
+    }
+    push(out, 'resting_hr', day, first(d, ['restingHeartRate', 'restingHeartRateInBeatsPerMinute']));
+    const stress = first(d, ['averageStressLevel']);
+    if (stress !== null && stress >= 0) push(out, 'stress_level', day, stress);
+  }
+
+  for (const entry of (raw.sleeps ?? []).flatMap(listOf)) {
+    const s = isObj(entry.dailySleepDTO) ? entry.dailySleepDTO : entry;
+    const day = dayOf(s);
+    const total = first(s, ['sleepTimeSeconds', 'durationInSeconds']);
+    const parts = ['deepSleepSeconds', 'lightSleepSeconds', 'remSleepSeconds'].map((n) => first(s, [n]));
+    const seconds = total ?? (parts.some((p) => p !== null) ? parts.reduce<number>((a, b) => a + (b ?? 0), 0) : null);
+    if (seconds !== null && seconds > 0) push(out, 'sleep_hours', day, seconds / 3600);
+    const scores = isObj(s.sleepScores) && isObj(s.sleepScores.overall) ? s.sleepScores.overall : undefined;
+    const overall = isObj(s.overallSleepScore) ? s.overallSleepScore : undefined;
+    push(out, 'sleep_score', day, first(scores, ['value']) ?? first(overall, ['value']) ?? first(s, ['sleepScore']));
+    push(out, 'respiration', day, first(s, ['averageRespirationValue', 'avgSleepRespirationValue']));
+  }
+
+  for (const b of (raw.bodyBattery ?? []).flatMap(listOf)) {
+    const levels = Array.isArray(b.bodyBatteryValuesArray)
+      ? (b.bodyBatteryValuesArray as unknown[])
+          .map((pair) => (Array.isArray(pair) ? num(pair[1]) : null))
+          .filter((v): v is number => v !== null && v >= 0)
+      : [];
+    push(out, 'body_battery', dayOf(b), mean(levels) ?? first(b, ['average', 'bodyBatteryAverage']));
+  }
+
+  for (const w of (raw.weight ?? []).flatMap(listOf)) {
+    const latest = isObj(w.latestWeight) ? w.latestWeight : w;
+    const value = first(latest, ['weight', 'weightInGrams']);
+    // Garmin Connect liefert Gramm; ein Wert unter 1000 waere schon Kilogramm.
+    if (value !== null) push(out, 'weight', dayOf(w) ?? dayOf(latest), value > 1000 ? value / 1000 : value);
+  }
+
+  return dedupeDays(out);
+}
+
+// ===================================================================
 // Mehrere Tage zusammenfassen
 // ===================================================================
 
