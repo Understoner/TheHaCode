@@ -24,7 +24,8 @@ export type WearableMetric =
   | 'body_battery'
   | 'stress_level'
   | 'stress_minutes'
-  | 'respiration';
+  | 'respiration'
+  | 'weight';
 
 export type DayValue = { metric: WearableMetric; day: string; value: number };
 
@@ -153,9 +154,16 @@ export type GarminStressDetail = {
   timeOffsetStressLevelValues?: Record<string, number>;
 };
 
-export type GarminSummaryType = 'dailies' | 'sleeps' | 'stressDetails';
+/** Body Composition: Index-Waage oder Eingabe in Garmin Connect (0054). */
+export type GarminBodyComp = {
+  measurementTimeInSeconds?: number;
+  measurementTimeOffsetInSeconds?: number;
+  weightInGrams?: number;
+};
 
-export const GARMIN_SUMMARY_TYPES: readonly GarminSummaryType[] = ['dailies', 'sleeps', 'stressDetails'];
+export type GarminSummaryType = 'dailies' | 'sleeps' | 'stressDetails' | 'bodyComps';
+
+export const GARMIN_SUMMARY_TYPES: readonly GarminSummaryType[] = ['dailies', 'sleeps', 'stressDetails', 'bodyComps'];
 
 export function garminDailiesToDays(items: GarminDaily[]): DayValue[] {
   const out: DayValue[] = [];
@@ -202,9 +210,30 @@ export function garminStressToDays(items: GarminStressDetail[]): DayValue[] {
   return out;
 }
 
+/**
+ * Gewicht in kg. Body Compositions tragen kein calendarDate: der Tag ergibt
+ * sich aus Messzeit plus Zeitzonen-Versatz der Person. Mehrere Messungen an
+ * einem Tag - die letzte zaehlt.
+ */
+export function garminBodyCompsToDays(items: GarminBodyComp[]): DayValue[] {
+  const sorted = [...items].sort(
+    (a, b) => (num(a.measurementTimeInSeconds) ?? 0) - (num(b.measurementTimeInSeconds) ?? 0),
+  );
+  const out: DayValue[] = [];
+  for (const b of sorted) {
+    const at = num(b.measurementTimeInSeconds);
+    const grams = num(b.weightInGrams);
+    if (at === null || grams === null || grams <= 0) continue;
+    const day = new Date((at + (num(b.measurementTimeOffsetInSeconds) ?? 0)) * 1000).toISOString().slice(0, 10);
+    push(out, 'weight', day, grams / 1000);
+  }
+  return dedupeDays(out);
+}
+
 export function garminToDays(type: GarminSummaryType, items: unknown[]): DayValue[] {
   if (type === 'dailies') return garminDailiesToDays(items as GarminDaily[]);
   if (type === 'sleeps') return garminSleepsToDays(items as GarminSleep[]);
+  if (type === 'bodyComps') return garminBodyCompsToDays(items as GarminBodyComp[]);
   return garminStressToDays(items as GarminStressDetail[]);
 }
 

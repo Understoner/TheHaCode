@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   authorizeUrl,
   dedupeDays,
+  garminBodyCompsToDays,
   garminDailiesToDays,
   garminSleepsToDays,
   garminStressToDays,
@@ -116,6 +117,17 @@ describe('Garmin', () => {
       { calendarDate: '2026-11-06', timeOffsetBodyBatteryValues: { '0': 80, '180': 60, '360': 40 } },
     ]);
     expect(pick(days, 'body_battery')).toBe(60);
+  });
+
+  it('nimmt das Gewicht in kg, am Ortstag, die letzte Messung zaehlt', () => {
+    // 05.11.2026 23:30 UTC = 06.11. 00:30 in Wien (+3600 s)
+    const lateUtc = Date.UTC(2026, 10, 5, 23, 30) / 1000;
+    const days = garminBodyCompsToDays([
+      { measurementTimeInSeconds: lateUtc + 7200, measurementTimeOffsetInSeconds: 3600, weightInGrams: 72350 },
+      { measurementTimeInSeconds: lateUtc, measurementTimeOffsetInSeconds: 3600, weightInGrams: 72800 },
+      { measurementTimeInSeconds: lateUtc, weightInGrams: 0 },
+    ]);
+    expect(days).toEqual([{ metric: 'weight', day: '2026-11-06', value: 72.35 }]);
   });
 
   it('holt Daten nur bei Garmin ab', () => {

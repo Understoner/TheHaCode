@@ -1,7 +1,7 @@
 -- docs/inhalte/wearables.sql
 --
--- Zwei neue Lebensstil-Habits fuer die Geraete-Anbindung (Migration 0053,
--- 07.11.2026). Inhalt, kein Schema: laeuft im SQL Editor von STAGING (oder
+-- Drei neue Habits fuer die Geraete-Anbindung (Migration 0053/0054,
+-- 07.11.2026): Etagen, Intensitaetsminuten, Gewicht. Inhalt, kein Schema: laeuft im SQL Editor von STAGING (oder
 -- lokal per psql) - NICHT auf Live, solange die Anbindung dort aus ist
 -- (docs/WEARABLES.md).
 --
@@ -31,10 +31,27 @@ select v.slug, c.id, v.title, v.description_md, 'number',
   join public.habit_categories c on c.slug = 'bewegung'
 on conflict (slug) do nothing;
 
+-- Gewicht (0054): ein Gesundheits-Messwert ohne Punkte und ohne Wertgrenzen
+-- (SAD §5.7, is_health_measure) - die App zeigt nur den eigenen Verlauf.
+-- Mit einer Garmin-Waage oder der Eingabe in Garmin Connect fuellt die App
+-- es selbst; von Hand geht es immer.
+insert into public.habit_templates (
+  slug, category_id, title, description_md, tracking_type,
+  unit, min_value, max_value, step_value, default_target, higher_is_better,
+  points, is_negative, is_preview, is_health_measure, sort_order, is_published, wearable_metric
+)
+select 'gewicht', c.id, 'Gewicht',
+  'Trag dein Gewicht ein, am besten morgens nach dem Aufstehen und immer unter denselben Bedingungen – so werden die Werte vergleichbar. Einzelne Tage schwanken um ein bis zwei Kilo, aussagekräftig ist der Verlauf über Wochen. Es gibt dafür keine Punkte: Das Gewicht ist ein Messwert, kein Ziel, das du täglich erreichen musst. Mit einer Garmin-Waage oder deiner Eingabe in Garmin Connect trägt die App den Wert selbst ein.',
+  'number', 'kg', 20, 400, 0.1, null, false,
+  0, false, false, true, 30, true, 'weight'
+  from public.habit_categories c
+ where c.slug = 'ernaehrung'
+on conflict (slug) do nothing;
+
 -- Pruefen:
 -- select slug, title, unit, points, points_from, wearable_metric, is_published
 --   from public.habit_templates where wearable_metric is not null order by sort_order;
 
 -- Ruecknahme (nur bei Bedarf):
 -- update public.habit_templates set is_published = false
---  where owner_id is null and slug in ('etagen', 'intensitaetsminuten');
+--  where owner_id is null and slug in ('etagen', 'intensitaetsminuten', 'gewicht');

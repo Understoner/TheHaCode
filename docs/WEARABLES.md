@@ -1,6 +1,6 @@
 # Geräte-Anbindung Oura und Garmin
 
-Stand 07.11.2026 · Migration `0053` · **nur Testsystem (Staging)**
+Stand 07.11.2026 · Migrationen `0053`, `0054` · **nur Testsystem (Staging)**
 
 Wer mag, verbindet seinen Oura-Ring und/oder seine Garmin-Uhr. Die App füllt
 dann die gewählten Lebensstil-Habits selbst aus und zeigt weitere Tageswerte in
@@ -16,6 +16,7 @@ keine Einzelmessungen.
 | Schlafwert (0–100) | `daily_sleep.score` | `sleeps.overallSleepScore` | `schlafqualitaet-wearable` |
 | Etagen | – | `dailies.floorsClimbed` | `etagen` (neu, `docs/inhalte/wearables.sql`) |
 | Intensitätsminuten | mäßig + 2 × intensiv | mäßig + 2 × intensiv | `intensitaetsminuten` (neu) |
+| Gewicht (kg) | – (Oura misst kein Gewicht) | `bodyComps.weightInGrams`, letzte Messung des Tages | `gewicht` (neu, ohne Punkte, `is_health_measure`) |
 | Ruhepuls | niedrigster Wert im Hauptschlaf | `restingHeartRate…` | nur Auswertung |
 | Body Battery | – | Tagesdurchschnitt aus `stressDetails` | nur Auswertung |
 | Stress (0–100) | – | `averageStressLevel` | nur Auswertung |
@@ -63,7 +64,7 @@ Garmin ── Ping ──► Edge Function wearables-garmin (?key=…)
 ### 1. Oura
 
 1. Unter <https://cloud.ouraring.com/oauth/applications> eine Anwendung anlegen.
-2. Redirect URI: `https://staging.deine-domain.at/habit-tracker/geraete`
+2. Redirect URI: `https://dev.deratemcode.at/habit-tracker/geraete`
    (für lokal zusätzlich `http://localhost:8081/habit-tracker/geraete`).
 3. Scope: `daily`.
 4. Client ID und Secret notieren.
@@ -77,9 +78,9 @@ Ohne sie zeigt die App „Oura gibt die Werte nur mit aktiver Mitgliedschaft her
    <https://developer.garmin.com/gc-developer-program/>. Die Freischaltung
    prüft Garmin von Hand und dauert erfahrungsgemäß einige Tage bis Wochen.
 2. Im Portal OAuth 2.0 (PKCE) wählen, Redirect URI wie bei Oura.
-3. Summary-Typen **Dailies, Sleeps, Stress Details** sowie **Deregistrations**
-   und **User Permissions** im Modus **Ping** auf diese Adresse stellen:
-   `https://<staging-ref>.supabase.co/functions/v1/wearables-garmin?key=<GARMIN_WEBHOOK_KEY>`
+3. Summary-Typen **Dailies, Sleeps, Stress Details, Body Compositions** sowie
+   **Deregistrations** und **User Permissions** im Modus **Ping** auf diese Adresse stellen:
+   `https://tlhjtkmfdzylzpkqdkrn.supabase.co/functions/v1/wearables-garmin?key=<GARMIN_WEBHOOK_KEY>`
 4. **Nach der Freischaltung prüfen:** Adressen (`GARMIN` in
    `supabase/functions/_shared/wearables.ts`) und Feldnamen gegen die aktuelle
    Garmin-Dokumentation. Sie sind nach bestem Wissen gesetzt, aber mangels
@@ -88,7 +89,7 @@ Ohne sie zeigt die App „Oura gibt die Werte nur mit aktiver Mitgliedschaft her
 ### 3. Function Secrets (nur Staging)
 
 ```bash
-supabase secrets set --project-ref <staging-ref> \
+supabase secrets set --project-ref tlhjtkmfdzylzpkqdkrn \
   WEARABLES_ENABLED=true \
   WEARABLE_TOKEN_KEY="$(openssl rand -base64 32)" \
   OURA_CLIENT_ID=... OURA_CLIENT_SECRET=... \
@@ -103,7 +104,7 @@ Verbindungen trennen und neu verbinden). Auf Live wird **nichts** davon gesetzt.
 ### 4. Inhalte (nur Staging)
 
 `docs/inhalte/wearables.sql` im SQL Editor von Staging ausführen: legt die
-Habits „Etagen gestiegen“ und „Intensitätsminuten“ an.
+Habits „Etagen gestiegen“, „Intensitätsminuten“ und „Gewicht“ an.
 
 ## Warum Live aus bleibt
 

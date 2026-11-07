@@ -16,6 +16,7 @@ export const METRICS = [
   'sleep_score',
   'floors',
   'intensity_minutes',
+  'weight',
   // Nur in der Auswertung
   'resting_hr',
   'body_battery',
@@ -33,6 +34,7 @@ export const HABIT_METRICS: readonly WearableMetric[] = [
   'sleep_score',
   'floors',
   'intensity_minutes',
+  'weight',
 ];
 
 /** Nachkommastellen in der Anzeige. */
@@ -47,6 +49,7 @@ export const DECIMALS: Record<WearableMetric, number> = {
   stress_level: 0,
   stress_minutes: 0,
   respiration: 1,
+  weight: 1,
 };
 
 export type DailyRow = { provider: WearableProvider; metric: string; day: IsoDate; value: number | string };

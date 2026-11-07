@@ -1174,7 +1174,7 @@
   "wearables.provider.garmin": "Garmin",
   "wearables.settings.title": "Geräte",
   "wearables.settings.action": "Oura und Garmin verbinden",
-  "wearables.settings.text": "Schritte, Schlaf, Etagen und Intensitätsminuten automatisch eintragen lassen",
+  "wearables.settings.text": "Schritte, Schlaf, Etagen, Intensitätsminuten und Gewicht automatisch eintragen lassen",
   "wearables.devices.back": "← Einstellungen",
   "wearables.devices.title": "Geräte",
   "wearables.devices.unavailable": "Die Anbindung von Geräten gibt es hier noch nicht.",
@@ -1185,7 +1185,7 @@
   "wearables.devices.statusOn": "Verbunden",
   "wearables.devices.statusOff": "Nicht verbunden",
   "wearables.devices.about.oura": "Schritte, Schlafdauer, Schlafwert, Intensitätsminuten, Ruhepuls, Atemfrequenz und Minuten mit hohem Stress. Die App holt die Werte, sobald du das Tagebuch öffnest. Oura gibt Daten nur mit aktiver Oura-Mitgliedschaft heraus.",
-  "wearables.devices.about.garmin": "Schritte, Etagen, Intensitätsminuten, Schlafdauer, Schlafwert, Ruhepuls, Body Battery, Stress und Atemfrequenz. Garmin schickt neue Werte von selbst, meist wenige Minuten nachdem sich deine Uhr mit Garmin Connect abgeglichen hat.",
+  "wearables.devices.about.garmin": "Schritte, Etagen, Intensitätsminuten, Schlafdauer, Schlafwert, Ruhepuls, Body Battery, Stress, Atemfrequenz und Gewicht (von einer Garmin-Waage oder deiner Eingabe in Garmin Connect). Garmin schickt neue Werte von selbst, meist wenige Minuten nachdem sich deine Uhr mit Garmin Connect abgeglichen hat.",
   "wearables.devices.connect": "Mit {{provider}} verbinden",
   "wearables.devices.connected": "{{provider}} ist verbunden. Die ersten Werte können ein paar Minuten brauchen.",
   "wearables.devices.finishing": "Verbindung wird eingerichtet …",
@@ -1235,5 +1235,7 @@
   "wearables.unit.body_battery": "von 100",
   "wearables.unit.stress_level": "von 100",
   "wearables.unit.stress_minutes": "Min.",
-  "wearables.unit.respiration": "Atemzüge/Min."
+  "wearables.unit.respiration": "Atemzüge/Min.",
+  "wearables.metric.weight": "Gewicht",
+  "wearables.unit.weight": "kg"
 }
