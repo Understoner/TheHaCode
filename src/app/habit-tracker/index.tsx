@@ -31,6 +31,8 @@ import {
 } from '@/features/habits/useHabits';
 import { habitsPlannedOn } from '@/features/habits/plannedDays';
 import { useChallengeSlots } from '@/features/challenges/useChallenges';
+import { WEARABLES_ENABLED } from '@/features/wearables/flag';
+import { WearableAutoSync } from '@/features/wearables/WearableAutoSync';
 
 export default function TagebuchScreen() {
   const { session, loading } = useAuth();
@@ -69,6 +71,8 @@ export default function TagebuchScreen() {
             {/* Kurstermine (V1.2) stehen neben den Habits und brauchen keine
                 Einwilligung - deshalb ausserhalb von DiaryForUser. */}
             {view !== 'auswertung' ? <CourseAgenda /> : null}
+            {/* Oura still abgleichen (0053, nur Testsystem, nur mit Verbindung). */}
+            {WEARABLES_ENABLED ? <WearableAutoSync /> : null}
             <DiaryForUser view={view} />
           </>
         )}

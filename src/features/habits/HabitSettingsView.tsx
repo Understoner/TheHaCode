@@ -13,6 +13,7 @@ import { usePlusAccess } from '@/features/configurator/useSequences';
 import { CORE_AREA, enabledCategoryIds, isAreaEnabled, toggleArea } from '@/features/habits/habitAreas';
 import { AreaGlyph } from '@/features/habits/HabitPicker';
 import { useHabitAreas, useHabitCatalog, useHabitScoreEnabled, useMyHabits } from '@/features/habits/useHabits';
+import { WEARABLES_ENABLED } from '@/features/wearables/flag';
 
 // Die Einstellungen des Tagebuchs im Vorschlag "Mondlicht Mobile"
 // (02.11.2026, nur Testsystem): Zeilen mit Zeichen statt Textkarten, echte
@@ -25,6 +26,7 @@ const LIST = 'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01';
 const PLUS = 'M12 5v14M5 12h14';
 const ROUTE = 'M6 19a2 2 0 1 0 0-4a2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4a2 2 0 0 0 0 4zM8 17h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7';
 const STAR = 'M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z';
+const WATCH = 'M8 6V3h8v3M8 18v3h8v-3M7 6h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM12 9v3l2 1';
 
 function Icon({ d, color }: { d: string; color: string }) {
   return (
@@ -166,6 +168,23 @@ export function HabitSettingsView() {
           />
         </Link>
       </View>
+
+      {/* Geraete-Anbindung Oura und Garmin (0053, nur Testsystem). */}
+      {WEARABLES_ENABLED ? (
+        <>
+          <Text style={styles.kicker}>{t('wearables.settings.title')}</Text>
+          <View style={styles.group}>
+            <Link href="/habit-tracker/geraete" style={styles.rowLink}>
+              <Row
+                icon={<Icon d={WATCH} color={palette.ocean700} />}
+                title={t('wearables.settings.action')}
+                hint={t('wearables.settings.text')}
+                right={<Icon d={CHEVRON} color={palette.ink700} />}
+              />
+            </Link>
+          </View>
+        </>
+      ) : null}
 
       <Text style={styles.kicker}>{t('diary.settings.areas.title')}</Text>
       <Text style={styles.text}>{t('diary.settings.areas.text')}</Text>

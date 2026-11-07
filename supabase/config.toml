@@ -448,10 +448,17 @@ deno_version = 2
 # stripe-webhook/index.ts gegen STRIPE_WEBHOOK_SECRET (SAD §4.3 Punkt 2).
 # Bliebe verify_jwt an, kaeme kein einziges Ereignis durch.
 #
-# Das ist die einzige Funktion ohne JWT-Pruefung. Wer hier eine zweite
+# Das war bis 0053 die einzige Funktion ohne JWT-Pruefung. Wer hier eine zweite
 # eintraegt, oeffnet sie fuer das ganze Internet - dann muss die Funktion
 # selbst beweisen koennen, wer da anruft.
 [functions.stripe-webhook]
+verify_jwt = false
+
+# Zweite Ausnahme (0053, Geraete-Anbindung, nur Staging): Garmin meldet neue
+# Daten ohne Supabase-JWT. Die Funktion verlangt dafuer GARMIN_WEBHOOK_KEY in
+# der Adresse und holt Daten ausschliesslich bei apis.garmin.com mit dem
+# Token der Person ab (wearables-garmin/index.ts).
+[functions.wearables-garmin]
 verify_jwt = false
 
 [analytics]

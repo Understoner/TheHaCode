@@ -40,6 +40,11 @@ export const EXPORT_TABLES = [
   'course_plan_slots',
   'quiz_attempts',
   'certificates',
+  // Geraete-Anbindung (0053): Verbindungen und Tageswerte. Die Schluessel
+  // der Anbieter (wearable_secrets) sind verschluesselt und fuer niemanden
+  // ausser dem Server lesbar - sie sind Zugangsdaten, keine Inhalte.
+  'wearable_connections',
+  'wearable_daily',
 ] as const;
 
 /**
