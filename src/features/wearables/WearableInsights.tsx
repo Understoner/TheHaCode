@@ -6,9 +6,11 @@ import { StyleSheet, Text, View } from 'react-native';
 import { QueryBoundary } from '@/components/QueryBoundary';
 import { colors, radius, spacing } from '@/design/tokens';
 import { addDays, type IsoDate } from '@/features/habits/dates';
+import { useMyHabits } from '@/features/habits/useHabits';
+import type { ValueRule } from '@/features/habits/valuePoints';
 
 import { WEARABLES_ENABLED } from './flag';
-import { buildSeries, HABIT_METRICS, type MetricSeries } from './series';
+import { buildSeries, DECIMALS, HABIT_METRICS, type MetricSeries, type WearableMetric } from './series';
 import { SourceChart, SourceLegend } from './SourceChart';
 import { useWearableAutoSync, useWearableConnections, useWearableDaily } from './useWearables';
 
@@ -61,6 +63,7 @@ function SeriesCards({
 }) {
   const { t } = useTranslation();
   const series = useMemo(() => buildSeries(rows, from, today), [rows, from, today]);
+  const rules = useRulesByMetric();
 
   if (series.length === 0) {
     return (
@@ -79,18 +82,43 @@ function SeriesCards({
   return (
     <>
       {inDiary.map((s) => (
-        <SeriesCard key={s.metric} series={s} today={today} />
+        <SeriesCard key={s.metric} series={s} today={today} rule={rules.get(s.metric) ?? null} />
       ))}
       {more.length > 0 ? <Text style={styles.kicker}>{t('wearables.insights.more')}</Text> : null}
       {more.map((s) => (
-        <SeriesCard key={s.metric} series={s} today={today} />
+        <SeriesCard key={s.metric} series={s} today={today} rule={null} showMean />
       ))}
       <Text style={styles.meta}>{t('wearables.insights.explain', { days: WINDOW })}</Text>
     </>
   );
 }
 
-function SeriesCard({ series, today }: { series: MetricSeries; today: IsoDate }) {
+/**
+ * Punktegrenzen je Wert - aus dem gewaehlten Habit, das diesen Wert fuellt.
+ * Nur dort faerbt das Diagramm; ohne gewaehltes Habit gibt es keine Punkte
+ * und damit auch keine Farbe.
+ */
+function useRulesByMetric(): Map<WearableMetric, ValueRule> {
+  const myHabits = useMyHabits();
+  const map = new Map<WearableMetric, ValueRule>();
+  for (const habit of myHabits.data ?? []) {
+    const metric = habit.habit_templates.wearable_metric as WearableMetric | null;
+    if (habit.is_active && metric && !habit.habit_templates.is_health_measure) map.set(metric, habit.habit_templates);
+  }
+  return map;
+}
+
+function SeriesCard({
+  series,
+  today,
+  rule,
+  showMean = false,
+}: {
+  series: MetricSeries;
+  today: IsoDate;
+  rule: ValueRule | null;
+  showMean?: boolean;
+}) {
   const { t } = useTranslation();
   const title = t(`wearables.metric.${series.metric}`);
   const unit = t(`wearables.unit.${series.metric}`);
@@ -101,8 +129,18 @@ function SeriesCard({ series, today }: { series: MetricSeries; today: IsoDate })
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
-      <SourceLegend showOura={showOura} showGarmin={showGarmin} />
-      <SourceChart days={series.days} today={today} window={WINDOW} title={title} />
+      <SourceLegend showOura={showOura} showGarmin={showGarmin} rule={rule} />
+      <SourceChart
+        days={series.days}
+        today={today}
+        window={WINDOW}
+        title={title}
+        unit={unit}
+        decimals={DECIMALS[series.metric]}
+        rule={rule}
+        showMean={showMean}
+        connectGaps={series.metric === 'weight'}
+      />
       <Text style={styles.text}>
         {[
           series.mean.average === null
