@@ -16,8 +16,10 @@ import type { SeriesDay } from './series';
 // - der Durchschnitt als weiche Linie, Oura als Kreis, Garmin als Quadrat -
 //   unterscheidbar auch ohne Farbe;
 // - Farbe der Linie nach den Punktegrenzen des Habits (gruen Punkte, rot
-//   Abzug, grau ohne Punkte), die Grenzen gestrichelt und beschriftet - so
-//   bleibt die Bedeutung auch ohne Farbsehen lesbar;
+//   Abzug, grau ohne Punkte), die Grenzen gestrichelt mit getoenten Zonen -
+//   so bleibt die Bedeutung auch ohne Farbsehen erkennbar. Bewusst ohne
+//   Beschriftung der Grenzen (User, 07.11.2026: im Diagramm nicht lesbar);
+//   was ein Tag bringt, zeigt der Tooltip;
 // - Werte ohne Grenzen (Gewicht, Ruhepuls, ...) einfarbig, ohne Bewertung
 //   (SAD §5.7), auf Wunsch mit dem eigenen Durchschnitt als Hilfslinie;
 // - Y-Achse nach Wertebereich statt ab 0, mit beschrifteten Hilfslinien.
@@ -123,16 +125,6 @@ export function SourceChart({
     })
     .filter((b): b is { kind: ZoneKind; top: number; bottom: number } => b !== null);
 
-  const edgeLabel = (edge: (typeof edges)[number], side: 'above' | 'below') => {
-    const kind = edge[side];
-    const value = edge.value.toLocaleString('de-AT');
-    if (side === 'above' && (kind === 'good' || kind === 'partial')) return t(`wearables.chart.from.${kind}`, { value });
-    if (side === 'below' && kind === 'bad') return t('wearables.chart.below.bad', { value });
-    if (side === 'below' && (kind === 'good' || kind === 'partial')) return t(`wearables.chart.upTo.${kind}`, { value });
-    if (side === 'above' && kind === 'bad') return t('wearables.chart.above.bad', { value });
-    return null;
-  };
-
   const pick = (e: PointerEvent) => {
     const px = e.nativeEvent.offsetX;
     if (typeof px !== 'number' || width === 0) return;
@@ -184,34 +176,20 @@ export function SourceChart({
               </G>
             ))}
 
-            {edges.map((edge) => {
-              if (edge.value <= domain.lo || edge.value >= domain.hi) return null;
-              const above = edgeLabel(edge, 'above');
-              const below = edgeLabel(edge, 'below');
-              return (
-                <G key={`e${edge.value}`}>
-                  <Line
-                    x1={LEFT}
-                    x2={width - RIGHT}
-                    y1={y(edge.value)}
-                    y2={y(edge.value)}
-                    stroke={colors.lineStrong}
-                    strokeWidth={1.2}
-                    strokeDasharray="4 4"
-                  />
-                  {above ? (
-                    <SvgText x={width - RIGHT - 2} y={y(edge.value) - 5} textAnchor="end" fontSize={10.5} fontWeight="700" fill={colors.ink700}>
-                      {above}
-                    </SvgText>
-                  ) : null}
-                  {below ? (
-                    <SvgText x={width - RIGHT - 2} y={y(edge.value) + 14} textAnchor="end" fontSize={10.5} fontWeight="700" fill={colors.ink700}>
-                      {below}
-                    </SvgText>
-                  ) : null}
-                </G>
-              );
-            })}
+            {edges.map((edge) =>
+              edge.value <= domain.lo || edge.value >= domain.hi ? null : (
+                <Line
+                  key={`e${edge.value}`}
+                  x1={LEFT}
+                  x2={width - RIGHT}
+                  y1={y(edge.value)}
+                  y2={y(edge.value)}
+                  stroke={colors.lineStrong}
+                  strokeWidth={1.2}
+                  strokeDasharray="4 4"
+                />
+              ),
+            )}
 
             {showMean && mean !== null ? (
               <G>
