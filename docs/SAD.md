@@ -1421,7 +1421,10 @@ sind ausdrücklich nicht Teil davon.
 Schreiben nur über `save_wearable_days()` / `remove_wearable()` (service_role,
 Einwilligung `health_data` und `can_use_habit_template()` in der Datenbank).
 Was die Person selbst einträgt, gewinnt (`habit_logs.source`). Tokens
-AES-GCM-verschlüsselt in `wearable_secrets` (nur service_role). Einrichtung,
+AES-GCM-verschlüsselt in `wearable_secrets` (nur service_role). Garmin liefert
+im kostenlosen Starter-Zugang per Push (ohne Rückschau); die Funktion
+`wearables-garmin` nimmt auch Ping an (Enterprise). Der persönliche
+Garmin-Schlüssel scheidet aus (nicht für Apps mit vielen Nutzern). Einrichtung,
 Rücknahme und offene Punkte: `docs/WEARABLES.md`.
 
 ---
