@@ -1,13 +1,15 @@
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import '@/i18n';
 import { DeleteAccount } from './DeleteAccount';
 
-const { invoke, signOut, useAuthMock } = vi.hoisted(() => ({
+const { invoke, signOut, useAuthMock, useSubscriptionMock } = vi.hoisted(() => ({
   invoke: vi.fn(),
   signOut: vi.fn(),
   useAuthMock: vi.fn(),
+  useSubscriptionMock: vi.fn(),
 }));
 
 vi.mock('@/lib/supabase', () => ({
@@ -15,6 +17,8 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 vi.mock('@/features/auth/AuthProvider', () => ({ useAuth: useAuthMock }));
+
+vi.mock('@/features/plus/usePlus', () => ({ useSubscription: useSubscriptionMock }));
 
 const EMAIL = 'wer@example.at';
 
@@ -29,6 +33,48 @@ describe('DeleteAccount', () => {
     invoke.mockReset();
     signOut.mockReset().mockResolvedValue({ error: null });
     useAuthMock.mockReturnValue({ session: { user: { email: EMAIL } }, loading: false });
+    useSubscriptionMock.mockReturnValue({ data: null });
+  });
+
+  // Review 11.11.2026, S1: das Abo endet mit dem Loeschen - das steht in der
+  // Warnung, bevor jemand bestaetigt.
+  it('weist auf ein laufendes Plus-Abo hin', () => {
+    useSubscriptionMock.mockReturnValue({ data: { status: 'active' } });
+
+    render(<DeleteAccount />);
+    fireEvent.click(screen.getByText('Konto löschen'));
+
+    expect(screen.getByText('Du hast ein laufendes Plus-Abo.', { exact: false })).toBeTruthy();
+  });
+
+  it('erwaehnt kein Abo, wenn keines laeuft', () => {
+    useSubscriptionMock.mockReturnValue({ data: { status: 'canceled' } });
+
+    render(<DeleteAccount />);
+    fireEvent.click(screen.getByText('Konto löschen'));
+
+    expect(screen.queryByText('Du hast ein laufendes Plus-Abo.', { exact: false })).toBeNull();
+  });
+
+  // Laesst sich das Abo bei Stripe nicht beenden, loescht der Server nicht.
+  // Die allgemeine Meldung waere hier falsch: sie verschweigt, dass das Konto
+  // noch da ist und warum.
+  it('sagt es eigens, wenn das Abo nicht beendet werden konnte', async () => {
+    invoke.mockResolvedValue({
+      data: null,
+      error: new FunctionsHttpError(
+        new Response('{"error":"subscription_cancel_failed"}', { status: 502 }),
+      ),
+    });
+
+    render(<DeleteAccount />);
+    bestaetigen();
+    fireEvent.click(screen.getByText('Endgültig löschen'));
+
+    await waitFor(() =>
+      expect(screen.getByText('Dein Plus-Abo ließ sich nicht beenden.', { exact: false })).toBeTruthy(),
+    );
+    expect(signOut).not.toHaveBeenCalled();
   });
 
   // Der eigentliche Schutz: ein einzelner Druck loescht nichts. Ginge das,

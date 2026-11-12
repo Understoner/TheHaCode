@@ -160,6 +160,19 @@ const ROUTEN = [
   '/konto',
   '/plus',
   '/passwort-neu',
+  // Dynamische Routen (Review 11.11.2026, A1): der Export legt dafuer nur
+  // eine Vorlagendatei ab, erreichbar sind sie allein ueber die Regeln in
+  // dist/.htaccess. Fehlt eine, antwortet der Hoster mit 404 - beim Prueflink
+  // auf dem Zertifikat und bei der Rueckkehr aus dem Onlinekurs-Kauf ist das
+  // passiert. Die Adressen muessen nichts Echtes treffen: geprueft wird, dass
+  // die Seite ausgeliefert wird; "gibt es nicht" sagt dann die App selbst.
+  '/onlinekurse',
+  '/onlinekurse/smoke-test',
+  '/onlinekurse/smoke-test/planen',
+  '/onlinekurse/smoke-test/block',
+  '/zertifikat/AC-0000-0000',
+  '/news/smoke-test',
+  '/kurse/smoke-test',
 ];
 
 test('jede Route ist auch direkt aufrufbar, nicht nur ueber einen Klick', async ({ request }) => {

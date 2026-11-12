@@ -65,7 +65,8 @@ select throws_ok(
 create temp table cert as
 select * from public.issue_certificate('c4600000-0000-0000-0000-000000000001', '  Anna Beispiel ');
 select is((select full_name from cert), 'Anna Beispiel', 'Ausgestellt, mit bereinigtem Namen');
-select ok((select code ~ '^AC-[0-9A-F]{4}-[0-9A-F]{4}$' from cert), 'mit Pruefcode');
+-- Seit 0056 vier Gruppen (64 Bit): ein Code mit 32 Bit liess sich erraten.
+select ok((select code ~ '^AC-[0-9A-F]{4}(-[0-9A-F]{4}){3}$' from cert), 'mit Pruefcode aus vier Gruppen');
 select is((select full_name from public.issue_certificate('c4600000-0000-0000-0000-000000000001', 'Jemand anderes')),
   'Anna Beispiel', 'Ein zweites Ausstellen liefert dasselbe Zertifikat, der Name bleibt');
 

@@ -12,23 +12,39 @@ insert into public.team_members (id, slug, full_name, bio, published_at) values
   ('99999999-9999-9999-9999-999999999999', 'entwurf',  'Entwurf', 'Text', null);
 
 -- Normalfall: die oeffentliche Seite liest ohne Anmeldung
+--
+-- Gezaehlt werden NUR die Zeilen dieses Tests (Review 11.11.2026, W6). Vorher
+-- stand hier "count(*) = 1" ueber die ganze Tabelle - das stimmt nach einem
+-- frischen "db reset" wie in der CI, aber nicht in einer Datenbank mit
+-- Inhalten: dort waren vier Tests rot, ohne dass etwas kaputt war. Ein Test,
+-- der vom Inhalt der Datenbank abhaengt, prueft den Inhalt, nicht die Policy.
 set local role anon;
 
 select is(
-  (select count(*) from public.courses)::int, 1,
+  (select count(*) from public.courses
+    where id in ('55555555-5555-5555-5555-555555555555',
+                 '66666666-6666-6666-6666-666666666666',
+                 '77777777-7777-7777-7777-777777777777'))::int, 1,
   'anon sieht nur den veroeffentlichten, bereits vergangenen Kurs'
 );
 select is(
-  (select slug from public.courses limit 1), 'atem-grundkurs',
+  (select slug from public.courses
+    where id in ('55555555-5555-5555-5555-555555555555',
+                 '66666666-6666-6666-6666-666666666666',
+                 '77777777-7777-7777-7777-777777777777')), 'atem-grundkurs',
   'der sichtbare Kurs ist der tatsaechlich veroeffentlichte'
 );
 
 select is(
-  (select count(*) from public.team_members)::int, 1,
+  (select count(*) from public.team_members
+    where id in ('88888888-8888-8888-8888-888888888888',
+                 '99999999-9999-9999-9999-999999999999'))::int, 1,
   'anon sieht nur veroeffentlichte Teammitglieder'
 );
 select is(
-  (select slug from public.team_members limit 1), 'michael',
+  (select slug from public.team_members
+    where id in ('88888888-8888-8888-8888-888888888888',
+                 '99999999-9999-9999-9999-999999999999')), 'michael',
   'das sichtbare Teammitglied ist tatsaechlich veroeffentlicht'
 );
 

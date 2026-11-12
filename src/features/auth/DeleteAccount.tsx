@@ -5,6 +5,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '@/design/tokens';
 import { TextField } from '@/components/TextField';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useSubscription } from '@/features/plus/usePlus';
+import { withFunctionErrorCode } from '@/lib/functionError';
 import { supabase } from '@/lib/supabase';
 import { PressableRing } from '@/components/PressableRing';
 
@@ -19,9 +21,21 @@ import { PressableRing } from '@/components/PressableRing';
 // Zwei Schritte statt einem: der erste Druck oeffnet nur die Warnung. Ein
 // einzelner Knopf "Konto loeschen" neben "Abmelden" waere zu leicht zu treffen
 // fuer etwas, das sich nicht rueckgaengig machen laesst.
+//
+// DAS ABO (Review 11.11.2026, S1): die Edge Function beendet ein laufendes
+// Plus-Abo bei Stripe, bevor sie loescht. Das soll niemanden ueberraschen,
+// also steht es in der Warnung. Und es kann scheitern - dann ist das Konto
+// noch da, und genau das sagt die Meldung, statt des allgemeinen "hat nicht
+// geklappt".
 export function DeleteAccount() {
   const { t } = useTranslation();
   const { session } = useAuth();
+  const subscription = useSubscription();
+  // Alles, was bei Stripe noch abbuchen koennte - dieselbe Abgrenzung wie in
+  // supabase/functions/_shared/account-deletion.ts. Das ist nur der Hinweis;
+  // was tatsaechlich beendet wird, entscheidet der Server.
+  const hasRunningSubscription =
+    !!subscription.data && subscription.data.status !== 'canceled' && subscription.data.status !== 'expired';
   const [armed, setArmed] = useState(false);
   // Die eigene Adresse abtippen (Backlog T06). Zwei Schritte allein waren zu
   // wenig: der zweite Knopf sitzt genau dort, wo eben noch der erste war, und
@@ -46,14 +60,20 @@ export function DeleteAccount() {
       const { error: callError } = await supabase.functions.invoke('delete-account', {
         method: 'POST',
       });
-      if (callError) throw callError;
+      if (callError) throw await withFunctionErrorCode(callError);
 
       // Das Konto ist weg, die Sitzung im Browser noch da. Ohne signOut bliebe
       // die Oberflaeche angemeldet, bis der Zugangstoken von selbst ablaeuft.
       await supabase.auth.signOut();
-    } catch {
+    } catch (caught) {
       setPending(false);
-      setError(t('errors:auth.deleteFailed'));
+      setError(
+        t(
+          caught instanceof Error && caught.message === 'subscription_cancel_failed'
+            ? 'errors:auth.deleteSubscriptionFailed'
+            : 'errors:auth.deleteFailed',
+        ),
+      );
     }
   };
 
@@ -69,6 +89,7 @@ export function DeleteAccount() {
     <View style={styles.panel}>
       <Text style={styles.title}>{t('auth.delete.title')}</Text>
       <Text style={styles.body}>{t('auth.delete.body')}</Text>
+      {hasRunningSubscription ? <Text style={styles.body}>{t('auth.delete.subscription')}</Text> : null}
       <Text style={styles.body}>{t('auth.delete.confirmHint', { email })}</Text>
 
       <TextField

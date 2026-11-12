@@ -8,6 +8,7 @@ import { PressableRing } from '@/components/PressableRing';
 import { TextField } from '@/components/TextField';
 import { colors, spacing } from '@/design/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { withFunctionErrorCode } from '@/lib/functionError';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
 
@@ -45,7 +46,8 @@ async function downloadPdf(courseId: string, code: string): Promise<void> {
     method: 'POST',
     body: { courseId },
   });
-  if (error) throw error;
+  // Der Code der Absage steckt in der Antwort, nicht in error.message.
+  if (error) throw await withFunctionErrorCode(error);
   if (!(data instanceof Blob) || Platform.OS !== 'web') throw new Error('no_pdf');
   const href = URL.createObjectURL(data);
   const a = document.createElement('a');
@@ -110,7 +112,17 @@ export function CertificatePanel({
           block
           onPress={() => download.mutate(c.code)}
         />
-        {download.isError ? <Text style={styles.error}>{t('onlineCourses.cert.downloadFailed')}</Text> : null}
+        {download.isError ? (
+          <Text style={styles.error}>
+            {t(
+              // Der Name enthaelt Zeichen, die die PDF nicht setzen kann
+              // (Review S5). Noch einmal versuchen hilft dann nicht.
+              download.error instanceof Error && download.error.message === 'name_not_printable'
+                ? 'onlineCourses.cert.nameNotPrintable'
+                : 'onlineCourses.cert.downloadFailed',
+            )}
+          </Text>
+        ) : null}
         <PressableRing
           style={styles.copy}
           onPress={() => {

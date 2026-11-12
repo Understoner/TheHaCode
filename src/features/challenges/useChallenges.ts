@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import type { IsoDate } from '@/features/habits/dates';
 import type { HabitSlot } from '@/features/habits/plannedDays';
 import type { HabitTemplate, UserHabit } from '@/features/habits/useHabits';
+import { fetchAllRows } from '@/lib/fetchAllRows';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
 
@@ -103,13 +104,22 @@ export function useChallengeSlots() {
     queryKey: ['challenges', userId, 'slots'],
     enabled: !loading && userId !== null,
     queryFn: async (): Promise<HabitSlot[]> => {
-      const { data, error } = await supabase
-        .from('challenge_slots')
-        .select('starts_on, due_on, challenge_items(user_habit_id), challenges(cancelled_at, deleted_at)')
-        .eq('user_id', userId!)
-        .is('deleted_at', null);
-      if (error) throw error;
-      return (data ?? []).flatMap((slot) =>
+      // Seitenweise (Review 11.11.2026, E1): ein Weg mit acht Habits ueber
+      // vier Wochen hat schon 224 Termine, und alte Wege bleiben stehen. Der
+      // Server gibt je Anfrage hoechstens 1000 Zeilen heraus; ohne Blaettern
+      // fehlten danach beliebige Termine im Tagebuch.
+      const data = await fetchAllRows((from, to) =>
+        supabase
+          .from('challenge_slots')
+          .select('starts_on, due_on, challenge_items(user_habit_id), challenges(cancelled_at, deleted_at)', {
+            count: 'exact',
+          })
+          .eq('user_id', userId!)
+          .is('deleted_at', null)
+          .order('id')
+          .range(from, to),
+      );
+      return data.flatMap((slot) =>
         slot.challenge_items
           ? [
               {

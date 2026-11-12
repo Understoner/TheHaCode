@@ -185,8 +185,8 @@ liefen.
 
 Die Liste steht seitdem an einer Stelle (`_shared/http.ts`, Konstante
 `ALLOWED_HEADERS`) und wird von `__tests__/http.test.ts` festgehalten.
-`delete-account` hat weiterhin seine eigene Kopie; wer die eine ändert, ändert
-die andere mit.
+`delete-account` nutzt seit dem 30.10.2026 dieselbe Datei — eine eigene Kopie
+gibt es nicht mehr.
 
 **So prüft man es von außen** — das ist der Aufruf, der den Fehler gefunden hat:
 

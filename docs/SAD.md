@@ -1593,6 +1593,17 @@ Ohne diesen vorgesehenen Pfad bastelt beim ersten Supportfall jemand direkt an d
 
 ### 5.3 Betroffenenrechte als Code
 
+> **Soll und Ist, Stand 11.11.2026** (Review D3). Der Code in diesem Abschnitt
+> ist das Zielbild von August 2026, nicht der Stand im Repository:
+>
+> | | Soll laut diesem Abschnitt | Ist im Code |
+> |---|---|---|
+> | Auskunft | Edge Function `export-my-data` | Im Client unter RLS: `src/features/auth/dataExport.ts`, seitenweise über `src/lib/fetchAllRows.ts`. Eine Edge Function gibt es nicht. |
+> | Löschung, Schritt 1 | Stripe-Abo sofort kündigen | **Umgesetzt am 11.11.2026** in `delete-account`; scheitert die Kündigung, wird nicht gelöscht. |
+> | Löschung, Schritt 2 | Storage-Objekte entfernen | Entfällt: Nutzer laden nichts hoch. |
+> | Löschung, Schritt 3 | Abrechnungsnachweis archivieren (`billing_archive`) | **Nicht gebaut.** Die Abo-Zeile verschwindet per Kaskade; Rechnungen und Kundendaten liegen nur bei Stripe. |
+> | Löschung, Schritt 4 | `auth.admin.deleteUser()` | Umgesetzt. Kursbuchungen bleiben als Zahlungsaufzeichnung ohne Personenbezug (0022). |
+
 **Auskunft & Datenübertragbarkeit (Art. 15, 20)** — Edge Function `export-my-data`:
 
 ```ts

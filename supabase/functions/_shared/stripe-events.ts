@@ -259,3 +259,19 @@ export function mapSubscription(
 
   return row;
 }
+
+/**
+ * Gehoert das Abo zu einem Konto, das es nicht mehr gibt?
+ *
+ * public.subscriptions.user_id verweist auf auth.users - der einzige
+ * Fremdschluessel der Tabelle. Verletzt ein Upsert ihn (Postgres 23503), ist
+ * das Konto geloescht. Dann hilft kein Wiederholen: Stripe wuerde das Ereignis
+ * drei Tage lang erneut zustellen, jedes Mal mit 500 beantwortet, und einen
+ * dauerhaft fehlschlagenden Endpunkt schaltet Stripe ab - die Freischaltung
+ * fiele fuer ALLE aus (Review 11.11.2026, S1). Der Webhook vermerkt so ein
+ * Ereignis deshalb im Log und quittiert es.
+ */
+export function isMissingAccountError(error: { code?: string | null } | null | undefined): boolean {
+  return error?.code === '23503';
+}
+

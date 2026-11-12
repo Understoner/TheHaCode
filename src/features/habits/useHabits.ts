@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfileFlag } from '@/features/settings/useProfileFlag';
+import { fetchAllRows } from '@/lib/fetchAllRows';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
 
@@ -95,18 +96,25 @@ export function useHabitLogs(from: IsoDate, to: IsoDate) {
     // Beim Blaettern im Monat bleibt das Bisherige stehen, bis das Neue da
     // ist - sonst fiele die ganze Seite kurz auf das Skelett zurueck.
     placeholderData: (previous) => previous,
-    queryFn: async (): Promise<HabitLog[]> => {
-      const { data, error } = await supabase
-        .from('habit_logs')
-        .select('*')
-        .eq('user_id', userId!)
-        .gte('log_date', from)
-        .lte('log_date', to)
-        .is('deleted_at', null)
-        .order('log_date');
-      if (error) throw error;
-      return data ?? [];
-    },
+    // Seitenweise (Review 11.11.2026, E1): die Auswertung liest ab dem
+    // 1. Jaenner. Bei acht Habits am Tag sind das nach gut vier Monaten mehr
+    // als die 1000 Zeilen, die der Server je Anfrage herausgibt - und weil
+    // aufsteigend sortiert ist, fehlten dann still die NEUESTEN Eintraege.
+    queryFn: (): Promise<HabitLog[]> =>
+      fetchAllRows<HabitLog>((start, end) =>
+        supabase
+          .from('habit_logs')
+          .select('*', { count: 'exact' })
+          .eq('user_id', userId!)
+          .gte('log_date', from)
+          .lte('log_date', to)
+          .is('deleted_at', null)
+          .order('log_date')
+          // id macht die Reihenfolge eindeutig - ohne sie duerfte die
+          // Datenbank Eintraege desselben Tages von Seite zu Seite umstellen.
+          .order('id')
+          .range(start, end),
+      ),
   });
 }
 

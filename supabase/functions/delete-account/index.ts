@@ -25,9 +25,29 @@
 // (Migration 0001, geprueft in supabase/tests/001_foundation.test.sql).
 // Einzige Ausnahme seit 0022: Kursbuchungen bleiben als Zahlungsaufzeichnung
 // stehen, per "on delete set null" ohne Bezug zur Person.
+//
+// ERST DAS ABO, DANN DAS KONTO (Review 11.11.2026, S1)
+// ----------------------------------------------------
+// Bis dahin wurde hier nur geloescht. Die Abo-Zeile verschwand per Kaskade,
+// das Abo bei Stripe lief weiter und wurde weiter abgebucht - und kuendigen
+// konnte es niemand mehr, weil das Kundenportal eine Anmeldung verlangt.
+// Jetzt gilt die Reihenfolge aus SAD §5.3: laufende Abos sofort bei Stripe
+// beenden, erst danach loeschen. Laesst sich ein Abo nicht beenden, bleibt das
+// Konto stehen und die App sagt es (subscription_cancel_failed).
+//
+// NICHT umgesetzt aus SAD §5.3: das pseudonymisierte Archiv des
+// Abrechnungsnachweises (billing_archive) und das Loeschen des Kunden bei
+// Stripe. Rechnungen und Kundendaten bleiben bei Stripe liegen - das ist eine
+// Frage der Aufbewahrungspflicht und gehoert entschieden, nicht geraten.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
+import Stripe from 'npm:stripe@18.5.0';
 
+import {
+  endSubscription,
+  subscriptionsToCancel,
+  type SubscriptionForDeletion,
+} from '../_shared/account-deletion.ts';
 // CORS seit 30.10.2026 aus der gemeinsamen Datei: nur die eigene Domain.
 import { corsHeaders, json } from '../_shared/http.ts';
 
@@ -60,11 +80,46 @@ Deno.serve(async (request) => {
   const { data, error } = await userClient.auth.getUser();
   if (error || !data.user) return json({ error: 'unauthorized' }, 401, origin);
 
-  // 2. Loeschen - mit genau der ID aus Schritt 1.
+  // Ab hier service_role - immer mit genau der ID aus Schritt 1.
   const adminClient = createClient(url, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  // 2. Laufende Abos bei Stripe beenden - VOR dem Loeschen. Danach gaebe es
+  // die Zeilen nicht mehr, aus denen sich die Abo-IDs ablesen lassen.
+  const { data: subscriptions, error: subscriptionsError } = await adminClient
+    .from('subscriptions')
+    .select('stripe_subscription_id, status')
+    .eq('user_id', data.user.id);
+
+  if (subscriptionsError) {
+    // Nicht loeschen, wenn unklar ist, ob ein Abo laeuft.
+    console.error('Abos nicht lesbar', subscriptionsError.message);
+    return json({ error: 'delete_failed' }, 500, origin);
+  }
+
+  const toCancel = subscriptionsToCancel((subscriptions ?? []) as SubscriptionForDeletion[]);
+
+  if (toCancel.length > 0) {
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      console.error('delete-account: STRIPE_SECRET_KEY fehlt, Abo nicht beendbar');
+      return json({ error: 'subscription_cancel_failed' }, 500, origin);
+    }
+
+    const stripe = new Stripe(stripeKey, { httpClient: Stripe.createFetchHttpClient() });
+
+    for (const subscriptionId of toCancel) {
+      const ended = await endSubscription(stripe.subscriptions, subscriptionId);
+      if (!ended) {
+        // Nur die Abo-ID ins Log, keine Angabe zur Person.
+        console.error('Abo liess sich nicht beenden, Konto bleibt stehen', subscriptionId);
+        return json({ error: 'subscription_cancel_failed' }, 502, origin);
+      }
+    }
+  }
+
+  // 3. Loeschen.
   const { error: deleteError } = await adminClient.auth.admin.deleteUser(data.user.id);
   if (deleteError) {
     console.error('deleteUser fehlgeschlagen', deleteError.message);

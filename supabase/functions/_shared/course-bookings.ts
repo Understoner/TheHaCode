@@ -151,7 +151,10 @@ export function bookingUpdateFor(
       throw new Error(`Buchung ${booking.id} gehoert zu einem Konto, die Zahlung kam als Gast`);
     }
     if (normalizeEmail(booking.guest_email) !== facts.guestEmail) {
-      throw new Error(`Buchung ${booking.id} gehoert nicht zu ${facts.guestEmail}`);
+      // Ohne die Adresse (Review 11.11.2026, S10): die Meldung landet im
+      // Funktionsprotokoll, und dort hat eine Gastadresse nichts verloren.
+      // Die Buchungs-ID reicht, um den Fall zu finden.
+      throw new Error(`Buchung ${booking.id} gehoert nicht zur Gastadresse dieser Zahlung`);
     }
   }
 
