@@ -35,6 +35,22 @@ export type PlanPrice = {
   interval: string | null;
 };
 
+// EINE ANTWORT FUER ZEHN MINUTEN MERKEN (Review 11.11.2026, E3)
+// -----------------------------------------------------------
+// Die Funktion ist ohne Anmeldung aufrufbar und hat bis dahin bei JEDEM Aufruf
+// zwei Preise bei Stripe geholt. Ein Skript mit dem oeffentlichen Schluessel
+// konnte so das Ratenlimit des Stripe-Kontos belasten - desselben Kontos, an
+// dem der Checkout haengt. Preise aendern sich im Jahr vielleicht einmal;
+// zehn Minuten Verzoegerung nach einer Aenderung im Dashboard schaden
+// niemandem. Abgerechnet wird ohnehin nie nach dieser Antwort, sondern nach
+// der Price-ID in create-checkout.
+//
+// Der Speicher lebt, solange die Instanz der Funktion warm ist. Eine kalte
+// Instanz fragt einmal neu - das ist gewollt und begrenzt die Last trotzdem
+// auf einen Bruchteil.
+const CACHE_MS = 10 * 60 * 1000;
+let cached: { prices: PlanPrice[]; at: number } | null = null;
+
 Deno.serve(async (request) => {
   const origin = request.headers.get('Origin');
 
@@ -54,6 +70,10 @@ Deno.serve(async (request) => {
   if (!stripeKey || !priceIds.monthly || !priceIds.yearly) {
     console.error('get-prices ist nicht vollstaendig konfiguriert');
     return json({ error: 'not_configured' }, 500, origin);
+  }
+
+  if (cached && Date.now() - cached.at < CACHE_MS) {
+    return json({ prices: cached.prices }, 200, origin);
   }
 
   const stripe = new Stripe(stripeKey, { httpClient: Stripe.createFetchHttpClient() });
@@ -79,6 +99,9 @@ Deno.serve(async (request) => {
         };
       }),
     );
+
+    // Nur eine gelungene Antwort wird gemerkt - ein Fehler nie.
+    cached = { prices, at: Date.now() };
 
     return json({ prices }, 200, origin);
   } catch (error) {

@@ -11,6 +11,7 @@ import {
   EXPORT_OWNER_COLUMN,
   EXPORT_TABLES,
 } from '@/features/auth/dataExport';
+import { fetchAllRows } from '@/lib/fetchAllRows';
 import { supabase } from '@/lib/supabase';
 import { PressableRing } from '@/components/PressableRing';
 
@@ -63,12 +64,17 @@ export function useDataExport(session: Session) {
 
       for (const table of EXPORT_TABLES) {
         const ownerColumn = EXPORT_OWNER_COLUMN[table];
-        const query = supabase.from(table).select('*');
-        const { data, error: tableError } = ownerColumn
-          ? await query.eq(ownerColumn, session.user.id)
-          : await query;
-        if (tableError) throw tableError;
-        daten[table] = data ?? [];
+        // Seitenweise (Review 11.11.2026, E1): der Server gibt je Anfrage
+        // hoechstens 1000 Zeilen heraus und meldet das Abschneiden nicht.
+        // Ohne Blaettern fehlten in der Auskunft - und in der Kopie vor dem
+        // Loeschen des Tagebuchs - still alle Zeilen danach. Jede dieser
+        // Tabellen hat eine Spalte id; sie macht die Reihenfolge eindeutig.
+        daten[table] = await fetchAllRows<unknown>((from, to) => {
+          const query = supabase.from(table).select('*', { count: 'exact' });
+          return (ownerColumn ? query.eq(ownerColumn, session.user.id) : query)
+            .order('id')
+            .range(from, to);
+        });
       }
 
       const dokument = buildExport(

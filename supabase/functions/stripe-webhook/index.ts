@@ -50,8 +50,10 @@ import {
   type StripeCourseSessionLike,
 } from '../_shared/course-bookings.ts';
 import { courseAccessRowFor, onlineCoursePaymentFacts } from '../_shared/online-courses.ts';
+import { isStripeResourceMissing } from '../_shared/account-deletion.ts';
 import {
   checkoutFacts,
+  isMissingAccountError,
   isRelevantEvent,
   mapSubscription,
   subscriptionIdFromInvoice,
@@ -153,7 +155,24 @@ Deno.serve(async (request) => {
         .from('subscriptions')
         .upsert(row, { onConflict: 'stripe_subscription_id' });
 
-      if (upsertError) throw new Error(`Abo nicht gespeichert: ${upsertError.message}`);
+      if (upsertError) {
+        // Das Konto zu diesem Abo gibt es nicht mehr (Review 11.11.2026, S1).
+        // Wiederholen hilft nicht - also vermerken und quittieren, statt
+        // Stripe drei Tage lang mit 500 zu antworten. Das ist KEIN stummes
+        // Schlucken (Regel 4): die Zeile unten ist der Auftrag, im
+        // Stripe-Dashboard nachzusehen. Steht dort ein Abo, das noch laeuft,
+        // wird jemand ohne Konto abgebucht und es gehoert von Hand beendet.
+        if (isMissingAccountError(upsertError)) {
+          console.error(
+            `Ereignis ${event.id} (${event.type}): Abo ${row.stripe_subscription_id} gehoert zu keinem ` +
+              `Konto mehr, Status bei Stripe: ${row.status}. Laeuft es noch, im Stripe-Dashboard beenden.`,
+          );
+          await markProcessed(admin, event.id);
+          return new Response('no account', { status: 200 });
+        }
+
+        throw new Error(`Abo nicht gespeichert: ${upsertError.message}`);
+      }
     }
 
     await markProcessed(admin, event.id);
@@ -272,12 +291,22 @@ async function handleCourseEvent(
 
   // Eine verfallene Sitzung gibt den Platz zurueck. Ohne das bliebe er bis zum
   // Ende der Haltezeit blockiert, obwohl feststeht, dass niemand mehr zahlt.
+  //
+  // NUR DIE AKTUELLE SITZUNG (Review 11.11.2026, S4). Wer den Checkout ein
+  // zweites Mal oeffnet, bekommt eine neue Sitzung zur selben Buchung, und die
+  // alte verfaellt. Deren Verfallsereignis darf die gerade erneuerte
+  // Reservierung nicht freigeben - sonst steht der Kunde auf der neuen
+  // Bezahlseite, waehrend sein Platz ein zweites Mal verkauft wird. Deshalb
+  // zaehlt das Ereignis nur, wenn es zur Sitzung gehoert, die an der Buchung
+  // vermerkt ist. create-course-checkout vermerkt die neue Sitzung, BEVOR es
+  // die alte beendet.
   if (event.type === 'checkout.session.expired') {
     const { error } = await admin
       .from('course_bookings')
       .update({ status: 'expired', reserved_until: null })
       .eq('id', facts.bookingId)
-      .eq('status', 'reserved');
+      .eq('status', 'reserved')
+      .eq('stripe_checkout_session_id', facts.checkoutSessionId);
 
     if (error) throw new Error(`Reservierung nicht freigegeben: ${error.message}`);
     return true;
@@ -303,6 +332,20 @@ async function handleCourseEvent(
   const update = bookingUpdateFor(booking as unknown as BookingRow, facts);
   if (!update) return true; // schon verbucht
 
+  // Bezahlt, nachdem die Reservierung schon verfallen war - etwa bei einer
+  // nachgelagerten Zahlungsart, deren Geld erst nach der Haltezeit eingeht.
+  // Der Platz galt in der Zwischenzeit als frei; die Buchung wird trotzdem
+  // bestaetigt (wer bezahlt hat, steht auf der Liste), aber OHNE erneute
+  // Platzpruefung. Das ist der offene Rest von Review S4: bis es dafuer eine
+  // Datenbankfunktion mit Sperre gibt, sagt wenigstens das Log, dass hier
+  // jemand von Hand nachzaehlen muss.
+  if ((booking as unknown as BookingRow).status === 'expired' && update.status === 'confirmed') {
+    console.error(
+      `Buchung ${facts.bookingId} wurde nach Ablauf der Reservierung bezahlt - ` +
+        'Teilnehmerzahl des Kurses von Hand pruefen (moegliche Ueberbuchung).',
+    );
+  }
+
   const { error: writeError } = await admin
     .from('course_bookings')
     .update(update)
@@ -316,12 +359,12 @@ async function handleCourseEvent(
 /**
  * Welche Abo-Zeile folgt aus diesem Ereignis? null heisst: nichts zu tun.
  *
- * Bei checkout.session.completed und den Rechnungsereignissen wird das Abo bei
- * Stripe nachgeschlagen, statt aus dem Ereignis zusammengesetzt zu werden. Die
- * Session kennt weder Periodenende noch Abrechnungsintervall, und eine
- * Rechnung nennt nur die Abo-ID. Ein Nachschlagen liefert in beiden Faellen
- * denselben vollstaendigen Stand wie bei den subscription-Ereignissen - eine
- * Abbildung statt vier.
+ * In JEDEM Fall wird das Abo bei Stripe nachgeschlagen, statt aus dem Ereignis
+ * zusammengesetzt zu werden. Die Session kennt weder Periodenende noch
+ * Abrechnungsintervall, eine Rechnung nennt nur die Abo-ID - und bei den
+ * subscription-Ereignissen kann der mitgelieferte Stand veraltet sein, weil
+ * Stripe keine Reihenfolge zusichert (Review S3). Eine Abbildung statt vier,
+ * und immer der Stand von jetzt.
  */
 async function rowForEvent(stripe: Stripe, event: Stripe.Event): Promise<SubscriptionRow | null> {
   switch (event.type) {
@@ -342,9 +385,15 @@ async function rowForEvent(stripe: Stripe, event: Stripe.Event): Promise<Subscri
     case 'customer.subscription.created':
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
-      // Das Ereignis IST das Abo - kein Nachschlagen noetig. Bei deleted
-      // liefert Stripe status = 'canceled' mit.
-      return mapSubscription(asSubscription(event.data.object));
+      // AUCH HIER NACHSCHLAGEN (Review 11.11.2026, S3). Bis dahin wurde der
+      // Stand aus dem Ereignis uebernommen. Stripe sichert aber keine
+      // Reihenfolge zu und wiederholt bis zu drei Tage lang: ein verspaetetes
+      // "updated" mit past_due ueberschrieb dann ein laengst bezahltes Abo,
+      // und der zahlende Kunde blieb gesperrt, bis das naechste Ereignis kam.
+      // Mit dem aktuellen Stand von Stripe ist die Reihenfolge gleichgueltig.
+      // Ein beendetes Abo bleibt bei Stripe abrufbar (status = 'canceled').
+      const fromEvent = asSubscription(event.data.object);
+      return mapSubscription(await currentSubscription(stripe, fromEvent));
     }
 
     case 'invoice.paid':
@@ -358,6 +407,24 @@ async function rowForEvent(stripe: Stripe, event: Stripe.Event): Promise<Subscri
 
     default:
       return null;
+  }
+}
+
+/**
+ * Der aktuelle Stand eines Abos bei Stripe. Kennt Stripe es nicht mehr - das
+ * kommt nur bei geloeschten Testdaten vor -, bleibt der Stand aus dem
+ * Ereignis: besser als ein Ereignis, das drei Tage lang scheitert. Jeder
+ * andere Fehler wirft und fuehrt zu 500 und einem neuen Versuch (Regel 4).
+ */
+async function currentSubscription(
+  stripe: Stripe,
+  fromEvent: StripeSubscriptionLike,
+): Promise<StripeSubscriptionLike> {
+  try {
+    return asSubscription(await stripe.subscriptions.retrieve(fromEvent.id));
+  } catch (error) {
+    if (isStripeResourceMissing(error)) return fromEvent;
+    throw error;
   }
 }
 

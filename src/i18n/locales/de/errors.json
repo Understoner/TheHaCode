@@ -1,4 +1,7 @@
 {
+  "app.crash.title": "Hier ist etwas schiefgegangen",
+  "app.crash.body": "Diese Seite ließ sich nicht anzeigen. Lad sie bitte neu. Hilft das nicht, schreib uns an office@thehacode.com.",
+  "app.crash.reload": "Seite neu laden",
   "loadFailed.title": "Daten konnten nicht geladen werden",
   "loadFailed.body": "Bitte prüfe deine Verbindung.",
   "retry": "Erneut versuchen",
@@ -25,6 +28,7 @@
   "auth.samePassword": "Das ist dein bisheriges Passwort. Bitte wähle ein anderes.",
   "auth.linkExpired": "Dieser Link gilt nicht mehr – er läuft nach einer Stunde ab und lässt sich nur einmal benutzen. Fordere einfach einen neuen an.",
   "auth.deleteFailed": "Das Löschen hat nicht geklappt. Bitte versuch es noch einmal – oder schreib uns, dann erledigen wir es von Hand.",
+  "auth.deleteSubscriptionFailed": "Dein Plus-Abo ließ sich nicht beenden. Dein Konto ist deshalb noch nicht gelöscht – sonst würde weiter abgebucht, ohne dass du kündigen kannst. Bitte versuch es noch einmal oder schreib uns an office@thehacode.com.",
   "sequenz.titel": "Bitte gib der Sequenz einen Titel mit mindestens zwei Zeichen.",
   "sequenz.titelZuLang": "Der Titel ist zu lang – höchstens 80 Zeichen.",
   "sequenz.untertitelZuLang": "Der Untertitel ist zu lang – höchstens 120 Zeichen.",

@@ -242,18 +242,29 @@ Deno.serve(async (request) => {
 
   // Eine aeltere Sitzung derselben Buchung verfaellt - sonst haette jemand,
   // der zurueck geht und neu bucht, zwei bezahlbare Seiten fuer einen Platz.
-  if (booking.stripe_checkout_session_id) {
+  //
+  // DIE REIHENFOLGE IST WESENTLICH (Review 11.11.2026, S4): erst die neue
+  // Sitzung anlegen und an der Buchung vermerken, DANN die alte beenden.
+  // Stripe meldet das Beenden als checkout.session.expired, und der Webhook
+  // gibt daraufhin die Reservierung frei - aber nur, wenn das Ereignis zur
+  // vermerkten Sitzung gehoert. Stand hier die alte Reihenfolge, traf das
+  // Ereignis der alten Sitzung auf eine Buchung, an der sie noch vermerkt war:
+  // der Platz war frei, waehrend der Kunde auf der neuen Bezahlseite stand.
+  const previousSessionId: string | null = booking.stripe_checkout_session_id ?? null;
+  let newSessionId: string | null = null;
+
+  const expireQuietly = async (sessionId: string) => {
     try {
-      await stripe.checkout.sessions.expire(booking.stripe_checkout_session_id);
+      await stripe.checkout.sessions.expire(sessionId);
     } catch (error) {
       // Sie kann laengst abgelaufen oder bezahlt sein; beides ist kein Grund,
       // die neue Buchung scheitern zu lassen.
       console.warn(
-        'Alte Checkout-Sitzung liess sich nicht beenden',
+        'Checkout-Sitzung liess sich nicht beenden',
         error instanceof Error ? error.message : error,
       );
     }
-  }
+  };
 
   // Anzahlung oder alles? Entschieden hat das die Datenbank (§ 11 AGB, siehe
   // Migration 0011) - hier wird das Ergebnis nur noch abgelesen.
@@ -317,6 +328,8 @@ Deno.serve(async (request) => {
       cancel_url: `${appUrl}/kurse?buchung=abgebrochen&kurs=${encodeURIComponent(course.slug)}`,
     });
 
+    newSessionId = session.id;
+
     if (!session.url) {
       throw new Error('Stripe lieferte keine Checkout-Adresse');
     }
@@ -327,14 +340,28 @@ Deno.serve(async (request) => {
       .eq('id', booking.id);
 
     if (updateError) {
-      // Die Sitzung steht schon; sie traegt die booking_id in den Metadaten,
-      // der Webhook findet die Buchung also auch ohne diese Spalte. Deshalb
-      // kein Abbruch - nur ein Eintrag im Log.
-      console.error('Sitzungs-ID nicht an der Buchung vermerkt', updateError.message);
+      // Frueher stand hier "kein Abbruch": der Webhook findet die Buchung
+      // ueber die booking_id in den Metadaten. Das stimmt fuer die Zahlung
+      // weiterhin - aber seit S4 haengt die Freigabe einer verfallenen
+      // Reservierung an genau dieser Spalte. Ohne den Vermerk gaebe das
+      // Verfallsereignis der ALTEN Sitzung den Platz frei. Deshalb jetzt laut
+      // scheitern: der catch-Zweig beendet beide Sitzungen und gibt den Platz
+      // zurueck, der Kunde bucht noch einmal.
+      throw new Error(`Sitzungs-ID nicht an der Buchung vermerkt: ${updateError.message}`);
+    }
+
+    // Erst jetzt, wo die neue Sitzung vermerkt ist, die alte beenden.
+    if (previousSessionId && previousSessionId !== session.id) {
+      await expireQuietly(previousSessionId);
     }
 
     return json({ url: session.url }, 200, origin);
   } catch (error) {
+    // Keine der Sitzungen darf bezahlbar bleiben, wenn der Platz gleich
+    // wieder in den Verkauf geht.
+    if (newSessionId) await expireQuietly(newSessionId);
+    if (previousSessionId) await expireQuietly(previousSessionId);
+
     // Der Platz gehoert wieder in den Verkauf. Ohne das haelt ein
     // Stripe-Ausfall ihn 40 Minuten lang besetzt.
     const { error: releaseError } = await adminClient

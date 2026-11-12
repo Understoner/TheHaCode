@@ -279,10 +279,64 @@ const htaccess = `# Erzeugt von scripts/write-build-info.mjs — nicht von Hand 
   # ist genau die Adresse, die jemand weiterschickt oder die in einem
   # VHS-Programm steht.
   RewriteRule ^kurse/[^/]+$ /kurse/[slug].html [L]
+
+  # /zertifikat/<code> -> zertifikat/[code].html (Review 11.11.2026, A1)
+  #
+  # Genau diese Adresse steht als Prueflink auf jedem Zertifikat-PDF. Ohne die
+  # Regel lief jeder, der den Link aus dem PDF oeffnete, in den 404-Status.
+  RewriteRule ^zertifikat/[^/]+$ /zertifikat/[code].html [L]
+
+  # /onlinekurse/<slug>, /onlinekurse/<slug>/planen und
+  # /onlinekurse/<slug>/<block>, aus demselben Grund: Stripe leitet nach dem
+  # Kauf auf /onlinekurse/<slug>?kauf=erfolg zurueck - ein direkter Aufruf.
+  # "planen" steht vor dem Block, sonst hielte die Block-Regel es fuer einen.
+  RewriteRule ^onlinekurse/[^/]+/planen$ /onlinekurse/[slug]/planen.html [L]
+  RewriteRule ^onlinekurse/[^/]+/[^/]+$ /onlinekurse/[slug]/[block].html [L]
+  RewriteRule ^onlinekurse/[^/]+$ /onlinekurse/[slug].html [L]
 </IfModule>
 
 ErrorDocument 404 /+not-found.html
 `;
+
+// DAMIT EINE NEUE DYNAMISCHE ROUTE NICHT WIEDER VERGESSEN WIRD (Review A1)
+// ---------------------------------------------------------------------
+// Zertifikat und Onlinekurse kamen im November 2026 dazu, die Regeln oben
+// nicht - und der Prueflink auf jedem Zertifikat lief ins Leere. Deshalb
+// bricht der Build jetzt ab, wenn der Export eine Vorlagendatei mit
+// Klammernamen enthaelt, die weder eine Umschreiberegel hat noch hier als
+// bewusste Ausnahme steht.
+const OHNE_REGEL_MIT_ABSICHT = [
+  // Nur aus der App heraus angesteuert; siehe den Kommentar bei /news/<slug>.
+  'sessions/[id].html',
+  'sequenzen/[id].html',
+];
+
+function vorlagenDateien(dir, prefix = '') {
+  const gefunden = [];
+  for (const name of readdirSync(dir)) {
+    const pfad = join(dir, name);
+    const relativ = prefix ? `${prefix}/${name}` : name;
+    if (statSync(pfad).isDirectory()) {
+      // _expo und assets enthalten nur gebaute Dateien, keine Routen.
+      if (prefix === '' && (name === '_expo' || name === 'assets')) continue;
+      gefunden.push(...vorlagenDateien(pfad, relativ));
+    } else if (name.endsWith('.html') && relativ.includes('[')) {
+      gefunden.push(relativ);
+    }
+  }
+  return gefunden;
+}
+
+const ohneRegel = vorlagenDateien(distDir).filter(
+  (datei) => !OHNE_REGEL_MIT_ABSICHT.includes(datei) && !htaccess.includes(` /${datei} [L]`),
+);
+if (ohneRegel.length > 0) {
+  throw new Error(
+    `Dynamische Route ohne Umschreiberegel in .htaccess: ${ohneRegel.join(', ')}. ` +
+      'Regel in scripts/write-build-info.mjs ergaenzen oder die Datei in ' +
+      'OHNE_REGEL_MIT_ABSICHT eintragen - sonst liefert der direkte Aufruf 404.',
+  );
+}
 
 writeFileSync(join(distDir, '.htaccess'), htaccess);
 console.log('[thehacode] dist/.htaccess geschrieben (Schutz-Header)');

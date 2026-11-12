@@ -53,10 +53,17 @@ mit Bild, PDF, genau ein Quiz am Ende) mit Zertifikat als PDF. Verbindlich:
   für das Zertifikat.
 
 **Nicht in V1 bis V1.2:** Marker-Synchronisation geführter Aufnahmen,
-Hintergrundmusik, Sprachansagen als Cues, Testzeitraum, Lifetime-Tarif, native
-Apps, Offline-Betrieb, Erinnerungen, In-App-Redaktionsoberfläche (Studio reicht).
+Testzeitraum, Lifetime-Tarif, native Apps, Offline-Betrieb, Erinnerungen,
+In-App-Redaktionsoberfläche (Studio reicht).
 Wenn eine Aufgabe eines
 dieser Themen berührt: nicht anfangen, sondern melden.
+
+**Abweichend vom ursprünglichen Schnitt ausgeliefert** (Entscheidungen des Teams,
+hier am 11.11.2026 nachgetragen): Sprachansagen zu den Phasen (seit 06.09.2026,
+`public/stimme/`, `voice.ts`), zwei Musikstücke zur Auswahl (`public/musik/`,
+`music.ts`), Einstieg und Ausklang einer Session als Audiodatei (0048,
+`clips.ts`). **Nur im Testsystem:** Geräte-Anbindung Oura und Garmin (0053,
+0054, `docs/WEARABLES.md`) — Live erst nach ausdrücklicher Freigabe.
 
 ---
 
@@ -67,15 +74,20 @@ dieser Themen berührt: nicht anfangen, sondern melden.
 | Sprache | TypeScript, `strict: true` |
 | Framework | Expo + Expo Router, `web.output: "static"` |
 | Server State | TanStack Query v5 |
-| Client State | Zustand |
-| Styling | NativeWind v4 + `src/design/tokens.ts` |
-| Animation | Reanimated 3 |
-| Audio | Web Audio API, synthetische Töne über `OscillatorNode`; Dateien nur als gesprochene Aufnahmen in Onlinekursen (V1.2) |
+| Client State | React Context (`AuthProvider`), sonst lokaler Zustand — kein Store |
+| Styling | `StyleSheet` + `src/design/tokens.ts`, Breakpoints über `src/design/responsive.ts` |
+| Animation | `Animated` aus React Native |
+| Audio | Web Audio API. Phasentöne synthetisch über `OscillatorNode`; Dateien nur an den freigegebenen Stellen (siehe „Verboten") |
 | Formulare | React Hook Form + Zod |
 | Backend | Supabase — Auth, Postgres, Storage, Edge Functions |
 | Hosting | Hostinger Business, Node.js Web App (statisch ausgeliefert), GitHub-Integration |
 | i18n | i18next, Sprache `de` |
 | Tests | Vitest, pgTAP, Playwright |
+
+Stand der Tabelle: 11.11.2026, an den Code angeglichen. Bis dahin standen hier
+Zustand, NativeWind v4 und Reanimated 3 — vorgesehen, aber nie eingebaut. Wer
+eine davon einführen will, stellt die Frage neu; „stand einmal in der Tabelle"
+ist keine Freigabe.
 
 **Keine neuen Bibliotheken ohne Rücksprache** — insbesondere nicht für State,
 Styling, Datenzugriff, Datumsrechnung, Formulare oder Auth. Wirkt eine Aufgabe
@@ -108,9 +120,10 @@ Google- und Apple-Anmeldung, Kontoverknüpfung und Löschung kommen aus Supabase
 - **RLS-Policies mit `using (true)`** oder Schreibpolicies ohne `with check`.
 - **`setInterval` für Zeitkritisches.** Timer driften kumulativ (SAD §7.1).
 - **`localStorage` für fachliche Daten.**
-- **Audiodateien für Cues oder Musik.** Töne kommen aus dem Oszillator; Musik
-  bringt der Nutzer in seiner eigenen App mit. Gesprochene Aufnahmen gibt es
-  nur als Inhalt von Onlinekursen (V1.2).
+- **Neue Audiodateien ohne Rücksprache.** Phasentöne kommen aus dem Oszillator.
+  Dateien gibt es nur an den freigegebenen Stellen: Ansagen (`public/stimme/`),
+  die zwei Musikstücke (`public/musik/`), Einstieg und Ausklang einer Session
+  (0048) und gesprochene Aufnahmen in Onlinekursen (V1.2).
 - **Deutsche Strings im Code.** Alles über i18next.
 - **Schemaänderungen im Supabase Studio.** Nur als Migration im Repo.
 - **`service_role`-Key im Client-Bundle, in hPanel oder in einer lokalen `.env`.**
@@ -142,11 +155,26 @@ dann App" ist deshalb **nicht erzwingbar** — beide starten gleichzeitig.
 - **Neue Nutzertabelle** → `on delete cascade` auf `auth.users`, `user_id`
   denormalisiert, `updated_at`, `deleted_at`, `client_id` — und ein Eintrag in
   der UNION-Liste in `supabase/tests/001_foundation.test.sql`.
-- **Neue Tabelle** → `enable row level security` in derselben Migration.
+- **Neue Tabelle** → `enable row level security` in derselben Migration, und
+  `revoke all on … from anon, authenticated` **vor** den `grant`-Zeilen.
+- **Neue Funktion** → `revoke execute … from public, anon, authenticated`, dann
+  gezielt vergeben. Ob die Plattform neuen Objekten pauschale Rechte mitgibt,
+  ist nicht unsere Entscheidung und hat sich schon einmal geändert (0055).
 - **Neue Policy** → ein pgTAP-Test, der den **Missbrauchsfall** prüft, nicht nur
   den Normalfall.
 - **Fehlermeldungen deutsch, ohne Technikjargon, immer mit Handlungsoption.**
-  Technische Details gehen an Sentry.
+  Technische Details gehören in ein Fehler-Monitoring (Sentry laut SAD §5.6) —
+  **das ist noch nicht eingebaut**; bis dahin `console.error` ohne Nutzdaten.
+  Anzeigefehler fängt `ErrorBoundary` im Root-Layout.
+- **Abfragen, deren Ergebnis je Nutzer wächst** (Tagebuch, Termine, Auskunft) →
+  über `fetchAllRows` (`src/lib/fetchAllRows.ts`). Der Server gibt je Anfrage
+  höchstens 1.000 Zeilen heraus und meldet das Abschneiden nicht.
+- **Fehler einer Edge Function** → `withFunctionErrorCode`
+  (`src/lib/functionError.ts`). Der Code der Absage steht in der Antwort, nicht
+  in `error.message`; ohne den Umweg sieht der Nutzer nur „hat nicht geklappt".
+- **Neue dynamische Route** (`[slug].tsx`) → Umschreiberegel in
+  `scripts/write-build-info.mjs` und eine Adresse in `ROUTEN`
+  (`e2e/smoke.spec.ts`). Der Build bricht sonst ab.
 
 ---
 
@@ -170,8 +198,8 @@ Sequenzen bleiben immer erlaubt — auch nach Ende des Abos (SAD §3.4).
 
 ```
 feature/*  →  PR nach develop
-develop    →  Testsystem  (staging.deine-domain.at)
-main       →  Livesystem  (app.deine-domain.at)  — nur über die Beförderung
+develop    →  Testsystem  (dev.deratemcode.at)
+main       →  Livesystem  (deratemcode.at)       — nur über die Beförderung
 ```
 
 Nach dem Merge in `develop` läuft alles automatisch: Migrationen nach Supabase

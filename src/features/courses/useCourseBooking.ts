@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/AuthProvider';
+import { withFunctionErrorCode } from '@/lib/functionError';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
 
@@ -78,7 +79,9 @@ export function useCourseCheckout() {
         { method: 'POST', body: { courseSlug, agbAccepted: true, ...(guest ? { guest } : {}) } },
       );
 
-      if (error) throw error;
+      // Der Code der Absage steckt in der Antwort, nicht in error.message.
+
+      if (error) throw await withFunctionErrorCode(error);
       if (!data?.url) throw new Error(data?.error ?? 'unknown');
 
       return data.url;

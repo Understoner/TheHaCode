@@ -8,13 +8,19 @@
 // noch gesetzt. Wer kein Zertifikat hat, bekommt 404.
 //
 // pdf-lib (MIT) ist am 03.11.2026 vom Team freigegeben, nur fuer diese
-// Funktion. Standardschriften (WinAnsi) decken Umlaute und ß ab; eine
-// eingebettete Schrift braucht es nicht.
+// Funktion. Standardschriften (WinAnsi) decken Umlaute und ß ab.
+//
+// WAS SIE NICHT ABDECKEN (Review 11.11.2026, S5): ć, č, ł, ő und alles
+// ausserhalb des lateinischen Alphabets. pdf-lib wirft bei so einem Zeichen -
+// bis dahin als unbehandelter Fehler. Jetzt laeuft jeder Text vorher durch
+// toPrintable() (_shared/pdf-text.ts, dort steht auch, warum das eine
+// Zwischenloesung ist), und um das Setzen selbst steht ein try/catch.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2.118.0';
 import { PDFDocument, rgb, StandardFonts } from 'npm:pdf-lib@1.17.1';
 
 import { json, preflight, corsHeaders } from '../_shared/http.ts';
+import { toPrintable } from '../_shared/pdf-text.ts';
 
 type CertificateRequest = { courseId?: unknown };
 
@@ -74,16 +80,37 @@ Deno.serve(async (request) => {
 
   const course = (cert as unknown as { online_courses: { title: string; subtitle: string | null } | null })
     .online_courses;
-  const pdf = await renderCertificate({
-    name: cert.full_name,
-    courseTitle: course?.title ?? '',
-    courseSubtitle: course?.subtitle ?? null,
-    score: cert.score,
-    total: cert.total,
-    issuedAt: new Date(cert.issued_at),
-    code: cert.code,
-    verifyUrl: `${appUrl}/zertifikat/${cert.code}`,
-  });
+
+  // Der Name: was die Schrift nicht kennt, auf den Grundbuchstaben
+  // zurueckgefuehrt. Bleibt dabei etwas uebrig, das sich nicht ersetzen
+  // laesst (ein Name in kyrillischer Schrift etwa), gibt es keine PDF mit
+  // Fragezeichen statt eines Namens, sondern eine klare Absage - die App
+  // bittet dann, sich zu melden.
+  const name = toPrintable(cert.full_name);
+  if (name.lost > 0) {
+    console.warn(`Zertifikat ${cert.code}: Name nicht druckbar (${name.lost} Zeichen ohne Ersatz)`);
+    return json({ error: 'name_not_printable' }, 422, origin);
+  }
+
+  let pdf: Uint8Array;
+  try {
+    pdf = await renderCertificate({
+      name: name.text,
+      // Titel und Untertitel sind Redaktionstext: ein einzelnes fremdes
+      // Zeichen darin soll nicht allen Teilnehmern die PDF nehmen.
+      courseTitle: toPrintable(course?.title ?? '').text,
+      courseSubtitle: course?.subtitle ? toPrintable(course.subtitle).text : null,
+      score: cert.score,
+      total: cert.total,
+      issuedAt: new Date(cert.issued_at),
+      code: cert.code,
+      verifyUrl: `${appUrl}/zertifikat/${cert.code}`,
+    });
+  } catch (error) {
+    // Nur der Code ins Log, nicht der Name.
+    console.error(`Zertifikat ${cert.code} liess sich nicht setzen`, error instanceof Error ? error.message : error);
+    return json({ error: 'render_failed' }, 500, origin);
+  }
 
   return new Response(pdf, {
     status: 200,

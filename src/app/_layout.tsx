@@ -5,12 +5,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
 import { NavBar } from '@/components/NavBar';
 import { StagingBanner } from '@/components/StagingBanner';
 import { colors, DESIGN_PREVIEW } from '@/design/tokens';
 import { responsive } from '@/design/responsive';
 import { AuthProvider } from '@/features/auth/AuthProvider';
+import { SessionCacheGuard } from '@/features/auth/SessionCacheGuard';
 import { useEntitlementSync } from '@/features/plus/useEntitlementSync';
 import '@/i18n';
 
@@ -51,6 +53,9 @@ export default function RootLayout() {
             /konto nach der Rueckkehr aus dem Checkout, manchmal auf
             /sequenzen. */}
         <EntitlementSync />
+        {/* Abmelden oder Kontowechsel: der Zwischenspeicher des vorigen
+            Kontos gehoert nicht mehr dazu (Review S11). */}
+        <SessionCacheGuard />
         {/* Der Titel gehoert hierher und nicht in +html.tsx: Expo rendert den
             <title> ueber react-helmet, und nur ueber <Head> gesetzt aendert er
             sich auch beim Wechsel der Seite ohne Neuladen. Einzelne Screens
@@ -73,7 +78,13 @@ export default function RootLayout() {
               <NavBar />
             </>
           )}
-          <Stack screenOptions={{ headerShown: false, contentStyle: styles.screen }} />
+          {/* Wirft eine Seite beim Anzeigen, bleibt die Navigation stehen und
+              an ihrer Stelle steht eine Meldung mit "Seite neu laden" - statt
+              einer weissen Seite (Review W3). Der Pfad als resetKey: nach
+              einem Seitenwechsel gibt es einen neuen Versuch. */}
+          <ErrorBoundary resetKey={pathname}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: styles.screen }} />
+          </ErrorBoundary>
           {/* Im Testsystem stehen die Rechtstexte auf dem Handy im Blatt
               "Mehr" der Tab-Leiste (02.11.2026); der Streifen bleibt dem
               Desktop. */}
